@@ -104,7 +104,6 @@ export function emitClaude({ assets, mcpServers, target }) {
     lines.push('|---|---|');
     for (const a of asSkills) lines.push(`| \`${a.id}\` | ${a.description} |`);
     textFiles.push({ relPath: '4ai-global.md', content: lines.join('\n') });
-    notes.push('Thêm dòng `@4ai-global.md` vào C:\\Users\\PM01\\.claude\\CLAUDE.md nếu chưa có (4AI tự tạo CLAUDE.md nếu file chưa tồn tại).');
   }
 
   for (const a of asSkills) {

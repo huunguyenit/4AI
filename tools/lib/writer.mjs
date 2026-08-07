@@ -56,6 +56,22 @@ function miniDiff(oldText, newText, label) {
 }
 
 /**
+ * Đảm bảo file CLAUDE.md (project hoặc user scope) có dòng @import.
+ * File này là tài sản VIẾT TAY — 4AI không sở hữu, không track trong manifest:
+ * chưa có thì tạo tối thiểu (một lần), có rồi thì chỉ kiểm tra và báo.
+ * @returns {'created'|'present'|'missing-line'}
+ */
+export function ensureImportLine({ destRoot, fileName, line, header, dryRun }) {
+  const abs = path.join(destRoot, fileName);
+  const existing = readTextIfExists(abs);
+  if (existing === null) {
+    if (!dryRun) writeAtomic(abs, normalize(`${header}\n\n${line}\n`));
+    return 'created';
+  }
+  return existing.includes(line) ? 'present' : 'missing-line';
+}
+
+/**
  * Đồng bộ một target.
  *
  * @param {object} p

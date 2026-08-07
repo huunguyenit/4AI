@@ -38,6 +38,9 @@ export const FIELDS = {
 };
 
 // Shape của connection string. `check` fail nếu thấy trong assets/** hoặc ledger/**.
+// Dòng NÓI VỀ pattern (tài liệu cấm secret) đánh dấu waiver tường minh:
+// chứa marker này thì được bỏ qua — waiver phải nhìn thấy được trong diff.
+export const SECRET_WAIVER = '4ai:allow-secret-pattern';
 export const SECRET_PATTERNS = [
   /\bData\s+Source\s*=/i,
   /\bInitial\s+Catalog\s*=/i,
@@ -172,6 +175,7 @@ export function validateAsset(fm, keyLines, body, ctx) {
   // Secret.
   const bodyLines = body.split('\n');
   for (let i = 0; i < bodyLines.length; i++) {
+    if (bodyLines[i].includes(SECRET_WAIVER)) continue;
     for (const re of SECRET_PATTERNS) {
       if (re.test(bodyLines[i])) {
         errs.push({

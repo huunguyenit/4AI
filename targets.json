@@ -17,8 +17,8 @@
       "domains": ["fbo-xml", "project-mgmt"],
       "scope": "user",
       "globalPolicy": "on-demand-only",
-      "enabled": false,
-      "notes": "Bật ở Phase 4. Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
+      "enabled": true,
+      "notes": "Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
     },
     {
       "name": "devworkflow",

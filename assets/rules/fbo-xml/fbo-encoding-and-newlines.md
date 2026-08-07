@@ -1,0 +1,44 @@
+---
+id: fbo-encoding-and-newlines
+title: Encoding and newline preservation
+kind: rule
+domain: fbo-xml
+description: XML nguồn FBO có thể là Windows-1258 + CRLF + BOM — phát hiện trước khi đọc, giữ nguyên y hệt khi ghi; không bao giờ normalize sang UTF-8 LF như tác dụng phụ.
+severity: hard
+globs: ["**/App_Data/Controllers/**"]
+version: 1
+---
+
+## Vì sao
+
+Một phần controller cũ được lưu **Windows-1258** (bảng mã tiếng Việt legacy). Mở bằng
+UTF-8 rồi lưu lại là phá dấu tiếng Việt trong `dien_giai`, `ten_vt`… của khách — lỗi
+đắt, khó thấy khi review, và chỉ phát hiện khi màn hình hiển thị sai.
+
+## Quy tắc
+
+- **BẮT BUỘC** xác định encoding trước khi đọc. Không có bộ dò Windows-1258 đáng tin
+  (nó trùng byte với CP1252) — heuristic thực dụng: decode UTF-8 strict trước; nếu lỗi
+  hoặc ra ký tự U+FFFD thì decode lại bằng `windows-1258`. Khai báo `encoding=` trong
+  XML declaration (nếu có) là gợi ý đầu tiên.
+- Khi ghi lại file nguồn FBO: **giữ nguyên** encoding gốc, trạng thái BOM gốc, và newline
+  gốc (thường CRLF). Sửa nội dung ≠ sửa định dạng lưu trữ.
+- **KHÔNG ĐƯỢC** để editor/tool tự "chuẩn hoá" file FBO sang UTF-8 LF như tác dụng phụ
+  của một lần sửa nhỏ. Diff phải chỉ chứa đúng dòng mình chủ đích sửa.
+- Ưu tiên đọc qua `read_local_file` của `fastbusiness-mcp` — nó đã xử lý Windows-1258.
+
+## Ví dụ
+
+Đọc dò encoding trong Node:
+
+    const buf = fs.readFileSync(p);
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+    catch { text = new TextDecoder('windows-1258').decode(buf); }
+
+## Bẫy
+
+- File "trông ổn" trong editor không có nghĩa encoding đúng — editor có thể đang đoán.
+  Bằng chứng là byte, không phải hiển thị.
+- Diff toàn-file (mọi dòng đều đổi) sau một sửa nhỏ = dấu hiệu newline/encoding đã bị
+  normalize. Dừng, revert, làm lại.

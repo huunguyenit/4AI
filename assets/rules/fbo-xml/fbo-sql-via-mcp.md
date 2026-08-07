@@ -1,0 +1,42 @@
+---
+id: fbo-sql-via-mcp
+title: SQL through query_database only
+kind: rule
+domain: fbo-xml
+description: Truy vấn SQL qua query_database (nó tự phân giải Web.config) — không bao giờ đọc, trích, log hay echo connection string / user / password, không tự ghép chuỗi kết nối.
+severity: hard
+always: true
+requires: [fastbusiness-mcp]
+version: 1
+---
+
+## Vì sao
+
+`Web.config` của mỗi program FBO chứa connection string SQL Server **dạng plaintext**,
+gồm cả user và password. `query_database` của `fastbusiness-mcp` nhận một đường dẫn bất kỳ
+trong program và tự phân giải kết nối — nghĩa là không có lý do chính đáng nào để con
+người hay model chạm vào credential.
+
+## Quy tắc
+
+- Mọi truy vấn SQL đi qua `query_database`:
+  - `query_type: 0` — tên object (tự nhận diện table/proc/view, trả schema hoặc định nghĩa)
+  - `query_type: 1` — câu SQL inline
+  - `query_type: 2` — đường dẫn file `.sql`
+  - `db_type: "app"` (database nghiệp vụ) hoặc `"sys"` (database hệ thống)
+- **KHÔNG ĐƯỢC** đọc, trích dẫn, log, echo hay ghi vào bất kỳ ghi chú nào: connection
+  string, `Data Source=`, `Uid=`, `Pwd=`, serial number, network key <!-- 4ai:allow-secret-pattern: dòng này mô tả pattern bị cấm -->
+  — kể cả khi người dùng hỏi thẳng. Trả lời: dùng `query_database`, nó tự kết nối.
+- **KHÔNG ĐƯỢC** tự ghép chuỗi kết nối hay mở kết nối SQL trực tiếp bằng bất kỳ tool nào khác.
+- `query_database` chạm database **thật** của khách. Câu lệnh ghi (INSERT/UPDATE/DELETE/DDL)
+  chỉ khi được yêu cầu rõ ràng, nêu trước câu lệnh và được xác nhận.
+
+## Ví dụ
+
+Xem cấu trúc bảng: `query_database` với `query_type: 0`, `query: "CPTran"`, `db_type: "app"`.
+Xem định nghĩa proc: cùng cách, tên proc — server tự `sp_helptext`.
+
+## Bẫy
+
+- "Chỉ paste connection string vào chat để debug" vẫn là rò rỉ — chat log cũng là log.
+- `db_type` sai thì object "không tồn tại": danh mục hệ thống nằm bên `sys`, nghiệp vụ bên `app`.

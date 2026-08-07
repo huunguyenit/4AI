@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseFrontmatter, FmError } from './fm.mjs';
-import { applyDefaults, validateAsset, SECRET_PATTERNS } from './schema.mjs';
+import { applyDefaults, validateAsset, SECRET_PATTERNS, SECRET_WAIVER } from './schema.mjs';
 
 /** Gốc hub, suy ra từ vị trí file này (tools/lib/assets.mjs → ../../). */
 export const HUB = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..');
@@ -164,6 +164,7 @@ export function scanSecrets({ hub = HUB, dirs = ['ledger', 'data'] } = {}) {
       const abs = path.join(root, rel);
       const lines = readText(abs).split('\n');
       for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes(SECRET_WAIVER)) continue;
         for (const re of SECRET_PATTERNS) {
           if (re.test(lines[i])) {
             hits.push({ file: `${dir}/${toPosix(rel)}`, line: i + 1,

@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "note": "Bản đồ App_Data/Controllers của một program FBO/FBI. Số file lấy từ corpus FBISP24 (2026-08) — tỷ lệ tương đối mới là điều đáng nhớ, con số tuyệt đối thay đổi theo program.",
+  "folders": {
+    "Dir": { "purpose": "Màn hình nhập liệu (voucher / danh mục) — điểm vào chính", "corpusCount": 649 },
+    "Grid": { "purpose": "Lưới và detail grid của chứng từ", "corpusCount": 2017 },
+    "Filter": { "purpose": "Màn hình điều kiện lọc", "corpusCount": 2103 },
+    "Report": { "purpose": "Báo cáo — đi kèm .rpt Crystal Reports", "corpusCount": 682 },
+    "Lookup": { "purpose": "Tra cứu / chọn dữ liệu", "corpusCount": 434 },
+    "Include": { "purpose": "Mảnh dùng chung (XML / Command / Javascript) — sửa là ảnh hưởng toàn hệ thống", "corpusCount": 817 },
+    "Templates": { "purpose": "Template", "corpusCount": 5 },
+    "Query": { "purpose": "Định nghĩa truy vấn" },
+    "View": { "purpose": "View" },
+    "Post": { "purpose": "Hạch toán / post chứng từ" },
+    "Flow": { "purpose": "Luồng xử lý" },
+    "List": { "purpose": "Danh sách" },
+    "Structure": { "purpose": "Cấu trúc" },
+    "Options": { "purpose": "Tuỳ chọn màn hình / hệ thống" },
+    "Notify": { "purpose": "Thông báo" },
+    "EInvoice": { "purpose": "Hoá đơn điện tử" },
+    "BankHub": { "purpose": "Kết nối ngân hàng" },
+    "Dashboard": { "purpose": "Dashboard" },
+    "Allocation": { "purpose": "Phân bổ" },
+    "Chat": { "purpose": "Chat" },
+    "Media": { "purpose": "Media" },
+    "Config": { "purpose": "Cấu hình" }
+  },
+  "fileTypes": {
+    ".f": "Controller chuẩn (compile/mã hoá) — corpus có 4665 file",
+    ".xml": "Controller nguồn / bản customize — corpus có 2245 file; trong Dir: .xml cạnh .f nghĩa là đã customize",
+    ".txt": "Thân include (JS / SQL / Command) — 1663 file",
+    ".rpt": "Crystal Reports — 1341 file",
+    ".xsd": "Schema — 556 file",
+    ".ent": "Entity — 459 file"
+  }
+}

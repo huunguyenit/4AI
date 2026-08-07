@@ -1,0 +1,38 @@
+---
+id: fbo-accent-free-search
+title: Accent-free Vietnamese search
+kind: rule
+domain: fbo-xml
+description: search_nodes chỉ hiểu tiếng Việt không dấu — bỏ dấu trước khi tìm ("giay bao no" ra CPTran, "phieu chi" ra CDTran), thử luôn cả mã controller nếu biết.
+severity: soft
+globs: ["**/App_Data/Controllers/**"]
+requires: [fastbusiness-mcp]
+version: 1
+---
+
+## Vì sao
+
+Index của `search_nodes` xây trên dữ liệu không dấu — tìm bằng từ khoá có dấu sẽ trả về
+rỗng và dễ kết luận nhầm là "không có màn hình đó".
+
+## Quy tắc
+
+- Bỏ toàn bộ dấu tiếng Việt trước khi gọi `search_nodes`: "giấy báo nợ" → `giay bao no`.
+- Kết quả rỗng chưa phải kết luận — thử biến thể: tên ngắn hơn, tên field
+  (`dien giai`, `gia ban`), hoặc mã controller trực tiếp nếu đoán được (`CPTran`, `CDTran`).
+- Biết mã controller rồi thì đừng search nữa — vào thẳng `query_node_details`.
+
+## Ví dụ
+
+| Từ khoá | Kết quả điển hình |
+|---|---|
+| `giay bao no` | `CPTran` |
+| `phieu chi` | `CDTran` |
+| `dien giai` | field `dien_giai` |
+| `gia ban` | `gia2` / `gia_nt2` |
+| `ten hang hoa` | `ten_vt` |
+
+## Bẫy
+
+- Tên nghiệp vụ và mã controller không suy ra nhau bằng logic — cùng "phiếu" nhưng
+  `CDTran` là phiếu chi, `CPTran` là giấy báo nợ. Nghi ngờ thì search, đừng đoán mã.

@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { HUB, loadAssets, readJson } from './assets.mjs';
-import { syncTarget } from './writer.mjs';
+import { syncTarget, ensureImportLine } from './writer.mjs';
 import { emitClaude } from './emit/claude.mjs';
 import { emitCursor } from './emit/cursor.mjs';
 import { emitVscode } from './emit/vscode.mjs';
@@ -144,12 +144,17 @@ export async function runSync(opts) {
     }
     for (const n of notes) process.stdout.write(`  NOTE ${n}\n`);
 
-    // claudeMdImport: yêu cầu CLAUDE.md của repo chứa dòng @import.
-    if (target.claudeMdImport) {
-      const cm = path.join(target.path, 'CLAUDE.md');
-      const line = '@.claude/4ai-context.md';
-      const has = fs.existsSync(cm) && fs.readFileSync(cm, 'utf8').includes(line);
-      if (!has) {
+    // CLAUDE.md là file viết tay — 4AI không sở hữu. Chưa có thì tạo tối thiểu,
+    // có rồi thì chỉ kiểm tra dòng @import và nhắc.
+    if (target.claudeMdImport || target.scope === 'user') {
+      const line = target.scope === 'user' ? '@4ai-global.md' : '@.claude/4ai-context.md';
+      const header = target.scope === 'user'
+        ? '# CLAUDE.md (user scope)\n\nFile này là của bạn — 4AI chỉ cần dòng import bên dưới.'
+        : `# ${target.name}`;
+      const state = ensureImportLine({ destRoot: target.path, fileName: 'CLAUDE.md', line, header, dryRun });
+      if (state === 'created') {
+        process.stdout.write(`  create        CLAUDE.md (tối thiểu, chứa \`${line}\` — file thuộc về bạn, 4AI không đụng lại)\n`);
+      } else if (state === 'missing-line') {
         process.stdout.write(`  ACTION cần thêm dòng \`${line}\` vào ${target.name}/CLAUDE.md (4AI không tự sửa file viết tay).\n`);
       }
     }

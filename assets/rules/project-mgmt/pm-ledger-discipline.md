@@ -1,0 +1,38 @@
+---
+id: pm-ledger-discipline
+title: Ledger discipline
+kind: rule
+domain: project-mgmt
+description: Mọi thay đổi hướng khách để lại entry trong ledger/tasks.md và dòng CHANGELOG khi xong — không có entry thì task chưa xong, kể cả khi code đã chạy.
+severity: hard
+always: true
+see-also: [pm-no-secrets-in-notes]
+version: 1
+---
+
+## Vì sao
+
+Nhiều khách, nhiều program, nhiều SP — ba tháng sau không ai nhớ đã sửa gì cho ai nếu
+không có vết. Ledger là bộ nhớ chung của mọi phiên làm việc và mọi công cụ.
+
+## Quy tắc
+
+- Bắt đầu một thay đổi hướng khách: **BẮT BUỘC** mở entry trong `ledger/tasks.md` của hub
+  4AI — khách, program path, controller dự kiến đụng, trạng thái `Mới`.
+- Trạng thái đi theo vòng đời: `Mới → Đang làm → Chờ xác nhận → Xong`. Cập nhật khi chuyển.
+- Đóng task: **BẮT BUỘC** thêm dòng vào `ledger/CHANGELOG.md` — ngày, khách, controller,
+  một câu mô tả.
+- Không có entry ⇒ task **chưa xong**. Code chạy được không thay thế được vết.
+
+## Ví dụ
+
+    ## ACME — Thêm ghi_chu_2 vào phiếu chi
+    - Program: \\10.0.0.1\CustomerPro\FBO\ACME\SP229
+    - Controller: Dir\CDTran.xml, Grid\CDTran
+    - Trạng thái: Đang làm
+    - Ngày mở: 2026-08-07
+
+## Bẫy
+
+- "Sửa nhỏ quá không cần ghi" — sửa nhỏ nhất vẫn là một dòng diff trên màn hình khách
+  đang chạy. Ngưỡng ghi ledger là "hướng khách", không phải "đủ to".

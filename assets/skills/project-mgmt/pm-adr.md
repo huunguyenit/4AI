@@ -1,0 +1,47 @@
+---
+id: pm-adr
+title: ADR — when and how
+kind: skill
+domain: project-mgmt
+description: Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau.
+version: 1
+---
+
+## Vì sao
+
+Quyết định không ghi lại sẽ bị hỏi lại — và trả lời khác — sau ba tháng. ADR rẻ: một file,
+một lần viết. Convention lấy theo `DevWorkFlow/docs/adr/` (ADR-0001…0009) để người đọc
+hai repo không phải học hai format.
+
+## Khi nào viết
+
+Viết khi quyết định (1) khó đảo ngược, (2) ảnh hưởng nhiều hơn một task, hoặc (3) đã gây
+tranh luận và sẽ bị hỏi lại. Ví dụ: "customize đặt ở controller riêng thay vì include chung",
+"khách X không nâng SP trong năm nay". KHÔNG viết ADR cho lựa chọn hiển nhiên hoặc dễ đổi.
+
+## Template
+
+Đặt tại `ledger/adr/ADR-<số 4 chữ số>-<slug>.md`:
+
+    # ADR-0001: <Tiêu đề quyết định>
+
+    - Trạng thái: Đề xuất | Chấp nhận | Thay thế bởi ADR-XXXX
+    - Ngày: YYYY-MM-DD
+    - Khách/Phạm vi: <ACME | toàn bộ | hub 4AI>
+
+    ## Bối cảnh
+    <Vấn đề gì buộc phải quyết định. 3-6 câu.>
+
+    ## Quyết định
+    <Một đoạn, thì khẳng định: "Chúng tôi sẽ …">
+
+    ## Hệ quả
+    <Được gì, mất gì, ràng buộc gì phát sinh.>
+
+Số ADR tăng dần, không tái sử dụng. Đổi ý → viết ADR mới thay thế, đánh dấu ADR cũ
+`Thay thế bởi`, không sửa nội dung cũ.
+
+## Bẫy
+
+- ADR không phải tài liệu thiết kế — không dán spec dài vào. Một trang là đủ; chi tiết
+  để link.
