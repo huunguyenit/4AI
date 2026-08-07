@@ -1,0 +1,8 @@
+# 4AI sinh mọi output với newline LF. Git không được phép đổi ngược lại CRLF
+# khi checkout, nếu không manifest hash sẽ lệch ngay sau mỗi lần clone.
+* text=auto eol=lf
+
+*.md    text eol=lf
+*.mdc   text eol=lf
+*.json  text eol=lf
+*.mjs   text eol=lf
