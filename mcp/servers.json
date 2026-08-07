@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "servers": {
+    "fastbusiness-mcp": {
+      "description": "Đồ thị controller FBO/FBI (Kuzu Radar), phân giải DTD entity, truy cập SQL Server qua Web.config.",
+      "observedVersion": "2.0.0",
+      "transport": "stdio",
+      "command": "D:\\fastbusiness_mcp\\fastbusiness_mcp.exe",
+      "args": [],
+      "cwd": "D:\\fastbusiness_mcp",
+      "env": {
+        "FASTBUSINESS_VSCODE_DB_PATH": "D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb"
+      },
+      "targets": ["claude", "cursor", "vscode", "devworkflow"],
+      "autoApprove": [
+        "search_nodes",
+        "query_node_details",
+        "get_related_nodes",
+        "get_xml_entities",
+        "query_radar",
+        "read_local_file"
+      ],
+      "binaryFingerprint": {
+        "size": 9390433,
+        "mtime": "2026-07-23T04:40:59.323Z"
+      },
+      "notes": [
+        "cwd BẮT BUỘC. Đăng ký ở Claude Desktop hiện thiếu cả cwd lẫn env — đừng chép ngược từ đó.",
+        "env đã SỬA: C:\\Users\\PM01\\.cursor\\mcp.json đang trỏ D:/fastbusiness_mcp/data/fields_lmdb, đường dẫn đó KHÔNG TỒN TẠI.",
+        "LMDB thật nằm ở D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb.",
+        "Kuzu DB tách theo project: D:\\fastbusiness_mcp\\KuzuDB\\<base64(program-root)>\\.fbograph\\kuzu\\",
+        "query_database CỐ TÌNH không nằm trong autoApprove — nó chạm database khách thật.",
+        "Đây là binary đóng (PyInstaller), không có source. Tên tool và schema Kuzu là hợp đồng-theo-quan-sát; binaryFingerprint để check cảnh báo khi nó đổi."
+      ]
+    }
+  }
+}

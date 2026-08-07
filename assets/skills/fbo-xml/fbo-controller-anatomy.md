@@ -1,0 +1,52 @@
+---
+id: fbo-controller-anatomy
+title: FBO controller anatomy
+kind: skill
+domain: fbo-xml
+description: Giải phẫu một màn hình FBO — thư mục nào chứa gì, cặp .f/.xml, ba loại Include, và thứ tự đọc 5 bước khi nhận yêu cầu sửa.
+requires: [fastbusiness-mcp]
+see-also: [fbo-radar-query-discipline]
+version: 1
+---
+
+## Vì sao
+
+Một "màn hình" FBO thực tế là 3–6 file rải trong nhiều thư mục, nối nhau bằng DTD entity.
+Sửa đúng chỗ đòi hỏi biết file nào giữ vai trò gì trước khi mở bất cứ file nào.
+
+## Bản đồ
+
+Một chứng từ điển hình, ví dụ **giấy báo nợ** `CPTran`:
+
+| File | Vai trò |
+|---|---|
+| `Dir\CPTran.f` (hoặc `.xml` nếu đã customize) | Màn hình nhập chính: field, layout, event |
+| `Grid\CPTran.f` | Detail grid của chứng từ — quan hệ `COMPANION_FILE` |
+| `Filter\CPTran.f` | Điều kiện lọc khi mở danh sách |
+| `Lookup\*.f` | Các lookup mà field tham chiếu — quan hệ `LOOKUP_REFERENCE` |
+| `Include\XML\*.xml`, `Include\Command\*.txt`, `Include\Javascript\*.txt` | Mảnh dùng chung, kéo vào bằng `&EntityName;` |
+
+Ba loại Include: `XML\` (mảnh khai báo), `Command\` (SQL/command), `Javascript\`
+(thân hàm JS — `WhenVoucherInit`, `WhenVoucherLoading`, `WhenVoucherClosing`…).
+
+## Cặp `.f` và `.xml`
+
+`.f` = bản chuẩn. `.xml` cùng tên cạnh nó = bản customize, runtime ưu tiên. Trong Radar,
+node có `needs_xml` / `paired_f_path` phản ánh trạng thái này. Kiểm tra cặp **trước** khi
+sửa: sửa nhầm vào `.f` chuẩn là phá sản phẩm gốc.
+
+## Thứ tự đọc khi nhận một yêu cầu sửa
+
+1. Xác định **program path** (khách nào, SP nào). Chưa rõ thì hỏi.
+2. `search_nodes` bằng tiếng Việt không dấu → ra mã controller (`"giay bao no"` → `CPTran`).
+3. `query_node_details` → field, kiểu, mô tả.
+4. `query_radar` lọc `COMPANION_FILE` / `LOOKUP_REFERENCE` → dựng bản đồ file liên quan.
+5. `get_xml_entities` (`mode: "path"`) → danh sách include và vị trí khai báo, rồi mới
+   `read_local_file` đúng những đoạn cần.
+
+## Bẫy
+
+- Nhảy thẳng vào `read_local_file` mà bỏ bước 4–5 sẽ sửa file mà không biết nó được
+  include ở đâu khác.
+- Field naming là tiếng Việt không dấu: `dien_giai`, `ten_vt`, `gia2`/`gia_nt2` —
+  đừng tìm bằng tên có dấu.

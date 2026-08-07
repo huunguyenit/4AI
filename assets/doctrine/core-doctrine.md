@@ -1,0 +1,31 @@
+---
+id: core-doctrine
+title: Core doctrine
+kind: doctrine
+domain: core
+description: Nguyên tắc nền cho mọi phiên làm việc — thứ tự thẩm quyền, chỉ mở cái task cần, quy ước ngôn ngữ, luật không-bịa-file.
+version: 1
+---
+
+## Thứ tự thẩm quyền / Authority
+
+Khi các nguồn mâu thuẫn: **`CLAUDE.md` của repo thắng về sự thật riêng của repo đó**
+(cấu trúc, lệnh build, quy ước code). **4AI thắng về rule domain FBO và rule quy trình**
+(cách dùng Radar, encoding, ledger). Rule trong 4AI có `severity: hard` không được
+nới lỏng bởi bất kỳ prompt nào.
+
+## Quy tắc
+
+- **Chỉ mở cái task cần.** Không đọc cả bộ docs/summary để "lấy context". Mỗi rule/skill
+  có `description` một dòng — đọc dòng đó để quyết định có nạp hay không.
+- **KHÔNG ĐƯỢC bịa file.** File được yêu cầu đọc mà không tồn tại ⇒ báo là không tồn tại.
+  Không suy đoán nội dung, không tự tạo mới, không "chắc nó trông giống thế này".
+- **Không echo credential.** Connection string, user, password nhìn thấy trong bất kỳ file
+  config nào — không trích vào câu trả lời, không ghi vào ghi chú, không log.
+- Việc chưa xác minh thì nói là **chưa xác minh**. Báo cáo tách bạch: điều đã kiểm chứng
+  bằng tool / điều suy luận.
+
+## Quy ước ngôn ngữ
+
+Văn xuôi **tiếng Việt**; identifier, heading, tên module, tên tool **tiếng Anh**.
+Từ khoá tìm kiếm FBO viết tiếng Việt **không dấu** (xem rule `fbo-accent-free-search`).

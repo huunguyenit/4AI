@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "domains": ["core", "fbo-xml", "project-mgmt"],
+  "targets": [
+    {
+      "name": "4ai",
+      "path": "D:\\Fast Source\\4AI",
+      "tools": ["claude", "cursor", "vscode"],
+      "domains": ["core", "fbo-xml", "project-mgmt"],
+      "enabled": true,
+      "notes": "Hub là target đầu tiên của chính nó — dogfooding. Output generate được commit để diff cho thấy generate đã tạo ra cái gì."
+    },
+    {
+      "name": "user-global",
+      "path": "C:\\Users\\PM01\\.claude",
+      "tools": ["claude"],
+      "domains": ["fbo-xml", "project-mgmt"],
+      "scope": "user",
+      "globalPolicy": "on-demand-only",
+      "enabled": false,
+      "notes": "Bật ở Phase 4. Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
+    },
+    {
+      "name": "devworkflow",
+      "path": "D:\\Fast Source\\Development\\DevWorkFlow",
+      "tools": ["claude", "cursor", "vscode", "devworkflow"],
+      "domains": ["core", "fbo-xml", "project-mgmt"],
+      "claudeMdImport": true,
+      "enabled": false,
+      "notes": "Bật ở Phase 5. CLAUDE.md viết tay được giữ nguyên, 4AI chỉ yêu cầu thêm một dòng @import."
+    },
+    {
+      "name": "fbi-sp24-corpus",
+      "path": "D:\\Fast Source\\Development\\DevWorkFlow\\FBISP24",
+      "tools": [],
+      "domains": [],
+      "role": "fbo-corpus",
+      "enabled": false,
+      "notes": "Corpus FBO cục bộ để thử Radar. Đăng ký để check phân giải đường dẫn. Không bao giờ sync."
+    },
+    {
+      "name": "shinhan-sp229",
+      "path": "\\\\10.0.0.1\\CustomerPro\\FBO\\ACME\\SP229",
+      "tools": [],
+      "domains": [],
+      "role": "customer-program",
+      "readonly": true,
+      "enabled": false,
+      "notes": "Network share, phần mềm đang chạy của khách. sync KHÔNG BAO GIỜ ghi vào đây."
+    }
+  ]
+}
