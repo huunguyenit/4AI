@@ -335,6 +335,8 @@ corpus để sẵn bản đồ file.
 | `fbo-customization-workflow` | Quy trình customize một màn hình FBO từ đầu tới cuối — xác định program, xác nhận controller, kiểm tra cặp .f/.xml, phân giải entity, sửa tối thiểu, verify, ghi ledger. |
 | `fbo-js-api` | Bề mặt JS phía client của FBO — Form API vs Grid API, event handler chuẩn (WhenVoucherInit/Loading/Closing), thân handler nằm ở Include Javascript, tra cứu bằng search_content trên code thật. |
 | `fbo-navigation-recipes` | Sổ tay tool call của 4ai-fbo — từ tên nghiệp vụ ra màn hình, họ file cùng mã, nguồn lookup, ai dùng include này, controller nào gọi hàm JS, cột database nào đứng sau. |
+| `fbo-nd252-ty-gia-hq` | Spec NĐ 252/2026/NĐ-CP — thêm tùy chọn bật/tắt trường "Tỷ giá hq" trên HDA/HD1 gồm form nhập, cảnh báo khi lưu, post sổ ctgt20, phát hành HĐĐT và import. |
+| `fbo-regulatory-rollout` | Quy trình áp một thay đổi pháp lý lên nhiều chương trình khách — chốt diện áp dụng, khảo sát chênh lệch SP, làm mẫu một khách rồi nhân bản, ledger và bàn giao theo mốc hiệu lực. |
 | `fbo-sql-object-lookup` | Tìm và đọc table/proc/view đứng sau một màn hình FBO qua query_sql — tham số object để soi cấu trúc, sql cho câu tự viết, liên hệ field màn hình với cột database. |
 | `pm-adr` | Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau. |
 | `pm-customer-program-registry` | Đọc và bảo trì data/customers.json — tra "khách X nằm ở đâu" ra program path, dòng sản phẩm FBO/FBI, SP version, DB alias; cách thêm khách mới đúng schema. |

@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "785c019f7feea5a3c0ec468c044d1729f97547e6aeb03796f79bd3b40d19574d"
+      "sha256": "e37e953e826709912ddb4f7435e69b5b91cf6b8a70b329cc5518c6cc9fdc2094"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -158,6 +158,18 @@
       "path": ".claude/skills/fbo-navigation-recipes/SKILL.md",
       "sha256": "b833a55c7479f48039803e128a656cb567f3fcd2a7ce1dac601b9b7cc33926e0",
       "sourceId": "fbo-navigation-recipes",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-nd252-ty-gia-hq/SKILL.md",
+      "sha256": "b322c681c133eaa1097a9a791e459ea99d898b57d4553b6507115e21ac79b0c4",
+      "sourceId": "fbo-nd252-ty-gia-hq",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-regulatory-rollout/SKILL.md",
+      "sha256": "4272f1347d8bb7120889fdd474e9bfec1bffa7c0c014628feb0ec6391f4a3920",
+      "sourceId": "fbo-regulatory-rollout",
       "sourceVersion": 1
     },
     {
@@ -371,9 +383,21 @@
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/rules/fbo-nd252-ty-gia-hq.mdc",
+      "sha256": "0355300a98839daaee080db077676341c72f1a00887a2f4ea8723d6a8c9f5545",
+      "sourceId": "fbo-nd252-ty-gia-hq",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/rules/fbo-never-invent-files.mdc",
       "sha256": "07ef77de5451b8187f80ac47de2af27d5529b7b539e1c12f4f4c933033f7566b",
       "sourceId": "fbo-never-invent-files",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/fbo-regulatory-rollout.mdc",
+      "sha256": "9a0aebbc8d345b1b0f7f2f69f2bb9d959e26f1dfc4ac5c4597f95f0e5b434b36",
+      "sourceId": "fbo-regulatory-rollout",
       "sourceVersion": 1
     },
     {
@@ -519,6 +543,18 @@
       "sourceVersion": 1
     },
     {
+      "path": ".github/instructions/fbo-nd252-ty-gia-hq.instructions.md",
+      "sha256": "ea6a5ac2548d285aaed70d6be82ce9c57309bcee5b9cddb07e272dedae9940c1",
+      "sourceId": "fbo-nd252-ty-gia-hq",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/fbo-regulatory-rollout.instructions.md",
+      "sha256": "663fc7ad348ca353d1226a1253cb41ffd906d8387bea2e5ab24e373afa013113",
+      "sourceId": "fbo-regulatory-rollout",
+      "sourceVersion": 1
+    },
+    {
       "path": ".github/instructions/fbo-sql-object-lookup.instructions.md",
       "sha256": "fa2271ef2a1ea7fa7e75c08724fe43f328722888f11fc74301b6b05f963e911c",
       "sourceId": "fbo-sql-object-lookup",
@@ -622,6 +658,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-07T07:28:29.117Z",
+  "syncedAt": "2026-08-07T08:56:28.225Z",
   "target": "4ai"
 }
