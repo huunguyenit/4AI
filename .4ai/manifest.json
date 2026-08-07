@@ -1,0 +1,129 @@
+{
+  "files": [
+    {
+      "path": ".claude/4ai-context.md",
+      "sha256": "4963b42b65154007678ef45c63230de19a9cbe83f074b22e7459502e20ec7476"
+    },
+    {
+      "path": ".claude/agents/fbo-explorer.md",
+      "sha256": "8073a599a4ae8e452a0100e42cd50d4ae5e4632cb22e69454f9a46d141765dd6",
+      "sourceId": "fbo-explorer",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-controller-anatomy/SKILL.md",
+      "sha256": "ca537f5d4619ae154e4bac0c72df6484ff61d82556488462baf1f61a2756c0c2",
+      "sourceId": "fbo-controller-anatomy",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-radar-query-discipline/SKILL.md",
+      "sha256": "083f2a2350bce8ffd77ed452233e739696957d18eaf46d01f65e1d8e922674f2",
+      "sourceId": "fbo-radar-query-discipline",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/commands/fbo-explorer.md",
+      "sha256": "f8cd7ce36219efddab0746c964af8b732887afe4bf6d9ef3ea15ac698398133f",
+      "sourceId": "fbo-explorer",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/00-core-doctrine.mdc",
+      "sha256": "3d2d6be3c03584e539d5756537c0b6a939c44f94b5b198b7878c61ad926049f1",
+      "sourceId": "core-doctrine",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/00-fbo-doctrine.mdc",
+      "sha256": "a38a88c180fc3ae349f109c639e8529b69951610e8245a298ef2aecd4cf1e518",
+      "sourceId": "fbo-doctrine",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/00-pm-doctrine.mdc",
+      "sha256": "2721b620b3e0c03724628d54c647f3fdf802899f10a771d614da572a1970020e",
+      "sourceId": "pm-doctrine",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/fbo-controller-anatomy.mdc",
+      "sha256": "eda76a8ebb8f245fbdadb57ba0e824aca6eecabb5560ebfeb54da13217ee3ed9",
+      "sourceId": "fbo-controller-anatomy",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/fbo-never-invent-files.mdc",
+      "sha256": "3face32d0cd6381294cd255e75f71f9cad5fe073f4669e6c0653867a16299d70",
+      "sourceId": "fbo-never-invent-files",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/fbo-radar-query-discipline.mdc",
+      "sha256": "fb4a8c7093ceb6616de0b600c9a8bc4727b5e82992f0313d0ca150dabe99799f",
+      "sourceId": "fbo-radar-query-discipline",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/chatmodes/fbo-explorer.chatmode.md",
+      "sha256": "233556ae5cde047f1a9ae14b32e129a79f54e2a9e3465eba01e80256b21aa1cf",
+      "sourceId": "fbo-explorer",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "sha256": "0e8cfa6cade90e96bf89e36f55004b4057f07bb5512845f1c552e8221375f1bf"
+    },
+    {
+      "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
+      "sha256": "fb2597f1b3890a916b25b27535144d1b350a86c48a3d6e1098f1cd7b836d9e6a",
+      "sourceId": "fbo-controller-anatomy",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/fbo-radar-query-discipline.instructions.md",
+      "sha256": "94ecc46ec6ffc29ffe903620953329ddfcfdb26acd92a3811a4bea4116d8c8f9",
+      "sourceId": "fbo-radar-query-discipline",
+      "sourceVersion": 1
+    }
+  ],
+  "hub": "D:\\Fast Source\\4AI",
+  "jsonOwnership": [
+    {
+      "createdByUs": true,
+      "ownedCanonical": "[[\"fastbusiness-mcp\"],[\"mcp__fastbusiness-mcp__search_nodes\",\"mcp__fastbusiness-mcp__query_node_details\",\"mcp__fastbusiness-mcp__get_related_nodes\",\"mcp__fastbusiness-mcp__get_xml_entities\",\"mcp__fastbusiness-mcp__query_radar\",\"mcp__fastbusiness-mcp__read_local_file\"]]",
+      "ownedKeys": [
+        "enabledMcpjsonServers",
+        "permissions.allow"
+      ],
+      "path": ".claude/settings.json"
+    },
+    {
+      "createdByUs": true,
+      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"}}]",
+      "ownedKeys": [
+        "mcpServers.fastbusiness-mcp"
+      ],
+      "path": ".cursor/mcp.json"
+    },
+    {
+      "createdByUs": true,
+      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"}}]",
+      "ownedKeys": [
+        "mcpServers.fastbusiness-mcp"
+      ],
+      "path": ".mcp.json"
+    },
+    {
+      "createdByUs": true,
+      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"},\"type\":\"stdio\"}]",
+      "ownedKeys": [
+        "servers.fastbusiness-mcp"
+      ],
+      "path": ".vscode/mcp.json"
+    }
+  ],
+  "schemaVersion": 1,
+  "syncedAt": "2026-08-07T02:15:42.831Z",
+  "target": "4ai"
+}

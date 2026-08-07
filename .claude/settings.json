@@ -1,0 +1,15 @@
+{
+  "enabledMcpjsonServers": [
+    "fastbusiness-mcp"
+  ],
+  "permissions": {
+    "allow": [
+      "mcp__fastbusiness-mcp__search_nodes",
+      "mcp__fastbusiness-mcp__query_node_details",
+      "mcp__fastbusiness-mcp__get_related_nodes",
+      "mcp__fastbusiness-mcp__get_xml_entities",
+      "mcp__fastbusiness-mcp__query_radar",
+      "mcp__fastbusiness-mcp__read_local_file"
+    ]
+  }
+}

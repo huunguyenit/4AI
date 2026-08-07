@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "fastbusiness-mcp": {
+      "args": [],
+      "command": "D:\\fastbusiness_mcp\\fastbusiness_mcp.exe",
+      "cwd": "D:\\fastbusiness_mcp",
+      "env": {
+        "FASTBUSINESS_VSCODE_DB_PATH": "D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb"
+      },
+      "type": "stdio"
+    }
+  }
+}
