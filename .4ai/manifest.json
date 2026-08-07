@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "88644694350654ee9c99706bc4b498c6c5c0e946d1d8e4eefa0e6c2f6b3ec317"
+      "sha256": "7f96de75991a2a1cf49b6080eb00792d438c97c3ff7ab2557a719726d7132f75"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -35,6 +35,12 @@
       "sourceVersion": 1
     },
     {
+      "path": ".claude/commands/doctor.md",
+      "sha256": "7f20e881f20691f3032afe9461210d419e607c3161dfe7393c655c6583879625",
+      "sourceId": "doctor",
+      "sourceVersion": 1
+    },
+    {
       "path": ".claude/commands/fbo-customize.md",
       "sha256": "39d9243b396de0d476b5ec14fa5109bd87515dbac258112a01a0409a1f22d355",
       "sourceId": "fbo-customize",
@@ -59,6 +65,24 @@
       "sourceVersion": 1
     },
     {
+      "path": ".claude/commands/new-agent.md",
+      "sha256": "2618ecf9852b424e0a2970d66f81311e0eb67912bb9bee7bda1504381da0bbc1",
+      "sourceId": "new-agent",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/commands/new-rule.md",
+      "sha256": "bf5a44deb05d6a3d840698d67909370334c7578156d6e69d5a9afb47fcdd3a0b",
+      "sourceId": "new-rule",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/commands/new-skill.md",
+      "sha256": "bdb41373ddbd612166a60c6a18e85bb509b395d2fbad6efc2e6e967b261955a1",
+      "sourceId": "new-skill",
+      "sourceVersion": 1
+    },
+    {
       "path": ".claude/commands/pm-new-adr.md",
       "sha256": "32591b35a1c566fa388de4f9eadf3388b9e4b5ebd4f402e600475cb809cb6162",
       "sourceId": "pm-new-adr",
@@ -68,6 +92,18 @@
       "path": ".claude/commands/pm-status.md",
       "sha256": "0f054e502dcb68b014eb071dae5c8376d200f16b7c3e0e9b99fc014bdf215713",
       "sourceId": "pm-status",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/commands/sync.md",
+      "sha256": "21b8abe6018b29c24f0595713cc9a693703f5d5c1e90396c1bd7d3e8e8cac154",
+      "sourceId": "sync",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/4ai-asset-authoring/SKILL.md",
+      "sha256": "edf286bc4640da127d959bc7490b7652ebe9f7617c0ee133235a037e2d895920",
+      "sourceId": "4ai-asset-authoring",
       "sourceVersion": 1
     },
     {
@@ -155,6 +191,12 @@
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/commands/doctor.md",
+      "sha256": "bb70a34da415dfcdaf1d3ee2492473cb50b46cc1f48bbd71d992ddf12555fb7a",
+      "sourceId": "doctor",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/commands/fbo-change-reviewer.md",
       "sha256": "ffc93883f011b0c91b40364aa231842c7fc9cb9377b72311186c1afd1efba67c",
       "sourceId": "fbo-change-reviewer",
@@ -197,6 +239,24 @@
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/commands/new-agent.md",
+      "sha256": "7935334377bfdbbfcad421e40436614d4fb5eda8f6c6093dd1b7b97848a8764c",
+      "sourceId": "new-agent",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/commands/new-rule.md",
+      "sha256": "f1eddfb008b800f6100c58dfe3a911ef7e4e9de44e8548f5033b8ca4d86ba188",
+      "sourceId": "new-rule",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/commands/new-skill.md",
+      "sha256": "0635a3fcb90f7b0e35b893ed3c3e2c8411331dcf796e7bce6c51d4364bfaf8ad",
+      "sourceId": "new-skill",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/commands/pm-new-adr.md",
       "sha256": "97fa2c56d44864b6a582e92e596ed040552565ca2a7c229b2fa7d3591f511085",
       "sourceId": "pm-new-adr",
@@ -221,6 +281,12 @@
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/commands/sync.md",
+      "sha256": "2aaf6a5c8146fc6acab17f20feaa3d3aa535dc9ae8dd8631c0a41301fba472b5",
+      "sourceId": "sync",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/rules/00-core-doctrine.mdc",
       "sha256": "3d2d6be3c03584e539d5756537c0b6a939c44f94b5b198b7878c61ad926049f1",
       "sourceId": "core-doctrine",
@@ -236,6 +302,12 @@
       "path": ".cursor/rules/00-pm-doctrine.mdc",
       "sha256": "2721b620b3e0c03724628d54c647f3fdf802899f10a771d614da572a1970020e",
       "sourceId": "pm-doctrine",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/4ai-asset-authoring.mdc",
+      "sha256": "9ad956a194b90e090ac583485c6e9f9a1c015120a911b4e17156a4dbd42f7fa2",
+      "sourceId": "4ai-asset-authoring",
       "sourceVersion": 1
     },
     {
@@ -550,6 +622,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-07T02:24:50.681Z",
+  "syncedAt": "2026-08-07T06:11:34.717Z",
   "target": "4ai"
 }

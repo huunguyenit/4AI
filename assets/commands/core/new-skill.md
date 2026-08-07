@@ -1,0 +1,24 @@
+---
+id: new-skill
+title: /new-skill
+kind: command
+domain: core
+description: Tạo skill mới trong hub 4AI — ép nội dung thành quy trình cụ thể với tool-call và path thật thay vì lời khuyên chung chung, rồi chạy check.
+argument-hint: <domain> <mô tả ngắn>
+mode: agent
+targets: [claude, cursor]
+version: 1
+---
+
+## Việc cần làm
+
+Tạo skill mới: **$ARGUMENTS**
+
+1. Nạp skill `4ai-asset-authoring`.
+2. Tự hỏi trước khi viết: đây có thật là **quy trình nạp theo yêu cầu** không? Nếu nó là
+   ràng buộc luôn đúng → đề nghị làm rule thay vì skill. Nói ra nhận định này.
+3. Viết `assets/skills/<domain>/<id>.md`. Chuẩn chất lượng: người đọc làm theo được mà
+   không cần hỏi thêm — chuỗi tool-call cụ thể, query mẫu chạy được, path thật, bảng
+   thật. "Nên cẩn thận khi X" không phải nội dung skill.
+4. `description` nêu rõ **khi nào cần nạp** — model chọn skill bằng đúng dòng đó.
+5. Chạy `node tools/4ai.mjs check` — exit 0 rồi mới báo xong, kèm output `explain <id>`.

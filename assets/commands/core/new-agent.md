@@ -1,0 +1,26 @@
+---
+id: new-agent
+title: /new-agent
+kind: command
+domain: core
+description: Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only.
+argument-hint: <domain> <mô tả ngắn>
+mode: agent
+targets: [claude, cursor]
+version: 1
+---
+
+## Việc cần làm
+
+Tạo sub-agent mới: **$ARGUMENTS**
+
+1. Nạp skill `4ai-asset-authoring`.
+2. Chốt với người dùng (một câu, có mặc định): agent này **read-only hay được sửa file**?
+   Nhiệm vụ một câu là gì?
+3. Viết `assets/agents/<domain>/<id>.md` với đủ:
+   - `tools`: danh sách **tối thiểu** cho nhiệm vụ. Read-only ⇒ **KHÔNG ĐƯỢC** có
+     Edit/Write — kể cả khi được xin "cho tiện". Tool MCP viết `mcp__<server>__<tool>`
+     và khai `requires`.
+   - Body: `## Nhiệm vụ` (kèm điều agent KHÔNG làm) / `## Quy trình` /
+     `## Định dạng báo cáo (bắt buộc)` / `## Ràng buộc`.
+4. Chạy `node tools/4ai.mjs check` — exit 0 rồi mới báo xong, kèm output `explain <id>`.

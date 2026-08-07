@@ -295,6 +295,11 @@ corpus để sẵn bản đồ file.
 | `fbo-explorer` | Sub-agent điều tra màn hình FBO read-only — trả về bản đồ file, field, quan hệ, include, kèm mục Chưa chắc chắn bắt buộc. Không bao giờ sửa file. |
 | `pm-planner` | Sub-agent biến yêu cầu mơ hồ thành kế hoạch có phạm vi — xác định khách/program/SP, liệt kê controller liên quan, soạn sẵn ledger entry. Chỉ lập kế hoạch, không sửa file. |
 | `pm-release-auditor` | Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá. |
+| `doctor` | Chạy 4AI check và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. |
+| `new-agent` | Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only. |
+| `new-rule` | Tạo rule mới trong hub 4AI — hỏi 3 điều không suy ra được (severity, always/globs, targets), viết file đúng schema, chạy check. |
+| `new-skill` | Tạo skill mới trong hub 4AI — ép nội dung thành quy trình cụ thể với tool-call và path thật thay vì lời khuyên chung chung, rồi chạy check. |
+| `sync` | Chạy 4AI sync — dry-run trước, tóm tắt kế hoạch ghi, dừng chờ xác nhận rồi mới ghi thật; giải thích mọi refuse. |
 | `fbo-customize` | Customize màn hình FBO cho một khách — chốt phạm vi, lập kế hoạch, chờ duyệt, rồi mới giao fbo-customizer thi hành và ghi ledger. |
 | `fbo-find` | Điều tra một màn hình FBO — dispatch fbo-explorer, trả về bản đồ file, field, quan hệ và trạng thái customize. |
 | `fbo-review` | Soi diff XML hiện tại theo bộ rule FBO — dispatch fbo-change-reviewer, phân loại Blocker / Nên sửa / Góp ý. |
@@ -306,6 +311,7 @@ corpus để sẵn bản đồ file.
 | `fbo-entity-resolution-first` | Trước khi sửa controller phải phân giải DTD entity bằng get_xml_entities; đụng vào Include phải đếm số controller dùng chung — sửa include là thay đổi toàn hệ thống. |
 | `fbo-f-vs-xml-pairing` | .f là bản chuẩn, .xml cùng tên cạnh nó là bản customize được runtime ưu tiên — kiểm tra cặp bằng Radar (needs_xml, paired_f_path) trước khi sửa hay tạo. |
 | `fbo-radar-query-discipline` | Bắt buộc khi dùng query_radar — luôn lọc r.edge_type (99% cạnh là SHARED_INCLUDE), luôn LIMIT, size() thay length(), tìm handler JS qua js_text CONTAINS. |
+| `4ai-asset-authoring` | Dùng khi tạo hoặc sửa asset trong hub 4AI (rule/skill/agent/command/doctrine) — schema frontmatter, subset YAML, quy ước đặt tên, và bước check bắt buộc trước khi báo xong. |
 | `fbo-controller-anatomy` | Giải phẫu một màn hình FBO — thư mục nào chứa gì, cặp .f/.xml, ba loại Include, và thứ tự đọc 5 bước khi nhận yêu cầu sửa. |
 | `fbo-customization-workflow` | Quy trình customize một màn hình FBO từ đầu tới cuối — xác định program, xác nhận controller, kiểm tra cặp .f/.xml, phân giải entity, sửa tối thiểu, verify, ghi ledger. |
 | `fbo-js-api` | Bề mặt JS phía client của FBO — Form API vs Grid API, các event handler chuẩn (WhenVoucherInit/Loading/Closing), thân handler nằm ở Include Javascript, tra cứu qua knowledge base của MCP. |

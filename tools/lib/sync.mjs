@@ -8,8 +8,9 @@ import { syncTarget, ensureImportLine } from './writer.mjs';
 import { emitClaude } from './emit/claude.mjs';
 import { emitCursor } from './emit/cursor.mjs';
 import { emitVscode } from './emit/vscode.mjs';
+import { emitDevworkflow } from './emit/devworkflow.mjs';
 
-const EMITTERS = { claude: emitClaude, cursor: emitCursor, vscode: emitVscode };
+const EMITTERS = { claude: emitClaude, cursor: emitCursor, vscode: emitVscode, devworkflow: emitDevworkflow };
 
 function isUnc(p) {
   return /^[\\/]{2}/.test(p);
@@ -54,7 +55,7 @@ export async function runSync(opts) {
       return 1;
     }
     targets = [{ name: `dest:${opts.dest}`, path: opts.dest,
-      tools: ['claude', 'cursor', 'vscode'], domains: targetsCfg.domains ?? [], adhoc: true }];
+      tools: Object.keys(EMITTERS), domains: targetsCfg.domains ?? [], adhoc: true }];
     if (!opts.yes) opts.dryRun = true;
   }
   if (targets.length === 0) {
@@ -88,7 +89,7 @@ export async function runSync(opts) {
     }
 
     const tools = (opts.tool?.length ? target.tools.filter((t) => opts.tool.includes(t)) : target.tools)
-      .filter((t) => t in EMITTERS); // devworkflow đến Phase 5
+      .filter((t) => t in EMITTERS);
 
     const domainAssets = assets.filter((a) => target.domains.includes(a.domain));
 
