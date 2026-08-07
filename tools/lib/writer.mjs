@@ -197,7 +197,14 @@ export function syncTarget({ destRoot, textFiles, jsonFiles, manifest, opts }) {
       }
     }
 
+    // Owned-key mà lần sync trước 4AI sở hữu nhưng lần này không emit nữa (vd đổi tên
+    // MCP server) phải bị gỡ. Không xử lý ở đây thì entry cũ sống mãi: file vẫn được
+    // emit nên nhánh prune-toàn-file bên dưới không bao giờ chạm tới nó.
     const merged = deepMerge(existing, jf.patch);
+    const staleKeys = (prev?.ownedKeys ?? []).filter((k) => !jf.ownedKeys.includes(k));
+    for (const k of staleKeys) {
+      if (deletePath(merged, k)) plan.push({ action: 'prune-keys', relPath, detail: k });
+    }
     const newContent = normalize(stableStringify(merged));
     const ownedCanonical = canonical(jf.ownedKeys.map((k) => getPath(merged, k)));
     newJsonOwnership.push({ path: relPath, ownedKeys: jf.ownedKeys, ownedCanonical, createdByUs });

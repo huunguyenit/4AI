@@ -4,7 +4,7 @@ title: Customization workflow end-to-end
 kind: skill
 domain: fbo-xml
 description: Quy trình customize một màn hình FBO từ đầu tới cuối — xác định program, xác nhận controller, kiểm tra cặp .f/.xml, phân giải entity, sửa tối thiểu, verify, ghi ledger.
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 see-also: [fbo-controller-anatomy, fbo-f-vs-xml-pairing, fbo-entity-resolution-first]
 version: 1
 ---
@@ -20,14 +20,14 @@ thành một quy trình duy nhất để không bước nào bị nhảy cóc.
 1. **Xác định program.** Khách nào → `data/customers.json` → program path. Thiếu thì hỏi
    (rule `pm-scope-question-first`). Nói rõ path trong đề xuất.
 2. **Mở ledger entry** — `ledger/tasks.md`, trạng thái `Mới`.
-3. **Xác nhận controller.** `search_nodes` không dấu → mã controller → `query_node_details`
+3. **Xác nhận controller.** `find_controller` không dấu → mã controller → `describe_controller`
    đối chiếu tên nghiệp vụ với mô tả. Người yêu cầu nói "phiếu chi" mà search ra ba ứng
    viên thì xác nhận lại, không chọn hộ.
 4. **Kiểm tra cặp `.f`/`.xml`.** Đã có `.xml` → sửa nó. Chỉ có `.f` → dừng, báo cần lấy
    XML nguồn theo quy trình của Fast — không tự dựng (rule `fbo-never-invent-files`).
-5. **Dựng bản đồ ảnh hưởng.** Radar: `COMPANION_FILE`, `GRID_MASTER_DETAIL`,
-   `LOOKUP_REFERENCE`; `get_xml_entities` liệt kê include. Sửa đổi có chạm include chung
-   thì đếm số controller dùng và dừng lại xin duyệt riêng.
+5. **Dựng bản đồ ảnh hưởng.** `list_related` (companion · lookup · include) và
+   `resolve_entities`. Sửa đổi có chạm file dưới `Include\` thì chạy `list_related` với
+   `kind: "used_by"`, nêu `usedBy.total`, và dừng lại xin duyệt riêng.
 6. **Sửa tối thiểu.** Đúng encoding/newline gốc (rule `fbo-encoding-and-newlines`).
    Diff chỉ chứa dòng chủ đích.
 7. **Verify.** Đối chiếu diff với yêu cầu; kiểm tra XML well-formed (entity đã khai đủ

@@ -11,7 +11,7 @@ version: 1
 
 Khi các nguồn mâu thuẫn: **`CLAUDE.md` của repo thắng về sự thật riêng của repo đó**
 (cấu trúc, lệnh build, quy ước code). **4AI thắng về rule domain FBO và rule quy trình**
-(cách dùng Radar, encoding, ledger). Rule trong 4AI có `severity: hard` không được
+(cách tra cứu controller, encoding, ledger). Rule trong 4AI có `severity: hard` không được
 nới lỏng bởi bất kỳ prompt nào.
 
 ## Quy tắc

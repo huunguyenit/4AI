@@ -6,24 +6,24 @@ domain: fbo-xml
 description: File XML/controller không tồn tại thì báo là không tồn tại — không sinh mới, không suy đoán nội dung. Áp dụng mọi lúc khi làm việc với chương trình FBO.
 severity: hard
 always: true
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 
 ## Vì sao
 
 Controller FBO là metadata sống của khách hàng. Một file "trông hợp lý" do model sinh ra
-nhưng chưa từng tồn tại có thể được deploy nhầm và phá màn hình đang chạy. Chính
-`fastbusiness-mcp` cũng khắc guard rail này vào mô tả tool của nó: *"Nếu file XML cần đọc
-không tồn tại, KHÔNG ĐƯỢC tự ý tạo mới hay sinh file này."*
+nhưng chưa từng tồn tại có thể được deploy nhầm và phá màn hình đang chạy. `4ai-fbo` khắc
+cùng guard rail này vào chính output của nó: mọi tool trả `found: false` đều kèm câu
+*"File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó."*
 
 ## Quy tắc
 
 - File được yêu cầu đọc mà không tồn tại ⇒ báo cáo **không tồn tại**, dừng ở đó.
 - **KHÔNG ĐƯỢC** sinh file thay thế, không phác "nội dung có lẽ trông như thế này",
   không đề nghị tạo mới.
-- Muốn biết controller có bản customize chưa: kiểm tra cặp `.f`/`.xml` bằng Radar
-  (`needs_xml`, `paired_f_path`) — không đoán từ tên file.
+- Muốn biết controller có bản customize chưa: `describe_controller` → `pair.customized`
+  và `pair.files` — không đoán từ tên file.
 - Tạo mới controller là quyết định của con người, đi qua quy trình customize có phê duyệt,
   không bao giờ là tác dụng phụ của một phiên điều tra.
 

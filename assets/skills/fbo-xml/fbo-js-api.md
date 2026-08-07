@@ -3,9 +3,9 @@ id: fbo-js-api
 title: FBO client-side JS API
 kind: skill
 domain: fbo-xml
-description: Bề mặt JS phía client của FBO — Form API vs Grid API, các event handler chuẩn (WhenVoucherInit/Loading/Closing), thân handler nằm ở Include Javascript, tra cứu qua knowledge base của MCP.
-requires: [fastbusiness-mcp]
-see-also: [fbo-controller-anatomy, fbo-radar-navigation]
+description: Bề mặt JS phía client của FBO — Form API vs Grid API, event handler chuẩn (WhenVoucherInit/Loading/Closing), thân handler nằm ở Include Javascript, tra cứu bằng search_content trên code thật.
+requires: [4ai-fbo]
+see-also: [fbo-controller-anatomy, fbo-navigation-recipes]
 version: 1
 ---
 
@@ -21,10 +21,9 @@ những gì Form/Grid API đã có.
   validate. Dùng trong `Dir\`.
 - **Grid API** — thao tác lưới: dòng hiện tại, giá trị cell, thêm/xoá dòng, tính tổng.
   Dùng trong `Grid\` và detail grid.
-- Nguồn tra cứu chuẩn: knowledge base đóng gói trong MCP server —
-  `form_api.yaml`, `grid_api.yaml`, `common_patterns.yaml`, `context_rules.yaml`
-  (`D:\fastbusiness_mcp\_internal\knowledge_base\api_reference\`). Không chắc tên hàm
-  thì hỏi qua tool của `fastbusiness-mcp`, không bịa.
+- **Không có catalog API chính thức trong hub.** Nguồn sự thật duy nhất là code đang chạy
+  của chính program: tìm cách dùng thật bằng `search_content` với `in: "js"`. Không chắc
+  tên hàm thì **KHÔNG bịa** — tìm một chỗ đã dùng nó, hoặc nói là chưa xác minh được.
 
 ## Event handler chuẩn
 
@@ -39,9 +38,11 @@ entity — sửa chúng là sửa mọi màn hình cùng include (rule `fbo-enti
 
 ## Thứ tự làm việc
 
-1. Tìm handler hiện có: Radar `js_text CONTAINS '<tên hàm>'`.
-2. Đọc thân handler qua `get_xml_entities` / `read_local_file`.
-3. Viết theo pattern có sẵn trong `common_patterns.yaml` — cùng style với code khách đang chạy.
+1. Tìm handler hiện có: `search_content { query: "<tên hàm>", in: "js" }`.
+2. Đọc thân handler: `resolve_entities` (có `includeContent: true`) hoặc `read_source`
+   trên file `Include\Javascript\*.txt` tương ứng.
+3. Viết theo đúng pattern vừa đọc được — cùng style với code khách đang chạy, không theo
+   thói quen JS hiện đại.
 
 ## Bẫy
 

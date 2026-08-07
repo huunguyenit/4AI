@@ -17,8 +17,8 @@ Khám sức khoẻ hub.
 2. Với **mỗi** ERROR/WARN: nói rõ (a) nghĩa là gì, (b) sửa ở file nào dòng nào,
    (c) sửa xong thì chạy gì để xác nhận. Lỗi frontmatter thì mở file xem ngữ cảnh
    thật thay vì đoán từ message.
-3. WARN về binary fingerprint của `fastbusiness-mcp` thì nhắc thêm: server có thể đã
-   nâng cấp — kiểm tra các skill nhắc tên tool của nó trước khi cập nhật fingerprint
-   trong `mcp/servers.json`.
+3. Kiểm tra MCP server của hub: `node mcp/fbo/selftest.mjs` — nó bắt tay JSON-RPC thật
+   với `mcp/fbo/server.mjs` và đối chiếu danh sách tool với `mcp/servers.json`. Lệch
+   nhau nghĩa là registry và server đã trôi — sửa registry, rồi `sync` lại.
 4. Hub xanh hoàn toàn: báo tóm tắt số asset theo kind/domain và lần sync cuối của
    từng target — không bịa việc để có việc.

@@ -1,15 +1,17 @@
 {
   "enabledMcpjsonServers": [
-    "fastbusiness-mcp"
+    "4ai-fbo"
   ],
   "permissions": {
     "allow": [
-      "mcp__fastbusiness-mcp__search_nodes",
-      "mcp__fastbusiness-mcp__query_node_details",
-      "mcp__fastbusiness-mcp__get_related_nodes",
-      "mcp__fastbusiness-mcp__get_xml_entities",
-      "mcp__fastbusiness-mcp__query_radar",
-      "mcp__fastbusiness-mcp__read_local_file"
+      "mcp__4ai-fbo__list_programs",
+      "mcp__4ai-fbo__index_program",
+      "mcp__4ai-fbo__find_controller",
+      "mcp__4ai-fbo__describe_controller",
+      "mcp__4ai-fbo__list_related",
+      "mcp__4ai-fbo__resolve_entities",
+      "mcp__4ai-fbo__search_content",
+      "mcp__4ai-fbo__read_source"
     ]
   }
 }

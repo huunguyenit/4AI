@@ -6,7 +6,7 @@ domain: fbo-xml
 description: Customize màn hình FBO cho một khách — chốt phạm vi, lập kế hoạch, chờ duyệt, rồi mới giao fbo-customizer thi hành và ghi ledger.
 argument-hint: <khách> <mô tả thay đổi>
 mode: agent
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 

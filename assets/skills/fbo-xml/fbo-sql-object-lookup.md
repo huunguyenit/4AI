@@ -3,9 +3,9 @@ id: fbo-sql-object-lookup
 title: SQL object lookup
 kind: skill
 domain: fbo-xml
-description: Tìm và đọc table/proc/view đứng sau một màn hình FBO qua query_database — query_type 0 cho object, 1 cho SQL shaped, liên hệ field màn hình với cột database.
-requires: [fastbusiness-mcp]
-see-also: [fbo-radar-navigation]
+description: Tìm và đọc table/proc/view đứng sau một màn hình FBO qua query_sql — tham số object để soi cấu trúc, sql cho câu tự viết, liên hệ field màn hình với cột database.
+requires: [4ai-fbo]
+see-also: [fbo-navigation-recipes]
 version: 1
 ---
 
@@ -16,18 +16,21 @@ từ đâu" cần đi được đường: field màn hình → controller → qu
 
 ## Quy trình
 
-1. **Từ màn hình xuống:** `query_node_details` cho controller → xem `sql_text` (Radar)
-   hoặc phần `Query`/`Command` trong XML → tên table/proc xuất hiện ở đó.
-2. **Soi object:** `query_database` `query_type: 0`, `query: "<tên object>"` —
-   server tự nhận diện table (trả cấu trúc cột) / proc / view (trả định nghĩa).
-3. **Chạy thử SQL shaped:** `query_type: 1` với câu SELECT có `TOP` — xem dữ liệu thật
-   để đối chiếu field ↔ cột.
-4. **`db_type`:** nghiệp vụ (chứng từ, danh mục) bên `app`; cấu hình hệ thống, phân quyền
-   bên `sys`. Không thấy object thì đổi bên trước khi kết luận không tồn tại.
+1. **Từ màn hình xuống:** `describe_controller` → `table` (thuộc tính `table=` của root,
+   ví dụ `m31$000000`) và `commands[]` theo event. Cần chính nội dung SQL thì
+   `search_content` với `in: "sql"`, hoặc `read_source` phần `<command>`.
+2. **Soi object:** `query_sql { object: "<tên>" }` — server tự nhận diện table/view
+   (trả cấu trúc cột) hay proc (trả `definition`).
+3. **Xem dữ liệu thật:** `query_sql { sql: "SELECT TOP 20 …" }` để đối chiếu field ↔ cột.
+4. **`db`:** nghiệp vụ (chứng từ, danh mục) bên `app`; cấu hình hệ thống, phân quyền bên
+   `sys`. Không thấy object thì đổi bên trước khi kết luận không tồn tại.
+5. **`database`:** Web.config của FBO để placeholder `%Database` — tool sẽ báo và đòi
+   tham số `database`. Hỏi người dùng tên database, đừng đoán.
 
 ## Quy ước đặt tên hay gặp
 
-- Bảng chứng từ thường trùng mã controller: màn hình `CPTran` ↔ bảng `CPTran`.
+- Root element mang sẵn tên bảng thật: `<dir table="m31$000000" …>`. Phần `$000000` là
+  partition — xem `<partition>` để biết quy tắc tách bảng theo kỳ.
 - Cột tiếng Việt không dấu, trùng tên field màn hình: `dien_giai`, `ten_vt`, `gia2`,
   `gia_nt2` (`_nt` = nguyên tệ).
 

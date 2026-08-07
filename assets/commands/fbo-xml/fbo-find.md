@@ -6,7 +6,7 @@ domain: fbo-xml
 description: Điều tra một màn hình FBO — dispatch fbo-explorer, trả về bản đồ file, field, quan hệ và trạng thái customize.
 argument-hint: <mô tả màn hình hoặc mã controller> [program path]
 mode: agent
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 

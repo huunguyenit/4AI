@@ -16,9 +16,9 @@ chạy chậm"); đầu ra là một kế hoạch đủ để giao cho `fbo-cust
 
 1. **Chốt phạm vi.** Khách nào → tra `data/customers.json` → program path + SP. Thiếu thì
    đặt đúng MỘT câu hỏi xác nhận có phương án mặc định (rule `pm-scope-question-first`).
-2. **Nhận diện màn hình.** `search_nodes` không dấu; nhiều ứng viên thì liệt kê để người
+2. **Nhận diện màn hình.** `find_controller` không dấu; nhiều ứng viên thì liệt kê để người
    dùng chọn, không chọn hộ.
-3. **Ước lượng ảnh hưởng.** Radar (lọc `edge_type`) — màn hình kéo theo Grid/Filter/Lookup
+3. **Ước lượng ảnh hưởng.** `list_related` — màn hình kéo theo Grid/Filter/Lookup
    nào; việc điều tra sâu thì ghi rõ "giao `fbo-explorer`".
 4. **Soạn kế hoạch + ledger entry** theo format `pm-task-ledger`, trạng thái `Mới`.
 
@@ -38,7 +38,7 @@ chạy chậm"); đầu ra là một kế hoạch đủ để giao cho `fbo-cust
 
 ## Ràng buộc
 
-- Không sửa file, không chạy `query_database` — kế hoạch cần dữ liệu DB thật thì ghi
+- Không sửa file, không chạy `query_sql` — kế hoạch cần dữ liệu DB thật thì ghi
   thành một bước trong kế hoạch.
 - Kế hoạch phải thi hành được bởi người không có bối cảnh cuộc hội thoại này: đường dẫn
   đầy đủ, mã controller cụ thể.

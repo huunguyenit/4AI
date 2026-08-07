@@ -1,36 +1,31 @@
 {
   "version": 1,
   "servers": {
-    "fastbusiness-mcp": {
-      "description": "Đồ thị controller FBO/FBI (Kuzu Radar), phân giải DTD entity, truy cập SQL Server qua Web.config.",
-      "observedVersion": "2.0.0",
+    "4ai-fbo": {
+      "description": "MCP riêng của 4AI: index và tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi ảnh hưởng của Include, đọc file giữ nguyên encoding, truy vấn SQL qua Web.config.",
       "transport": "stdio",
-      "command": "D:\\fastbusiness_mcp\\fastbusiness_mcp.exe",
-      "args": [],
-      "cwd": "D:\\fastbusiness_mcp",
-      "env": {
-        "FASTBUSINESS_VSCODE_DB_PATH": "D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb"
-      },
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": ["D:\\Fast Source\\4AI\\mcp\\fbo\\server.mjs", "--hub", "D:\\Fast Source\\4AI"],
+      "cwd": "D:\\Fast Source\\4AI",
+      "env": {},
       "targets": ["claude", "cursor", "vscode", "devworkflow"],
       "autoApprove": [
-        "search_nodes",
-        "query_node_details",
-        "get_related_nodes",
-        "get_xml_entities",
-        "query_radar",
-        "read_local_file"
+        "list_programs",
+        "index_program",
+        "find_controller",
+        "describe_controller",
+        "list_related",
+        "resolve_entities",
+        "search_content",
+        "read_source"
       ],
-      "binaryFingerprint": {
-        "size": 9390433,
-        "mtime": "2026-07-23T04:40:59.323Z"
-      },
       "notes": [
-        "cwd BẮT BUỘC. Đăng ký ở Claude Desktop hiện thiếu cả cwd lẫn env — đừng chép ngược từ đó.",
-        "env đã SỬA: C:\\Users\\PM01\\.cursor\\mcp.json đang trỏ D:/fastbusiness_mcp/data/fields_lmdb, đường dẫn đó KHÔNG TỒN TẠI.",
-        "LMDB thật nằm ở D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb.",
-        "Kuzu DB tách theo project: D:\\fastbusiness_mcp\\KuzuDB\\<base64(program-root)>\\.fbograph\\kuzu\\",
-        "query_database CỐ TÌNH không nằm trong autoApprove — nó chạm database khách thật.",
-        "Đây là binary đóng (PyInstaller), không có source. Tên tool và schema Kuzu là hợp đồng-theo-quan-sát; binaryFingerprint để check cảnh báo khi nó đổi."
+        "Nguồn ở mcp/fbo/ trong chính hub này — zero dependency, không kế thừa gì từ fastbusiness-mcp.",
+        "Index nằm ở <hub>/.4ai/index/<slug>.sqlite. KHÔNG BAO GIỜ ghi vào thư mục program của khách.",
+        "query_sql CỐ TÌNH không nằm trong autoApprove — nó chạm database thật; câu lệnh ghi còn cần allowWrite: true.",
+        "Kết nối phân giải nội bộ từ Web.config; module sql.mjs redact mọi shape connection string trước khi trả ra.",
+        "Đường dẫn node.exe để tuyệt đối cho chắc: một số client spawn với PATH tối giản.",
+        "node:sqlite là API built-in còn ở diện experimental — Node in cảnh báo ra stderr, vô hại với MCP (stdout mới là kênh giao thức)."
       ]
     }
   }

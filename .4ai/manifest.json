@@ -2,29 +2,29 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "7f96de75991a2a1cf49b6080eb00792d438c97c3ff7ab2557a719726d7132f75"
+      "sha256": "785c019f7feea5a3c0ec468c044d1729f97547e6aeb03796f79bd3b40d19574d"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
-      "sha256": "bd7a6a9d97b4d0c558d2ba169f53e8b42da93fa392d4694d9105fb45dfe1e603",
+      "sha256": "6093490432ea5d29e20e0d5533325bf2f1079492227a1819132d9e78aaf3f3cf",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/fbo-customizer.md",
-      "sha256": "5a7d1eb08de6ed93708a4d4a7068cad84d8a9b3c6317cc7f6c99444f780d247b",
+      "sha256": "789d631f2804da2c53001aaeadc521dce74ad74222c5c355c8acd781c602773c",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/fbo-explorer.md",
-      "sha256": "8073a599a4ae8e452a0100e42cd50d4ae5e4632cb22e69454f9a46d141765dd6",
+      "sha256": "d708b2f63e6eb2b1166d9feff2b7897e01a7b5054e5fbb8904f1c82de16b0427",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/pm-planner.md",
-      "sha256": "2c938705a1b8ffeb866892a5f58644e2c40896af2f50864a2c1c1c69107e2795",
+      "sha256": "27043031a9bd959c8b298e65fc2f900f81187fbc33f2ddca0e244069f46f1a2c",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
@@ -36,7 +36,7 @@
     },
     {
       "path": ".claude/commands/doctor.md",
-      "sha256": "7f20e881f20691f3032afe9461210d419e607c3161dfe7393c655c6583879625",
+      "sha256": "4c40727cc86e6b8f3348fd6e454801de1cd73e950517fe45f27fc2c61dcda26d",
       "sourceId": "doctor",
       "sourceVersion": 1
     },
@@ -60,7 +60,7 @@
     },
     {
       "path": ".claude/commands/fbo-sql.md",
-      "sha256": "24ba6c2b0a5e2db18df9da173e332300687515349b81259299c22d8e6076a28f",
+      "sha256": "d62715bb5597fea0bc86d8d67e7541a8980a993614a7439a80eb3ae80f0aa063",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
@@ -108,61 +108,61 @@
     },
     {
       "path": ".claude/skills/fbo-accent-free-search/SKILL.md",
-      "sha256": "1e3fd89d5674bf3bcb05efd3d48e74609a30cab412630fd372803be17a932bb7",
+      "sha256": "6a08c922cb22781970cc34c89609be78eea5867b44459ae32c4af5dd9c3dd43c",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-controller-anatomy/SKILL.md",
-      "sha256": "ca537f5d4619ae154e4bac0c72df6484ff61d82556488462baf1f61a2756c0c2",
+      "sha256": "4c07a064ae7c2984f7e69fdbceb07e9a288ffaed77f5ec1de2df2dce196a75d9",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-customization-workflow/SKILL.md",
-      "sha256": "255e53c54ccef5d37f7ceda8e26034a51a0ec13f98409b3bf6c48ae3174a581c",
+      "sha256": "8d4da2735ad17c3ab2eed7f11951ca891d4b4a662f5e8078cfb1a8972e71e906",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-encoding-and-newlines/SKILL.md",
-      "sha256": "e9cd8bf1777fcff284b78564a63e5d2a3434702ca0470f4fa3c90b8cd1a92b14",
+      "sha256": "afc048a475d45a6fba582f8eab7e114504490fd71d0e798066f21640726ef777",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-entity-resolution-first/SKILL.md",
-      "sha256": "049df60b350bea591ee1d66a7cdc2597b0ed72dced785598083852085d09c4e9",
+      "sha256": "47e4a1a636f3718134bc67daefbfa57e66734457d72f4ab2963494151fa5823a",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-f-vs-xml-pairing/SKILL.md",
-      "sha256": "cb4b01ff7fe212f7279d985cbcca3c7c80893fabd3df4ba1baeb7ac4ea6c31b2",
+      "sha256": "c5783b149499c9d5db25fb1f50f49130357ed8590ee8d033e23b2b5fa68af7fc",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-js-api/SKILL.md",
-      "sha256": "53e0d57d857d14a45c3da40eba3a2f791cad1b61e19314cd950f73f68a0c166d",
+      "sha256": "efb039be2217413d627fec82d299cea2a6d0fd34c3cafac614f943ccdd0708aa",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
-      "path": ".claude/skills/fbo-radar-navigation/SKILL.md",
-      "sha256": "57a0f6a1ab60ad4ceaa1d7d5142d358836c18400118812c5329174e3ead7d563",
-      "sourceId": "fbo-radar-navigation",
+      "path": ".claude/skills/fbo-lookup-discipline/SKILL.md",
+      "sha256": "e8e66e8b3439f2f66df73afc4f52730ed964195557232cde6195cc2a4a352013",
+      "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 1
     },
     {
-      "path": ".claude/skills/fbo-radar-query-discipline/SKILL.md",
-      "sha256": "083f2a2350bce8ffd77ed452233e739696957d18eaf46d01f65e1d8e922674f2",
-      "sourceId": "fbo-radar-query-discipline",
+      "path": ".claude/skills/fbo-navigation-recipes/SKILL.md",
+      "sha256": "b833a55c7479f48039803e128a656cb567f3fcd2a7ce1dac601b9b7cc33926e0",
+      "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-sql-object-lookup/SKILL.md",
-      "sha256": "a39cd374541a8acb1fcd5352e114c4daea71fa97b8aecc9357d1e0e8517eab89",
+      "sha256": "d45cf8021e2b278b12f8f9da771af8a9892cfd9e23d28718980fcc5ce2b1b3a9",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
@@ -192,13 +192,13 @@
     },
     {
       "path": ".cursor/commands/doctor.md",
-      "sha256": "bb70a34da415dfcdaf1d3ee2492473cb50b46cc1f48bbd71d992ddf12555fb7a",
+      "sha256": "9946307ba9aeac9e93011226231df52caa9b89dfde5268054d73b18cb0be755f",
       "sourceId": "doctor",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-change-reviewer.md",
-      "sha256": "ffc93883f011b0c91b40364aa231842c7fc9cb9377b72311186c1afd1efba67c",
+      "sha256": "209b5e78db7d4e1270fcf60e3130c67ceee391c2569dc08d223a2d9fbd9b7876",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
@@ -210,13 +210,13 @@
     },
     {
       "path": ".cursor/commands/fbo-customizer.md",
-      "sha256": "28b2d30668a6a9fd8a6f6fa93e1b08bfc40e802ff71121e8b141dba7c877fa24",
+      "sha256": "577aa03dd9291e1468fb23b2a31afa5d9c99c3c9d6cc0834f005567822d7ec12",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-explorer.md",
-      "sha256": "f8cd7ce36219efddab0746c964af8b732887afe4bf6d9ef3ea15ac698398133f",
+      "sha256": "3ae437c41a854fd613fefca8c0f36413c4170aca901b83079b35a83874fb8b78",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
@@ -234,7 +234,7 @@
     },
     {
       "path": ".cursor/commands/fbo-sql.md",
-      "sha256": "81aecde7765cfc0f9f57b85b79551cc297cab1889135d3ed2a9a93992ae1f288",
+      "sha256": "9dc701070307d3c95caefd16d745722923e89f14f090db6aaf52538aa3e0f750",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
@@ -264,7 +264,7 @@
     },
     {
       "path": ".cursor/commands/pm-planner.md",
-      "sha256": "4b224929be6c6b21257b7c3cf1ef7a52a0b0b5814e1a2fa2a7a811c0d2b16903",
+      "sha256": "d1675015616f99a9a7b692e9da9e242f60b9d03d8dfb00da3148cb5f3bbbcabf",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
@@ -288,13 +288,13 @@
     },
     {
       "path": ".cursor/rules/00-core-doctrine.mdc",
-      "sha256": "3d2d6be3c03584e539d5756537c0b6a939c44f94b5b198b7878c61ad926049f1",
+      "sha256": "054f604489b03ca13102493b27e64aedfff60febcc1feb966b3ed8c5beaf0eb6",
       "sourceId": "core-doctrine",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/00-fbo-doctrine.mdc",
-      "sha256": "a38a88c180fc3ae349f109c639e8529b69951610e8245a298ef2aecd4cf1e518",
+      "sha256": "897effa08d6137974fc05cb0a3974996ff8902f560ce70ee7b0a93e660a98d28",
       "sourceId": "fbo-doctrine",
       "sourceVersion": 1
     },
@@ -312,13 +312,13 @@
     },
     {
       "path": ".cursor/rules/fbo-accent-free-search.mdc",
-      "sha256": "57f0a3fe4c7d6c05c9ca494f8b7a97751811a4b9fc9c9d583f960e1e6266eaa6",
+      "sha256": "d5dc008159f35ecf2e538dcb44542d35c46194b94e1285f48ed09dabdfa6f8ca",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-controller-anatomy.mdc",
-      "sha256": "eda76a8ebb8f245fbdadb57ba0e824aca6eecabb5560ebfeb54da13217ee3ed9",
+      "sha256": "f236505de50e8e143e37ea66456ccc44eba121abbf0371ba8ecb22f7547d7fe9",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
@@ -330,61 +330,61 @@
     },
     {
       "path": ".cursor/rules/fbo-customization-workflow.mdc",
-      "sha256": "dc715edd2c85b5d82674cc379bfcda489d63284bca28ff9aa8f97e7a7e53f6d1",
+      "sha256": "465f7b7025a2911f6bf6801db8337050f1027bfeb969a1837f2aad2ca1d50fa6",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-encoding-and-newlines.mdc",
-      "sha256": "0f43b1560dcbc34c3e7ee6bf6843af57dacb17181a9a2c163df52206f4cf47a1",
+      "sha256": "f0c8dcaa9dbbe4d87ea9a5a82200433ffee54ec11e09e09ad92dcfa12eb0faaa",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-entity-resolution-first.mdc",
-      "sha256": "848084d2a09d248a6153324899fec396fc1613627ac197a2153facd5daccfddd",
+      "sha256": "bf06b18e30c008d3668be0ad0e708e492ea95d5327aa6f81730ce2a1c168e21a",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-f-vs-xml-pairing.mdc",
-      "sha256": "fe38db07ab586869bd3e8da73ba0609685c5bf2bedea87b61e9bc8a3f9d654d3",
+      "sha256": "d2dfa250fb58792473aa5dd4621174367b30b1a1428cac4b48b241d2707c7501",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-js-api.mdc",
-      "sha256": "db0b48178b97cfe550f93cacfe3ad3e0e4885f0dcfb009a587ee2e85d49af9af",
+      "sha256": "d5f9e123c37e9cdedda234b0edfc1798b51e5abc7243203144be38f421d4b351",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/rules/fbo-lookup-discipline.mdc",
+      "sha256": "5679f82ab3aa4c5a6ac922bfb9b0a2498b9b5e91a216609bd2099b55e9d8b4c9",
+      "sourceId": "fbo-lookup-discipline",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/fbo-navigation-recipes.mdc",
+      "sha256": "cef761da6fc29b6495f7eee8abc913d360b8da0585883a3f7dd9e51c5e7a84b5",
+      "sourceId": "fbo-navigation-recipes",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/rules/fbo-never-invent-files.mdc",
-      "sha256": "3face32d0cd6381294cd255e75f71f9cad5fe073f4669e6c0653867a16299d70",
+      "sha256": "07ef77de5451b8187f80ac47de2af27d5529b7b539e1c12f4f4c933033f7566b",
       "sourceId": "fbo-never-invent-files",
       "sourceVersion": 1
     },
     {
-      "path": ".cursor/rules/fbo-radar-navigation.mdc",
-      "sha256": "afc9542daf4b6e696b4f6e620d33e6089478c4c2d00c2e105237578f54ada105",
-      "sourceId": "fbo-radar-navigation",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/fbo-radar-query-discipline.mdc",
-      "sha256": "fb4a8c7093ceb6616de0b600c9a8bc4727b5e82992f0313d0ca150dabe99799f",
-      "sourceId": "fbo-radar-query-discipline",
-      "sourceVersion": 1
-    },
-    {
       "path": ".cursor/rules/fbo-sql-object-lookup.mdc",
-      "sha256": "33ccc3b9e9f46d42a41c5ad53b56c9f2921eacebc554561034ac93356702af86",
+      "sha256": "3d5a6b351decc71dafc4129095efd2267598be67bf73548a4ed83682ad3d2a65",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-sql-via-mcp.mdc",
-      "sha256": "f46c67b6eaa90a61206803356498b4f49fc490036c289433d1690e880dfbdf1c",
+      "sha256": "ddb49d982423b63d1fc743fac893ea31482bc8c5d6cef59182ace809413de6c8",
       "sourceId": "fbo-sql-via-mcp",
       "sourceVersion": 1
     },
@@ -432,25 +432,25 @@
     },
     {
       "path": ".github/chatmodes/fbo-change-reviewer.chatmode.md",
-      "sha256": "2a949068e3b85ec394f7643cc9605aeca1f6a4827f0edd38535ba8e16a001818",
+      "sha256": "ea1b8c67e495ff4a252bc870fbc189b0951d77ccd143b617bbd46f39a3f3c551",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-customizer.chatmode.md",
-      "sha256": "bd13e6346790b54557d084e14050bbb1e16f1c0ade47f95a613e8383e3cd4fb5",
+      "sha256": "6f8564a7d5d2161951139e0784fe5ac45a832983e3d1f5d73b9a27e4c6c2fd33",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-explorer.chatmode.md",
-      "sha256": "233556ae5cde047f1a9ae14b32e129a79f54e2a9e3465eba01e80256b21aa1cf",
+      "sha256": "ebafed33931126abcda64c52f381577c7be0f4c4ca005209df539ce3db8af0eb",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/pm-planner.chatmode.md",
-      "sha256": "65bb3d92b784a2db3d8b9898c4788b452150ee4d0a45094b9dff6bdc21031fd4",
+      "sha256": "888656d707db06d2f9254a0cbb7d6a4795e1cd3e35ba317e846c11c9c11460a5",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
@@ -462,65 +462,65 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "79557a6e0fb707a7cf706ac953428fd81c103f02a3c192747dbedebb20743555"
+      "sha256": "33e2e3e61156f40fad18169b85c5eb1bcfcaa22e8b0b623f4f28f296192b7a44"
     },
     {
       "path": ".github/instructions/fbo-accent-free-search.instructions.md",
-      "sha256": "8587433699e9dd343e907af3f0f4c3bc226f6b1f987f53ccfb85d4eb9aa4f483",
+      "sha256": "7c2a69cb3138acceab91c10212435866d9edde6d9a39075c3c648cc90dffea66",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
-      "sha256": "fb2597f1b3890a916b25b27535144d1b350a86c48a3d6e1098f1cd7b836d9e6a",
+      "sha256": "6c4a94bcbf4ec1755355660e963e5dfff3ae9bd23bd8944cf26da7605576a970",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-customization-workflow.instructions.md",
-      "sha256": "18c6a4bf5c027db51fafb17f0f4d7d2c332b8f6eae925e388d701154e0458f2b",
+      "sha256": "5f68ac6ae57369213ec80a294411c4c4529c67a87313e65072e868fbed8de5f8",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-encoding-and-newlines.instructions.md",
-      "sha256": "6daa629477a8d3d4875e1b5aa2c629d210cb1932a478af6c3720a9cba430f1d0",
+      "sha256": "855ea9ac6ad89d154c925d1cb3fbeda2da57ef15a0957b3e46e2d8d4b04d1a4e",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-entity-resolution-first.instructions.md",
-      "sha256": "bbd5bb54ab2c247291ce537d64808df47fdb3c802989c675202f9777f7dcb5bf",
+      "sha256": "8255ad194a317899269c6ab7f6183b1ce4d0e28823d5263846276532d10ea99d",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-f-vs-xml-pairing.instructions.md",
-      "sha256": "6c269942840ab89c10fff4e652fa38160d597dfa41027dd95af40a10a9ae7f07",
+      "sha256": "645ad92f663f373a2cda54d41256237a075b3fdf4f2ff34fd2b030893d6fd58e",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-js-api.instructions.md",
-      "sha256": "021b82478b90e05065223f5fc1fa4fbd17b7e376e5b424643f0203bfb5f8aae8",
+      "sha256": "ac70a53202f6e22139b8e8fdc7e894ce76f12ef463773cc78a1bc1065be33069",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
-      "path": ".github/instructions/fbo-radar-navigation.instructions.md",
-      "sha256": "b74cf235c95ae3e6b2b0be87514977d5c9db0c1c0102877b9b2373e82db0976c",
-      "sourceId": "fbo-radar-navigation",
+      "path": ".github/instructions/fbo-lookup-discipline.instructions.md",
+      "sha256": "177e7df91f40700412f02a2873e85ac6dbff4a208732aae7228573440d4eaae7",
+      "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 1
     },
     {
-      "path": ".github/instructions/fbo-radar-query-discipline.instructions.md",
-      "sha256": "94ecc46ec6ffc29ffe903620953329ddfcfdb26acd92a3811a4bea4116d8c8f9",
-      "sourceId": "fbo-radar-query-discipline",
+      "path": ".github/instructions/fbo-navigation-recipes.instructions.md",
+      "sha256": "2dff98f052f7c85a838afead8525d1c19d2ebdfd1271a2913c6c2f185e7b25e5",
+      "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-sql-object-lookup.instructions.md",
-      "sha256": "0d12f8e70dec876da8e618f1f6b14e3f91ed0f2e73de252821e7921e7e0d5f5f",
+      "sha256": "fa2271ef2a1ea7fa7e75c08724fe43f328722888f11fc74301b6b05f963e911c",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
@@ -568,7 +568,7 @@
     },
     {
       "path": ".github/prompts/fbo-sql.prompt.md",
-      "sha256": "b2831acb2db42512b3b81f2412d67919d169c43dfcbc210a51017cc92923451c",
+      "sha256": "769cb22b4a630708d67af1e8c232d45413511e2f1777dce4782b55679f0808ce",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
@@ -589,7 +589,7 @@
   "jsonOwnership": [
     {
       "createdByUs": true,
-      "ownedCanonical": "[[\"fastbusiness-mcp\"],[\"mcp__fastbusiness-mcp__search_nodes\",\"mcp__fastbusiness-mcp__query_node_details\",\"mcp__fastbusiness-mcp__get_related_nodes\",\"mcp__fastbusiness-mcp__get_xml_entities\",\"mcp__fastbusiness-mcp__query_radar\",\"mcp__fastbusiness-mcp__read_local_file\"]]",
+      "ownedCanonical": "[[\"4ai-fbo\"],[\"mcp__4ai-fbo__list_programs\",\"mcp__4ai-fbo__index_program\",\"mcp__4ai-fbo__find_controller\",\"mcp__4ai-fbo__describe_controller\",\"mcp__4ai-fbo__list_related\",\"mcp__4ai-fbo__resolve_entities\",\"mcp__4ai-fbo__search_content\",\"mcp__4ai-fbo__read_source\"]]",
       "ownedKeys": [
         "enabledMcpjsonServers",
         "permissions.allow"
@@ -598,30 +598,30 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"}}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\"}]",
       "ownedKeys": [
-        "mcpServers.fastbusiness-mcp"
+        "mcpServers.4ai-fbo"
       ],
       "path": ".cursor/mcp.json"
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"}}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\"}]",
       "ownedKeys": [
-        "mcpServers.fastbusiness-mcp"
+        "mcpServers.4ai-fbo"
       ],
       "path": ".mcp.json"
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[],\"command\":\"D:\\\\fastbusiness_mcp\\\\fastbusiness_mcp.exe\",\"cwd\":\"D:\\\\fastbusiness_mcp\",\"env\":{\"FASTBUSINESS_VSCODE_DB_PATH\":\"D:\\\\fastbusiness_mcp\\\\_internal\\\\data\\\\fields_lmdb\"},\"type\":\"stdio\"}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\",\"type\":\"stdio\"}]",
       "ownedKeys": [
-        "servers.fastbusiness-mcp"
+        "servers.4ai-fbo"
       ],
       "path": ".vscode/mcp.json"
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-07T06:11:34.717Z",
+  "syncedAt": "2026-08-07T07:28:29.117Z",
   "target": "4ai"
 }

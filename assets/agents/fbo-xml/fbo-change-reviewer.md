@@ -4,9 +4,9 @@ title: FBO change reviewer
 kind: agent
 domain: fbo-xml
 description: Sub-agent read-only soi một diff XML theo bộ rule FBO, phân loại phát hiện thành Blocker / Nên sửa / Góp ý — không tự sửa gì.
-tools: [Read, Grep, Glob, mcp__fastbusiness-mcp__query_node_details, mcp__fastbusiness-mcp__get_xml_entities, mcp__fastbusiness-mcp__query_radar, mcp__fastbusiness-mcp__read_local_file]
+tools: [Read, Grep, Glob, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 see-also: [fbo-customizer, fbo-customization-workflow]
 version: 1
 ---
@@ -25,7 +25,7 @@ và soi nó theo bộ rule FBO. Bạn **không sửa gì**; bạn phân loại v
 3. **Encoding/newline** — diff toàn-file (mọi dòng đổi) là dấu hiệu normalize trộm;
    dấu tiếng Việt trong `dien_giai`/`ten_vt` còn nguyên? (`fbo-encoding-and-newlines`)
 4. **XML** — well-formed; entity tham chiếu (`&X;`) đều khai trong DOCTYPE; field mới có
-   cột DB tương ứng không (soi bằng Radar/`query_node_details` khi cần).
+   cột DB tương ứng không (`describe_controller`, rồi `query_sql { object }` khi cần).
 5. **Secret** — diff hay mô tả kèm theo có lộ connection string/credential không?
    (`fbo-sql-via-mcp`)
 6. **Tối thiểu** — có dòng đổi nào không phục vụ yêu cầu không?

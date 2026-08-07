@@ -1,5 +1,5 @@
 ---
-description: Trước khi sửa controller phải phân giải DTD entity bằng get_xml_entities; đụng vào Include phải đếm số controller dùng chung — sửa include là thay đổi toàn hệ thống.
+description: Trước khi sửa controller phải phân giải DTD entity bằng resolve_entities; đụng vào Include phải đếm số controller dùng chung — sửa include là thay đổi toàn hệ thống.
 globs: ["**/App_Data/Controllers/**"]
 alwaysApply: false
 ---
@@ -19,10 +19,12 @@ Controller FBO kéo mảnh dùng chung vào bằng DTD entity (`&XMLWhenVoucherI
 
 ## Quy tắc
 
-- **BẮT BUỘC** chạy `get_xml_entities` (mode `path` để biết khai báo ở đâu, mode `content`
-  khi cần nội dung) trước khi sửa bất kỳ controller nào có `<!DOCTYPE ... [`.
-- Trước khi sửa bất cứ file nào dưới `Include\`: **BẮT BUỘC** đếm số controller tham chiếu
-  nó (Radar, `edge_type = 'ENTITY_INCLUDE'`) và nêu con số đó trong đề xuất.
+- **BẮT BUỘC** chạy `resolve_entities` (thêm `includeContent: true` khi cần nội dung)
+  trước khi sửa bất kỳ controller nào có `<!DOCTYPE ... [`.
+- Trước khi sửa bất cứ file nào dưới `Include\`: **BẮT BUỘC** chạy `list_related` với
+  `kind: "used_by"` và nêu `usedBy.total` trong đề xuất.
+- `resolve_entities` trả `exists: false` nghĩa là DOCTYPE khai một include **không có thật**
+  trong program. Báo lại đúng như thế — không tạo file để "cho đủ".
 - Sửa include dùng chung **không phải customization** — nó là thay đổi toàn hệ thống của
   program. Chỉ làm khi được yêu cầu rõ ràng và người yêu cầu biết phạm vi ảnh hưởng.
 - Cần hành vi riêng cho một màn hình: đưa code vào controller đó (hoặc tách include mới),
@@ -30,17 +32,22 @@ Controller FBO kéo mảnh dùng chung vào bằng DTD entity (`&XMLWhenVoucherI
 
 ## Ví dụ
 
-Đếm controller dùng một include:
-
-    MATCH (c:XmlFile)-[r:Rel]->(i:XmlFile)
-    WHERE i.relative_path CONTAINS 'WhenVoucherInit' AND r.edge_type = 'ENTITY_INCLUDE'
-    RETURN count(c)
+    list_related { program: "_CORPUS", path: "Include\\XML\\WhenVoucherInit.xml",
+                   kind: "used_by" }
+    → usedBy.total: 12
+      warning: "File này nằm trong Include\ và đang được 12 controller dùng chung.
+                Sửa nó là thay đổi toàn hệ thống của program, KHÔNG phải customize
+                một màn hình."
 
 ## Bẫy
 
-- `SHARED_INCLUDE` và `ENTITY_INCLUDE` là hai loại cạnh khác nhau — đếm bằng
-  `SHARED_INCLUDE` sẽ ra con số vô nghĩa (xem `fbo-radar-query-discipline`).
-- Include có thể lồng include. Phân giải một tầng chưa chắc đã thấy đáy.
+- Include có thể lồng include. Phân giải một tầng chưa chắc đã thấy đáy — theo `resolved`
+  của tầng dưới rồi gọi `resolve_entities` tiếp.
+- Entity tham số (`<!ENTITY % X SYSTEM …>` rồi `%X;`) hoạt động khác entity thường: nó
+  chèn **khai báo**, không chèn nội dung vào body. `resolve_entities` đánh dấu bằng
+  `parameter: true` — đừng nhầm nó với include nội dung.
+- `usedInBody: false` nghĩa là entity được khai nhưng không dùng trong file này. Vô hại,
+  nhưng đừng dựa vào nó để kết luận file include kia không quan trọng.
 
 
 > Xem thêm: `fbo-controller-anatomy`, `fbo-customization-scope`

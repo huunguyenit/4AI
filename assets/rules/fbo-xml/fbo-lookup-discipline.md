@@ -1,0 +1,53 @@
+---
+id: fbo-lookup-discipline
+title: FBO lookup discipline
+kind: rule
+domain: fbo-xml
+description: Kỷ luật dùng 4ai-fbo — index_program trước khi tra cứu, tìm không dấu, đo used_by trước khi đụng Include, đọc file bằng read_source chứ không mở tay.
+severity: hard
+globs: ["**/App_Data/Controllers/**"]
+requires: [4ai-fbo]
+see-also: [fbo-never-invent-files, fbo-navigation-recipes]
+version: 1
+---
+
+## Vì sao
+
+Một program FBO có ~9.000 file controller. Mở file bừa hoặc grep toàn cây vừa chậm vừa
+bỏ sót quan hệ — thứ quyết định "sửa chỗ này ảnh hưởng những đâu" nằm trong DTD entity và
+quy ước đặt tên, không nằm trong nội dung một file. `4ai-fbo` index sẵn những quan hệ đó;
+không dùng nó là tự bịt mắt.
+
+## Quy tắc
+
+- **BẮT BUỘC** xác định `program` trước mọi tool call. Chưa biết thì `list_programs`;
+  index là **per-program**, kết quả của khách này không nói gì về khách khác.
+- **BẮT BUỘC** `index_program` một lần cho mỗi program (và chạy lại khi program đổi).
+  Tool tra cứu sẽ báo lỗi rõ nếu chưa index — đừng đoán quanh nó.
+- Tìm bằng **`find_controller`**, không grep tay. Kết quả gom theo **mã controller**:
+  `matchedIn` là file khớp từ khoá, `entry` là màn hình nhập chính. Bản `.f` mã hoá không
+  bóc được nội dung nên không bao giờ tự khớp — nó chỉ hiện qua họ file cùng mã.
+- **BẮT BUỘC** chạy `list_related` với `kind: "used_by"` trước khi đề xuất sửa bất kỳ file
+  nào trong `Include\`, và nêu con số trả về trong đề xuất.
+- Đọc file bằng **`read_source`** — nó trả kèm charset/BOM/newline gốc, thứ bắt buộc phải
+  giữ nguyên khi ghi lại (rule `fbo-encoding-and-newlines`).
+- Kết quả rỗng **KHÔNG** phải bằng chứng "không tồn tại". Thử từ khoá ngắn hơn, tên field,
+  hoặc mã controller trực tiếp trước khi kết luận.
+
+## Ví dụ
+
+    find_controller   { program: "ACME", query: "giay bao no" }
+    → controller CPTran · entry Dir\CPTran.f · customized false
+
+    list_related      { program: "ACME", path: "Include\\XML\\WhenVoucherInit.xml",
+                        kind: "used_by" }
+    → total 12 + cảnh báo: sửa file này là thay đổi toàn hệ thống
+
+## Bẫy
+
+- Gọi tool tra cứu khi chưa `index_program` → lỗi "Program chưa được index". Đó là lỗi
+  đúng, không phải trục trặc; chạy index rồi làm lại.
+- `search_content` chỉ quét **JS và SQL đã bóc tách**, không quét toàn văn XML. Cần toàn
+  văn thì `read_source` trên file cụ thể.
+- Chỉ mục xây từ lần index gần nhất. Program vừa được cập nhật mà chưa index lại thì
+  kết quả là ảnh của quá khứ.

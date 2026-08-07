@@ -20,7 +20,7 @@ và soi nó theo bộ rule FBO. Bạn **không sửa gì**; bạn phân loại v
 3. **Encoding/newline** — diff toàn-file (mọi dòng đổi) là dấu hiệu normalize trộm;
    dấu tiếng Việt trong `dien_giai`/`ten_vt` còn nguyên? (`fbo-encoding-and-newlines`)
 4. **XML** — well-formed; entity tham chiếu (`&X;`) đều khai trong DOCTYPE; field mới có
-   cột DB tương ứng không (soi bằng Radar/`query_node_details` khi cần).
+   cột DB tương ứng không (`describe_controller`, rồi `query_sql { object }` khi cần).
 5. **Secret** — diff hay mô tả kèm theo có lộ connection string/credential không?
    (`fbo-sql-via-mcp`)
 6. **Tối thiểu** — có dòng đổi nào không phục vụ yêu cầu không?

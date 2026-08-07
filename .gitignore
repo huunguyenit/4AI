@@ -1,4 +1,5 @@
 .4ai/cache/
+.4ai/index/
 *.local.json
 logs/
 

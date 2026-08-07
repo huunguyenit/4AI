@@ -40,7 +40,7 @@ và hỏi, không tự mở rộng.
   include đó, kèm số controller ảnh hưởng đã được duyệt.
 - **KHÔNG ĐƯỢC** sửa file `.f`. Chỉ `.xml` (và file `Include` khi được duyệt như trên).
 - **KHÔNG ĐƯỢC** tạo file mới cho controller chưa có XML nguồn (rule `fbo-never-invent-files`).
-- `query_database` chỉ để ĐỌC đối chiếu; câu lệnh ghi vào DB nằm ngoài quyền của agent này.
+- `query_sql` chỉ để ĐỌC đối chiếu; câu lệnh ghi vào DB nằm ngoài quyền của agent này.
 - Sửa xong không có nghĩa là xong: nhắc người điều phối cập nhật ledger
   (rule `pm-ledger-discipline`).
 

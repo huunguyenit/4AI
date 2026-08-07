@@ -144,8 +144,14 @@ export function emitClaude({ assets, mcpServers, target }) {
     });
   } else if (isUserScope && serverIds.length > 0) {
     for (const [id, srv] of Object.entries(mcpServers)) {
-      const envArgs = Object.entries(srv.env ?? {}).map(([k, v]) => `--env ${k}="${v}"`).join(' ');
-      notes.push(`MCP scope user không ghi file (Claude Code tự quản ~/.claude.json). Chạy tay nếu muốn: claude mcp add -s user ${id} ${envArgs} -- "${srv.command}"`.trim());
+      const envArgs = Object.entries(srv.env ?? {}).map(([k, v]) => `--env ${k}="${v}"`);
+      const cmd = [
+        'claude mcp add -s user', id,
+        ...envArgs,
+        '--', `"${srv.command}"`,
+        ...(srv.args ?? []).map((a) => `"${a}"`),
+      ].join(' ');
+      notes.push(`MCP scope user không ghi file (Claude Code tự quản ~/.claude.json). Chạy tay nếu muốn:\n       ${cmd}`);
     }
   }
 

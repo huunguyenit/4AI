@@ -3,10 +3,10 @@ id: fbo-sql
 title: /fbo-sql
 kind: command
 domain: fbo-xml
-description: Tra cứu SQL đằng sau màn hình FBO qua query_database — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP.
+description: Tra cứu SQL đằng sau màn hình FBO qua query_sql — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP.
 argument-hint: <tên object hoặc câu hỏi về dữ liệu> [khách]
 mode: agent
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 
@@ -14,11 +14,12 @@ version: 1
 
 Tra cứu SQL: **$ARGUMENTS**
 
-1. Xác định program (khách nào) — cần cho `query_database` phân giải kết nối.
+1. Xác định program (khách nào) — cần cho `query_sql` phân giải kết nối.
 2. Theo skill `fbo-sql-object-lookup`:
-   - Tên object cụ thể → `query_type: 0` (tự nhận diện table/proc/view).
-   - Câu hỏi dữ liệu → viết SELECT có `TOP 20`, chạy `query_type: 1`.
-   - Không thấy object → đổi `db_type` giữa `app`/`sys` trước khi kết luận không tồn tại.
+   - Tên object cụ thể → `query_sql { object: "<tên>" }` (tự nhận diện table/proc/view).
+   - Câu hỏi dữ liệu → `query_sql { sql: "SELECT TOP 20 …" }`.
+   - Không thấy object → đổi `db` giữa `app`/`sys` trước khi kết luận không tồn tại.
+   - Báo thiếu `database` (Web.config dùng `%Database`) → hỏi người dùng tên database.
 3. Trình kết quả: cấu trúc/định nghĩa + vài dòng dữ liệu mẫu nếu có, liên hệ cột với
    field màn hình khi suy ra được.
 

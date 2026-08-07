@@ -6,7 +6,7 @@ domain: fbo-xml
 description: Soi diff XML hiện tại theo bộ rule FBO — dispatch fbo-change-reviewer, phân loại Blocker / Nên sửa / Góp ý.
 argument-hint: "[file hoặc diff cần soi — bỏ trống để soi thay đổi đang mở]"
 mode: ask
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 

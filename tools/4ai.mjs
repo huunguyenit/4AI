@@ -46,20 +46,21 @@ function cmdCheck(opts) {
   const { assets, errors, warnings, targetsCfg, mcpCfg } = loadHub();
   errors.push(...scanSecrets({}).map((h) => ({ file: h.file, line: h.line, message: h.message })));
 
-  // Binary fingerprint của MCP server.
+  // MCP server: command và mọi arg là đường dẫn phải tồn tại thật.
   for (const [id, srv] of Object.entries(mcpCfg.servers)) {
     if (!fs.existsSync(srv.command)) {
-      warnings.push({ file: 'mcp/servers.json', line: 0,
-        message: `server \`${id}\`: binary không tồn tại: ${srv.command}` });
-      continue;
+      errors.push({ file: 'mcp/servers.json', line: 0,
+        message: `server \`${id}\`: command không tồn tại: ${srv.command}` });
     }
-    const fp = srv.binaryFingerprint;
-    if (fp) {
-      const st = fs.statSync(srv.command);
-      if (st.size !== fp.size) {
-        warnings.push({ file: 'mcp/servers.json', line: 0,
-          message: `server \`${id}\`: binary đã đổi (size ${st.size} ≠ ${fp.size} đã ghi nhận) — tên tool/schema có thể đã khác, kiểm tra lại các skill nhắc tới nó rồi cập nhật binaryFingerprint` });
+    for (const a of srv.args ?? []) {
+      if (/[\\/]/.test(a) && /\.(mjs|js|exe|cmd|py)$/i.test(a) && !fs.existsSync(a)) {
+        errors.push({ file: 'mcp/servers.json', line: 0,
+          message: `server \`${id}\`: arg trỏ tới file không tồn tại: ${a}` });
       }
+    }
+    if (srv.cwd && !fs.existsSync(srv.cwd)) {
+      errors.push({ file: 'mcp/servers.json', line: 0,
+        message: `server \`${id}\`: cwd không tồn tại: ${srv.cwd}` });
     }
     for (const [k, v] of Object.entries(srv.env ?? {})) {
       if (/PATH$/i.test(k) && !fs.existsSync(v)) {

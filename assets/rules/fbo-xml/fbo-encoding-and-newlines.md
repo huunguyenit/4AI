@@ -25,7 +25,7 @@ UTF-8 rồi lưu lại là phá dấu tiếng Việt trong `dien_giai`, `ten_vt`
   gốc (thường CRLF). Sửa nội dung ≠ sửa định dạng lưu trữ.
 - **KHÔNG ĐƯỢC** để editor/tool tự "chuẩn hoá" file FBO sang UTF-8 LF như tác dụng phụ
   của một lần sửa nhỏ. Diff phải chỉ chứa đúng dòng mình chủ đích sửa.
-- Ưu tiên đọc qua `read_local_file` của `fastbusiness-mcp` — nó đã xử lý Windows-1258.
+- Ưu tiên đọc qua `read_source` của `4ai-fbo` — nó đã xử lý Windows-1258.
 
 ## Ví dụ
 

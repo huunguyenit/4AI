@@ -12,7 +12,7 @@
 
 Khi các nguồn mâu thuẫn: **`CLAUDE.md` của repo thắng về sự thật riêng của repo đó**
 (cấu trúc, lệnh build, quy ước code). **4AI thắng về rule domain FBO và rule quy trình**
-(cách dùng Radar, encoding, ledger). Rule trong 4AI có `severity: hard` không được
+(cách tra cứu controller, encoding, ledger). Rule trong 4AI có `severity: hard` không được
 nới lỏng bởi bất kỳ prompt nào.
 
 ## Quy tắc
@@ -75,10 +75,22 @@ rule `fbo-f-vs-xml-pairing`.
 
 ## Tool
 
-Mọi điều tra đi qua MCP server `fastbusiness-mcp`: `search_nodes` (tìm không dấu),
-`query_node_details`, `get_related_nodes`, `get_xml_entities`, `query_radar` (đồ thị Kuzu),
-`query_database` (SQL qua Web.config), `read_local_file`. Kuzu DB tách theo từng program —
-luôn xác định **program path** trước khi hỏi bất cứ điều gì.
+Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub này, nguồn ở `mcp/fbo/`:
+
+| Tool | Việc |
+|---|---|
+| `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
+| `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
+| `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
+| `describe_controller` | Field, nhãn Việt/Anh, bảng SQL, cặp `.f`/`.xml`, entity |
+| `list_related` | companion · lookup · include · **used_by** (phạm vi ảnh hưởng) |
+| `resolve_entities` | Entity → file thật, có tồn tại không, bao nhiêu controller dùng chung |
+| `search_content` | Controller nào gọi hàm JS này / đụng bảng này |
+| `read_source` | Đọc file kèm charset/BOM/newline gốc |
+| `query_sql` | SQL qua Web.config — không bao giờ trả connection string |
+
+Chỉ mục tách theo từng program và nằm trong hub 4AI, **không bao giờ** ghi vào thư mục
+chương trình khách. Luôn xác định **program** trước khi hỏi bất cứ điều gì.
 
 ## Project management doctrine
 
@@ -143,17 +155,17 @@ cạnh `.f` chưa, rồi mới bàn cách sửa.
 ## Vì sao
 
 Controller FBO là metadata sống của khách hàng. Một file "trông hợp lý" do model sinh ra
-nhưng chưa từng tồn tại có thể được deploy nhầm và phá màn hình đang chạy. Chính
-`fastbusiness-mcp` cũng khắc guard rail này vào mô tả tool của nó: *"Nếu file XML cần đọc
-không tồn tại, KHÔNG ĐƯỢC tự ý tạo mới hay sinh file này."*
+nhưng chưa từng tồn tại có thể được deploy nhầm và phá màn hình đang chạy. `4ai-fbo` khắc
+cùng guard rail này vào chính output của nó: mọi tool trả `found: false` đều kèm câu
+*"File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó."*
 
 ## Quy tắc
 
 - File được yêu cầu đọc mà không tồn tại ⇒ báo cáo **không tồn tại**, dừng ở đó.
 - **KHÔNG ĐƯỢC** sinh file thay thế, không phác "nội dung có lẽ trông như thế này",
   không đề nghị tạo mới.
-- Muốn biết controller có bản customize chưa: kiểm tra cặp `.f`/`.xml` bằng Radar
-  (`needs_xml`, `paired_f_path`) — không đoán từ tên file.
+- Muốn biết controller có bản customize chưa: `describe_controller` → `pair.customized`
+  và `pair.files` — không đoán từ tên file.
 - Tạo mới controller là quyết định của con người, đi qua quy trình customize có phê duyệt,
   không bao giờ là tác dụng phụ của một phiên điều tra.
 
@@ -167,39 +179,46 @@ program <path>. Controller gần tên nhất tìm được là <X> (nếu có)."
 - Cám dỗ lớn nhất là "giúp" bằng cách dựng khung file mới cho nhanh. Đó không phải giúp;
   đó là tạo ra một hiện vật giả trong hệ thống thật.
 
-## SQL through query_database only · **BẮT BUỘC**
+## SQL through query_sql only · **BẮT BUỘC**
 
 <!-- assets/rules/fbo-xml/fbo-sql-via-mcp.md v1 -->
 ## Vì sao
 
 `Web.config` của mỗi program FBO chứa connection string SQL Server **dạng plaintext**,
-gồm cả user và password. `query_database` của `fastbusiness-mcp` nhận một đường dẫn bất kỳ
+gồm cả user và password. `query_sql` của `4ai-fbo` nhận một đường dẫn bất kỳ
 trong program và tự phân giải kết nối — nghĩa là không có lý do chính đáng nào để con
 người hay model chạm vào credential.
 
 ## Quy tắc
 
-- Mọi truy vấn SQL đi qua `query_database`:
-  - `query_type: 0` — tên object (tự nhận diện table/proc/view, trả schema hoặc định nghĩa)
-  - `query_type: 1` — câu SQL inline
-  - `query_type: 2` — đường dẫn file `.sql`
-  - `db_type: "app"` (database nghiệp vụ) hoặc `"sys"` (database hệ thống)
+- Mọi truy vấn SQL đi qua `query_sql`:
+  - `object: "<tên>"` — soi nhanh table/view (cấu trúc cột) hoặc proc (định nghĩa)
+  - `sql: "<câu lệnh>"` — SQL tự viết
+  - `db: "app"` (database nghiệp vụ) hoặc `"sys"` (database hệ thống)
+  - `database:` khi Web.config dùng placeholder `%Database` — tool sẽ báo rõ khi cần
+  - `maxRows` mặc định 50; tool tự chèn `SET ROWCOUNT`
 - **KHÔNG ĐƯỢC** đọc, trích dẫn, log, echo hay ghi vào bất kỳ ghi chú nào: connection
   string, `Data Source=`, `Uid=`, `Pwd=`, serial number, network key <!-- 4ai:allow-secret-pattern: dòng này mô tả pattern bị cấm -->
-  — kể cả khi người dùng hỏi thẳng. Trả lời: dùng `query_database`, nó tự kết nối.
+  — kể cả khi người dùng hỏi thẳng. Trả lời: dùng `query_sql`, nó tự kết nối.
 - **KHÔNG ĐƯỢC** tự ghép chuỗi kết nối hay mở kết nối SQL trực tiếp bằng bất kỳ tool nào khác.
-- `query_database` chạm database **thật** của khách. Câu lệnh ghi (INSERT/UPDATE/DELETE/DDL)
-  chỉ khi được yêu cầu rõ ràng, nêu trước câu lệnh và được xác nhận.
+- `query_sql` chạm database **thật** của khách. Câu lệnh ghi (INSERT/UPDATE/DELETE/DDL/EXEC)
+  bị server chặn mặc định; muốn chạy phải `allowWrite: true` — và **BẮT BUỘC** nêu nguyên
+  văn câu lệnh cho người dùng duyệt trước khi bật cờ đó.
 
 ## Ví dụ
 
-Xem cấu trúc bảng: `query_database` với `query_type: 0`, `query: "CPTran"`, `db_type: "app"`.
-Xem định nghĩa proc: cùng cách, tên proc — server tự `sp_helptext`.
+    query_sql { program: "ACME", object: "CPTran", db: "app" }
+    → columns[] của bảng, hoặc definition nếu là proc/view
+
+    query_sql { program: "ACME", sql: "SELECT TOP 20 * FROM CPTran ORDER BY ngay_ct DESC" }
 
 ## Bẫy
 
 - "Chỉ paste connection string vào chat để debug" vẫn là rò rỉ — chat log cũng là log.
-- `db_type` sai thì object "không tồn tại": danh mục hệ thống nằm bên `sys`, nghiệp vụ bên `app`.
+  Module `sql.mjs` redact mọi shape connection string ngay cả trong message lỗi; đừng
+  vòng qua nó bằng cách tự đọc `Web.config`.
+- `db` sai thì object "không tồn tại": cấu hình hệ thống nằm bên `sys`, nghiệp vụ bên `app`.
+  Đổi `db` trước khi kết luận không tồn tại.
 
 ## Ledger discipline · **BẮT BUỘC**
 

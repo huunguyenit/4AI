@@ -30,25 +30,28 @@ Ba loại Include: `XML\` (mảnh khai báo), `Command\` (SQL/command), `Javascr
 
 ## Cặp `.f` và `.xml`
 
-`.f` = bản chuẩn. `.xml` cùng tên cạnh nó = bản customize, runtime ưu tiên. Trong Radar,
-node có `needs_xml` / `paired_f_path` phản ánh trạng thái này. Kiểm tra cặp **trước** khi
-sửa: sửa nhầm vào `.f` chuẩn là phá sản phẩm gốc.
+`.f` = bản chuẩn. `.xml` cùng tên cạnh nó = bản customize, runtime ưu tiên.
+`describe_controller` trả `pair.customized` và `pair.files` phản ánh trạng thái này.
+Kiểm tra cặp **trước** khi sửa: sửa nhầm vào `.f` chuẩn là phá sản phẩm gốc.
 
 ## Thứ tự đọc khi nhận một yêu cầu sửa
 
-1. Xác định **program path** (khách nào, SP nào). Chưa rõ thì hỏi.
-2. `search_nodes` bằng tiếng Việt không dấu → ra mã controller (`"giay bao no"` → `CPTran`).
-3. `query_node_details` → field, kiểu, mô tả.
-4. `query_radar` lọc `COMPANION_FILE` / `LOOKUP_REFERENCE` → dựng bản đồ file liên quan.
-5. `get_xml_entities` (`mode: "path"`) → danh sách include và vị trí khai báo, rồi mới
-   `read_local_file` đúng những đoạn cần.
+1. Xác định **program** (khách nào, SP nào). Chưa rõ thì hỏi. Chưa index thì `index_program`.
+2. `find_controller` → ra mã controller (`"giay bao no"` → `CPTran`). Kết quả gom theo mã,
+   `entry` là màn hình nhập chính.
+3. `describe_controller` → field kèm nhãn Việt/Anh, bảng SQL, trạng thái cặp `.f`/`.xml`.
+4. `list_related` → companion (Grid/Filter/Report cùng mã) + lookup (field nào trỏ đi đâu).
+5. `resolve_entities` → danh sách include, file thật, và `sharedByControllers`; rồi mới
+   `read_source` đúng những đoạn cần.
 
 ## Bẫy
 
-- Nhảy thẳng vào `read_local_file` mà bỏ bước 4–5 sẽ sửa file mà không biết nó được
+- Nhảy thẳng vào `read_source` mà bỏ bước 4–5 sẽ sửa file mà không biết nó được
   include ở đâu khác.
-- Field naming là tiếng Việt không dấu: `dien_giai`, `ten_vt`, `gia2`/`gia_nt2` —
-  đừng tìm bằng tên có dấu.
+- Field naming là tiếng Việt không dấu: `dien_giai`, `ten_vt`, `gia2`/`gia_nt2` (`_nt` =
+  nguyên tệ), `%l` cuối tên là field ngoại (`external="true"`, chỉ để hiển thị).
+- `describe_controller` trên bản `.f` chỉ cho biết cặp file và mã — `.f` đã mã hoá, không
+  bóc được field. Không có `.xml` thì không có nội dung để đọc, chấm hết.
 
 
-> Xem thêm: `fbo-radar-query-discipline`
+> Xem thêm: `fbo-lookup-discipline`

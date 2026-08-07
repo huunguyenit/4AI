@@ -4,7 +4,7 @@ title: FBO domain doctrine
 kind: doctrine
 domain: fbo-xml
 description: FBO là gì — màn hình là XML controller, hai dòng sản phẩm FBO/FBI đánh số SP, bản đồ thư mục Controllers, mô hình .f/.xml.
-requires: [fastbusiness-mcp]
+requires: [4ai-fbo]
 version: 1
 ---
 
@@ -49,7 +49,19 @@ rule `fbo-f-vs-xml-pairing`.
 
 ## Tool
 
-Mọi điều tra đi qua MCP server `fastbusiness-mcp`: `search_nodes` (tìm không dấu),
-`query_node_details`, `get_related_nodes`, `get_xml_entities`, `query_radar` (đồ thị Kuzu),
-`query_database` (SQL qua Web.config), `read_local_file`. Kuzu DB tách theo từng program —
-luôn xác định **program path** trước khi hỏi bất cứ điều gì.
+Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub này, nguồn ở `mcp/fbo/`:
+
+| Tool | Việc |
+|---|---|
+| `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
+| `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
+| `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
+| `describe_controller` | Field, nhãn Việt/Anh, bảng SQL, cặp `.f`/`.xml`, entity |
+| `list_related` | companion · lookup · include · **used_by** (phạm vi ảnh hưởng) |
+| `resolve_entities` | Entity → file thật, có tồn tại không, bao nhiêu controller dùng chung |
+| `search_content` | Controller nào gọi hàm JS này / đụng bảng này |
+| `read_source` | Đọc file kèm charset/BOM/newline gốc |
+| `query_sql` | SQL qua Web.config — không bao giờ trả connection string |
+
+Chỉ mục tách theo từng program và nằm trong hub 4AI, **không bao giờ** ghi vào thư mục
+chương trình khách. Luôn xác định **program** trước khi hỏi bất cứ điều gì.

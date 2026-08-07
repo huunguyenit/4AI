@@ -1,12 +1,13 @@
 {
   "mcpServers": {
-    "fastbusiness-mcp": {
-      "args": [],
-      "command": "D:\\fastbusiness_mcp\\fastbusiness_mcp.exe",
-      "cwd": "D:\\fastbusiness_mcp",
-      "env": {
-        "FASTBUSINESS_VSCODE_DB_PATH": "D:\\fastbusiness_mcp\\_internal\\data\\fields_lmdb"
-      }
+    "4ai-fbo": {
+      "args": [
+        "D:\\Fast Source\\4AI\\mcp\\fbo\\server.mjs",
+        "--hub",
+        "D:\\Fast Source\\4AI"
+      ],
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "cwd": "D:\\Fast Source\\4AI"
     }
   }
 }
