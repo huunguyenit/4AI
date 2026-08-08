@@ -197,7 +197,7 @@ export const TOOLS = [
   {
     name: 'query_sql',
     description:
-      'Chạy SQL trên database của program (kết nối tự phân giải từ Web.config — KHÔNG BAO GIỜ trả về chuỗi kết nối, user hay password). Truyền `object` để soi nhanh cấu trúc table/view hoặc định nghĩa proc; hoặc `sql` cho câu tự viết. Mặc định chỉ đọc; câu lệnh ghi bị chặn trừ khi allowWrite=true.',
+      'Chạy SQL trên database của program (kết nối tự phân giải từ Web.config — KHÔNG BAO GIỜ trả về chuỗi kết nối, user hay password). Tên database cũng tự phân giải: db=sys lấy sysConnectionString (placeholder thì rớt về appSetting sysDatabaseName), db=app lấy appConnectionString và nếu gặp %Database thì dò tiếp bảng `entity` của db sys, cột cdata. Chỉ phải truyền `database` khi muốn ép, hoặc `entity` khi program có nhiều entity. Truyền `object` để soi nhanh cấu trúc table/view hoặc định nghĩa proc; hoặc `sql` cho câu tự viết. Mặc định chỉ đọc; câu lệnh ghi bị chặn trừ khi allowWrite=true.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -205,7 +205,8 @@ export const TOOLS = [
         object: { type: 'string', description: 'Tên table/view/proc cần soi' },
         sql: { type: 'string', description: 'Câu SQL tự viết' },
         db: { type: 'string', enum: ['app', 'sys'], default: 'app' },
-        database: { type: 'string', description: 'Tên database khi Web.config dùng placeholder %Database' },
+        database: { type: 'string', description: 'Ép tên database, bỏ qua mọi bước phân giải tự động' },
+        entity: { type: 'string', description: 'Mã entity (cột code bảng entity) khi program có nhiều entity — chỉ dùng cho db=app' },
         maxRows: { type: 'integer', default: 50, maximum: 1000 },
         allowWrite: { type: 'boolean', default: false, description: 'Bật mới cho phép INSERT/UPDATE/DELETE/DDL' },
       },
@@ -222,7 +223,8 @@ export const TOOLS = [
       properties: {
         program: { type: 'string' },
         code: { type: 'string', description: 'Mã chứng từ (ví dụ HDA) hoặc sysid (ví dụ SVTran)' },
-        database: { type: 'string', description: 'Tên database khi Web.config dùng placeholder %Database' },
+        database: { type: 'string', description: 'Ép tên database app — chỉ ảnh hưởng leg dmct9; leg wcommand luôn tự phân giải db sys' },
+        entity: { type: 'string', description: 'Mã entity khi program có nhiều entity — chỉ ảnh hưởng leg db app (dmct9)' },
       },
       required: ['program', 'code'],
       additionalProperties: false,
@@ -584,6 +586,7 @@ export const HANDLERS = {
         sql,
         dbType: args.db ?? 'app',
         database: args.database,
+        entity: args.entity,
         maxRows: Math.min(args.maxRows ?? 50, 1000),
       });
       return {
@@ -616,11 +619,12 @@ export const HANDLERS = {
       try { return { ok: true, data: fn() }; } catch (e) { return { ok: false, error: redact(e.message) }; }
     };
 
+    // `database`/`entity` chỉ áp cho leg app: leg sys tự phân giải qua sysDatabaseName, ép tên
+    // database app vào đó là gọi nhầm chỗ.
     const w = leg(() => runSql({
       programPath,
       sql: `SELECT * FROM wcommand WHERE syscode = '${lit}' OR sysid = '${lit}'`,
       dbType: 'sys',
-      database: args.database,
       maxRows: 10,
     }));
     const d = leg(() => runSql({
@@ -628,6 +632,7 @@ export const HANDLERS = {
       sql: `SELECT * FROM dmct9 WHERE ma_ct = '${lit}'`,
       dbType: 'app',
       database: args.database,
+      entity: args.entity,
       maxRows: 10,
     }));
 

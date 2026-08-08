@@ -23,7 +23,11 @@ người hay model chạm vào credential.
   - `object: "<tên>"` — soi nhanh table/view (cấu trúc cột) hoặc proc (định nghĩa)
   - `sql: "<câu lệnh>"` — SQL tự viết
   - `db: "app"` (database nghiệp vụ) hoặc `"sys"` (database hệ thống)
-  - `database:` khi Web.config dùng placeholder `%Database` — tool sẽ báo rõ khi cần
+  - Tên database **tự phân giải**, thường không phải truyền gì: `sys` lấy `sysConnectionString`
+    (placeholder thì rớt về appSetting `sysDatabaseName`); `app` lấy `appConnectionString`, gặp
+    `%Database` thì dò tiếp bảng `entity` của db sys, cột `cdata`
+  - `entity:` khi program có nhiều entity — tool liệt kê các mã và dừng lại, chọn rồi gọi lại
+  - `database:` chỉ khi muốn **ép** một database cụ thể, bỏ qua phân giải tự động
   - `maxRows` mặc định 50; tool tự chèn `SET ROWCOUNT`
 - **KHÔNG ĐƯỢC** đọc, trích dẫn, log, echo hay ghi vào bất kỳ ghi chú nào: connection
   string, `Data Source=`, `Uid=`, `Pwd=`, serial number, network key <!-- 4ai:allow-secret-pattern: dòng này mô tả pattern bị cấm -->

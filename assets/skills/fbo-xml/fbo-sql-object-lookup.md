@@ -24,8 +24,10 @@ từ đâu" cần đi được đường: field màn hình → controller → qu
 3. **Xem dữ liệu thật:** `query_sql { sql: "SELECT TOP 20 …" }` để đối chiếu field ↔ cột.
 4. **`db`:** nghiệp vụ (chứng từ, danh mục) bên `app`; cấu hình hệ thống, phân quyền bên
    `sys`. Không thấy object thì đổi bên trước khi kết luận không tồn tại.
-5. **`database`:** Web.config của FBO để placeholder `%Database` — tool sẽ báo và đòi
-   tham số `database`. Hỏi người dùng tên database, đừng đoán.
+5. **Tên database:** không phải truyền, tool tự phân giải. Web.config để placeholder
+   `%Database` ở leg `app` thì tool dò bảng `entity` của db sys, cột `cdata` — đó là nơi FBO
+   ghi ánh xạ entity → database dữ liệu. Program có nhiều entity thì tool liệt kê các mã và
+   dừng: chọn bằng `entity: "<mã>"`, đừng đoán. `database:` chỉ dùng khi cố ý ép.
 
 ## Quy ước đặt tên hay gặp
 

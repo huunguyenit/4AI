@@ -25,8 +25,11 @@
         "Index nằm ở <hub>/.4ai/index/<slug>.sqlite. KHÔNG BAO GIỜ ghi vào thư mục program của khách.",
         "query_sql CỐ TÌNH không nằm trong autoApprove — nó chạm database thật; câu lệnh ghi còn cần allowWrite: true.",
         "resolve_vouchercode cũng chạm database nhưng VẪN autoApprove: nó chỉ chạy hai câu SELECT cố định trên bảng từ điển hệ thống (wcommand, dmct9), không nhận SQL tự do, không có đường ghi. 'Chạm DB' không phải tiêu chí loại trừ — 'nhận SQL tự do' mới là.",
-        "Kết nối phân giải nội bộ từ Web.config; module sql.mjs redact mọi shape connection string trước khi trả ra.",
+        "Kết nối phân giải nội bộ từ Web.config; module sql.mjs redact mọi shape connection string trước khi trả ra, cộng thêm bịt theo giá trị thật của server/user/password và cắt cụm `Server <tên>,` mà SQL Server tự khai trong message lỗi.",
+        "Tên database tự phân giải: db sys lấy sysConnectionString (placeholder thì rớt về appSetting sysDatabaseName), db app lấy appConnectionString và gặp %Database thì dò bảng entity cột cdata bên db sys. Program nhiều entity thì tool liệt kê mã rồi dừng — không đoán hộ.",
+        "Kết quả sqlcmd đi qua file tạm với `-f o:65001 -o` chứ không qua stdout: `-f` không áp cho stdout, để mặc định thì tiếng Việt bị sqlcmd làm hỏng ngay tại nguồn, không decode ngược được.",
         "Đường dẫn node.exe để tuyệt đối cho chắc: một số client spawn với PATH tối giản.",
+        "Cùng lý do PATH tối giản: sql.mjs tự dò sqlcmd ở PATH rồi tới các thư mục cài quen thuộc (Client SDK\\ODBC\\<ver>\\Tools\\Binn, SQL Server Tools\\Binn, go-sqlcmd). Máy nào cài chỗ lạ thì đặt env FBO_SQLCMD trỏ thẳng vào sqlcmd.exe — không cần sửa code.",
         "node:sqlite là API built-in còn ở diện experimental — Node in cảnh báo ra stderr, vô hại với MCP (stdout mới là kênh giao thức)."
       ]
     }

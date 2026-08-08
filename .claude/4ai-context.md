@@ -73,6 +73,17 @@ và tham chiếu trong thân là `&XMLWhenVoucherInit;`.
 — có `.xml` nghĩa là màn hình đó đã được chỉnh cho khách. Chi tiết và số liệu kiểm chứng:
 rule `fbo-f-vs-xml-pairing`.
 
+## Mã chứng từ và sysid là hai thứ khác nhau
+
+| Ví dụ | Là gì | Sống ở đâu |
+|---|---|---|
+| `HDA`, `HD1` | **mã chứng từ** — khái niệm nghiệp vụ người dùng nói | `wcommand.syscode` (db `sys`), `dmct9.ma_ct` (db `app`) |
+| `SVTran`, `CPTran` | **sysid** — controller và bảng vật lý | `wcommand.sysid`, và chính là tên file trong `Controllers\` |
+
+Chỉ mục controller là file-based nên nó **không biết** mã chứng từ: `find_controller { query: "HDA" }`
+trả rỗng, vì không file nào tên HDA. Đường đi đúng là `resolve_vouchercode` — nó tra `wcommand`
+lấy sysid rồi mới tra chỉ mục. `HDA` → `SVTran` → `Dir\SVTran.xml`.
+
 ## Tool
 
 Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub này, nguồn ở `mcp/fbo/`:
@@ -82,6 +93,7 @@ Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub n
 | `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
 | `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
 | `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
+| `resolve_vouchercode` | Mã chứng từ (HDA) ↔ sysid (SVTran) ↔ controller |
 | `describe_controller` | Field, nhãn Việt/Anh, bảng SQL, cặp `.f`/`.xml`, entity |
 | `list_related` | companion · lookup · include · **used_by** (phạm vi ảnh hưởng) |
 | `resolve_entities` | Entity → file thật, có tồn tại không, bao nhiêu controller dùng chung |
@@ -195,7 +207,11 @@ người hay model chạm vào credential.
   - `object: "<tên>"` — soi nhanh table/view (cấu trúc cột) hoặc proc (định nghĩa)
   - `sql: "<câu lệnh>"` — SQL tự viết
   - `db: "app"` (database nghiệp vụ) hoặc `"sys"` (database hệ thống)
-  - `database:` khi Web.config dùng placeholder `%Database` — tool sẽ báo rõ khi cần
+  - Tên database **tự phân giải**, thường không phải truyền gì: `sys` lấy `sysConnectionString`
+    (placeholder thì rớt về appSetting `sysDatabaseName`); `app` lấy `appConnectionString`, gặp
+    `%Database` thì dò tiếp bảng `entity` của db sys, cột `cdata`
+  - `entity:` khi program có nhiều entity — tool liệt kê các mã và dừng lại, chọn rồi gọi lại
+  - `database:` chỉ khi muốn **ép** một database cụ thể, bỏ qua phân giải tự động
   - `maxRows` mặc định 50; tool tự chèn `SET ROWCOUNT`
 - **KHÔNG ĐƯỢC** đọc, trích dẫn, log, echo hay ghi vào bất kỳ ghi chú nào: connection
   string, `Data Source=`, `Uid=`, `Pwd=`, serial number, network key <!-- 4ai:allow-secret-pattern: dòng này mô tả pattern bị cấm -->
@@ -314,6 +330,7 @@ corpus để sẵn bản đồ file.
 | `fbo-explorer` | Sub-agent điều tra màn hình FBO read-only — trả về bản đồ file, field, quan hệ, include, kèm mục Chưa chắc chắn bắt buộc. Không bao giờ sửa file. |
 | `pm-planner` | Sub-agent biến yêu cầu mơ hồ thành kế hoạch có phạm vi — xác định khách/program/SP, liệt kê controller liên quan, soạn sẵn ledger entry. Chỉ lập kế hoạch, không sửa file. |
 | `pm-release-auditor` | Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá. |
+| `pm-ur-analyst` | Sub-agent read-only bóc tài liệu khảo sát/biên bản thành bảng UR draft — map yêu cầu ra controller, chấm độ khó, ước lượng giờ công. Không chốt phạm vi, không sửa file. |
 | `doctor` | Chạy 4AI check và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. |
 | `new-agent` | Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only. |
 | `new-rule` | Tạo rule mới trong hub 4AI — hỏi 3 điều không suy ra được (severity, always/globs, targets), viết file đúng schema, chạy check. |

@@ -11,7 +11,8 @@
       "mcp__4ai-fbo__list_related",
       "mcp__4ai-fbo__resolve_entities",
       "mcp__4ai-fbo__search_content",
-      "mcp__4ai-fbo__read_source"
+      "mcp__4ai-fbo__read_source",
+      "mcp__4ai-fbo__resolve_vouchercode"
     ]
   }
 }

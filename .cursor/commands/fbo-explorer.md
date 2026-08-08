@@ -16,7 +16,8 @@ việc đó thuộc về `fbo-customizer` và dừng lại.
 
 1. Xác định **program** đang làm việc (`list_programs` nếu chưa rõ). Chưa index thì
    `index_program` — chỉ mục là per-program.
-2. `find_controller` với từ khoá tiếng Việt (có dấu hay không đều được).
+2. `find_controller` với từ khoá tiếng Việt (có dấu hay không đều được). Nếu thứ được hỏi
+   là **mã chứng từ** (HDA, HD1…) thì `find_controller` sẽ trượt — dùng `resolve_vouchercode`.
 3. `describe_controller` → field kèm nhãn, bảng SQL, trạng thái cặp `.f`/`.xml`.
 4. `list_related` → companion, lookup, include. Đối tượng nằm trong `Include\` thì thêm
    `kind: "used_by"` để biết phạm vi ảnh hưởng.

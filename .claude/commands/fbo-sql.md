@@ -15,7 +15,9 @@ Tra cứu SQL: **$ARGUMENTS**
    - Tên object cụ thể → `query_sql { object: "<tên>" }` (tự nhận diện table/proc/view).
    - Câu hỏi dữ liệu → `query_sql { sql: "SELECT TOP 20 …" }`.
    - Không thấy object → đổi `db` giữa `app`/`sys` trước khi kết luận không tồn tại.
-   - Báo thiếu `database` (Web.config dùng `%Database`) → hỏi người dùng tên database.
+   - Tên database tự phân giải (leg `app` dò `entity.cdata` bên db sys) — đừng truyền
+     `database` khi chưa cần. Báo program có nhiều entity → hỏi người dùng chọn mã, rồi
+     gọi lại với `entity: "<mã>"`.
 3. Trình kết quả: cấu trúc/định nghĩa + vài dòng dữ liệu mẫu nếu có, liên hệ cột với
    field màn hình khi suy ra được.
 
