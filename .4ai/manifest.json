@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "c5e4104151781d125f703664adf6e2ab52a6e8a0061a5316ebfc77872609b2c1"
+      "sha256": "b93c5e7d0a957839bd542f4fbff869ac48785eeeee4cb594d71cfab845b2504f"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -36,9 +36,9 @@
     },
     {
       "path": ".claude/agents/pm-ur-analyst.md",
-      "sha256": "42a601d9ace7c2f5507fcc2ef39ef7d888b80bdcfd2c3ce8d47cdf66d4fad9a1",
+      "sha256": "4f7b092d4fb15c62c2c594baddbf3fcf9a4a5697d255b14d967a496f3c18796b",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/commands/doctor.md",
@@ -300,9 +300,9 @@
     },
     {
       "path": ".cursor/commands/pm-ur-analyst.md",
-      "sha256": "22c30848c7a9b2dc4fa0c6593655da7643753f5ab5f39aa959d84a7f0a6c9189",
+      "sha256": "ea3649238111c44161088124a82f543a5f15af1e66a6af94b8b738e7bf8c6a3b",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/commands/sync.md",
@@ -449,6 +449,12 @@
       "sourceVersion": 1
     },
     {
+      "path": ".cursor/rules/pm-program-from-workspace.mdc",
+      "sha256": "c729f42674708a7abe7f66f0d63aa0290ba4321f07c982739b4004d131464bd5",
+      "sourceId": "pm-program-from-workspace",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/rules/pm-release-handover.mdc",
       "sha256": "c2be0f7a0b74fa66613135fb26500e814c114f67020d600530a489eb64fa9988",
       "sourceId": "pm-release-handover",
@@ -464,6 +470,12 @@
       "path": ".cursor/rules/pm-task-ledger.mdc",
       "sha256": "916f95c811495546ec232f0cfcc4891d4c6638a783e230ab1c6fd6394d501c13",
       "sourceId": "pm-task-ledger",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/pm-ur-routing.mdc",
+      "sha256": "4a209e13596806d5cbfc73b5d9f2d35a918bc1a4e6f08cc2b03e43333e769531",
+      "sourceId": "pm-ur-routing",
       "sourceVersion": 1
     },
     {
@@ -498,13 +510,13 @@
     },
     {
       "path": ".github/chatmodes/pm-ur-analyst.chatmode.md",
-      "sha256": "770617e21478dbee271806e30b0a9af501ccfa6611352abb0db204d466b7e0da",
+      "sha256": "146d96355585151e74d2d986fb222286951d379455c94df0f8b9ab0d45e886c5",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "e6332ee5fe1b6ecfceedd575bc13d1747787e57176377443f26632371fe66936"
+      "sha256": "3e861fd5f1a4b88352cb539b28f69ec487ba57acc87f946a12cda01923ca0b48"
     },
     {
       "path": ".github/instructions/fbo-accent-free-search.instructions.md",
@@ -676,6 +688,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-08T05:11:47.195Z",
+  "syncedAt": "2026-08-08T05:25:00.339Z",
   "target": "4ai"
 }

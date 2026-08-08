@@ -12,6 +12,15 @@
       "notes": "SP version chưa xác nhận — hỏi trước khi sửa."
     },
     {
+      "code": "DEMO1",
+      "name": "Demo Co",
+      "product": "FBI",
+      "sp": "FBISP2422",
+      "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422",
+      "dbAlias": "cbvn-app",
+      "notes": "QLDA: nbdmda.ma_da='DEMO1', sProjectFolder=DEMO1_FBISP2422, bp_tk=TK1, bp_lt=FSD."
+    },
+    {
       "code": "DEMO2",
       "name": "DEMO2",
       "product": "FBI",

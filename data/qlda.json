@@ -36,12 +36,12 @@
         "maPbsp": "FBISP2422",
         "bpTk": "TK1",
         "bpLt": "FSD",
-        "customerCode": "",
-        "programPath": "",
+        "customerCode": "DEMO1",
+        "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422",
         "registeredInQlda": true,
-        "registeredInCustomersJson": false,
+        "registeredInCustomersJson": true,
         "attachments": { "controller": "nbdmda", "syskey": "DEMO1", "count": 2 },
-        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo. CHƯA có trong data/customers.json vì thiếu programPath. ma_pbsp=FBISP2422 cho biết đây là FBI SP2422 (cùng SP với DEMO2) nhưng KHÔNG suy ra được program path — phải hỏi."
+        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo. Đã đăng ký data/customers.json 2026-08-08."
       }
     ]
   },
@@ -351,7 +351,7 @@
     "note": "Bảng danh mục mà ba bảng trên trỏ tới. Muốn biết giá trị hợp lệ của một cột thì đọc bảng tương ứng, không tự đặt enum.",
     "nbdmnhv": "Nhân viên",
     "nbdmbp": "Bộ phận",
-    "nbdmttyc": "Trạng thái yêu cầu",
+    "nbdmttyc": "Trạng thái yêu cầu — xem enums.trangThaiYeuCau",
     "nbdmlyc": "Loại yêu cầu",
     "nbdmxlyc": "Hướng xử lý yêu cầu",
     "nbdmnhyc": "Nhóm yêu cầu",
@@ -360,6 +360,30 @@
     "vnbdmdagd": "Giai đoạn dự án (view)",
     "nbphcv": "Phiếu phân công việc — bảng riêng, nối với nbphyc qua stt_rec_cv",
     "Unit": "Đơn vị cơ sở"
+  },
+  "enums": {
+    "note": "Ảnh chụp danh mục 2026-08-08 để khỏi phải đoán nghĩa mã viết tắt. NGUỒN SỰ THẬT vẫn là bảng trong DB — thấy mã lạ thì tra lại, đừng kết luận là sai.",
+    "trangThaiYeuCau": {
+      "table": "nbdmttyc",
+      "column": "nbphyc.trang_thai",
+      "type": "char(2)",
+      "values": [
+        { "ma": "TA", "ten": "Yêu cầu tạm (chỉ để nhập tạm chưa duyệt)", "duyetYn": 0 },
+        { "ma": "YC", "ten": "Yêu cầu", "duyetYn": 0 },
+        { "ma": "GC", "ten": "Ghi chú", "duyetYn": 1 },
+        { "ma": "DD", "ten": "Đã duyệt", "duyetYn": 1 },
+        { "ma": "XN", "ten": "Xác nhận chuyển LT", "duyetYn": 1 },
+        { "ma": "TH", "ten": "Đang thực hiện", "duyetYn": 1 },
+        { "ma": "HT", "ten": "Hoàn thành, chờ test", "duyetYn": 1 },
+        { "ma": "DT", "ten": "Đang test", "duyetYn": 1 },
+        { "ma": "OK", "ten": "Test OK (TK test lại)", "duyetYn": 1 },
+        { "ma": "UP", "ten": "Đã update (kết thúc)", "duyetYn": 1 },
+        { "ma": "CH", "ten": "Chờ", "duyetYn": 2 },
+        { "ma": "KL", "ten": "Không làm", "duyetYn": 2 },
+        { "ma": "KD", "ten": "Không duyệt", "duyetYn": 2 }
+      ],
+      "flowNote": "Luồng thường gặp: TA/YC → DD → XN → TH → HT → DT → OK → UP. Nhánh dừng: CH, KL, KD (duyet_yn=2)."
+    }
   },
   "urFieldMap": {
     "note": "Ánh xạ cột bảng UR draft (output của subagent phân tích tài liệu) sang cột thật của nbphyc.",
