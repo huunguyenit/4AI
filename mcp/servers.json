@@ -17,12 +17,14 @@
         "list_related",
         "resolve_entities",
         "search_content",
-        "read_source"
+        "read_source",
+        "resolve_vouchercode"
       ],
       "notes": [
         "Nguồn ở mcp/fbo/ trong chính hub này — zero dependency, không kế thừa gì từ fastbusiness-mcp.",
         "Index nằm ở <hub>/.4ai/index/<slug>.sqlite. KHÔNG BAO GIỜ ghi vào thư mục program của khách.",
         "query_sql CỐ TÌNH không nằm trong autoApprove — nó chạm database thật; câu lệnh ghi còn cần allowWrite: true.",
+        "resolve_vouchercode cũng chạm database nhưng VẪN autoApprove: nó chỉ chạy hai câu SELECT cố định trên bảng từ điển hệ thống (wcommand, dmct9), không nhận SQL tự do, không có đường ghi. 'Chạm DB' không phải tiêu chí loại trừ — 'nhận SQL tự do' mới là.",
         "Kết nối phân giải nội bộ từ Web.config; module sql.mjs redact mọi shape connection string trước khi trả ra.",
         "Đường dẫn node.exe để tuyệt đối cho chắc: một số client spawn với PATH tối giản.",
         "node:sqlite là API built-in còn ở diện experimental — Node in cảnh báo ra stderr, vô hại với MCP (stdout mới là kênh giao thức)."

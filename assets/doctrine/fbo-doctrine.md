@@ -47,6 +47,17 @@ và tham chiếu trong thân là `&XMLWhenVoucherInit;`.
 — có `.xml` nghĩa là màn hình đó đã được chỉnh cho khách. Chi tiết và số liệu kiểm chứng:
 rule `fbo-f-vs-xml-pairing`.
 
+## Mã chứng từ và sysid là hai thứ khác nhau
+
+| Ví dụ | Là gì | Sống ở đâu |
+|---|---|---|
+| `HDA`, `HD1` | **mã chứng từ** — khái niệm nghiệp vụ người dùng nói | `wcommand.syscode` (db `sys`), `dmct9.ma_ct` (db `app`) |
+| `SVTran`, `CPTran` | **sysid** — controller và bảng vật lý | `wcommand.sysid`, và chính là tên file trong `Controllers\` |
+
+Chỉ mục controller là file-based nên nó **không biết** mã chứng từ: `find_controller { query: "HDA" }`
+trả rỗng, vì không file nào tên HDA. Đường đi đúng là `resolve_vouchercode` — nó tra `wcommand`
+lấy sysid rồi mới tra chỉ mục. `HDA` → `SVTran` → `Dir\SVTran.xml`.
+
 ## Tool
 
 Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub này, nguồn ở `mcp/fbo/`:
@@ -56,6 +67,7 @@ Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub n
 | `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
 | `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
 | `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
+| `resolve_vouchercode` | Mã chứng từ (HDA) ↔ sysid (SVTran) ↔ controller |
 | `describe_controller` | Field, nhãn Việt/Anh, bảng SQL, cặp `.f`/`.xml`, entity |
 | `list_related` | companion · lookup · include · **used_by** (phạm vi ảnh hưởng) |
 | `resolve_entities` | Entity → file thật, có tồn tại không, bao nhiêu controller dùng chung |

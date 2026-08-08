@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { readSource } from './encoding.mjs';
+import { readSource, decodeSource } from './encoding.mjs';
 
 const SECRET_SHAPES = [
   /(?:password|pwd)\s*=\s*[^;"'\s]+/gi,
@@ -121,7 +121,8 @@ export function runSql({ programPath, sql, dbType = 'app', database, maxRows = 1
   const args = [
     '-S', conn.server,
     '-d', conn.database,
-    '-s', '\t', '-W', '-w', '65535', '-Y', '512',
+    // -W (bỏ khoảng trắng thừa) loại trừ nhau với -Y; -W là thứ làm parseTsv chạy được.
+    '-s', '\t', '-W', '-w', '65535',
     '-b', '-r', '1',
     '-l', String(Math.ceil(timeoutMs / 1000)),
     '-Q', header + sql,
@@ -129,20 +130,22 @@ export function runSql({ programPath, sql, dbType = 'app', database, maxRows = 1
   if (conn.trusted || conn.user === '') args.push('-E');
   else args.push('-U', conn.user, '-P', conn.password);
 
+  // Không đặt `encoding`: sqlcmd trả byte theo codepage OEM, nhãn tiếng Việt sẽ hỏng nếu
+  // ép utf8. decodeSource dùng đúng cơ chế đang dùng cho file nguồn: utf-8 strict, rớt về cp1258.
   const res = spawnSync(sqlcmd, args, {
-    encoding: 'utf8',
     timeout: timeoutMs,
     windowsHide: true,
     maxBuffer: 16 * 1024 * 1024,
   });
 
   if (res.error) throw new Error(`Không chạy được sqlcmd: ${redact(res.error.message)}`);
-  const stderr = redact(res.stderr ?? '').trim();
+  const stdout = res.stdout ? decodeSource(res.stdout).text : '';
+  const stderr = redact(res.stderr ? decodeSource(res.stderr).text : '').trim();
   if (res.status !== 0) {
-    throw new Error(`SQL lỗi (exit ${res.status}): ${stderr || redact(res.stdout ?? '').slice(0, 800)}`);
+    throw new Error(`SQL lỗi (exit ${res.status}): ${stderr || redact(stdout).slice(0, 800)}`);
   }
 
-  const lines = (res.stdout ?? '').split(/\r?\n/);
+  const lines = stdout.split(/\r?\n/);
   const headerLine = lines.find((l) => l.trim() !== '') ?? '';
   const columns = headerLine.includes('\t') ? headerLine.split('\t') : [headerLine].filter(Boolean);
   const body = lines.slice(lines.indexOf(headerLine) + 1)
@@ -159,9 +162,14 @@ export function runSql({ programPath, sql, dbType = 'app', database, maxRows = 1
   };
 }
 
+/** Escape literal string trước khi nhét vào SQL text. */
+export function sqlLiteral(s) {
+  return String(s).replace(/'/g, "''");
+}
+
 /** SQL soạn sẵn để soi một object (table / view / proc) — không cần người dùng tự viết. */
 export function objectSql(objectName) {
-  const safe = objectName.replace(/'/g, "''");
+  const safe = sqlLiteral(objectName);
   return `
 IF OBJECT_ID('${safe}') IS NULL
   SELECT 'NOT_FOUND' AS result, '${safe}' AS object_name;

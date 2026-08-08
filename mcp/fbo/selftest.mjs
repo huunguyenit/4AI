@@ -96,9 +96,15 @@ ok('kèm cảnh báo không được bịa file',
 const write = payload(await call('query_sql', { program: PROGRAM, sql: 'DELETE FROM CPTran' }));
 ok('query_sql chặn câu lệnh ghi', typeof write?.__error === 'string' && /allowWrite/.test(write.__error));
 
+// Guard rail: resolve_vouchercode phải đòi `code` chứ không đoán.
+const noCode = payload(await call('resolve_vouchercode', { program: PROGRAM }));
+ok('resolve_vouchercode thiếu code → lỗi rõ ràng',
+  typeof noCode?.__error === 'string' && /code/i.test(noCode.__error));
+
 // Guard rail: không rò connection string trong bất kỳ output nào.
 const sqlAttempt = payload(await call('query_sql', { program: PROGRAM, object: 'APTran' }));
-const allOutput = JSON.stringify([missing, write, sqlAttempt]) + serverLog.join('');
+const voucherAttempt = payload(await call('resolve_vouchercode', { program: PROGRAM, code: 'HDA' }));
+const allOutput = JSON.stringify([missing, write, sqlAttempt, voucherAttempt]) + serverLog.join('');
 const leak = /(?:password|pwd|uid|user\s*id)\s*=\s*(?!\*\*\*)[^;"'\s,}]+/i.exec(allOutput);
 ok('không rò credential ra output/stderr', !leak, leak ? `thấy: ${leak[0].slice(0, 40)}` : undefined);
 

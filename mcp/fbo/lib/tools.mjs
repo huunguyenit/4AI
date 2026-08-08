@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 9 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 10 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { readSource, stripAccents } from './encoding.mjs';
 import { buildIndex, openIndex, controllersRoot, indexPathFor } from './index.mjs';
-import { runSql, objectSql, redact } from './sql.mjs';
+import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
 
 const NOT_FOUND_NOTE =
   'File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó.';
@@ -62,6 +62,16 @@ function parseJson(s, fallback) {
 
 function fileRow(db, relPath) {
   return db.prepare('SELECT * FROM file WHERE lower(rel_path) = lower(?)').get(relPath);
+}
+
+/** Họ file cùng một mã controller, Dir đứng trước. */
+function familyRows(db, stem) {
+  return db.prepare(
+    `SELECT rel_path, folder, ext, title_vi, title_en, field_count, has_pair_f
+     FROM file WHERE lower(stem) = lower(?)
+       AND folder IN ('Dir','Grid','Filter','Report','Lookup')
+     ORDER BY CASE folder WHEN 'Dir' THEN 0 WHEN 'Grid' THEN 1 WHEN 'Filter' THEN 2
+                          WHEN 'Report' THEN 3 ELSE 4 END, ext`).all(stem);
 }
 
 // ---------------------------------------------------------------- tool定義
@@ -203,6 +213,21 @@ export const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: 'resolve_vouchercode',
+    description:
+      'Phân giải mã chứng từ (syscode, ví dụ "HDA") ↔ sysid controller (ví dụ "SVTran") theo cả hai chiều. Tra wcommand (db sys: syscode/sysid) và dmct9 (db app: ma_ct/url), rồi tra tiếp controller tương ứng trong chỉ mục program giống find_controller. Ba nguồn độc lập: thiếu sqlcmd hoặc chưa index thì phần chạy được vẫn trả về, phần hỏng báo rõ lý do. Chỉ SELECT có giới hạn trên bảng từ điển hệ thống, không có đường ghi.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        program: { type: 'string' },
+        code: { type: 'string', description: 'Mã chứng từ (ví dụ HDA) hoặc sysid (ví dụ SVTran)' },
+        database: { type: 'string', description: 'Tên database khi Web.config dùng placeholder %Database' },
+      },
+      required: ['program', 'code'],
+      additionalProperties: false,
+    },
+  },
 ];
 
 // ---------------------------------------------------------------- handlers
@@ -264,13 +289,6 @@ export const HANDLERS = {
       // Gom theo MÃ controller, không theo file. Lý do: bản .f mã hoá không bóc được
       // title/field nên không bao giờ tự khớp từ khoá nghiệp vụ — nhưng nó thường CHÍNH LÀ
       // màn hình người dùng đang hỏi. Khớp ở Report\CPTran.xml phải kéo Dir\CPTran.f theo.
-      const famStmt = db.prepare(
-        `SELECT rel_path, folder, ext, title_vi, title_en, field_count, has_pair_f
-         FROM file WHERE lower(stem) = lower(?)
-           AND folder IN ('Dir','Grid','Filter','Report','Lookup')
-         ORDER BY CASE folder WHEN 'Dir' THEN 0 WHEN 'Grid' THEN 1 WHEN 'Filter' THEN 2
-                              WHEN 'Report' THEN 3 ELSE 4 END, ext`);
-
       const seen = new Set();
       const groups = [];
       for (const r of rows) {
@@ -278,7 +296,7 @@ export const HANDLERS = {
         if (seen.has(key)) continue;
         seen.add(key);
         if (groups.length >= limit) break;
-        const family = famStmt.all(r.stem);
+        const family = familyRows(db, r.stem);
         const entry = family.find((x) => x.folder === 'Dir') ?? r;
         groups.push({
           controller: r.stem,
@@ -582,5 +600,100 @@ export const HANDLERS = {
     } catch (e) {
       throw new Error(redact(e.message));
     }
+  },
+
+  resolve_vouchercode(hub, args) {
+    const programPath = resolveProgram(hub, args.program);
+    const code = typeof args.code === 'string' ? args.code.trim() : '';
+    if (!code) {
+      throw new Error('Thiếu tham số `code` — truyền mã chứng từ (ví dụ HDA) hoặc sysid (ví dụ SVTran).');
+    }
+    const lit = sqlLiteral(code);
+
+    // Ba nguồn chạy độc lập: hỏng nguồn này không được giết kết quả của nguồn kia.
+    // Thiếu sqlcmd thì hai leg SQL hỏng nhưng leg chỉ mục vẫn dùng được nếu code chính là sysid.
+    const leg = (fn) => {
+      try { return { ok: true, data: fn() }; } catch (e) { return { ok: false, error: redact(e.message) }; }
+    };
+
+    const w = leg(() => runSql({
+      programPath,
+      sql: `SELECT * FROM wcommand WHERE syscode = '${lit}' OR sysid = '${lit}'`,
+      dbType: 'sys',
+      database: args.database,
+      maxRows: 10,
+    }));
+    const d = leg(() => runSql({
+      programPath,
+      sql: `SELECT * FROM dmct9 WHERE ma_ct = '${lit}'`,
+      dbType: 'app',
+      database: args.database,
+      maxRows: 10,
+    }));
+
+    const wRows = w.ok ? w.data.rows : [];
+    const dRows = d.ok ? d.data.rows : [];
+    const sysid = wRows[0]?.sysid || null;
+    const stem = sysid ?? code;
+
+    let controller;
+    const db = openIndex(hub, programPath);
+    if (!db) {
+      controller = {
+        found: false,
+        sysid: stem,
+        note: `Program chưa được index — chạy index_program rồi gọi lại để tra controller cho \`${stem}\`.`,
+      };
+    } else {
+      try {
+        const family = familyRows(db, stem);
+        if (family.length === 0) {
+          controller = {
+            found: false,
+            sysid: stem,
+            note: `Không có controller mã \`${stem}\` trong chỉ mục program này. ${NOT_FOUND_NOTE}`,
+          };
+        } else {
+          const entry = family.find((x) => x.folder === 'Dir') ?? family[0];
+          controller = {
+            found: true,
+            controller: stem,
+            entry: entry.rel_path,
+            title: family.map((x) => x.title_vi || x.title_en).find(Boolean) ?? null,
+            customized: family.some((x) => x.ext === '.xml' && x.has_pair_f === 1),
+            files: family.map((x) => x.rel_path),
+          };
+        }
+      } finally { db.close(); }
+    }
+
+    return {
+      program: programPath,
+      code,
+      wcommand: {
+        found: wRows.length > 0,
+        database: w.ok ? w.data.database : undefined,
+        rows: wRows,
+        truncated: w.ok ? w.data.truncated : undefined,
+        error: w.ok ? undefined : w.error,
+      },
+      dmct9: {
+        found: dRows.length > 0,
+        database: d.ok ? d.data.database : undefined,
+        rows: dRows,
+        truncated: d.ok ? d.data.truncated : undefined,
+        error: d.ok ? undefined : d.error,
+        note: dRows.length > 0
+          ? 'Cột `url` trỏ một trang ASPX dưới Main\\ — chỉ để tham khảo, tool không tự phân tích ASPX.'
+          : undefined,
+      },
+      resolved: { sysid: stem, from: sysid ? 'wcommand' : 'input' },
+      controller,
+      note: sysid
+        ? undefined
+        : w.ok
+          ? `wcommand không có dòng nào khớp \`${code}\` (cả syscode lẫn sysid) — đang coi \`${code}\` là sysid để tra chỉ mục.`
+          : `Không tra được wcommand nên chưa phân giải được mã chứng từ — đang coi \`${code}\` là sysid để tra chỉ mục.`,
+    };
   },
 };

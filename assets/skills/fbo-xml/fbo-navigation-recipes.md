@@ -69,8 +69,23 @@ Thêm `includeContent: true` khi cần nội dung.
 
     query_sql { program: "ACME", object: "APTran", database: "<tên DB>" }
 
+**Từ mã chứng từ ra màn hình** (`HDA`, `HD1`… — thứ `find_controller` không tìm được):
+
+    resolve_vouchercode { program: "ACME", code: "HDA" }
+    → resolved.sysid ("SVTran") · controller { entry, title, files[], customized }
+      · wcommand.rows[] (bar/bar2 = nhãn Việt/Anh, link = trang ASPX) · dmct9.rows[]
+
+Nhận cả hai chiều: truyền sysid (`"SVTran"`) cũng ra được mã chứng từ trong `wcommand.rows`.
+
 ## Bẫy
 
+- Mã chứng từ **không phải** tên file. `find_controller { query: "HDA" }` trả rỗng không có
+  nghĩa màn hình không tồn tại — đi qua `resolve_vouchercode` trước khi kết luận.
+- `resolve_vouchercode` chạy ba nguồn độc lập. Thiếu `sqlcmd` hoặc chưa index thì phần chạy
+  được vẫn trả về, phần hỏng nằm ở `wcommand.error` / `dmct9.error` — đọc nó, đừng coi
+  `found: false` là "không tồn tại".
+- `dmct9` nằm ở db `app` mà Web.config hay để placeholder `%Database`; leg đó sẽ đòi tham số
+  `database`. Hai leg còn lại không bị ảnh hưởng.
 - `describe_controller` trên bản `.f`: có `pair` và mã, nhưng **không** có field/title —
   `.f` đã mã hoá. Muốn nội dung phải có `.xml` nguồn.
 - `find_controller` xếp Dir lên trước, nhưng file khớp từ khoá có thể nằm ở Report. Đọc

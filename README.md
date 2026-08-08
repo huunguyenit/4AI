@@ -25,7 +25,7 @@ Yêu cầu duy nhất: **Node.js ≥ 22**. Không `npm install`, không dependen
 |---|---|
 | `assets/` | ★ Nguồn sự thật. Markdown + YAML frontmatter, một file một asset |
 | `mcp/servers.json` | Registry MCP chuẩn |
-| `data/` | `customers.json` (chương trình khách), `fbo-folders.json` (bản đồ Controllers) |
+| `data/` | `customers.json` (chương trình khách), `fbo-folders.json` (bản đồ Controllers), `fbo-database.json` (mô hình DB app/sys) |
 | `targets.json` | Sync ghi đi đâu, tool nào, domain nào |
 | `tools/` | CLI. `4ai.mjs` + `lib/` |
 | `docs/` | `ASSET-FORMAT.md`, `TARGET-MATRIX.md`, `DEVWORKFLOW-CONTRACT.md` |
