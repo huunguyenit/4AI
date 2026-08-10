@@ -2,728 +2,728 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "6850e6309f77851a1f808862a46b4481c6411ab5eaaf7d4af0488bfdd45f8dc9"
+      "sha256": "724c5e4957119e4f4f7dc1a9b39e5b4fa9c2937a605dd9fd8ce4738ba153a0bc"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
-      "sha256": "49ca7739005b2fccbc4406d41bfcf9bc078bb5ff0c9c85d557d8770f266af339",
+      "sha256": "6093490432ea5d29e20e0d5533325bf2f1079492227a1819132d9e78aaf3f3cf",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/fbo-customizer.md",
-      "sha256": "729b5141e7df7acaf55f547d8b23966ae78b2947ebdb364916766404d79e8a2d",
+      "sha256": "789d631f2804da2c53001aaeadc521dce74ad74222c5c355c8acd781c602773c",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/fbo-explorer.md",
-      "sha256": "8a3ee37276114412fd62536fba8bf7d9ff676f4876bbc1d43852c0d9d45bf195",
+      "sha256": "6f68e8c310bc02ebec7a2dd856e1981744a325cf599e465929e297162b1045d1",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/pm-planner.md",
-      "sha256": "f4e3f2518ae80bb3271df6ad8b4e8168eb4a1a842d705907ac3e7811780a09d0",
+      "sha256": "27043031a9bd959c8b298e65fc2f900f81187fbc33f2ddca0e244069f46f1a2c",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/pm-release-auditor.md",
-      "sha256": "601df1c860e3c81a6d739a016caa5d2658441add263f53efb1c55f530ea09f55",
+      "sha256": "677082fba7dcb720dfb08b5b4227c8349bd60f283e00b93d4f6a715988382ff0",
       "sourceId": "pm-release-auditor",
       "sourceVersion": 1
     },
     {
       "path": ".claude/agents/pm-ur-analyst.md",
-      "sha256": "194da78b86cefd64678c80af5fbd1368df2d248fc7a6fbc02103c20c2658fbd7",
+      "sha256": "4f7b092d4fb15c62c2c594baddbf3fcf9a4a5697d255b14d967a496f3c18796b",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 2
     },
     {
       "path": ".claude/commands/doctor.md",
-      "sha256": "64938b30b22d3e9384caefc116ccb2a16a824a9d3f356522168e0936cc82fd64",
+      "sha256": "4c40727cc86e6b8f3348fd6e454801de1cd73e950517fe45f27fc2c61dcda26d",
       "sourceId": "doctor",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/fbo-customize.md",
-      "sha256": "879e1e78cbd4e8d2fbd6171b809163f441ef9dbb6c4a8f8b03bc847684bc1322",
+      "sha256": "39d9243b396de0d476b5ec14fa5109bd87515dbac258112a01a0409a1f22d355",
       "sourceId": "fbo-customize",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/fbo-find.md",
-      "sha256": "58010f991db4e5cd21e1f6a9ccb75cde7f1f8ee3b6f0bfa4c77c234c937c1ede",
+      "sha256": "e2b197365c09dac21705fd1241629e903cfaa70d3de06e081e9ca31e06b96e2b",
       "sourceId": "fbo-find",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/fbo-review.md",
-      "sha256": "2ecac3fd9d14f3acec0d4501f6c3e9f72930a7c0997fd462b4a3cdf8fcc77437",
+      "sha256": "3b510aadfb7502e98c5346d1534eefe0a79e057500866d49cc54fcaa80cbe6c9",
       "sourceId": "fbo-review",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/fbo-sql.md",
-      "sha256": "29ea830e17976931591b3e41c628e4cbb5d504f3d1342777a4fac657be1a7d19",
+      "sha256": "47447e9b78c0de33ad4e0109520d2a46e61c52e4f6f8359e231def8a7096744b",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/new-agent.md",
-      "sha256": "8e7c5d9da61cc234832b6d346057eca85ebe8824fbde18bbe21e2680b9de2c12",
+      "sha256": "2618ecf9852b424e0a2970d66f81311e0eb67912bb9bee7bda1504381da0bbc1",
       "sourceId": "new-agent",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/new-rule.md",
-      "sha256": "801176a49fb51bc71d97114791d2773e655b2fda821b23750df4b0706e59b335",
+      "sha256": "bf5a44deb05d6a3d840698d67909370334c7578156d6e69d5a9afb47fcdd3a0b",
       "sourceId": "new-rule",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/new-skill.md",
-      "sha256": "639db3cf099e592ca393ecb75d115d9d29c5950e6faa4115840160ddc9fa8710",
+      "sha256": "bdb41373ddbd612166a60c6a18e85bb509b395d2fbad6efc2e6e967b261955a1",
       "sourceId": "new-skill",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/pm-new-adr.md",
-      "sha256": "08ca5faa05da1dabfa894e463abcc986f0b359f842b6a9634b32cc9e8cdb03eb",
+      "sha256": "32591b35a1c566fa388de4f9eadf3388b9e4b5ebd4f402e600475cb809cb6162",
       "sourceId": "pm-new-adr",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "5a33b99c9fe1206f43f967cba900bdfb8521028d27f357ac5a76d630d5e326b5",
+      "sha256": "861d3c7124fb9b4c57469c54c5eaf8980c556630d222ed9c59991f48791bd73f",
       "sourceId": "pm-review",
       "sourceVersion": 4
     },
     {
       "path": ".claude/commands/pm-status.md",
-      "sha256": "21b2c400a1e846b72fb7d823bafd85da730e31c2e39b24421cf1fcde1bac253b",
+      "sha256": "0f054e502dcb68b014eb071dae5c8376d200f16b7c3e0e9b99fc014bdf215713",
       "sourceId": "pm-status",
       "sourceVersion": 1
     },
     {
       "path": ".claude/commands/sync.md",
-      "sha256": "dac9e02326bb3acd9a679628c967a1549db04d5d1a2fc961d43dd84f772560ed",
+      "sha256": "21b8abe6018b29c24f0595713cc9a693703f5d5c1e90396c1bd7d3e8e8cac154",
       "sourceId": "sync",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/4ai-asset-authoring/SKILL.md",
-      "sha256": "99d5b3565a73b895b43a4d48f676932defdd65757386dd6d3cfef0681b07233c",
+      "sha256": "edf286bc4640da127d959bc7490b7652ebe9f7617c0ee133235a037e2d895920",
       "sourceId": "4ai-asset-authoring",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-accent-free-search/SKILL.md",
-      "sha256": "0507efe5e0ed961073a9ba2058116b4d286a29bed44d54b56860702348eb034b",
+      "sha256": "6a08c922cb22781970cc34c89609be78eea5867b44459ae32c4af5dd9c3dd43c",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-controller-anatomy/SKILL.md",
-      "sha256": "95a99c7a66595b259563c02f9291b7bef79c723a97afaa3edb34c9fb55e3d245",
+      "sha256": "4c07a064ae7c2984f7e69fdbceb07e9a288ffaed77f5ec1de2df2dce196a75d9",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-customization-workflow/SKILL.md",
-      "sha256": "c1b3dd8bb62f58a9c5167a8350d18cc36a189a8c9012a1b8097a597a8fadcc42",
+      "sha256": "8d4da2735ad17c3ab2eed7f11951ca891d4b4a662f5e8078cfb1a8972e71e906",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-encoding-and-newlines/SKILL.md",
-      "sha256": "ac16535cc07c65b4b3493f29437db633834906f64da2f7bdc3e4198f5b4ce70d",
+      "sha256": "afc048a475d45a6fba582f8eab7e114504490fd71d0e798066f21640726ef777",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-entity-resolution-first/SKILL.md",
-      "sha256": "3bc41fb05c44c41a4cfc4cd401544407a65c1650f12ac9806c158eb49292fd23",
+      "sha256": "47e4a1a636f3718134bc67daefbfa57e66734457d72f4ab2963494151fa5823a",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-f-vs-xml-pairing/SKILL.md",
-      "sha256": "365f02bcf8401e1dee16c331ca66bfe3f18f487e46eeeae77e98598b4254b1a6",
+      "sha256": "c5783b149499c9d5db25fb1f50f49130357ed8590ee8d033e23b2b5fa68af7fc",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-js-api/SKILL.md",
-      "sha256": "2dc8e38494fe1145af0f580f9489ef091c5a088ac374f97e66663a94706a77d9",
+      "sha256": "efb039be2217413d627fec82d299cea2a6d0fd34c3cafac614f943ccdd0708aa",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-lookup-discipline/SKILL.md",
-      "sha256": "fea456ca36163e3e3d79a613ac2a1e302132945212032396c07ed0067d21d4eb",
+      "sha256": "e8e66e8b3439f2f66df73afc4f52730ed964195557232cde6195cc2a4a352013",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-navigation-recipes/SKILL.md",
-      "sha256": "f530d50dfd8a426038d8f559d22f50b5d366322ee622e1af3d898f5adf37e850",
+      "sha256": "f29ad9ca25f0a6fdbd43ffce2e7c6d65dee4011127dc364773ebc5bf8f06d1a7",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-nd252-ty-gia-hq/SKILL.md",
-      "sha256": "7326d62405a2c498e7f73f9806babf894da14dcbfcbbe68e05002104c512abf2",
+      "sha256": "b322c681c133eaa1097a9a791e459ea99d898b57d4553b6507115e21ac79b0c4",
       "sourceId": "fbo-nd252-ty-gia-hq",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "15c879d276344d7c9ad07e617fe81f8901b3d731c7050286ba5e3432525333af",
+      "sha256": "8830a0af81caa91073ae3fb5cd42724940fbb4f4559e9a414719e01e40b5cbf0",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
     {
       "path": ".claude/skills/fbo-regulatory-rollout/SKILL.md",
-      "sha256": "35af6777d0a4569385fff22e69d21d28a0f3c3ce1eb4f68fe2403fac87afeab4",
+      "sha256": "4272f1347d8bb7120889fdd474e9bfec1bffa7c0c014628feb0ec6391f4a3920",
       "sourceId": "fbo-regulatory-rollout",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/fbo-sql-object-lookup/SKILL.md",
-      "sha256": "2427e098f4ae7f9b2416d78d524efdb9adc298f96f0f38d280859501e57e10cf",
+      "sha256": "9341193ca013ad2a3374842d596b55e1420931971203ee9ccaf9f14e84c93e61",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/pm-adr/SKILL.md",
-      "sha256": "9b87555f6c84bc88e6c7523ad0fea96d5df1ad22186ca27245bcfab36249db9b",
+      "sha256": "5a2e8c647e323118d48ff0cb32d1c7b1877a32dc36d4c0ebab2545e6e275f3c5",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/pm-capability-graph/SKILL.md",
-      "sha256": "a11b30e05d32d42d6acd5c48f7666668778af7629ccce2bb35cf89a3466a6f93",
+      "sha256": "3608c27a80baaecd1dff361205f223b882e9747cfa36d6b0585233b4c8fe1291",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".claude/skills/pm-customer-program-registry/SKILL.md",
-      "sha256": "a3383607ec0e63a635cb8ac971434943bcd8014fda9c051c841cf6343f4ed552",
+      "sha256": "23daa41049e7d3fdba822f3b960882883509cbed73af7894b10281e6ee638eff",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "0759fe7c9b17e6cd0a913b858e047f4a351cbe5bd17f7f044fb1f2f92d585a76",
+      "sha256": "f6ddd1b7149cbf701945a610abe0ac1108568d6ce3de2138064eaf4db4d0338a",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 4
     },
     {
       "path": ".claude/skills/pm-release-handover/SKILL.md",
-      "sha256": "e7b58877cc7397b03cd498dea3668dd773220ccf7bcfe9474a37ef5781caca1a",
+      "sha256": "f1377f10dfa7ecf488dcbd44f58b07704f5cfd01c15ca6af43efbb26240e243c",
       "sourceId": "pm-release-handover",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/pm-task-ledger/SKILL.md",
-      "sha256": "32e9e7ff8d950bd46ac1260fa6e6a06417805275e124abce6b7472c55173345b",
+      "sha256": "02508976c15bf4cf0d9211a6a4c19b5f37803a0b1cc1ef1ef4db621a760336b5",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/doctor.md",
-      "sha256": "353c76fe578d92f5cadd8541fe1aefa914b224e5ba3194c58268499b0ee01d52",
+      "sha256": "9946307ba9aeac9e93011226231df52caa9b89dfde5268054d73b18cb0be755f",
       "sourceId": "doctor",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-change-reviewer.md",
-      "sha256": "4a2c9384892ca05f688f9b18f1f13cb7593b781ff106465ee1c726467b947a6c",
+      "sha256": "209b5e78db7d4e1270fcf60e3130c67ceee391c2569dc08d223a2d9fbd9b7876",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-customize.md",
-      "sha256": "cc88bc5c56cbc1fa06fb435b26a5a9ec92ea8b881e4f75717c7510a5a690ef0c",
+      "sha256": "1ec4bb75dddfb3584c04ac311241860aeaeaf91d0e2b56ef376412652f193234",
       "sourceId": "fbo-customize",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-customizer.md",
-      "sha256": "3b304a5d2ee48ded23236ae9b573edbd8ac09712b80c107334ef9650071c1169",
+      "sha256": "577aa03dd9291e1468fb23b2a31afa5d9c99c3c9d6cc0834f005567822d7ec12",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-explorer.md",
-      "sha256": "36de4d08c8121c09fe9706b20a4adbe2bb187746cf1d37fde09f8ce51bfb8c65",
+      "sha256": "7454437d96cc1edf3c24116012d37e425614d54f8055406e173fd3d8397e3416",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-find.md",
-      "sha256": "850550a8016caf27c040bd56e0d49db829d854b7215bc0cd1fb07ca7c3392f52",
+      "sha256": "1678c4468c27844fdd72f18bbbc79b3e326a8c95862d351ab607eaec09025d35",
       "sourceId": "fbo-find",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-review.md",
-      "sha256": "78a817ff83d9c167ff3cf79fe6f9e82428687d5bf949e4aaf84e059b3965fa95",
+      "sha256": "c87d8d2e18fe896068b8251f0ea22ae22b1b384a05621c0b613a88e5ae0d9f79",
       "sourceId": "fbo-review",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/fbo-sql.md",
-      "sha256": "908cfe3d308475cb2b21760bca263a82cdb88638c4840f04e9939952aadcec44",
+      "sha256": "a05cee8b5edebe8e739d86eb5d715291c71948db3eac3d07c05d28d436d2cf5e",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/new-agent.md",
-      "sha256": "519e14138dcfdf8e2b37ee042d998b0c952821b65464d68da82cd7b6cb9f318f",
+      "sha256": "7935334377bfdbbfcad421e40436614d4fb5eda8f6c6093dd1b7b97848a8764c",
       "sourceId": "new-agent",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/new-rule.md",
-      "sha256": "ee03b7c1b7b30d4c18e2414d49d7c4ad0fcd845cadaac69ec46beb8bf2da52b2",
+      "sha256": "f1eddfb008b800f6100c58dfe3a911ef7e4e9de44e8548f5033b8ca4d86ba188",
       "sourceId": "new-rule",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/new-skill.md",
-      "sha256": "f532e20b9f7369de1345fc84b16ddda0bd0362ad1f40b823ceed31e329df9134",
+      "sha256": "0635a3fcb90f7b0e35b893ed3c3e2c8411331dcf796e7bce6c51d4364bfaf8ad",
       "sourceId": "new-skill",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/pm-new-adr.md",
-      "sha256": "96015c7b24566c11b162b7cf5016bcbe42c8e9a36896cf986e797b25f9ecff11",
+      "sha256": "97fa2c56d44864b6a582e92e596ed040552565ca2a7c229b2fa7d3591f511085",
       "sourceId": "pm-new-adr",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/pm-planner.md",
-      "sha256": "017c55c0da2110aa5b1b6874d7ef7bc6794d160721ad0eb13567eee60cf01565",
+      "sha256": "d1675015616f99a9a7b692e9da9e242f60b9d03d8dfb00da3148cb5f3bbbcabf",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/pm-release-auditor.md",
-      "sha256": "f431c719c0d02bcdc2daa2e09f882d66e20b6e2ca6501a17b93dfcd75179abcf",
+      "sha256": "ef9d6121265bc2ea3e5066a189ac0e3386cb688307fb96f44dcbb953fd926a33",
       "sourceId": "pm-release-auditor",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "fcf40f7c3582ba58232169956d1511c920bbb8b073531c33e9519daa331ff330",
+      "sha256": "98509df9d1e72a9afc05bb3f66c1a6da25ee76725dc9f8339dc49e60de7ce079",
       "sourceId": "pm-review",
       "sourceVersion": 4
     },
     {
       "path": ".cursor/commands/pm-status.md",
-      "sha256": "32d616eeb608ba9c122b72ac7d559f933d673e71b1c9a144a71c839a54fccd3d",
+      "sha256": "4a282af16f1dd863c52ff7e1f7ad22ab584ade51fcdaaf0e20ea6eff679c995d",
       "sourceId": "pm-status",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/commands/pm-ur-analyst.md",
-      "sha256": "7902250c6ef98382223261ee52a6668c042d33d61f76a32dd1f8ab70cf2e5382",
+      "sha256": "ea3649238111c44161088124a82f543a5f15af1e66a6af94b8b738e7bf8c6a3b",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/commands/sync.md",
-      "sha256": "9a9f250664a5d57234f983d354c655a671ef6cc700a05ed8e2a3d494dfa6715f",
+      "sha256": "2aaf6a5c8146fc6acab17f20feaa3d3aa535dc9ae8dd8631c0a41301fba472b5",
       "sourceId": "sync",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/00-core-doctrine.mdc",
-      "sha256": "b2250ce28d6e5a80b6e317692c197b458f978f2d808b9aae0d803f1c6d361974",
+      "sha256": "054f604489b03ca13102493b27e64aedfff60febcc1feb966b3ed8c5beaf0eb6",
       "sourceId": "core-doctrine",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/00-fbo-doctrine.mdc",
-      "sha256": "ba05014f01d7476ed3a85f691dd25cba46cef82373a983ef7795190575354614",
+      "sha256": "5e67b4ffefa352a7616ad0730bcc646ec34846e60d9dcd380bfbf1862c75576b",
       "sourceId": "fbo-doctrine",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/00-pm-doctrine.mdc",
-      "sha256": "6f9477abe9ce3a659c0d55dbebd5c8c37d95fc7e76389c110cc72b0b2d59b271",
+      "sha256": "2721b620b3e0c03724628d54c647f3fdf802899f10a771d614da572a1970020e",
       "sourceId": "pm-doctrine",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/4ai-asset-authoring.mdc",
-      "sha256": "3a1ae8fa3853696ae2b6592ada72404ace460eb11ee0fc867bef12e5dd8ff942",
+      "sha256": "9ad956a194b90e090ac583485c6e9f9a1c015120a911b4e17156a4dbd42f7fa2",
       "sourceId": "4ai-asset-authoring",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-accent-free-search.mdc",
-      "sha256": "a14331e17a52cd3d8c1cf7db661ef3a2a6d1bd655cfd1d21f2f5d1b60c2acc14",
+      "sha256": "d5dc008159f35ecf2e538dcb44542d35c46194b94e1285f48ed09dabdfa6f8ca",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-controller-anatomy.mdc",
-      "sha256": "c2ebc20f79672804ef8c9ea9f7e7b80c81dc06cb81aec3f185517ac97955d7e5",
+      "sha256": "f236505de50e8e143e37ea66456ccc44eba121abbf0371ba8ecb22f7547d7fe9",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-customization-scope.mdc",
-      "sha256": "8005d5783dd83f3957392bf0563a6696f9560d5ec20f72ca872ac4b3c55b233f",
+      "sha256": "e7b3c065c8a3fdc26c96b421bf777e31c772739203fe535902d31d4b20e24d6a",
       "sourceId": "fbo-customization-scope",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-customization-workflow.mdc",
-      "sha256": "9d9821ffa048ad58b03662c1dbf98ad2a0c95fb467958541fdf4d1ae8cfcb8d1",
+      "sha256": "465f7b7025a2911f6bf6801db8337050f1027bfeb969a1837f2aad2ca1d50fa6",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-encoding-and-newlines.mdc",
-      "sha256": "e9cf68addfa684ff995e2e128bb6911633ba71ddc531e6ca7492c7829219f71c",
+      "sha256": "f0c8dcaa9dbbe4d87ea9a5a82200433ffee54ec11e09e09ad92dcfa12eb0faaa",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-entity-resolution-first.mdc",
-      "sha256": "c71b7b7d8df8483a5817d36c8e0caf2fc76fd2bd81a133c779a31fd86252462d",
+      "sha256": "bf06b18e30c008d3668be0ad0e708e492ea95d5327aa6f81730ce2a1c168e21a",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-f-vs-xml-pairing.mdc",
-      "sha256": "a9609af8b6d5d5d6b3fb069b50ece687c7d7b6ea620b0d3aa2b3ba8f0befdbdc",
+      "sha256": "d2dfa250fb58792473aa5dd4621174367b30b1a1428cac4b48b241d2707c7501",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-js-api.mdc",
-      "sha256": "1734e7860e8fc600b3738ecf50e40e57aee1f935c100dab19f349870d60891a1",
+      "sha256": "d5f9e123c37e9cdedda234b0edfc1798b51e5abc7243203144be38f421d4b351",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-lookup-discipline.mdc",
-      "sha256": "4b9cbe30804d347f59c7d43a5937ae5169a3a78e802bd400309d0448322d7f7f",
+      "sha256": "5679f82ab3aa4c5a6ac922bfb9b0a2498b9b5e91a216609bd2099b55e9d8b4c9",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-navigation-recipes.mdc",
-      "sha256": "69e578c947b76ab8ce7a33d2a1c16b8769a36c305131b783839270a349d231ef",
+      "sha256": "619016053a4a9680bd9424f7701d5f86ac10a0bba7b4de2e4fc6fc1f7c84c114",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-nd252-ty-gia-hq.mdc",
-      "sha256": "d8fe2ae38ca1d0df665f921228c94524947ceeeee67a78a66423295d21ddadc9",
+      "sha256": "0355300a98839daaee080db077676341c72f1a00887a2f4ea8723d6a8c9f5545",
       "sourceId": "fbo-nd252-ty-gia-hq",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-never-invent-files.mdc",
-      "sha256": "dc6e2e9f1e2d192753d0c77179495f5c6fa9924ebe29d6140798b0dadfb19b92",
+      "sha256": "07ef77de5451b8187f80ac47de2af27d5529b7b539e1c12f4f4c933033f7566b",
       "sourceId": "fbo-never-invent-files",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-new-table-proposal.mdc",
-      "sha256": "49d5b9f86e07e84531a425ecd31b93ef99087e41f4032f0dd7d217a842a7e2ec",
+      "sha256": "dceef0fd08faad0914ee9f65fb3177e2ad07d67904203dc9b9adb53de913a645",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
     {
       "path": ".cursor/rules/fbo-regulatory-rollout.mdc",
-      "sha256": "276ccf64e204be6d9dbb07eefc1ed2a322f3241227d5a31ca3042ee5f516723d",
+      "sha256": "9a0aebbc8d345b1b0f7f2f69f2bb9d959e26f1dfc4ac5c4597f95f0e5b434b36",
       "sourceId": "fbo-regulatory-rollout",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-sql-object-lookup.mdc",
-      "sha256": "935b9f8c6a91bfd950a284f0f2301e0e2902bef931c742331d6feb7e0bdeef16",
+      "sha256": "7409c6895e65edf87c9f854719d4874ef5ce0a3a82772421808fb90c417ac4f1",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-sql-via-mcp.mdc",
-      "sha256": "f22d7e55feaa12a46cd116f5c0e52c79b5a23948cd549ef0168cde95b32a33dd",
+      "sha256": "4a2c71923fa8af7af96225f6b9f1084b4d8d5a83f4e72f5f46861642eaaa3a51",
       "sourceId": "fbo-sql-via-mcp",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-adr.mdc",
-      "sha256": "e466127a09fff0a862918e03c9d53ac9e64b3385773851286d8287582bc653d5",
+      "sha256": "62e9ff232b92790203895243c74b8e6f7e823abf91614ea2c09e8ff065881102",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-capability-graph.mdc",
-      "sha256": "9547cda14abf36fbf17699bc8caa30e6e0144a3a79a7fbae46f48b4e88ca14ad",
+      "sha256": "14e3cdcb5d7b93bd0bda04ffbf16ec119d6cd6e87f280549ce92bdf91a4551f3",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/rules/pm-customer-program-registry.mdc",
-      "sha256": "999ef3dd058d70df74f769daddd0fbf3ea4f66fab87f299b5bb84a4698bf8e4d",
+      "sha256": "aebf261528a47212d9baf3b75a521c38e78107af10e54929b752a101775310a0",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-deadline-review.mdc",
-      "sha256": "7f21e3a020dee66a75ed04ba0ad4f6f197edea2cdd3b4ca3a8ff6676afc3009a",
+      "sha256": "81f72a604924e52525e8fa6dfe8ee044034d0d50fc0821d47dd9884ee34e4f4b",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 4
     },
     {
       "path": ".cursor/rules/pm-ledger-discipline.mdc",
-      "sha256": "77d2be13a5941529609416eebe6d544f8f3bb816b20ef7cb433c906c2f4484d6",
+      "sha256": "86b9ce406656998968d016cd2712594b66b77308232a8bb216d5012380e2cf30",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-no-secrets-in-notes.mdc",
-      "sha256": "833457c19188d55df264d751ccfa88f52bee22bb89493117bac3fd0f263cefb4",
+      "sha256": "5ad3608a8820e6d2d049002395bf555e29d434de2bf43d34103cc6f44429762e",
       "sourceId": "pm-no-secrets-in-notes",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-program-from-workspace.mdc",
-      "sha256": "5d72debf62236d472151695333e8ac9e9391cea6ec21da13d750d3a6c1893f16",
+      "sha256": "c729f42674708a7abe7f66f0d63aa0290ba4321f07c982739b4004d131464bd5",
       "sourceId": "pm-program-from-workspace",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-release-handover.mdc",
-      "sha256": "90986dbe85c2c2f7f00f5c1b151736fe2fc91bc618f6eb625d839d3004cdad1f",
+      "sha256": "c2be0f7a0b74fa66613135fb26500e814c114f67020d600530a489eb64fa9988",
       "sourceId": "pm-release-handover",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-scope-question-first.mdc",
-      "sha256": "c7fbeb246303a1cf4d3aa8effec3780e626019a33c05ebe9bc510325a2c572a0",
+      "sha256": "224ec2f61ee54851e8f8ef8f7c499b576623ec31891b44465eaba472bcae9532",
       "sourceId": "pm-scope-question-first",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-task-ledger.mdc",
-      "sha256": "f76ecd7afabe3f1247cf21998ca42d29aef33f50cb98aea1ee0ee1722e647f9e",
+      "sha256": "916f95c811495546ec232f0cfcc4891d4c6638a783e230ab1c6fd6394d501c13",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-ur-routing.mdc",
-      "sha256": "bc9d94950e591d48c3784bd88d7d54a67cafad238a5a3600f8ed4eb0b46e8085",
+      "sha256": "4a209e13596806d5cbfc73b5d9f2d35a918bc1a4e6f08cc2b03e43333e769531",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-change-reviewer.chatmode.md",
-      "sha256": "d77eac124c266ffb877972b0ed703cfd8583bd56c51b2940c7c5da5728500e4a",
+      "sha256": "ea1b8c67e495ff4a252bc870fbc189b0951d77ccd143b617bbd46f39a3f3c551",
       "sourceId": "fbo-change-reviewer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-customizer.chatmode.md",
-      "sha256": "0898a246f3a0e6ef2a62c0656c7fc7c1d98c5a0044c0b0b4b602c6e060a237ee",
+      "sha256": "6f8564a7d5d2161951139e0784fe5ac45a832983e3d1f5d73b9a27e4c6c2fd33",
       "sourceId": "fbo-customizer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-explorer.chatmode.md",
-      "sha256": "f088027636f336e4e71275471385de46cce5648c0d7c332e72aa51ba140f07c7",
+      "sha256": "3d8e090feb8ad38997c313c11da9e6ea790a34d83dc0e40624af36268b053797",
       "sourceId": "fbo-explorer",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/pm-planner.chatmode.md",
-      "sha256": "8471fc9a6eb0eff4b373ebf820e06a412f68b7ec8bc5fcc6b2c5ae5dbcff74c1",
+      "sha256": "888656d707db06d2f9254a0cbb7d6a4795e1cd3e35ba317e846c11c9c11460a5",
       "sourceId": "pm-planner",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/pm-release-auditor.chatmode.md",
-      "sha256": "ef13ee9659c8619f4b181087ed4c12b514f5e558622e95166f26fc1ea74264a3",
+      "sha256": "3721059ccf27a32cb1fa5912e1593bf6a7d0d36a85b21dfeec7cbaf8f3ce5d44",
       "sourceId": "pm-release-auditor",
       "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/pm-ur-analyst.chatmode.md",
-      "sha256": "0f0a759d078b0ea7c6449b203229dd8be9374359dfe8553eef5b913c3d46199e",
+      "sha256": "146d96355585151e74d2d986fb222286951d379455c94df0f8b9ab0d45e886c5",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 2
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "a7e14dc61526465a5c12ec78ca9990f9dcf2030ec5d31081c78efec6b316db5b"
+      "sha256": "3e861fd5f1a4b88352cb539b28f69ec487ba57acc87f946a12cda01923ca0b48"
     },
     {
       "path": ".github/instructions/fbo-accent-free-search.instructions.md",
-      "sha256": "e965cb8dbc6f571397076df7c95a4707db464c5c5b8b020930d0c7201f97aa7c",
+      "sha256": "7c2a69cb3138acceab91c10212435866d9edde6d9a39075c3c648cc90dffea66",
       "sourceId": "fbo-accent-free-search",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
-      "sha256": "0db50ca7fa9b7a44f40c159cc15a5d48e3045b3774fec26703367c51cb235b91",
+      "sha256": "6c4a94bcbf4ec1755355660e963e5dfff3ae9bd23bd8944cf26da7605576a970",
       "sourceId": "fbo-controller-anatomy",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-customization-workflow.instructions.md",
-      "sha256": "c5ae280a5d768798bacd0a5cab91193622f26d6232f999aba23bc62d66f1a188",
+      "sha256": "5f68ac6ae57369213ec80a294411c4c4529c67a87313e65072e868fbed8de5f8",
       "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-encoding-and-newlines.instructions.md",
-      "sha256": "55ac68fa93f125e7c31deec0518472431e92d6118ed72933c59de6b8060346f0",
+      "sha256": "855ea9ac6ad89d154c925d1cb3fbeda2da57ef15a0957b3e46e2d8d4b04d1a4e",
       "sourceId": "fbo-encoding-and-newlines",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-entity-resolution-first.instructions.md",
-      "sha256": "410f50c5f1ddb030559901785d77ec3c5e627eb1dff77009db93a43bbb9205c3",
+      "sha256": "8255ad194a317899269c6ab7f6183b1ce4d0e28823d5263846276532d10ea99d",
       "sourceId": "fbo-entity-resolution-first",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-f-vs-xml-pairing.instructions.md",
-      "sha256": "18e96fecc8a99b87486385c2735791b58ec29cdd1859434c4a0a413d9ac8b68f",
+      "sha256": "645ad92f663f373a2cda54d41256237a075b3fdf4f2ff34fd2b030893d6fd58e",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-js-api.instructions.md",
-      "sha256": "3c5e0a70bad9ef5bcd537014db205041f74955e1cc461786d749d37761a5ecb5",
+      "sha256": "ac70a53202f6e22139b8e8fdc7e894ce76f12ef463773cc78a1bc1065be33069",
       "sourceId": "fbo-js-api",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-lookup-discipline.instructions.md",
-      "sha256": "a7b5f108a5391187d10fd9aff3113055f7bdfa110b6056d92f7eed2978419dfb",
+      "sha256": "177e7df91f40700412f02a2873e85ac6dbff4a208732aae7228573440d4eaae7",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-navigation-recipes.instructions.md",
-      "sha256": "08bd2e3f216c05daf3064f56f1a36c81f19c24956ad9f613dbd4b0d28a5a63c1",
+      "sha256": "f4d0cb3f059e2e6247458112ee56f38bf2cf582464496bffc0fafee604b5860e",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-nd252-ty-gia-hq.instructions.md",
-      "sha256": "b2b215eb8267f90b345f749d996b253e0c2130ac2fa230b16364268b1541b405",
+      "sha256": "ea6a5ac2548d285aaed70d6be82ce9c57309bcee5b9cddb07e272dedae9940c1",
       "sourceId": "fbo-nd252-ty-gia-hq",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-new-table-proposal.instructions.md",
-      "sha256": "a835fb3965e72fe5cbb05c9f6d0fc6ba907c0d47e046dfc90d7f7f0e1f3b736c",
+      "sha256": "75380222d166586233fa73acd9eb03932d07303e944e0f905b2d75b7cd299ce8",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
     {
       "path": ".github/instructions/fbo-regulatory-rollout.instructions.md",
-      "sha256": "c590cff4a41147b58587d65b1ae6535726401129cbfb60f851cad6ca31bf2f9a",
+      "sha256": "663fc7ad348ca353d1226a1253cb41ffd906d8387bea2e5ab24e373afa013113",
       "sourceId": "fbo-regulatory-rollout",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/fbo-sql-object-lookup.instructions.md",
-      "sha256": "53cbad7b12f8ee1a568daa3c56cd9e261ab36fc617a9fa50bef3bc0bbf66dbf0",
+      "sha256": "93fd0b72c8a3612cb6edf983e2b4215b358ce303413100eb88cf38c4364c1ba0",
       "sourceId": "fbo-sql-object-lookup",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/pm-adr.instructions.md",
-      "sha256": "461605746739fc44fa2d6ad67e8e47b537aa52bfe0038f9f2495a12a2905e34f",
+      "sha256": "355af52c15bd235a48d7fdbdac8a0615ca8b3cfe76da46517a8485644da26415",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/pm-capability-graph.instructions.md",
-      "sha256": "e18f5ecbd299b449a0ef4a4359776271b2f11ff9256c899742af4e422496cf4b",
+      "sha256": "019ef5b4da38ff3d69843fa8ea53aed15277bfa9413fa38b4f365c6f54dc6b67",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".github/instructions/pm-customer-program-registry.instructions.md",
-      "sha256": "e2c4065a4835bc24626a47925298076bb7013734ca432b7a7a60e5d923732b69",
+      "sha256": "1ce3ffe99fbd9907665cdebfd02812882a2d6bb0a7292bc9465d44b311b81dbb",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "ca3070b78068ff1a8aceaf9da2825997a5718e3d8ed075382245a9acac7b031a",
+      "sha256": "8b11eb42507d5930f39cec7607482264d049cdf1e5706f51808b7ce064b38b49",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 4
     },
     {
       "path": ".github/instructions/pm-release-handover.instructions.md",
-      "sha256": "39a8359eb1f9b74164647956be1d8a87dd82da2f32dbb4f17c470b1e40df901b",
+      "sha256": "9b64c3d48d7bac3a5b214f35b300ce8a26fdd0d8c5784c7f4a2a5bc9b11a530a",
       "sourceId": "pm-release-handover",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/pm-task-ledger.instructions.md",
-      "sha256": "4f322beb02fea2fe0cd085c9b41c89c46b0387ec312f091f7c2035f561910cf8",
+      "sha256": "f04acfb85523013ad5caf62d899d5916fc5e2485119543562a2c4cebae55fe51",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/fbo-customize.prompt.md",
-      "sha256": "50fc6b8e2cb26724817db4ec4f7ab6db00bd6af757db78755bbc4bb12e426c32",
+      "sha256": "690a19287bb5b8c6d0cd05833caf567f981e5573616b77b51cc38cf33800dfeb",
       "sourceId": "fbo-customize",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/fbo-find.prompt.md",
-      "sha256": "cda6bd3086c4fd3228bf31f5a5207964d6f57b538764b6873e4658cde76073d1",
+      "sha256": "fcedfc343ac502fa719967e2f0bdcf895a4773a89820cf90f32162ea07c80baf",
       "sourceId": "fbo-find",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/fbo-review.prompt.md",
-      "sha256": "08e2cc3fde79b0bd43dfc00f1a25c2abbc97ef04cb4aa04271de7bbf08b3b831",
+      "sha256": "f6dcb66ac7c2966e0ddc01230c93778187f334e7322b16aeb17992e6129733ab",
       "sourceId": "fbo-review",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/fbo-sql.prompt.md",
-      "sha256": "095c34481728b3ea48698088b7cfae55ea55de10764eff3f1988f61e5eae362e",
+      "sha256": "c6a41c64667d7a26c4d0af11c340c644d8deda44628028f0219b2485290377d4",
       "sourceId": "fbo-sql",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/pm-new-adr.prompt.md",
-      "sha256": "93a834bbeb2ff88d6cc5277eff40be7f0eae8b52821e191f9a633434ce2aa278",
+      "sha256": "8634c4b746bc2fe987fa726c00eaa141b8940b3775d69d8d29db0fbcca210dab",
       "sourceId": "pm-new-adr",
       "sourceVersion": 1
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "b52b2a6321e30329b569e26ae17853d27287d858484e9f9a86e815017487a69f",
+      "sha256": "80f5e7af9e98cb2a38de81d9cde512a6af85de9bba13db04b613fd9abd03b7cb",
       "sourceId": "pm-review",
       "sourceVersion": 4
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
-      "sha256": "72b710b2779f79da49f55260bdf24f5dd38a22690f23524516d1507cfc3b69dd",
+      "sha256": "afb4044ebb072e3401535eda37b88e81377dcc1e636183628cffd2e55b3af08e",
       "sourceId": "pm-status",
       "sourceVersion": 1
     }
   ],
-  "hub": "D:\\FBO-Shared\\mcp\\4AI",
+  "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [
     {
       "createdByUs": true,
@@ -736,7 +736,7 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\"}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\"}]",
       "ownedKeys": [
         "mcpServers.4ai-fbo"
       ],
@@ -744,7 +744,7 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\"}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\"}]",
       "ownedKeys": [
         "mcpServers.4ai-fbo"
       ],
@@ -752,7 +752,7 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[{\"args\":[\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\FBO-Shared\\\\mcp\\\\4AI\",\"type\":\"stdio\"}]",
+      "ownedCanonical": "[{\"args\":[\"D:\\\\Fast Source\\\\4AI\\\\mcp\\\\fbo\\\\server.mjs\",\"--hub\",\"D:\\\\Fast Source\\\\4AI\"],\"command\":\"C:\\\\Program Files\\\\nodejs\\\\node.exe\",\"cwd\":\"D:\\\\Fast Source\\\\4AI\",\"type\":\"stdio\"}]",
       "ownedKeys": [
         "servers.4ai-fbo"
       ],
@@ -760,6 +760,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-10T09:23:14.755Z",
+  "syncedAt": "2026-08-10T10:06:18.179Z",
   "target": "4ai"
 }
