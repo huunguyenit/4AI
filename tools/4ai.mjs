@@ -22,6 +22,7 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
   node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
   node tools/4ai.mjs report <payload>   dựng báo cáo rà soát HTML vào ledger/ [--dry-run]
                                         payload có "kind":"portfolio" -> tổng quan nhiều dự án
+                                        payload có "kind":"performance" -> hiệu suất theo phòng ban
 `;
 
 function fail(msg) {
@@ -273,8 +274,14 @@ async function cmdReport(payloadPath, opts) {
   const { buildReportArtifact, buildPortfolioArtifact } = await import('./lib/report.mjs');
   const { writeArtifacts } = await import('./lib/writer.mjs');
 
-  const build = payload?.kind === 'portfolio' ? buildPortfolioArtifact : buildReportArtifact;
-  const { artifact, errors } = build(payload, HUB);
+  let artifact, errors;
+  if (payload?.kind === 'performance') {
+    const { buildPerformanceReportArtifact } = await import('./lib/report-performance.mjs');
+    ({ artifact, errors } = buildPerformanceReportArtifact(payload));
+  } else {
+    const build = payload?.kind === 'portfolio' ? buildPortfolioArtifact : buildReportArtifact;
+    ({ artifact, errors } = build(payload, HUB));
+  }
   if (errors.length) {
     for (const e of errors) process.stderr.write(`  ${e}\n`);
     fail(`payload thiếu ${errors.length} chỗ — không dựng báo cáo.`);

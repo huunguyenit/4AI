@@ -49,11 +49,11 @@ const TRANG_THAI = {
   TH: { ten: 'Đang thực hiện', mau: 'tt-th' },
 };
 
-const esc = (s) => String(s ?? '')
+export const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
-const fmtDate = (iso) => {
+export const fmtDate = (iso) => {
   const s = String(iso ?? '').slice(0, 10);
   const [y, m, d] = s.split('-');
   return y && m && d ? `${d}/${m}/${y}` : s;
@@ -309,7 +309,7 @@ const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
 const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
 
-function section(id, tieuDe, moTa, noiDung, dem) {
+export function section(id, tieuDe, moTa, noiDung, dem) {
   const badge = dem === undefined ? '' : `<span class="count${dem ? '' : ' zero'}">${dem}</span>`;
   return `<section id="${id}">
 <h2>${esc(tieuDe)}${badge}</h2>
@@ -320,7 +320,7 @@ ${noiDung}
 
 const HEALTH_LABEL = { 'khan-cap': 'Khẩn cấp', 'can-chu-y': 'Cần chú ý', 'on': 'Ổn' };
 
-function page(title, metaLine, body) {
+export function page(title, metaLine, body) {
   return `<!doctype html>
 <html lang="vi">
 <head>
@@ -513,7 +513,7 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
 
 // ---------------------------------------------------------------- CSS — token thiết kế
 
-const CSS = `
+export const CSS = `
 :root{
   --bg:#F8FAFC;--surface:#FFFFFF;--fg:#0F172A;--mut:#64748B;--line:#E2E8F0;--track:#E2E8F0;
   --primary:#1E40AF;

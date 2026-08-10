@@ -41,6 +41,48 @@ node tools/4ai.mjs sync
 
 Chạy `check` hai lần không lỗi → không có side effect, an toàn push.
 
+## Báo cáo — Dựng Dashboard HTML
+
+Hub có hai loại báo cáo tự chứa (HTML offline), cập nhật bằng `report` command:
+
+### Báo cáo rà soát yêu cầu (UR Review)
+```bash
+node tools/4ai.mjs report <payload.json>
+```
+Với payload `"kind": "review"` → sinh HTML chi tiết tiến độ UR (deadline, TLKS, DDL proposal, biểu đồ):
+```json
+{
+  "kind": "review",
+  "ma_da": "DEMO1",
+  "ngay_chay": "2026-08-10",
+  "giaiDoan": [{ "giai_doan_da": "Phân tích", "ngay_ht": "2026-08-31" }],
+  "yeuCau": [{ "stt_rec": "001", "noi_dung": "...", "trang_thai": "DD" }]
+}
+```
+Output: `ledger/<ma_da>/review/<ngay>.html`
+
+### Báo cáo hiệu suất nhân viên (Performance Dashboard)
+```bash
+node tools/4ai.mjs report <payload.json>
+```
+Với payload `"kind": "performance"` → sinh dashboard KPI phòng ban (so sánh, top5, xu hướng):
+```json
+{
+  "kind": "performance",
+  "ngay_chay": "2026-08-10",
+  "granularity": "thang",
+  "boPhanMinh": "FSD",
+  "duLieu": [
+    { "emp": "NV07", "dept": "FSD", "period": 1, "yc": 12, "sl": 34 }
+  ]
+}
+```
+Output: `ledger/_performance/<thang|tuan>-<ngay>.html`
+
+**Dữ liệu chuẩn bị:** Query QLDA_APP (QLDA) bằng `query_sql`, output dạng JSON, truyền vào payload. Không gọi DB từ tool — payload chứa sẵn dữ liệu phẳng, tool chỉ tính pivot/xếp hạng bằng JS.
+
+**Thiết kế:** SVG chart tự vẽ (không CDN), CSS token dùng chung từ `report.mjs`, dark mode hỗ trợ.
+
 ## Cấu trúc & File cần biết
 
 | Thư mục / File | Mục đích |
@@ -49,10 +91,12 @@ Chạy `check` hai lần không lỗi → không có side effect, an toàn push.
 | `mcp/servers.json` | Cấu hình MCP server |
 | `data/` | Dữ liệu tham chiếu: `customers.json` (khách/program), `fbo-folders.json` (bản đồ FBO Controllers), `fbo-ddl.json` (schema DB) |
 | `targets.json` | Nơi sync ghi tới (Claude Code, Cursor, VSCode, DevWorkFlow) |
-| `tools/4ai.mjs` | CLI chính. Check / list / explain / sync |
-| `tools/lib/` | Module (schema, emitter, writer) |
+| `tools/4ai.mjs` | CLI chính. Check / list / explain / sync / report |
+| `tools/lib/` | Module (schema, emitter, writer, report, graph) |
+| `tools/lib/report.mjs` | Báo cáo rà soát UR (review, portfolio) |
+| `tools/lib/report-performance.mjs` | Báo cáo hiệu suất nhân viên theo phòng ban |
 | `docs/` | Hướng dẫn chi tiết: `ASSET-FORMAT.md`, `TARGET-MATRIX.md`, `DEVWORKFLOW-CONTRACT.md` |
-| `ledger/` | Dự án: task list, changelog, biên bản bàn giao |
+| `ledger/` | Dự án: task list, changelog, biên bản bàn giao, báo cáo export |
 
 ## Tạo / Sửa Asset
 
