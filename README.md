@@ -182,7 +182,7 @@ git push
 
 ✅ **Cho phép:**
 - Program path: `\\server\path\Program`
-- DB alias: `QLDA`, `QLDA_APP` (alias, không connection string)
+- DB alias: `QLDA`, `NB_A` (alias, không connection string)
 - Quy tắc kiểm soát: "không viết SQL tay"
 
 ❌ **Không bao giờ:**

@@ -18,7 +18,8 @@
         "resolve_entities",
         "search_content",
         "read_source",
-        "resolve_vouchercode"
+        "resolve_vouchercode",
+        "plan_report"
       ],
       "notes": [
         "Nguồn ở mcp/fbo/ trong chính hub này — zero dependency, không kế thừa gì từ fastbusiness-mcp.",

@@ -10,6 +10,7 @@ import path from 'node:path';
 import { readSource, stripAccents } from './encoding.mjs';
 import { buildIndex, openIndex, controllersRoot, indexPathFor } from './index.mjs';
 import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
+import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 
 const NOT_FOUND_NOTE =
   'File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó.';
@@ -227,6 +228,39 @@ export const TOOLS = [
         entity: { type: 'string', description: 'Mã entity khi program có nhiều entity — chỉ ảnh hưởng leg db app (dmct9)' },
       },
       required: ['program', 'code'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'plan_report',
+    description:
+      'Phân giải một yêu cầu báo cáo thành metadata + QueryPlan + prompt hoàn chỉnh để BẠN tự viết SQL. Thuần đọc cấu hình, KHÔNG gọi LLM và KHÔNG chạm database. Tự nhận domain: câu hỏi về dự án/yêu cầu (UR)/hạn hoàn thành lấy schema QLDA từ data/qlda.json (DB nội bộ QLDA_APP) kể cả khi truyền program của khách; câu hỏi nghiệp vụ lấy schema từ chỉ mục program. Viết SQL xong thì gọi execute_report.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        program: { type: 'string', description: 'Program path hoặc mã khách trong customers.json' },
+        request: { type: 'string', description: 'Yêu cầu báo cáo bằng tiếng Việt/Anh nguyên bản' },
+        domain: { type: 'string', enum: ['qlda', 'fbo'], description: 'Ép domain, bỏ qua bước tự nhận' },
+        maxRows: { type: 'integer', default: 10000, description: 'Giới hạn số dòng đưa vào QueryPlan' },
+      },
+      required: ['request'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'execute_report',
+    description:
+      'Chạy câu SELECT do bạn viết từ prompt của plan_report. SQL được đối chiếu lại với ĐÚNG metadata đã chốt ở bước plan (bảng, cột, bảng/cột bị cấm) trước khi thực thi read-only. Sai schema thì trả VALIDATION_FAILED, không có gì chạm database.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        planId: { type: 'string', description: 'Mã planId được trả về từ tool plan_report' },
+        sql: { type: 'string', description: 'Câu SELECT bạn tự viết theo SCHEMA trong prompt của plan' },
+        program: { type: 'string', description: 'Ép nơi chạy — mặc định lấy từ metadata của plan' },
+        database: { type: 'string', description: 'Ép tên database — mặc định lấy từ metadata của plan' },
+        maxRows: { type: 'integer', maximum: 10000 },
+      },
+      required: ['planId', 'sql'],
       additionalProperties: false,
     },
   },
@@ -700,5 +734,25 @@ export const HANDLERS = {
           ? `wcommand không có dòng nào khớp \`${code}\` (cả syscode lẫn sysid) — đang coi \`${code}\` là sysid để tra chỉ mục.`
           : `Không tra được wcommand nên chưa phân giải được mã chứng từ — đang coi \`${code}\` là sysid để tra chỉ mục.`,
     };
+  },
+
+  async plan_report(hub, args) {
+    const programPath = args.program ? resolveProgram(hub, args.program) : null;
+    return await planReport(args.request, {
+      hub,
+      programPath,
+      domain: args.domain,
+      maxRows: args.maxRows,
+    });
+  },
+
+  async execute_report(hub, args) {
+    const programPath = args.program ? resolveProgram(hub, args.program) : null;
+    return await executeReport(args.planId, args.sql, {
+      hub,
+      programPath,
+      database: args.database,
+      maxRows: args.maxRows,
+    });
   },
 };
