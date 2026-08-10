@@ -1,6 +1,6 @@
 # 4AI — AI Assistant Hub for FBO/FBI
 
-Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự động (agents) **tập trung cho FBO/FBI** — viết một lần, dùng trên tất cả platform: **Claude Code, Cursor, DevWorkFlow** và VSCode/Copilot.
+Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự động (agents) **tập trung cho FBO/FBI** — viết một lần, dùng trên tất cả platform: **Claude Code, Cursor, Antigravity** và VSCode/Copilot.
 
 ## 🎯 Tính năng chính
 
@@ -30,11 +30,15 @@ Cung cấp rules + commands cho Copilot, để làm việc FBO/FBI tự động:
 - **Rules áp dụng:** Không viết SQL tay, luôn dùng `query_sql`; không lộ connection string; dùng `resolve_entities` trước khi sửa XML FBO
 - Cursor hoạt động offline — chuẩn bị tài liệu trước bằng `query_sql` rồi truyền vào prompt
 
-### DevWorkFlow
-Tích hợp trong `ai-kit.json` + `emit/devworkflow.json` cho pipeline PM + QA:
-- Agents chạy trong CI/CD: kiểm tra compile, audit changelog, verify handover
-- Skill `pm-release-auditor` chạy tự động trước release
-- Lưu trữ kết quả trong ledger
+### Antigravity
+Xuất ra thư mục `.agents/` — rules, skills, agents, workflow (slash command), MCP:
+- **Rules** → `.agents/rules/` — doctrine/rule always là `trigger: always_on`, rule có `globs` là `trigger: glob`
+- **Skills** → `.agents/skills/<id>/SKILL.md`
+- **Agents** → `.agents/agents/<id>.md`
+- **Commands** → `.agents/workflows/<id>.md`, gọi bằng `/<id>`
+
+Antigravity đang public preview — mapping trên dựng từ tài liệu công khai, chưa verify trên
+workspace thật (xem ghi chú đầu `tools/lib/emit/antigravity.mjs`).
 
 ### VSCode / GitHub Copilot
 Export rules vào `.github/instructions/` — Copilot tạo PR/review tuân theo tiêu chuẩn.
@@ -72,7 +76,7 @@ git push
 **Sau khi push:** 
 - Claude Code: Chạy `/sync` để nhận config mới
 - Cursor: Reload cửa sổ hoặc `Ctrl+Shift+P` → reload
-- DevWorkFlow: Pipeline tự động lấy latest từ `main`
+- Antigravity: Reload workspace để nhận config mới
 
 ### Kiểm tra bao gồm gì
 
@@ -172,7 +176,7 @@ git push
 **Khi nào skill xuất hiện?**
 - **Claude Code:** Ngay lập tức (sau `/sync`), gọi bằng `/my-skill-id`
 - **Cursor:** Reload cửa sổ, dùng bình thường
-- **DevWorkFlow:** Pipeline tự động chạy khi có UR mới
+- **Antigravity:** Reload workspace, agent tự nạp theo `SKILL.md` khi liên quan
 
 ## 🔐 Bảo Mật
 
@@ -194,7 +198,6 @@ Xem chi tiết: [docs/ASSET-FORMAT.md](docs/ASSET-FORMAT.md)
 |---|---|
 | [ASSET-FORMAT.md](docs/ASSET-FORMAT.md) | Cách viết rule, skill, agent, command |
 | [TARGET-MATRIX.md](docs/TARGET-MATRIX.md) | Asset nào emit ra file nào trên từng platform |
-| [DEVWORKFLOW-CONTRACT.md](docs/DEVWORKFLOW-CONTRACT.md) | API & cấu trúc cho DevWorkFlow |
 
 ## 🤝 Cộng tác
 

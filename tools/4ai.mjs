@@ -8,6 +8,7 @@ import { HUB, loadAssets, readJson, resolveMcpServers, scanSecrets } from './lib
 import { skeleton, KINDS } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
 import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
+import { auditLedger } from './lib/ledger-audit.mjs';
 
 const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
 
@@ -57,6 +58,12 @@ function loadHub() {
 function cmdCheck(opts) {
   const { assets, errors, warnings, targetsCfg, mcpCfg } = loadHub();
   errors.push(...scanSecrets({}).map((h) => ({ file: h.file, line: h.line, message: h.message })));
+
+  // Audit cơ khí ledger/: entry Xong ↔ CHANGELOG, biên bản handover đủ mục (backstop
+  // của agent pm-release-auditor cho phần không cần phán đoán ngữ nghĩa).
+  const ledgerAudit = auditLedger({ hub: HUB });
+  errors.push(...ledgerAudit.errors);
+  warnings.push(...ledgerAudit.warnings);
 
   // MCP server: command và mọi arg là đường dẫn phải tồn tại thật.
   for (const [id, srv] of Object.entries(mcpCfg.servers)) {

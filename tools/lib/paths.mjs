@@ -18,7 +18,7 @@ export function isAlwaysOn(asset) {
 
 /**
  * @param {object} asset  asset đã applyDefaults
- * @param {'claude'|'cursor'|'vscode'|'devworkflow'} tool
+ * @param {'claude'|'cursor'|'vscode'|'antigravity'} tool
  * @param {{claudeRoot?: string}} opts
  *        claudeRoot: '.claude' cho project scope, '.' khi dest CHÍNH LÀ ~/.claude
  * @returns {Array<{path: string, mode: 'file'|'inline'}>}
@@ -57,14 +57,15 @@ export function emitPaths(asset, tool, opts = {}) {
       if (alwaysOn) return [{ path: SHARED.copilotInstructions, mode: 'inline' }];
       return [{ path: `.github/instructions/${id}.instructions.md`, mode: 'file' }];
 
-    case 'devworkflow': {
-      const folder = asset.kind === 'doctrine' ? 'doctrine'
-        : asset.kind === 'rule' ? 'rules'
-        : asset.kind === 'skill' ? 'skills'
-        : asset.kind === 'agent' ? 'agents'
-        : 'commands';
-      return [{ path: `Config/ai/${folder}/${id}.md`, mode: 'file' }];
-    }
+    // Antigravity — mapping best-effort theo tài liệu công khai (public preview,
+    // chưa xác nhận trên máy thật). Xem ghi chú trong emit/antigravity.mjs.
+    case 'antigravity':
+      if (asset.kind === 'agent') return [{ path: `.agents/agents/${id}.md`, mode: 'file' }];
+      if (asset.kind === 'command') return [{ path: `.agents/workflows/${id}.md`, mode: 'file' }];
+      if (asset.kind === 'skill') return [{ path: `.agents/skills/${id}/SKILL.md`, mode: 'file' }];
+      // doctrine + rule (always hay globs) đều là rule file riêng — activation mode
+      // (always_on/glob/model_decision) nằm trong frontmatter, không gộp chung một file.
+      return [{ path: `.agents/rules/${id}.md`, mode: 'file' }];
 
     default:
       throw new Error(`tool không rõ: ${tool}`);
@@ -82,8 +83,8 @@ export function mcpPath(tool, opts = {}) {
       return { path: '.cursor/mcp.json', key: 'mcpServers' };
     case 'vscode':
       return { path: '.vscode/mcp.json', key: 'servers' };
-    case 'devworkflow':
-      return null; // gộp trong ai-kit.json
+    case 'antigravity':
+      return { path: '.agents/mcp_config.json', key: 'mcpServers' };
     default:
       return null;
   }

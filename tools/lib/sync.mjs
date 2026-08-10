@@ -8,9 +8,9 @@ import { syncTarget, ensureImportLine } from './writer.mjs';
 import { emitClaude } from './emit/claude.mjs';
 import { emitCursor } from './emit/cursor.mjs';
 import { emitVscode } from './emit/vscode.mjs';
-import { emitDevworkflow } from './emit/devworkflow.mjs';
+import { emitAntigravity } from './emit/antigravity.mjs';
 
-const EMITTERS = { claude: emitClaude, cursor: emitCursor, vscode: emitVscode, devworkflow: emitDevworkflow };
+const EMITTERS = { claude: emitClaude, cursor: emitCursor, vscode: emitVscode, antigravity: emitAntigravity };
 
 function isUnc(p) {
   return /^[\\/]{2}/.test(p);

@@ -1,7 +1,7 @@
 # 4AI
 
 Hub biên dịch cấu hình trợ lý AI cho FBO/FBI. Một corpus markdown → bốn phương ngữ config
-(Claude Code, Cursor, VSCode/Copilot, DevWorkFlow). Không phải một ứng dụng, không host LLM,
+(Claude Code, Cursor, VSCode/Copilot, Antigravity). Không phải một ứng dụng, không host LLM,
 không chạy lúc edit — nó là **compiler**.
 
 ## Commands
@@ -32,8 +32,7 @@ phải cho cùng kết quả — đó là bài kiểm tra idempotency.
 | File | Mở khi |
 |---|---|
 | `docs/ASSET-FORMAT.md` | Viết hoặc sửa asset trong `assets/` |
-| `docs/TARGET-MATRIX.md` | Sửa emitter, hoặc hỏi "asset này ra file nào" |
-| `docs/DEVWORKFLOW-CONTRACT.md` | Làm việc với `emit/devworkflow.mjs` hoặc `ai-kit.json` |
+| `docs/TARGET-MATRIX.md` | Sửa emitter, hoặc hỏi "asset này ra file nào" (cột Antigravity đánh dấu chưa xác nhận) |
 | `targets.json` | Thêm/bật/tắt nơi sync ghi tới |
 | `mcp/servers.json` | Đụng tới cấu hình MCP |
 

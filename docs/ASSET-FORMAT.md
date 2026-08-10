@@ -19,7 +19,7 @@ Thẩm quyền khi lệch nhau: **file này > schema.mjs > emitter**.
 | `domain` | ✓ | kebab-case, phải có trong `targets.json:domains` | Namespace |
 | `description` | ✓ | 1 dòng, ≤200 ký tự | Emit **nguyên văn** sang mọi tool. Model đọc riêng dòng này phải quyết định được có nạp hay không |
 | `version` | ✓ | số nguyên ≥1 | Tăng khi sửa có ý nghĩa; hiện trong banner output |
-| `targets` | | mảng `claude` `cursor` `vscode` `devworkflow` | Mặc định: cả bốn |
+| `targets` | | mảng `claude` `cursor` `vscode` `antigravity` | Mặc định: cả bốn |
 | `always` | | bool | `true` ⇒ nạp mọi lượt. Mặc định `true` cho doctrine, `false` cho phần còn lại. Loại trừ với `globs` |
 | `globs` | | mảng glob | Phạm vi đường dẫn |
 | `severity` | rule ✓ | `hard` `soft` | `hard` render thành BẮT BUỘC/KHÔNG ĐƯỢC |

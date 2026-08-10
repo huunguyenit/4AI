@@ -2,7 +2,7 @@
 // Emitter không được hardcode tên field; nó đọc từ đây.
 
 export const KINDS = ['doctrine', 'rule', 'skill', 'agent', 'command'];
-export const TARGETS = ['claude', 'cursor', 'vscode', 'devworkflow'];
+export const TARGETS = ['claude', 'cursor', 'vscode', 'antigravity'];
 export const SEVERITIES = ['hard', 'soft'];
 export const MODES = ['agent', 'ask'];
 export const MODELS = ['haiku', 'sonnet', 'opus', 'inherit'];

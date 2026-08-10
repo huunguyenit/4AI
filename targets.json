@@ -5,7 +5,7 @@
     {
       "name": "4ai",
       "path": "D:\\FBO-Shared\\mcp\\4AI",
-      "tools": ["claude", "cursor", "vscode"],
+      "tools": ["claude", "cursor", "vscode", "antigravity"],
       "domains": ["core", "fbo-xml", "project-mgmt"],
       "enabled": true,
       "notes": "Hub là target đầu tiên của chính nó — dogfooding. Output generate được commit để diff cho thấy generate đã tạo ra cái gì."
@@ -19,15 +19,6 @@
       "globalPolicy": "on-demand-only",
       "enabled": true,
       "notes": "Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
-    },
-    {
-      "name": "devworkflow",
-      "path": "D:\\Fast Source\\Development\\DevWorkFlow",
-      "tools": ["claude", "cursor", "vscode", "devworkflow"],
-      "domains": ["core", "fbo-xml", "project-mgmt"],
-      "claudeMdImport": true,
-      "enabled": false,
-      "notes": "Bật ở Phase 5. CLAUDE.md viết tay được giữ nguyên, 4AI chỉ yêu cầu thêm một dòng @import."
     },
     {
       "name": "fbi-sp24-corpus",
