@@ -72,6 +72,29 @@ export function ensureImportLine({ destRoot, fileName, line, header, dryRun }) {
 }
 
 /**
+ * Ghi artifact độc lập — output nội bộ của hub (vd .4ai/graph/*.sql), không
+ * thuộc target sync nên không có manifest, không prune, không nhận nuôi.
+ * Emitter vẫn chỉ TRẢ VỀ {relPath, content}; đây là chỗ duy nhất ghi.
+ *
+ * @param {{destRoot: string, files: Array<{relPath: string, content: string}>, dryRun: boolean}} p
+ * @returns {Array<{action: 'create'|'update'|'unchanged', relPath: string, bytes: number}>}
+ */
+export function writeArtifacts({ destRoot, files, dryRun }) {
+  const plan = [];
+  for (const f of files) {
+    const relPath = f.relPath.replace(/\\/g, '/');
+    const abs = path.join(destRoot, relPath);
+    const content = normalize(f.content);
+    const onDisk = readTextIfExists(abs);
+    const action = onDisk === null ? 'create'
+      : normalize(onDisk) === content ? 'unchanged' : 'update';
+    plan.push({ action, relPath, bytes: Buffer.byteLength(content, 'utf8') });
+    if (!dryRun && action !== 'unchanged') writeAtomic(abs, content);
+  }
+  return plan;
+}
+
+/**
  * Đồng bộ một target.
  *
  * @param {object} p

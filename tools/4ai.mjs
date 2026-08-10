@@ -18,6 +18,9 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
   node tools/4ai.mjs targets            liệt kê target: path, tools, reachable
   node tools/4ai.mjs sync               chiếu asset + MCP vào các target đang bật
                                         [--dry-run] [--target T] [--tool X] [--force]
+  node tools/4ai.mjs graph check        validate đồ thị JSONL. Không bao giờ ghi
+  node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
+  node tools/4ai.mjs report <payload>   dựng báo cáo rà soát HTML vào ledger/ [--dry-run]
 `;
 
 function fail(msg) {
@@ -218,6 +221,69 @@ function cmdTargets(opts) {
   }
 }
 
+// ---------------------------------------------------------------- graph
+
+async function cmdGraph(sub, opts) {
+  if (sub && !['build', 'check'].includes(sub)) fail(`graph: lệnh con không rõ: ${sub} (build | check)`);
+  const { buildGraphArtifact } = await import('./lib/graph.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+
+  const { artifact, errors, stats } = buildGraphArtifact(HUB);
+
+  if (opts.json) {
+    process.stdout.write(JSON.stringify({ stats, errors, output: artifact?.relPath ?? null }, null, 2) + '\n');
+    process.exit(errors.length ? 1 : 0);
+  }
+
+  const kinds = Object.entries(stats.byKind).map(([k, c]) => `${k}:${c}`).join(' ');
+  const types = Object.entries(stats.byEdgeType).map(([t, c]) => `${t}:${c}`).join(' ');
+  process.stdout.write(`${stats.nodes} node · ${stats.edges} cạnh\n`);
+  if (kinds) process.stdout.write(`  node: ${kinds}\n`);
+  if (types) process.stdout.write(`  cạnh: ${types}\n`);
+
+  if (errors.length) {
+    for (const e of errors) {
+      process.stderr.write(`  ${e.file}:${e.line}  ${e.message}\n`);
+    }
+    process.stderr.write(`4ai: ${errors.length} lỗi — không sinh script.\n`);
+    process.exit(1);
+  }
+
+  if (sub === 'check') { process.stdout.write('graph hợp lệ. (check không bao giờ ghi)\n'); process.exit(0); }
+
+  const plan = writeArtifacts({ destRoot: HUB, files: [artifact], dryRun: opts.dryRun });
+  for (const p of plan) {
+    const verb = opts.dryRun ? `${p.action} (dry-run)` : p.action;
+    process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);
+  }
+  process.stdout.write('Nạp bằng sqlcmd hoặc query_sql — CHỈ sau khi PM xác nhận.\n');
+}
+
+// ---------------------------------------------------------------- report
+
+async function cmdReport(payloadPath, opts) {
+  if (!fs.existsSync(payloadPath)) fail(`không tìm thấy payload: ${payloadPath}`);
+  let payload;
+  try {
+    payload = JSON.parse(fs.readFileSync(payloadPath, 'utf8'));
+  } catch (e) {
+    fail(`payload không parse được: ${e.message}`);
+  }
+  const { buildReportArtifact } = await import('./lib/report.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+
+  const { artifact, errors } = buildReportArtifact(payload, HUB);
+  if (errors.length) {
+    for (const e of errors) process.stderr.write(`  ${e}\n`);
+    fail(`payload thiếu ${errors.length} chỗ — không dựng báo cáo.`);
+  }
+  const plan = writeArtifacts({ destRoot: HUB, files: [artifact], dryRun: opts.dryRun });
+  for (const p of plan) {
+    const verb = opts.dryRun ? `${p.action} (dry-run)` : p.action;
+    process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);
+  }
+}
+
 // ---------------------------------------------------------------- sync
 
 async function cmdSync(opts) {
@@ -266,6 +332,11 @@ switch (cmd) {
     cmdNew(rest[0], rest[1], values); break;
   case 'targets':
     cmdTargets(values); break;
+  case 'graph':
+    await cmdGraph(rest[0] ?? 'build', { ...values, dryRun: values['dry-run'] }); break;
+  case 'report':
+    if (!rest[0]) fail('cách dùng: report <payload.json> [--dry-run]');
+    await cmdReport(rest[0], { ...values, dryRun: values['dry-run'] }); break;
   case 'sync':
     await cmdSync({ ...values, dryRun: values['dry-run'] }); break;
   default:

@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "note": "Lịch nghỉ để tính 'N ngày làm việc trước hạn'. Nguồn pháp lý: Bộ luật Lao động 2019 Điều 112 (11 ngày lễ/năm) + nghị quyết/thông báo hoán đổi hằng năm của Chính phủ. Ngày Tết Âm lịch và Giỗ Tổ phụ thuộc lịch âm nên PHẢI soát lại mỗi năm — xem cờ `confirmed` của từng năm.",
+  "workWeek": {
+    "workingWeekdays": [1, 2, 3, 4, 5],
+    "note": "1=Thứ Hai … 5=Thứ Sáu. Thứ Bảy và Chủ nhật không phải ngày làm việc. Nếu công ty đổi sang làm T7 thì sửa mảng này, đừng sửa code.",
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "warning": {
+    "leadWorkingDays": 3,
+    "note": "Cảnh báo khi còn ĐÚNG 3 ngày làm việc hoặc ít hơn tính tới hạn, không tính ngày hạn. Ví dụ hạn là Thứ Hai: đếm ngược Thứ Sáu (1), Thứ Năm (2), Thứ Tư (3) → bắt đầu cảnh báo từ Thứ Tư tuần trước. Ngày trong `days` bị loại y như T7/CN.",
+    "reportTime": "08:00",
+    "reportDays": [1, 2, 3, 4, 5]
+  },
+  "makeupWorkdaysNote": "`makeupWorkdays` là ngày ĐI LÀM BÙ do hoán đổi, thường rơi vào Thứ Bảy. Mặc định KHÔNG tính là ngày làm việc vì công ty nghỉ T7 cố định. Đổi `countMakeupWorkdays` thành true nếu bộ phận thực sự đi làm hôm đó.",
+  "countMakeupWorkdays": false,
+  "years": {
+    "2026": {
+      "confirmed": true,
+      "verifiedAt": "2026-08-10",
+      "source": "Thông báo lịch nghỉ của Chính phủ (xaydungchinhsach.chinhphu.vn) + Bộ luật Lao động 2019 Điều 112",
+      "days": [
+        { "date": "2026-01-01", "weekday": 4, "ten": "Tết Dương lịch", "loai": "le-luat-dinh" },
+
+        { "date": "2026-02-14", "weekday": 6, "ten": "Tết Âm lịch — 27 tháng Chạp", "loai": "cuoi-tuan-trong-ky-nghi" },
+        { "date": "2026-02-15", "weekday": 7, "ten": "Tết Âm lịch — 28 tháng Chạp", "loai": "cuoi-tuan-trong-ky-nghi" },
+        { "date": "2026-02-16", "weekday": 1, "ten": "Tết Âm lịch — 29 tháng Chạp", "loai": "le-luat-dinh" },
+        { "date": "2026-02-17", "weekday": 2, "ten": "Tết Âm lịch — mùng 1 Bính Ngọ", "loai": "le-luat-dinh" },
+        { "date": "2026-02-18", "weekday": 3, "ten": "Tết Âm lịch — mùng 2", "loai": "le-luat-dinh" },
+        { "date": "2026-02-19", "weekday": 4, "ten": "Tết Âm lịch — mùng 3", "loai": "le-luat-dinh" },
+        { "date": "2026-02-20", "weekday": 5, "ten": "Tết Âm lịch — mùng 4", "loai": "le-luat-dinh" },
+        { "date": "2026-02-21", "weekday": 6, "ten": "Tết Âm lịch — mùng 5", "loai": "cuoi-tuan-trong-ky-nghi" },
+        { "date": "2026-02-22", "weekday": 7, "ten": "Tết Âm lịch — mùng 6", "loai": "cuoi-tuan-trong-ky-nghi" },
+
+        { "date": "2026-04-26", "weekday": 7, "ten": "Giỗ Tổ Hùng Vương (10/3 âm)", "loai": "le-luat-dinh" },
+        { "date": "2026-04-27", "weekday": 1, "ten": "Nghỉ bù Giỗ Tổ Hùng Vương", "loai": "nghi-bu" },
+
+        { "date": "2026-04-30", "weekday": 4, "ten": "Ngày Giải phóng miền Nam", "loai": "le-luat-dinh" },
+        { "date": "2026-05-01", "weekday": 5, "ten": "Quốc tế Lao động", "loai": "le-luat-dinh" },
+
+        { "date": "2026-08-31", "weekday": 1, "ten": "Nghỉ hoán đổi dịp Quốc khánh", "loai": "hoan-doi" },
+        { "date": "2026-09-01", "weekday": 2, "ten": "Nghỉ liền kề Quốc khánh", "loai": "le-luat-dinh" },
+        { "date": "2026-09-02", "weekday": 3, "ten": "Quốc khánh", "loai": "le-luat-dinh" }
+      ],
+      "makeupWorkdays": [
+        { "date": "2026-08-22", "weekday": 6, "ten": "Làm bù cho ngày hoán đổi 31/8" }
+      ],
+      "notes": [
+        "Kỳ nghỉ Tết chính thức của khối hành chính là 14/02–22/02/2026 (9 ngày liên tục, gồm 5 ngày lễ + 4 ngày cuối tuần). Khối doanh nghiệp được chọn phương án 5 ngày khác — nếu công ty chọn khác, sửa mảng `days` cho khớp thực tế.",
+        "Giỗ Tổ 26/4/2026 rơi vào Chủ nhật nên nghỉ bù Thứ Hai 27/4.",
+        "30/4 rơi Thứ Năm, 1/5 rơi Thứ Sáu — không phát sinh nghỉ bù."
+      ]
+    },
+    "2027": {
+      "confirmed": false,
+      "canXacNhan": "Nghị quyết/thông báo hoán đổi năm 2027 thường ban hành khoảng tháng 10/2026. Các ngày dưới đây là MỨC TỐI THIỂU theo Điều 112 cộng nghỉ bù cơ học — chưa phải lịch chính thức. Soát lại khi có văn bản.",
+      "verifiedAt": "2026-08-10",
+      "source": "Quy đổi âm lịch từ nguồn công khai; chưa có văn bản hoán đổi của Chính phủ.",
+      "days": [
+        { "date": "2027-01-01", "weekday": 5, "ten": "Tết Dương lịch", "loai": "le-luat-dinh" },
+
+        { "date": "2027-02-04", "weekday": 4, "ten": "Tết Âm lịch — 28 tháng Chạp (dự kiến)", "loai": "le-luat-dinh", "canXacNhan": true },
+        { "date": "2027-02-05", "weekday": 5, "ten": "Tết Âm lịch — 29 tháng Chạp (dự kiến)", "loai": "le-luat-dinh", "canXacNhan": true },
+        { "date": "2027-02-06", "weekday": 6, "ten": "Tết Âm lịch — mùng 1 Đinh Mùi", "loai": "cuoi-tuan-trong-ky-nghi" },
+        { "date": "2027-02-07", "weekday": 7, "ten": "Tết Âm lịch — mùng 2", "loai": "cuoi-tuan-trong-ky-nghi" },
+        { "date": "2027-02-08", "weekday": 1, "ten": "Tết Âm lịch — mùng 3 (dự kiến)", "loai": "le-luat-dinh", "canXacNhan": true },
+        { "date": "2027-02-09", "weekday": 2, "ten": "Tết Âm lịch — mùng 4 (dự kiến)", "loai": "le-luat-dinh", "canXacNhan": true },
+        { "date": "2027-02-10", "weekday": 3, "ten": "Tết Âm lịch — mùng 5 (dự kiến nghỉ bù)", "loai": "nghi-bu", "canXacNhan": true },
+
+        { "date": "2027-04-16", "weekday": 5, "ten": "Giỗ Tổ Hùng Vương (10/3 âm)", "loai": "le-luat-dinh" },
+
+        { "date": "2027-04-30", "weekday": 5, "ten": "Ngày Giải phóng miền Nam", "loai": "le-luat-dinh" },
+        { "date": "2027-05-01", "weekday": 6, "ten": "Quốc tế Lao động", "loai": "le-luat-dinh" },
+        { "date": "2027-05-03", "weekday": 1, "ten": "Nghỉ bù Quốc tế Lao động", "loai": "nghi-bu", "canXacNhan": true },
+
+        { "date": "2027-09-02", "weekday": 4, "ten": "Quốc khánh", "loai": "le-luat-dinh" },
+        { "date": "2027-09-03", "weekday": 5, "ten": "Nghỉ liền kề Quốc khánh (dự kiến)", "loai": "le-luat-dinh", "canXacNhan": true }
+      ],
+      "makeupWorkdays": [],
+      "notes": [
+        "Mùng 1 Tết Đinh Mùi = Thứ Bảy 06/02/2027 — hai ngày đầu kỳ nghỉ rơi đúng cuối tuần nên nghị quyết gần như chắc chắn sẽ bù thêm ngày làm việc. Đừng dùng lịch 2027 để cam kết hạn với khách cho tới khi `confirmed` chuyển true.",
+        "Giỗ Tổ 16/4/2027 rơi Thứ Sáu — không nghỉ bù.",
+        "1/5/2027 rơi Thứ Bảy → nghỉ bù Thứ Hai 03/5."
+      ]
+    }
+  }
+}

@@ -5,6 +5,10 @@ logs/
 
 # Tài liệu dự án của khách (khảo sát, biên bản, email). Dữ liệu khách — không commit.
 .management/
+ledger/*/docs/
+
+# Script nạp đồ thị do `graph build` sinh ra — dựng lại được từ JSONL, không commit.
+.4ai/graph/
 
 # Không bao giờ dùng npm — dòng này là phòng thủ, không phải dự kiến.
 node_modules/

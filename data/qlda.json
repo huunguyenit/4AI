@@ -101,6 +101,18 @@
       "note": "QLDA tự nó là một chương trình FBO — Web.config tại `path` chứa appConnectionString nên query_sql phân giải được kết nối. Web.config dùng placeholder %Database, vì vậy MỌI lệnh query_sql phải truyền `database: \"QLDA_APP\"`. Đây là DB nội bộ, KHÔNG phải DB nghiệp vụ của khách.",
       "indexedAt": "2026-08-08",
       "indexStats": { "files": 3310, "parsed": 823, "controllers": "Grid:1137 Filter:893 Report:479 Dir:459 Include:181" }
+    },
+    "graph4ai": {
+      "alias": "graph-4ai",
+      "connectionKey": "graphConnectionString",
+      "provider": "sqlserver",
+      "databaseName": "GRAPH_4AI",
+      "serverAlias": "fsd-sql2016",
+      "resolveOrder": [
+        { "kind": "env", "name": "GRAPH_4AI_CONNECTION" },
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "graphConnectionString" }
+      ],
+      "note": "DB nội bộ chứa CHỈ MỤC đồ thị năng lực FBO và mạng phụ thuộc UR. Nguồn sự thật là file JSONL trong repo — xem data/graph-schema.json. Không chứa dữ liệu nghiệp vụ của khách. Giá trị kết nối do PM tự điền vào qlda.local.json (đã gitignore) hoặc biến môi trường; KHÔNG BAO GIỜ ghi vào file này."
     }
   },
   "schemaSource": {
@@ -385,6 +397,102 @@
       "flowNote": "Luồng thường gặp: TA/YC → DD → XN → TH → HT → DT → OK → UP. Nhánh dừng: CH, KL, KD (duyet_yn=2)."
     }
   },
+  "review": {
+    "note": "Quy trình rà soát yêu cầu định kỳ của PM. Vai PM KẾT THÚC ở trạng thái HT — DT/OK/UP thuộc bộ phận khác, không đưa vào báo cáo.",
+    "pm": { "maNv": "PM01", "boPhanLt": "FSD" },
+
+    "scope": {
+      "duAn": {
+        "rule": "Dự án mà PM đứng tên lập trình quản lý: PM01 nằm trong nbdmda.ma_lt1, ma_lt2 hoặc ma_lt3.",
+        "note": "Một dự án có thể có nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận, chỉ lọc theo LTQL."
+      },
+      "yeuCau": {
+        "trangThai": ["DD", "XN", "TH"],
+        "rule": "Chỉ rà soát UR ở ba trạng thái này. TA/YC chưa vào luồng; HT trở đi đã ngoài vai PM; CH/KL/KD là nhánh dừng."
+      }
+    },
+
+    "deadline": {
+      "source": "nbcnhanhtda",
+      "hanHieuLuc": {
+        "rule": "MAX(ngay_ht) theo từng cặp (ma_da, giai_doan_da).",
+        "note": "ngay_ht nằm trong khoá chính nên mỗi lần hẹn lại là một dòng mới. Hạn hiệu lực của một giai đoạn là dòng có ngay_ht lớn nhất của giai đoạn đó. Mỗi giai đoạn có hạn riêng — không gộp cả dự án về một hạn."
+      },
+      "joinCaveat": "nbcnhanhtda.ma_da là varchar(33) còn nbdmda.ma_da là char(32) — bắt buộc RTRIM cả hai vế khi join, nếu không sẽ hụt dòng.",
+      "canhBao": {
+        "leadWorkingDays": 3,
+        "lichNghi": "data/holidays-vn.json",
+        "rule": "Cảnh báo khi số ngày làm việc còn lại tới hạn <= 3. Ngày làm việc loại T7/CN và mọi ngày trong holidays-vn.json.",
+        "quaHan": "Hạn đã qua mà UR vẫn ở DD/XN/TH thì báo mức QUÁ HẠN, tách riêng khỏi mức SẮP TỚI."
+      }
+    },
+
+    "chotDaHen": {
+      "column": "nbcnhanhtda.xac_nhan_da_hen_yn",
+      "rule": "Giai đoạn có hạn nhưng CHƯA tick chốt đã hẹn thì cảnh báo, và đề xuất đưa các UR chưa chốt được hạn trong giai đoạn đó về trạng thái TA.",
+      "note": "TA = 'Yêu cầu tạm (chỉ để nhập tạm chưa duyệt)', duyet_yn=0 — dùng để giữ chỗ khi chưa chốt được hạn hoàn thành."
+    },
+
+    "congPm": {
+      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái DD. UR ở XN/TH chỉ theo dõi hạn, không kiểm lại TLKS.",
+      "tai": "DD",
+      "quyetDinh": [
+        { "sang": "XN", "khi": "Chấp nhận — yêu cầu nằm trong phạm vi và đã chốt được hạn hoàn thành." },
+        { "sang": "TA", "khi": "Chưa chốt được hạn hoàn thành (giai đoạn chưa tick chốt đã hẹn)." },
+        { "sang": "KL", "khi": "Vượt khả năng xử lý của FBO — phải dẫn được node Capability verdict='khong' làm căn cứ." }
+      ],
+      "luongChuan": "DD → XN → TH → HT",
+      "thiHanh": "AI chỉ ĐỀ XUẤT và soạn sẵn câu lệnh. Mọi thay đổi trạng thái chỉ chạy sau khi PM xác nhận."
+    },
+
+    "kiemTlks": {
+      "note": "Áp dụng cho UR ở trạng thái DD.",
+      "rule": "tlks_yn chỉ được tick khi trang_tlks ghi rõ số trang / mục lục. Nhưng tick không đủ tin: có UR tick tlks_yn mà nội dung ghi không trùng tài liệu. LUÔN đọc nội dung tài liệu rồi mới kết luận.",
+      "ngoaiTlks": {
+        "rule": "UR không nằm trong TLKS thì phải có căn cứ khác đính kèm ở cấp dự án: biên bản nghiệm thu, phụ lục, hoặc email xác nhận có đúng nội dung đó.",
+        "kiemTaiDau": "sysfileinfo với controller='nbdmda' và syskey=<ma_da> — xem mục `attachments`.",
+        "khongCoCanCu": "Không tìm được căn cứ thì báo cáo nêu rõ 'ngoài TLKS, chưa có căn cứ' và đề xuất TA.",
+        "gioCong": "UR ngoài TLKS được tính thêm giờ công. Mức cộng KHÔNG đặt cứng — đề xuất dựa trên EffortSample đã có, PM xác nhận rồi ghi mẫu mới."
+      }
+    },
+
+    "docCache": {
+      "path": "ledger/<ma_da>/docs/",
+      "rule": "Tài liệu khảo sát, biên bản, phụ lục, email tải từ sysfileinfo được để trong repo cho lần sau đọc lại. KHÔNG commit — .gitignore đã chặn thư mục này.",
+      "invalidateBy": ["file_enc", "file_size"],
+      "note": "Chỉ tải lại khi file_enc mới hoặc file_size lệch so với lần trước. Không đổi/xoá gì trong fileStore gốc."
+    },
+
+    "capability": {
+      "graph": "data/graph-schema.json",
+      "rule": "Kết luận 'FBO làm được / không làm được' phải tra node Capability, không phán đoán tại chỗ. Thứ tự tra: tên menu (bar) → sysid controller → phân hệ → nghiệp vụ. Mốc so sánh là phiên bản SP của dự án (nbdmda.ma_pbsp).",
+      "khiChuaCo": "Không có node Capability tương ứng thì KHÔNG kết luận — hỏi PM, rồi ghi node mới vào data/graph/capability.jsonl."
+    },
+
+    "ddl": {
+      "config": "data/fbo-ddl.json",
+      "trigger": "UR có nội dung nhắc tới tạo bảng, thêm cột, thêm danh mục, thêm chứng từ.",
+      "output": "Ghi chú đính vào UR: tên bảng đề xuất, chứng từ tham khảo, aspx, controller, mẫu script. PM không chạy script."
+    },
+
+    "baoCao": {
+      "lich": { "gio": "08:00", "timezone": "Asia/Ho_Chi_Minh", "ngay": [1, 2, 3, 4, 5] },
+      "output": "ledger/<ma_da>/review/<YYYY-MM-DD>.html",
+      "format": "HTML tự chứa, xem lại được offline.",
+      "phanBaoCao": [
+        "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua.",
+        "Sắp tới hạn — còn <= 3 ngày làm việc.",
+        "Giai đoạn chưa tick chốt đã hẹn — kèm danh sách UR đề xuất về TA.",
+        "UR ở DD chờ cổng PM — kèm kết quả kiểm TLKS.",
+        "UR ngoài TLKS chưa có căn cứ đính kèm.",
+        "Đề xuất KL — kèm node Capability làm căn cứ.",
+        "UR nhắc tạo bảng/thêm cột — kèm gợi ý DDL.",
+        "Biểu đồ: tiến độ theo giai đoạn, phân bố UR trong/ngoài TLKS, đường deadline."
+      ],
+      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác."
+    }
+  },
+
   "urFieldMap": {
     "note": "Ánh xạ cột bảng UR draft (output của subagent phân tích tài liệu) sang cột thật của nbphyc.",
     "target": "nbphyc",
@@ -417,7 +525,9 @@
     ]
   },
   "openQuestions": [
-    "DEMO1 chưa có trong customers.json — thiếu programPath. Đã biết ma_da=DEMO1, ma_pbsp=FBISP2422 (FBI SP2422).",
+    "Thang độ khó dùng cho EffortSample chưa chốt — hỏi PM khi gặp trường hợp mới (xem data/graph-schema.json).",
+    "SOTran (DXA) và POTran (PO1) chưa biết menu_id/bar — corpus FBISP24 không có dòng wcommand cho hai mã này.",
+    "Họ bảng của PNA (71) suy từ chỉ mục controller, chưa đối chiếu dmct9 theo ma_ct='PNA'.",
     "Chốt chỗ chứa cho DoKho / CompanionLienDoi / CanLamRo (xem urFieldMap.unmapped).",
     "nbphcv (phiếu phân công việc) có cần khai thành bảng thứ tư không — hiện chỉ tham chiếu qua nbphyc.stt_rec_cv."
   ]

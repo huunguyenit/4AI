@@ -422,6 +422,7 @@ corpus để sẵn bản đồ file.
 | `fbo-review` | Soi diff XML hiện tại theo bộ rule FBO — dispatch fbo-change-reviewer, phân loại Blocker / Nên sửa / Góp ý. |
 | `fbo-sql` | Tra cứu SQL đằng sau màn hình FBO qua query_sql — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP. |
 | `pm-new-adr` | Ghi lại một quyết định thành ADR theo template chuẩn — hỏi đủ Bối cảnh/Quyết định/Hệ quả rồi tạo file trong ledger/adr/. |
+| `pm-review` | Chạy rà soát yêu cầu theo hạn và TLKS cho các dự án LTQL PM01, rồi sinh báo cáo HTML vào ledger. |
 | `pm-status` | Tóm tắt ledger — việc gì đang ở trạng thái nào, theo khách; nêu entry ứ đọng và entry Xong còn thiếu changelog. |
 | `fbo-accent-free-search` | find_controller chỉ hiểu tiếng Việt không dấu — bỏ dấu trước khi tìm ("giay bao no" ra CPTran, "phieu chi" ra CDTran), thử luôn cả mã controller nếu biết. |
 | `fbo-encoding-and-newlines` | XML nguồn FBO có thể là Windows-1258 + CRLF + BOM — phát hiện trước khi đọc, giữ nguyên y hệt khi ghi; không bao giờ normalize sang UTF-8 LF như tác dụng phụ. |
@@ -434,9 +435,12 @@ corpus để sẵn bản đồ file.
 | `fbo-js-api` | Bề mặt JS phía client của FBO — Form API vs Grid API, event handler chuẩn (WhenVoucherInit/Loading/Closing), thân handler nằm ở Include Javascript, tra cứu bằng search_content trên code thật. |
 | `fbo-navigation-recipes` | Sổ tay tool call của 4ai-fbo — từ tên nghiệp vụ ra màn hình, họ file cùng mã, nguồn lookup, ai dùng include này, controller nào gọi hàm JS, cột database nào đứng sau. |
 | `fbo-nd252-ty-gia-hq` | Spec NĐ 252/2026/NĐ-CP — thêm tùy chọn bật/tắt trường "Tỷ giá hq" trên HDA/HD1 gồm form nhập, cảnh báo khi lưu, post sổ ctgt20, phát hành HĐĐT và import. |
+| `fbo-new-table-proposal` | Yêu cầu nhắc tạo bảng hay thêm cột thì soạn gợi ý theo chuẩn FBO — tên bảng zc, chứng từ tham khảo, số hiệu trống, ngưỡng partition. Chỉ gợi ý, không chạy script. |
 | `fbo-regulatory-rollout` | Quy trình áp một thay đổi pháp lý lên nhiều chương trình khách — chốt diện áp dụng, khảo sát chênh lệch SP, làm mẫu một khách rồi nhân bản, ledger và bàn giao theo mốc hiệu lực. |
 | `fbo-sql-object-lookup` | Tìm và đọc table/proc/view đứng sau một màn hình FBO qua query_sql — tham số object để soi cấu trúc, sql cho câu tự viết, liên hệ field màn hình với cột database. |
 | `pm-adr` | Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau. |
+| `pm-capability-graph` | Đọc và bảo trì đồ thị năng lực FBO và mạng rà soát Request (Phase/Status/Evidence/PMReview/Plan) — file JSONL là nguồn thật, SQL Server graph là chỉ mục, dựng bằng 4ai graph build. |
 | `pm-customer-program-registry` | Đọc và bảo trì data/customers.json — tra "khách X nằm ở đâu" ra program path, dòng sản phẩm FBO/FBI, SP version, DB alias; cách thêm khách mới đúng schema. |
+| `pm-deadline-review` | Rà soát yêu cầu theo hạn giai đoạn và TLKS — lọc dự án LTQL, tính 3 ngày làm việc, kiểm chốt đã hẹn, đề xuất XN/TA/KL, sinh báo cáo HTML vào ledger. |
 | `pm-release-handover` | Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì. |
 | `pm-task-ledger` | Format entry trong ledger/tasks.md và vòng đời Mới → Đang làm → Chờ xác nhận → Xong — cách mở, cập nhật, đóng entry và chuyển sang CHANGELOG. |

@@ -1,0 +1,15 @@
+// Mẫu giờ công PM ĐÃ DUYỆT — căn cứ để đề xuất cho yêu cầu tương tự lần sau.
+//
+// CHƯA CÓ DÒNG NÀO. Chỉ ghi khi PM chốt một con số thật, không sinh tự động,
+// không lấy từ tg_dk_th mà lập trình viên tự điền.
+//
+// `featureType` phải là một id trong data/fbo-ddl.json → featureTypes.items:
+//   danh-muc · chung-tu · bao-cao · import · post-so · thong-bao · duyet · ket-chuyen · phan-bo
+// Gặp loại tính năng mới: hỏi PM tên loại + giờ công, thêm vào fbo-ddl.json trước.
+//
+// `doKho`: thang CHƯA CHỐT. Ghi đúng giá trị PM dùng, chuẩn hoá sau khi đủ mẫu.
+// `trongTlks`: false = ngoài TLKS, thường cộng thêm giờ. Mức cộng suy từ chính
+// các mẫu này, không đặt hệ số cứng.
+//
+// Mẫu một dòng (xoá dấu // để dùng):
+// {"_":"node","kind":"EffortSample","id":"cbvn-zcdmtdtt","featureType":"danh-muc","doKho":"trung-binh","trongTlks":true,"menu_id":"","sysid":"","gioCong":8,"ur_stt_rec":"","ma_da":"DEMO1","duyetBoi":"PM01","duyetVaoSp":"FBISP2422","ghiChu":"..."}

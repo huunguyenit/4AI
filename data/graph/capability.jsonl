@@ -1,0 +1,22 @@
+// Kho năng lực: FBO làm được gì, chưa được gì.
+//
+// Hai loại node:
+//   Capability       — khái niệm ổn định ("báo cáo công nợ theo tuổi nợ"), không có verdict.
+//   CapabilityVerdict — kết luận tại MỘT phiên bản SP cụ thể, nối tới Capability qua HAS_VERDICT.
+//
+// Verdict chỉ được ghi khi PM xác nhận, không suy đoán từ tên màn hình. Gặp yêu cầu chưa có
+// Capability tương ứng thì HỎI PM, đừng tự kết luận "FBO không làm được".
+//
+// Thứ tự tra khi cần trả lời "cái này FBO làm được chưa":
+//   tên menu (bar) → sysid controller → phân hệ → nghiệp vụ
+//
+// Năng lực đổi theo phiên bản thì THÊM node CapabilityVerdict mới (id khác vì ma_pbsp khác),
+// KHÔNG sửa đè node cũ — nhờ vậy mới tra được "SP2421 chưa có, SP2422 mới có".
+// verdict="workaround" thì đính kèm ImplementationPlan ở ledger/<ma_da>/graph.jsonl của
+// dự án đang cần workaround đó, nối bằng HAS_IMPLEMENTATION_PLAN từ Request tương ứng.
+
+// ---- ví dụ thật, PM xác nhận 2026-08-10 — dùng làm căn cứ cho UR-03 của DEMO1 ----
+// Báo cáo công nợ theo tuổi nợ là báo cáo chuẩn của FBO (không phải customize).
+{"_":"node","kind":"Capability","id":"sales-aging-report","menuBar":"Báo cáo công nợ","sysid":"","phanHe":"Bán hàng","nghiepVu":"Báo cáo tuổi nợ theo nhiều mức tuổi nợ"}
+{"_":"node","kind":"CapabilityVerdict","id":"sales-aging-report|FBISP2422","capabilityId":"sales-aging-report","ma_pbsp":"FBISP2422","verdict":"co","source":"PM xác nhận 2026-08-10","note":"Báo cáo chuẩn hỗ trợ cấu hình số mức tuổi nợ, không cần customize."}
+{"_":"edge","type":"HAS_VERDICT","from":"Capability:sales-aging-report","to":"CapabilityVerdict:sales-aging-report|FBISP2422","nguon":"pm-xac-nhan"}

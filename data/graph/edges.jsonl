@@ -1,0 +1,28 @@
+// Cạnh giữa các node dùng chung. Một dòng một cạnh.
+// `from`/`to` viết dạng "Kind:key" — khớp đúng khoá khai trong graph-schema.json.
+// `nguon` bắt buộc ghi vì sao có cạnh này. Cạnh do máy suy ra để doTinCay < 1
+// và chờ PM duyệt trước khi dùng làm căn cứ kết luận.
+
+// ---- menu gọi controller nào (wcommand.sysid) ----
+{"_":"edge","type":"USES","from":"Menu:03.01.02","to":"Controller:CPTran","nguon":"wcommand"}
+{"_":"edge","type":"USES","from":"Menu:05.01.04","to":"Controller:PVTran","nguon":"wcommand"}
+{"_":"edge","type":"USES","from":"Menu:06.01.04","to":"Controller:SVTran","nguon":"wcommand"}
+{"_":"edge","type":"USES","from":"Menu:08.01.01","to":"Controller:IRTran","nguon":"wcommand"}
+{"_":"edge","type":"USES","from":"Menu:08.01.04","to":"Controller:ITTran","nguon":"wcommand"}
+{"_":"edge","type":"USES","from":"Menu:08.01.05","to":"Controller:IPTran","nguon":"wcommand"}
+
+// ---- controller đứng trên bảng master nào (dmct9) ----
+{"_":"edge","type":"USES","from":"Controller:SVTran","to":"Table:m81$","nguon":"dmct9"}
+{"_":"edge","type":"USES","from":"Controller:IRTran","to":"Table:m74$","nguon":"dmct9"}
+{"_":"edge","type":"USES","from":"Controller:ITTran","to":"Table:m85$","nguon":"dmct9"}
+{"_":"edge","type":"USES","from":"Controller:SOTran","to":"Table:m64$","nguon":"dmct9 + PM xác nhận DXA=SOTran"}
+{"_":"edge","type":"USES","from":"Controller:POTran","to":"Table:m94$","nguon":"dmct9 + PM xác nhận PO1=POTran"}
+{"_":"edge","type":"USES","from":"Controller:PVTran","to":"Table:m71$","nguon":"chỉ mục controller (Grid\\PVTran.xml → m71$000000)","doTinCay":0.9,"ghi_chu":"Chưa đối chiếu dmct9 theo ma_ct='PNA'. Xác nhận lại khi có dịp."}
+
+// ---- bảng chi tiết phụ thuộc bảng master cùng họ ----
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:SVTran","to":"Table:d81$","nguon":"cùng họ bảng 81"}
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:IRTran","to":"Table:d74$","nguon":"cùng họ bảng 74"}
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:ITTran","to":"Table:d85$","nguon":"cùng họ bảng 85"}
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:SOTran","to":"Table:d64$","nguon":"cùng họ bảng 64"}
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:POTran","to":"Table:d94$","nguon":"cùng họ bảng 94"}
+{"_":"edge","type":"DEPENDS_ON","from":"Controller:PVTran","to":"Table:d71$","nguon":"chỉ mục controller (Grid\\PVDetail.xml → d71$000000)"}

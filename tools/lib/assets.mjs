@@ -160,7 +160,7 @@ export function scanSecrets({ hub = HUB, dirs = ['ledger', 'data'] } = {}) {
   for (const dir of dirs) {
     const root = path.join(hub, dir);
     if (!fs.existsSync(root)) continue;
-    for (const rel of fs.globSync('**/*.{md,json,txt}', { cwd: root })) {
+    for (const rel of fs.globSync('**/*.{md,json,jsonl,txt}', { cwd: root })) {
       const abs = path.join(root, rel);
       const lines = readText(abs).split('\n');
       for (let i = 0; i < lines.length; i++) {
