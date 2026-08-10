@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "c65e289bc7fc8aa64eaf7212d308d0e359ce0630d12e30109ac1fb9ccf4b22e6"
+      "sha256": "724c5e4957119e4f4f7dc1a9b39e5b4fa9c2937a605dd9fd8ce4738ba153a0bc"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -180,9 +180,9 @@
     },
     {
       "path": ".claude/skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "f5ec324d071592cd97a9560f81d5ce9f2ccd3dbaba098eca7e03ab1f9fab7e1b",
+      "sha256": "8830a0af81caa91073ae3fb5cd42724940fbb4f4559e9a414719e01e40b5cbf0",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".claude/skills/fbo-regulatory-rollout/SKILL.md",
@@ -438,9 +438,9 @@
     },
     {
       "path": ".cursor/rules/fbo-new-table-proposal.mdc",
-      "sha256": "c1bf684d1829e914a4142f2fc21bddb464d3cca342d4b9370f1d22e36b6649ab",
+      "sha256": "dceef0fd08faad0914ee9f65fb3177e2ad07d67904203dc9b9adb53de913a645",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".cursor/rules/fbo-regulatory-rollout.mdc",
@@ -628,9 +628,9 @@
     },
     {
       "path": ".github/instructions/fbo-new-table-proposal.instructions.md",
-      "sha256": "48856678ab0d31c9651b67c49811d2909ddf5b800093b3cfa23fde690820f60c",
+      "sha256": "75380222d166586233fa73acd9eb03932d07303e944e0f905b2d75b7cd299ce8",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".github/instructions/fbo-regulatory-rollout.instructions.md",
@@ -760,6 +760,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-10T06:22:49.450Z",
+  "syncedAt": "2026-08-10T06:54:36.276Z",
   "target": "4ai"
 }

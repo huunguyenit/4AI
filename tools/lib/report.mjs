@@ -12,8 +12,36 @@
 // Thiết kế: bảng màu semantic (đỏ/vàng/xanh) từ ui-ux-pro-max, font hệ thống (không @import
 // Google Fonts — trang phải mở được offline).
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
-import { HUB } from './assets.mjs';
+import { renderDdl } from './ddl.mjs';
+import { HUB, readJson } from './assets.mjs';
+
+/** Tải cấu hình từ qlda.local.json; fallback về defaults nếu file không tồn tại. */
+function loadConfig(hub = HUB) {
+  const localConfigPath = path.join(hub, 'data', 'qlda.local.json');
+  const defaults = { pm: { maNv: 'PM01', boPhanLt: 'FSD' } };
+
+  try {
+    return readJson(localConfigPath, defaults);
+  } catch {
+    return defaults;
+  }
+}
+
+/**
+ * SQL của một UR: ưu tiên `ddl` (đặc tả có cấu trúc → code sinh, luật cưỡng chế được),
+ * lùi về `ghiChuDdl` (chuỗi viết tay, chỉ còn cho dữ liệu cũ).
+ * @returns {{sql: string|null, err: string|null}}
+ */
+function sqlCuaUr(u) {
+  if (u.ddl) {
+    try { return { sql: renderDdl(u.ddl), err: null }; }
+    catch (e) { return { sql: null, err: e.message }; }
+  }
+  return { sql: u.ghiChuDdl ?? null, err: null };
+}
 
 const TRANG_THAI = {
   DD: { ten: 'Đã duyệt', mau: 'tt-dd' },
@@ -85,10 +113,26 @@ function validatePayloadDetailed(p) {
     if (!TRANG_THAI[u.trang_thai]) {
       fatal.push(`yeuCau[${i}] có trang_thai "${u.trang_thai}" — chỉ rà soát DD, XN, TH`);
     }
-    if (u.ghiChuDdl && !DDL_RE.test(u.ghiChuDdl)) {
-      quality.push(`${nhan}: \`ghiChuDdl\` không chứa câu DDL nào — gợi ý tạo bảng/thêm cột PHẢI là script SQL chạy được (CREATE TABLE / ALTER TABLE / EXEC …AddTable), không phải mô tả bằng lời. Xem skill fbo-new-table-proposal.`);
+    if (u.ddl) {
+      const { err } = sqlCuaUr(u);
+      if (err) quality.push(`${nhan}: \`ddl\` sai spec — ${err}`);
+    } else if (u.ghiChuDdl && !DDL_RE.test(u.ghiChuDdl)) {
+      quality.push(`${nhan}: \`ghiChuDdl\` không chứa câu DDL nào — gợi ý tạo bảng/thêm cột PHẢI là script SQL chạy được. Tốt hơn: dùng \`ddl\` có cấu trúc để bộ sinh tự viết SQL (tools/lib/ddl.mjs). Xem skill fbo-new-table-proposal.`);
     }
-    const created = u.ghiChuDdl && CREATE_RE.exec(u.ghiChuDdl);
+    // Tính năng chạy trên màn hình FBO ĐÃ CÓ SẴN thì không đẻ bảng mới — cái cần ghi lại là
+    // luồng dữ liệu nguồn → đích, không phải DDL.
+    if (u.luongDuLieu) {
+      const ld = u.luongDuLieu;
+      if (!Array.isArray(ld.nguon) || !ld.nguon.length) {
+        quality.push(`${nhan}: \`luongDuLieu\` thiếu \`nguon\` (mảng bảng/nguồn dữ liệu đầu vào).`);
+      }
+      if (!ld.dich || !ld.dich.manHinh) {
+        quality.push(`${nhan}: \`luongDuLieu\` thiếu \`dich.manHinh\` — phải nói rõ chứng từ đích trên FBO.`);
+      }
+    }
+    // Kiểm chéo dưới đây chỉ dành cho `ghiChuDdl` viết tay. Spec `ddl` đi qua bộ sinh nên
+    // các luật này đã được cưỡng chế ngay lúc sinh, không thể vi phạm.
+    const created = !u.ddl && u.ghiChuDdl && CREATE_RE.exec(u.ghiChuDdl);
     if (created) {
       const marker = DB_MARKER_RE.exec(u.ghiChuDdl);
       const tableName = created[1];
@@ -303,10 +347,11 @@ ${body}
 // ---------------------------------------------------------------- dựng: một dự án
 
 export function renderReport(payload, h) {
+  const config = loadConfig();
   const { today, phases, urs, quaHan, sapToi, chuaChot, congPm, ngoaiTlksThieuCanCu } = summarize(payload, h);
   const urChuaChot = urs.filter((u) => u._chotDaHen === false);
   const deXuatKl = urs.filter((u) => u.deXuat?.trang_thai === 'KL');
-  const coDdl = urs.filter((u) => u.ghiChuDdl);
+  const coDdl = urs.filter((u) => u.ddl || u.ghiChuDdl);
   const lichChuaChot = phases.some((p) => p.lichChuaChot);
 
   const canhBaoLich = lichChuaChot
@@ -330,10 +375,32 @@ ${chuaChot.map((p) => `<tr><td>${esc(p.giai_doan_da)}</td><td class="mono">${fmt
 <p class="lead">Đề xuất: đưa các yêu cầu chưa chốt được hạn trong những giai đoạn trên về trạng thái <code>TA</code>.</p>
 ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}` : '<p class="empty">Mọi giai đoạn có hạn đều đã tick chốt đã hẹn.</p>';
 
-  const ddlBlock = coDdl.length ? coDdl.map((u) => `<article class="ddl">
+  const ddlBlock = coDdl.length ? coDdl.map((u) => {
+    const { sql, err } = sqlCuaUr(u);
+    const than = err
+      ? `<p class="banner">Không sinh được SQL: ${esc(err)}</p>`
+      : `<div class="sql"><span class="sql-chip">SQL${u.ddl ? ' — sinh tự động' : ''} · chờ PM xác nhận</span><pre>${highlightSql(sql)}</pre></div>`;
+    return `<article class="ddl">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
-<div class="sql"><span class="sql-chip">SQL — chờ PM xác nhận</span><pre>${highlightSql(u.ghiChuDdl)}</pre></div>
-</article>`).join('\n') : '<p class="empty">Không có yêu cầu nào nhắc tạo bảng hay thêm cột.</p>';
+${than}
+</article>`;
+  }).join('\n') : '<p class="empty">Không có yêu cầu nào nhắc tạo bảng hay thêm cột.</p>';
+
+  const coLuong = urs.filter((u) => u.luongDuLieu);
+  const luongBlock = coLuong.length ? coLuong.map((u) => {
+    const ld = u.luongDuLieu;
+    const d = ld.dich ?? {};
+    const dichMo = [d.syscode && `mã <code>${esc(d.syscode)}</code>`, d.sysid && `controller <code>${esc(d.sysid)}</code>`,
+      d.bang && `bảng <code>${esc(d.bang)}</code>`].filter(Boolean).join(' · ');
+    return `<article class="flow">
+<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
+<dl class="flow-dl">
+  <dt>Nguồn</dt><dd>${(ld.nguon ?? []).map((n) => `<code>${esc(n)}</code>`).join(' + ') || '—'}</dd>
+  <dt>Đích</dt><dd><strong>${esc(d.manHinh ?? '—')}</strong>${dichMo ? ` — ${dichMo}` : ''}</dd>
+  ${ld.ghiChu ? `<dt>Ghi chú</dt><dd>${esc(ld.ghiChu)}</dd>` : ''}
+</dl>
+</article>`;
+  }).join('\n') : '';
 
   const body = [
     canhBaoLich,
@@ -350,6 +417,9 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
       urTable(ngoaiTlksThieuCanCu, [colStt, colNoiDung, colGiaiDoan, colTrangThai]), ngoaiTlksThieuCanCu.length),
     section('de-xuat-kl', 'Đề xuất KL', 'Mỗi mục phải dẫn được node Capability verdict "khong" làm căn cứ.',
       urTable(deXuatKl, [colStt, colNoiDung, colDeXuat]), deXuatKl.length),
+    coLuong.length ? section('luong-du-lieu', 'Luồng dữ liệu — tính năng dùng màn hình có sẵn',
+      'Những yêu cầu này KHÔNG tạo bảng mới: chứng từ đích đã tồn tại trên FBO. Cái cần chốt là nguồn lấy ở đâu và ghi vào chứng từ nào.',
+      luongBlock, coLuong.length) : '',
     section('ddl', 'Gợi ý tạo bảng / thêm cột', 'Script SQL đầy đủ cho lập trình viên — không tự chạy từ báo cáo này.',
       ddlBlock, coDdl.length),
     section('bieu-do', 'Biểu đồ', '', `
@@ -364,7 +434,7 @@ ${chartTlks(urs)}`),
   ].filter(Boolean).join('\n\n');
 
   const title = `Rà soát ${payload.ma_da}${payload.ten_ngan ? ' — ' + payload.ten_ngan : ''} · ${fmtDate(today)}`;
-  const metaLine = `Dự án <code>${esc(payload.ma_da)}</code>${payload.ma_pbsp ? ` · phiên bản <code>${esc(payload.ma_pbsp)}</code>` : ''} · phạm vi: LTQL ${esc(payload.pm ?? 'PM01')}, trạng thái DD/XN/TH · vai PM kết thúc ở HT. · <a href="../../_portfolio/${esc(payload.ngay_chay)}.html">← tổng quan mọi dự án</a>`;
+  const metaLine = `Dự án <code>${esc(payload.ma_da)}</code>${payload.ma_pbsp ? ` · phiên bản <code>${esc(payload.ma_pbsp)}</code>` : ''} · phạm vi: LTQL ${esc(payload.pm ?? config.pm.maNv)}, trạng thái DD/XN/TH · vai PM kết thúc ở HT. · <a href="../../_portfolio/${esc(payload.ngay_chay)}.html">← tổng quan mọi dự án</a>`;
   return page(title, metaLine, body);
 }
 
@@ -394,6 +464,7 @@ function projectCard(s, payload) {
  * @param {Array<{ma_da: string|null, errors: string[]}>} skipped dự án bị bỏ qua vì payload lỗi
  */
 export function renderPortfolio(items, skipped, warned, meta, h) {
+  const config = loadConfig();
   const allQuaHan = items.flatMap(({ payload, summary }) =>
     summary.quaHan.map((u) => ({ ...u, _ma_da: payload.ma_da })));
   const allSapToi = items.flatMap(({ payload, summary }) =>
@@ -436,7 +507,7 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
   ].filter(Boolean).join('\n\n');
 
   const title = `Tổng quan rà soát PM · ${fmtDate(meta.ngay_chay)}`;
-  const metaLine = `LTQL <code>${esc(meta.pm ?? 'PM01')}</code> · ${items.length} dự án${skipped.length ? ` (${skipped.length} bị bỏ qua)` : ''} · không chỉ định dự án cụ thể → xem toàn bộ.`;
+  const metaLine = `LTQL <code>${esc(meta.pm ?? config.pm.maNv)}</code> · ${items.length} dự án${skipped.length ? ` (${skipped.length} bị bỏ qua)` : ''} · không chỉ định dự án cụ thể → xem toàn bộ.`;
   return page(title, metaLine, body);
 }
 
@@ -504,6 +575,11 @@ font-family:ui-monospace,"Cascadia Code","Fira Code",SFMono-Regular,Consolas,mon
 pre{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;
 overflow-x:auto;font-size:12px;line-height:1.5}
 .ddl h3{margin-top:18px;color:var(--fg)}
+.flow{border:1px solid var(--line);border-left:3px solid var(--dd);border-radius:8px;padding:2px 16px 12px;margin:12px 0;background:var(--surface)}
+.flow h3{margin-top:14px;color:var(--fg)}
+.flow-dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:8px 0 0;font-size:13px}
+.flow-dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);font-weight:600;padding-top:2px}
+.flow-dl dd{margin:0}
 .chart{width:100%;height:auto;overflow:visible}
 .chart .ax{font-size:11px;fill:var(--mut)}
 .chart .val{font-size:11px;fill:var(--mut);font-family:ui-monospace,monospace}
