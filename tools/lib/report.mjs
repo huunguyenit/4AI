@@ -622,11 +622,12 @@ export function buildReportArtifact(payload, hub = HUB) {
   const errors = validatePayload(payload);
   if (errors.length) return { artifact: null, errors };
   const h = loadHolidays(hub);
+  const config = loadConfig(hub);
   const ngay = String(payload.ngay_chay).slice(0, 10);
   return {
     artifact: {
       relPath: `ledger/${payload.ma_da}/review/${ngay}.html`,
-      content: renderReport(payload, h),
+      content: renderReport({ ...payload, pm: config.pm.maNv }, h),
     },
     errors: [],
   };
@@ -643,6 +644,7 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   if (topErrors.length) return { artifact: null, errors: topErrors };
 
   const h = loadHolidays(hub);
+  const config = loadConfig(hub);
   const items = [];
   const skipped = [];
   const warned = [];
@@ -660,7 +662,7 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: `ledger/_portfolio/${ngay}.html`,
-      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: payload.pm }, h),
+      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: config.pm.maNv }, h),
     },
     errors: [],
   };
