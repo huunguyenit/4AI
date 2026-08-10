@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { HUB, loadAssets, readJson } from './assets.mjs';
+import { HUB, loadAssets, readJson, resolveMcpServers } from './assets.mjs';
 import { syncTarget, ensureImportLine } from './writer.mjs';
 import { emitClaude } from './emit/claude.mjs';
 import { emitCursor } from './emit/cursor.mjs';
@@ -19,6 +19,7 @@ function isUnc(p) {
 export async function runSync(opts) {
   const targetsCfg = readJson(path.join(HUB, 'targets.json'));
   const mcpCfg = readJson(path.join(HUB, 'mcp', 'servers.json'), { servers: {} });
+  mcpCfg.servers = resolveMcpServers(mcpCfg.servers);
   const { assets, errors } = loadAssets({
     domains: targetsCfg.domains ?? null,
     mcpServerIds: Object.keys(mcpCfg.servers),

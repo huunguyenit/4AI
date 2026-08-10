@@ -2,12 +2,12 @@
   "servers": {
     "4ai-fbo": {
       "args": [
-        "D:\\Fast Source\\4AI\\mcp\\fbo\\server.mjs",
+        "D:\\FBO-Shared\\mcp\\4AI\\mcp\\fbo\\server.mjs",
         "--hub",
-        "D:\\Fast Source\\4AI"
+        "D:\\FBO-Shared\\mcp\\4AI"
       ],
       "command": "C:\\Program Files\\nodejs\\node.exe",
-      "cwd": "D:\\Fast Source\\4AI",
+      "cwd": "D:\\FBO-Shared\\mcp\\4AI",
       "type": "stdio"
     }
   }

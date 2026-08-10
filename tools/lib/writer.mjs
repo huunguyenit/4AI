@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { stableStringify, canonical, deepMerge, getPath, setPath, deletePath } from './json.mjs';
+import { HUB } from './assets.mjs';
 
 export function sha256(text) {
   return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
@@ -269,7 +270,7 @@ export function syncTarget({ destRoot, textFiles, jsonFiles, manifest, opts }) {
 
   const newManifest = {
     schemaVersion: 1,
-    hub: 'D:\\Fast Source\\4AI',
+    hub: HUB,
     target: opts.targetName,
     syncedAt: new Date().toISOString(),
     files: newManifestFiles.sort((a, b) => (a.path < b.path ? -1 : 1)),

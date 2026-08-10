@@ -5,8 +5,8 @@
       "description": "MCP riêng của 4AI: index và tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi ảnh hưởng của Include, đọc file giữ nguyên encoding, truy vấn SQL qua Web.config.",
       "transport": "stdio",
       "command": "C:\\Program Files\\nodejs\\node.exe",
-      "args": ["D:\\Fast Source\\4AI\\mcp\\fbo\\server.mjs", "--hub", "D:\\Fast Source\\4AI"],
-      "cwd": "D:\\Fast Source\\4AI",
+      "args": ["{{HUB}}\\mcp\\fbo\\server.mjs", "--hub", "{{HUB}}"],
+      "cwd": "{{HUB}}",
       "env": {},
       "targets": ["claude", "cursor", "vscode", "devworkflow"],
       "autoApprove": [

@@ -31,6 +31,28 @@ export function readText(file) {
   return s;
 }
 
+/**
+ * mcp/servers.json dùng token `{{HUB}}` trong command/args/cwd/env thay vì đường dẫn
+ * tuyệt đối cố định — hub được checkout ở đường dẫn nào thì token giải ra đường dẫn đó,
+ * nên cùng một mcp/servers.json chạy đúng trên nhiều máy/nhiều lần chuyển chỗ.
+ */
+export function resolveMcpServers(servers, hub = HUB) {
+  const sub = (v) => (typeof v === 'string' ? v.replaceAll('{{HUB}}', hub) : v);
+  const out = {};
+  for (const [id, srv] of Object.entries(servers)) {
+    out[id] = {
+      ...srv,
+      command: sub(srv.command),
+      args: (srv.args ?? []).map(sub),
+      ...(srv.cwd ? { cwd: sub(srv.cwd) } : {}),
+      ...(srv.env && Object.keys(srv.env).length
+        ? { env: Object.fromEntries(Object.entries(srv.env).map(([k, v]) => [k, sub(v)])) }
+        : {}),
+    };
+  }
+  return out;
+}
+
 export function readJson(file, fallback = undefined) {
   if (!fs.existsSync(file)) {
     if (fallback !== undefined) return fallback;

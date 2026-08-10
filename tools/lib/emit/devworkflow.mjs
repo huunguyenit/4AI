@@ -10,6 +10,7 @@
 import { emitPaths } from '../paths.mjs';
 import { banner } from './common.mjs';
 import { sha256 } from '../writer.mjs';
+import { HUB } from '../assets.mjs';
 
 // Vị trí trong SOURCE TREE của DevWorkFlow — build link Config/ sang Runtime/Config/.
 const CONFIG_ROOT = 'DevWorkFlow.UI/Config';
@@ -55,7 +56,7 @@ export function emitDevworkflow({ assets, mcpServers }) {
   const kit = {
     schemaVersion: 1,
     generatedBy: '4AI',
-    hubPath: 'D:\\Fast Source\\4AI',
+    hubPath: HUB,
     payloadRoot: 'ai',
     domains: [...new Set(assets.map((a) => a.domain))].sort(),
     assets: kitAssets.sort((x, y) => (x.id < y.id ? -1 : 1)),

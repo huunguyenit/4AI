@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { HUB, loadAssets, readJson, scanSecrets } from './lib/assets.mjs';
+import { HUB, loadAssets, readJson, resolveMcpServers, scanSecrets } from './lib/assets.mjs';
 import { skeleton, KINDS } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
 import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
@@ -33,6 +33,7 @@ function fail(msg) {
 function loadConfig() {
   const targetsCfg = readJson(path.join(HUB, 'targets.json'), { version: 1, domains: null, targets: [] });
   const mcpCfg = readJson(path.join(HUB, 'mcp', 'servers.json'), { version: 1, servers: {} });
+  mcpCfg.servers = resolveMcpServers(mcpCfg.servers);
   return { targetsCfg, mcpCfg };
 }
 

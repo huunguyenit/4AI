@@ -4,7 +4,7 @@
   "targets": [
     {
       "name": "4ai",
-      "path": "D:\\Fast Source\\4AI",
+      "path": "D:\\FBO-Shared\\mcp\\4AI",
       "tools": ["claude", "cursor", "vscode"],
       "domains": ["core", "fbo-xml", "project-mgmt"],
       "enabled": true,
@@ -12,7 +12,7 @@
     },
     {
       "name": "user-global",
-      "path": "C:\\Users\\PM01\\.claude",
+      "path": "C:\\Users\\USER\\.claude",
       "tools": ["claude"],
       "domains": ["fbo-xml", "project-mgmt"],
       "scope": "user",
