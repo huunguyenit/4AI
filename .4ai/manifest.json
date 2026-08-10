@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "9c1bcbb1f0148c33a87173d8cd2a077138b9c2b0825af000d7a6f8a59ce5501b"
+      "sha256": "c65e289bc7fc8aa64eaf7212d308d0e359ce0630d12e30109ac1fb9ccf4b22e6"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -96,9 +96,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "86de48762c02f7e08eb6f697ed68af91379029cc884450c1b53c100354789bfe",
+      "sha256": "861d3c7124fb9b4c57469c54c5eaf8980c556630d222ed9c59991f48791bd73f",
       "sourceId": "pm-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -180,9 +180,9 @@
     },
     {
       "path": ".claude/skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "9aad35f72068e69c62c9dfe612233e1f15e0e417a2e5b1f04a7a45cdd34343a4",
+      "sha256": "f5ec324d071592cd97a9560f81d5ce9f2ccd3dbaba098eca7e03ab1f9fab7e1b",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/fbo-regulatory-rollout/SKILL.md",
@@ -216,9 +216,9 @@
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "b6a96ba2231965bfeb275812543edb920f8e8f57fddf27db05cfa7923a5858ad",
+      "sha256": "f6ddd1b7149cbf701945a610abe0ac1108568d6ce3de2138064eaf4db4d0338a",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".claude/skills/pm-release-handover/SKILL.md",
@@ -318,9 +318,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "810cd9612011c57405f9efce1ea6e456e242ae1fd9eaf8c49d472b68bbfe0aef",
+      "sha256": "98509df9d1e72a9afc05bb3f66c1a6da25ee76725dc9f8339dc49e60de7ce079",
       "sourceId": "pm-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -438,9 +438,9 @@
     },
     {
       "path": ".cursor/rules/fbo-new-table-proposal.mdc",
-      "sha256": "1a8735d54c0bb24e95c60d963efb1eab4dfcbe0f554e7ee103855c8c4f2be71d",
+      "sha256": "c1bf684d1829e914a4142f2fc21bddb464d3cca342d4b9370f1d22e36b6649ab",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/rules/fbo-regulatory-rollout.mdc",
@@ -480,9 +480,9 @@
     },
     {
       "path": ".cursor/rules/pm-deadline-review.mdc",
-      "sha256": "3f3c663669e405935ea12769224d377dd8529ffbcbe2955e642955266ad30a94",
+      "sha256": "81f72a604924e52525e8fa6dfe8ee044034d0d50fc0821d47dd9884ee34e4f4b",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".cursor/rules/pm-ledger-discipline.mdc",
@@ -628,9 +628,9 @@
     },
     {
       "path": ".github/instructions/fbo-new-table-proposal.instructions.md",
-      "sha256": "fa4430841d09064e999a1eca631216d30c6329ae7ef6faa0495b07d0f13dc583",
+      "sha256": "48856678ab0d31c9651b67c49811d2909ddf5b800093b3cfa23fde690820f60c",
       "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/fbo-regulatory-rollout.instructions.md",
@@ -664,9 +664,9 @@
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "80c32949b8945360abae9e891d67738a63576ae566517c988f5bcb4c5ef580c4",
+      "sha256": "8b11eb42507d5930f39cec7607482264d049cdf1e5706f51808b7ce064b38b49",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".github/instructions/pm-release-handover.instructions.md",
@@ -712,9 +712,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "961e2b686a0a03c0ec4d815b8918c67fb3f3efb74601459a570c789819266d6e",
+      "sha256": "80f5e7af9e98cb2a38de81d9cde512a6af85de9bba13db04b613fd9abd03b7cb",
       "sourceId": "pm-review",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -760,6 +760,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-10T04:22:09.888Z",
+  "syncedAt": "2026-08-10T06:22:49.450Z",
   "target": "4ai"
 }

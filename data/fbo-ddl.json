@@ -6,7 +6,7 @@
       "Đề xuất tên bảng theo quy ước dưới đây.",
       "Chỉ ra chứng từ chuẩn để lập trình viên sao chép cấu trúc.",
       "Ghi rõ trang aspx và controller tương ứng của chứng từ tham khảo.",
-      "Kèm mẫu script vào ghi chú UR để LT hiểu và làm theo."
+      "Viết SCRIPT SQL THẬT (CREATE TABLE / ALTER TABLE đầy đủ cột, kiểu, PK) đính vào ghi chú UR — không phải mô tả bằng lời. Lập trình viên phải đọc được và chạy được ngay, chỉ chờ PM xác nhận."
     ],
     "khongLam": [
       "Chạy bất kỳ lệnh DDL nào.",
@@ -17,6 +17,7 @@
   },
 
   "danhMuc": {
+    "scopeNote": "Quy ước `zc` + 5 cột bắt buộc dưới đây CHỈ áp dụng cho bảng danh mục trong DB App của FBO (nơi có sysgendata, sysmenu, hệ thống controller). KHÔNG áp dụng cho bảng trong DB trung gian — xem mục `bangTrungGian`.",
     "namingRule": "Bảng danh mục customize đặt tiền tố `zc` — `z` là chữ cái cuối bảng chữ cái (đẩy xuống cuối khi sắp xếp), `c` là customize. Phần còn lại giữ nguyên quy ước FBO: `dm` + viết tắt nghiệp vụ.",
     "examples": [
       { "table": "zcdmtdtt", "nghia": "Danh mục tiến độ thanh toán" }
@@ -28,7 +29,43 @@
       { "name": "datetime0", "purpose": "Thời điểm tạo (audit)." },
       { "name": "datetime2", "purpose": "Thời điểm sửa cuối (audit)." }
     ],
-    "mandatoryNote": "Năm cột trên là BẮT BUỘC với mọi bảng danh mục. Ngoài ra kiểu dữ liệu và các cột nghiệp vụ phải sao chép từ một bảng danh mục chuẩn cùng loại trong chính chương trình đó — không tự nghĩ ra kiểu."
+    "mandatoryNote": "Năm cột trên là BẮT BUỘC với mọi bảng danh mục trong DB App. Ngoài ra kiểu dữ liệu và các cột nghiệp vụ phải sao chép từ một bảng danh mục chuẩn cùng loại trong chính chương trình đó — không tự nghĩ ra kiểu."
+  },
+
+  "bangTrungGian": {
+    "note": "Bảng trong một DATABASE TRUNG GIAN (staging) — không phải DB App của FBO. Mục đích: kéo dữ liệu từ hệ thống của khách (Samo, đối tác, file nạp...) về trước khi import vào FBO. Đây không phải danh mục hay chứng từ FBO nên KHÔNG áp quy ước `zc`, KHÔNG bắt buộc 5 cột audit — bảng chỉ cần mirror đúng cấu trúc của hệ nguồn để nhận dữ liệu nguyên vẹn.",
+    "rule": [
+      "Đặt tên bảng đúng theo tên ở hệ nguồn (không dịch, không thêm tiền tố) — mục đích là ánh xạ 1-1 khi ETL, đổi tên chỉ gây khó đối chiếu.",
+      "Cột và kiểu dữ liệu lấy đúng theo mô tả/schema hệ nguồn cung cấp. Không tự suy đoán kiểu khi chưa có mô tả rõ (int/varchar/nvarchar khác nhau về khả năng chứa dữ liệu — lệch kiểu là mất dữ liệu).",
+      "PK đặt theo khoá của hệ nguồn, không tự bịa khoá composite trừ khi hệ nguồn xác nhận.",
+      "KHÔNG thêm status/user_id0/user_id2/datetime0/datetime2 trừ khi PM yêu cầu theo dõi lịch sử nạp — nếu cần, đó là quyết định riêng, ghi rõ lý do trong ghi chú UR."
+    ],
+    "verifiedExample": {
+      "database": "DB trung gian DEMO1 (kết nối FBO–Samo, xem data/qlda.json → projects.DEMO1)",
+      "table": "Town",
+      "muc_dich": "Lấy dữ liệu vùng địa lý (Region/State) từ Samo về DB trung gian trước khi FBO đọc.",
+      "columns": [
+        { "name": "Inc", "type": "int", "notNull": true, "pk": true, "nghia": "Khoá chính của bảng (Samo)" },
+        { "name": "State", "type": "int", "nghia": "Trường thông tin của Samo" },
+        { "name": "Region", "type": "int", "nghia": "Trường thông tin của Samo" },
+        { "name": "Alias", "type": "varchar(3)", "nghia": "Trường thông tin của Samo" },
+        { "name": "Name", "type": "nvarchar(24)", "nghia": "Tên vùng địa lý" },
+        { "name": "Iname", "type": "nvarchar(24)", "nghia": "Tên khác" }
+      ],
+      "columnTypeCaveat": "PM cung cấp bảng mô tả ghi Name/Iname là Nvarchar(24) nhưng script tay kèm theo lại viết varchar(24) — CHỌN nvarchar theo bảng mô tả (Name/Iname là tên địa danh, cần Unicode) và đã sửa trong `sql` bên dưới. Xác nhận lại với nguồn Samo nếu varchar mới là đúng.",
+      "sql": [
+        "CREATE TABLE Town (",
+        "  Inc int NOT NULL,",
+        "  State int NULL,",
+        "  Region int NULL,",
+        "  Alias varchar(3) NULL,",
+        "  Name nvarchar(24) NULL,",
+        "  Iname nvarchar(24) NULL,",
+        "  CONSTRAINT PK_Town PRIMARY KEY (Inc)",
+        ")"
+      ],
+      "sqlFixNote": "Script PM đưa thiếu dấu phẩy trước CONSTRAINT (cú pháp T-SQL sai, không chạy được) — đã thêm dấu phẩy ở bản trên."
+    }
   },
 
   "chungTu": {

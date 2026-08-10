@@ -21,6 +21,7 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
   node tools/4ai.mjs graph check        validate đồ thị JSONL. Không bao giờ ghi
   node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
   node tools/4ai.mjs report <payload>   dựng báo cáo rà soát HTML vào ledger/ [--dry-run]
+                                        payload có "kind":"portfolio" -> tổng quan nhiều dự án
 `;
 
 function fail(msg) {
@@ -269,10 +270,11 @@ async function cmdReport(payloadPath, opts) {
   } catch (e) {
     fail(`payload không parse được: ${e.message}`);
   }
-  const { buildReportArtifact } = await import('./lib/report.mjs');
+  const { buildReportArtifact, buildPortfolioArtifact } = await import('./lib/report.mjs');
   const { writeArtifacts } = await import('./lib/writer.mjs');
 
-  const { artifact, errors } = buildReportArtifact(payload, HUB);
+  const build = payload?.kind === 'portfolio' ? buildPortfolioArtifact : buildReportArtifact;
+  const { artifact, errors } = build(payload, HUB);
   if (errors.length) {
     for (const e of errors) process.stderr.write(`  ${e}\n`);
     fail(`payload thiếu ${errors.length} chỗ — không dựng báo cáo.`);

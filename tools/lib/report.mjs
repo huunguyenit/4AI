@@ -1,10 +1,16 @@
 // report.mjs — dựng báo cáo rà soát thành HTML tự chứa.
 //
-// TRẢ VỀ {relPath, content}; writer.mjs mới ghi. Không gọi DB, không gọi mạng:
+// TRẢ VỀ {relPath, content}; writer.mjs mới ghi. Không gọi DB, không gọi mạng, không CDN:
 // dữ liệu vào bằng payload JSON do người chạy rà soát chuẩn bị (query_sql →
 // scratchpad → lệnh này). Nhờ vậy báo cáo dựng lại được y hệt từ cùng payload.
 //
+// Hai loại payload:
+//   - một dự án  : { ma_da, ngay_chay, giaiDoan[], yeuCau[] }              -> buildReportArtifact
+//   - tổng quan  : { kind: "portfolio", ngay_chay, projects: [payload,…] } -> buildPortfolioArtifact
+//
 // Biểu đồ là SVG sinh tay — không CDN, không thư viện, mở offline vẫn đúng.
+// Thiết kế: bảng màu semantic (đỏ/vàng/xanh) từ ui-ux-pro-max, font hệ thống (không @import
+// Google Fonts — trang phải mở được offline).
 
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
 import { HUB } from './assets.mjs';
@@ -25,24 +31,95 @@ const fmtDate = (iso) => {
   return y && m && d ? `${d}/${m}/${y}` : s;
 };
 
-/** Kiểm payload trước khi dựng — thiếu gì báo rõ chỗ đó, không lặng lẽ render rỗng. */
-export function validatePayload(p) {
-  const errs = [];
-  if (!p || typeof p !== 'object') return ['payload không phải object'];
-  if (!p.ma_da) errs.push('thiếu `ma_da`');
-  if (!p.ngay_chay) errs.push('thiếu `ngay_chay` (YYYY-MM-DD) — ngày chạy rà soát');
-  if (!Array.isArray(p.giaiDoan)) errs.push('thiếu mảng `giaiDoan`');
-  if (!Array.isArray(p.yeuCau)) errs.push('thiếu mảng `yeuCau`');
+// ---------------------------------------------------------------- SQL highlight
+
+const SQL_KEYWORDS = ['CREATE', 'TABLE', 'ALTER', 'ADD', 'DROP', 'COLUMN', 'NOT', 'NULL',
+  'PRIMARY', 'KEY', 'CONSTRAINT', 'DEFAULT', 'REFERENCES', 'UNIQUE', 'EXEC', 'DECLARE',
+  'SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'IF', 'EXISTS', 'AND', 'OR', 'SET', 'AS'];
+const SQL_TYPES = ['INT', 'BIGINT', 'SMALLINT', 'TINYINT', 'VARCHAR', 'NVARCHAR', 'CHAR', 'NCHAR',
+  'DATETIME', 'SMALLDATETIME', 'DATE', 'NUMERIC', 'DECIMAL', 'BIT', 'MONEY', 'TEXT', 'NTEXT'];
+const kwRe = new RegExp(`\\b(${SQL_KEYWORDS.join('|')})\\b`, 'g');
+const tyRe = new RegExp(`\\b(${SQL_TYPES.join('|')})\\b`, 'gi');
+
+/** Tô nhẹ SQL bằng regex trên text ĐÃ escape — an toàn, không cần thư viện highlight. */
+function highlightSql(raw) {
+  return String(raw ?? '').split('\n').map((line) => {
+    if (line.trim().startsWith('--')) return `<span class="sql-cm">${esc(line)}</span>`;
+    return esc(line).replace(kwRe, '<span class="sql-kw">$1</span>').replace(tyRe, '<span class="sql-ty">$&</span>');
+  }).join('\n');
+}
+
+// `ghiChuDdl` phải là SQL CHẠY ĐƯỢC, không phải mô tả bằng lời. Chỉ dẫn trong skill là
+// chưa đủ — một lượt chạy thật ngày 2026-08-10 vẫn sinh ra 17 dòng văn xuôi dù skill đã
+// nói rõ. Nên luật này được CƯỠNG CHẾ ở đây: sai thì `report` từ chối dựng.
+const DDL_RE = /\b(CREATE\s+TABLE|ALTER\s+TABLE|CREATE\s+INDEX|DROP\s+TABLE|EXEC\s+\S*AddTable)/i;
+// Script CREATE TABLE phải khai đích đến bằng một marker tường minh. Dò theo văn xuôi
+// ("bảng trung gian…") quá mong manh — marker cho phép kiểm bằng máy, và đọc báo cáo
+// cũng biết ngay bảng này sinh ra ở DB nào.
+const CREATE_RE = /\bCREATE\s+TABLE\s+\[?([A-Za-z_][\w$]*)/i;
+const DB_MARKER_RE = /^\s*--\s*DB:\s*(app|trung-gian)\s*$/im;
+const AUDIT_COLS = ['status', 'user_id0', 'user_id2', 'datetime0', 'datetime2'];
+
+/**
+ * Kiểm payload, tách hai mức:
+ *   fatal   — dữ liệu không dựng nổi (thiếu khoá, trạng thái lạ, hỏng cách tính hạn).
+ *   quality — nội dung sai chuẩn nhưng phần deadline vẫn dùng được (ghiChuDdl không phải SQL).
+ * Báo cáo một dự án đòi SẠCH cả hai. Trang tổng quan chỉ loại dự án khi `fatal` — lỗi
+ * `quality` không được phép làm một dự án biến mất khỏi tầm mắt PM, chỉ hiện cảnh báo.
+ */
+function validatePayloadDetailed(p) {
+  const fatal = [];
+  const quality = [];
+  if (!p || typeof p !== 'object') return { fatal: ['payload không phải object'], quality };
+  if (!p.ma_da) fatal.push('thiếu `ma_da`');
+  if (!p.ngay_chay) fatal.push('thiếu `ngay_chay` (YYYY-MM-DD) — ngày chạy rà soát');
+  if (!Array.isArray(p.giaiDoan)) fatal.push('thiếu mảng `giaiDoan`');
+  if (!Array.isArray(p.yeuCau)) fatal.push('thiếu mảng `yeuCau`');
   for (const [i, g] of (p.giaiDoan ?? []).entries()) {
-    if (!g.giai_doan_da) errs.push(`giaiDoan[${i}] thiếu \`giai_doan_da\``);
-    if (!g.ngay_ht) errs.push(`giaiDoan[${i}] thiếu \`ngay_ht\` (hạn hiệu lực = MAX(ngay_ht))`);
+    if (!g.giai_doan_da) fatal.push(`giaiDoan[${i}] thiếu \`giai_doan_da\``);
+    if (!g.ngay_ht) fatal.push(`giaiDoan[${i}] thiếu \`ngay_ht\` (hạn hiệu lực = MAX(ngay_ht))`);
   }
   for (const [i, u] of (p.yeuCau ?? []).entries()) {
-    if (!u.stt_rec) errs.push(`yeuCau[${i}] thiếu \`stt_rec\``);
+    const nhan = u.fcode1 || String(u.stt_rec ?? '').trim() || `#${i}`;
+    if (!u.stt_rec) fatal.push(`yeuCau[${i}] thiếu \`stt_rec\``);
     if (!TRANG_THAI[u.trang_thai]) {
-      errs.push(`yeuCau[${i}] có trang_thai "${u.trang_thai}" — chỉ rà soát DD, XN, TH`);
+      fatal.push(`yeuCau[${i}] có trang_thai "${u.trang_thai}" — chỉ rà soát DD, XN, TH`);
+    }
+    if (u.ghiChuDdl && !DDL_RE.test(u.ghiChuDdl)) {
+      quality.push(`${nhan}: \`ghiChuDdl\` không chứa câu DDL nào — gợi ý tạo bảng/thêm cột PHẢI là script SQL chạy được (CREATE TABLE / ALTER TABLE / EXEC …AddTable), không phải mô tả bằng lời. Xem skill fbo-new-table-proposal.`);
+    }
+    const created = u.ghiChuDdl && CREATE_RE.exec(u.ghiChuDdl);
+    if (created) {
+      const marker = DB_MARKER_RE.exec(u.ghiChuDdl);
+      const tableName = created[1];
+      const laZc = /^zc/i.test(tableName);
+      if (!marker) {
+        quality.push(`${nhan}: script CREATE TABLE thiếu dòng khai đích đến. Thêm \`-- DB: app\` (DB App của FBO) hoặc \`-- DB: trung-gian\` (DB staging) — quy ước đặt tên khác nhau hoàn toàn giữa hai nơi.`);
+      } else if (marker[1].toLowerCase() === 'trung-gian' && laZc) {
+        quality.push(`${nhan}: khai \`-- DB: trung-gian\` nhưng đặt tên bảng \`${tableName}\` — tiền tố zc CHỈ dành cho DB App. Bảng ở DB trung gian giữ nguyên tên hệ nguồn để ETL ánh xạ 1-1. Xem data/fbo-ddl.json → bangTrungGian.`);
+      } else if (marker[1].toLowerCase() === 'app' && laZc) {
+        const thieu = AUDIT_COLS.filter((c) => !new RegExp(`\\b${c}\\b`, 'i').test(u.ghiChuDdl));
+        if (thieu.length) {
+          quality.push(`${nhan}: danh mục \`${tableName}\` trong DB App thiếu cột audit bắt buộc: ${thieu.join(', ')}. Xem data/fbo-ddl.json → danhMuc.mandatoryColumns.`);
+        }
+      }
     }
   }
+  return { fatal, quality };
+}
+
+/** Kiểm payload trước khi dựng — thiếu gì báo rõ chỗ đó, không lặng lẽ render rỗng. */
+export function validatePayload(p) {
+  const { fatal, quality } = validatePayloadDetailed(p);
+  return [...fatal, ...quality];
+}
+
+export function validatePortfolioPayload(p) {
+  const errs = [];
+  if (!p || typeof p !== 'object') return ['payload không phải object'];
+  if (p.kind !== 'portfolio') errs.push('thiếu `kind: "portfolio"`');
+  if (!p.ngay_chay) errs.push('thiếu `ngay_chay` (YYYY-MM-DD)');
+  if (!Array.isArray(p.projects) || !p.projects.length) errs.push('thiếu mảng `projects` (ít nhất một dự án)');
   return errs;
 }
 
@@ -65,6 +142,19 @@ function enrich(payload, h) {
     };
   });
   return { today, phases: [...byPhase.values()], urs };
+}
+
+/** Tóm tắt một dự án dùng cho cả trang riêng lẫn thẻ trong trang tổng quan. */
+function summarize(payload, h) {
+  const { today, phases, urs } = enrich(payload, h);
+  const quaHan = urs.filter((u) => u._muc === 'qua-han');
+  const sapToi = urs.filter((u) => u._muc === 'sap-toi');
+  const chuaChot = phases.filter((p) => !p.xac_nhan_da_hen_yn);
+  const congPm = urs.filter((u) => u.trang_thai === 'DD');
+  const ngoaiTlksThieuCanCu = urs.filter((u) => !u.tlks_yn && !u.canCu);
+  const health = quaHan.length ? 'khan-cap' : sapToi.length || chuaChot.length ? 'can-chu-y' : 'on';
+  const ganNhat = [...quaHan, ...sapToi].sort((a, b) => (a._soNgay ?? 0) - (b._soNgay ?? 0))[0] ?? null;
+  return { today, phases, urs, quaHan, sapToi, chuaChot, congPm, ngoaiTlksThieuCanCu, health, ganNhat };
 }
 
 // ---------------------------------------------------------------- biểu đồ
@@ -152,7 +242,7 @@ function chartTlks(urs) {
 // ---------------------------------------------------------------- bảng
 
 function urTable(urs, cols) {
-  if (!urs.length) return '<p class="empty">Không có mục nào. </p>';
+  if (!urs.length) return '<p class="empty">Không có mục nào.</p>';
   const head = cols.map((c) => `<th>${esc(c.ten)}</th>`).join('');
   const body = urs.map((u) => {
     const tds = cols.map((c) => `<td class="${c.cls ?? ''}">${c.get(u)}</td>`).join('');
@@ -173,6 +263,7 @@ const colTlks = { ten: 'TLKS', get: (u) => u.tlks_yn
   : `<span class="warn">ngoài</span>${u.canCu ? ' ' + esc(u.canCu) : ' <em>chưa có căn cứ</em>'}` };
 const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
+const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
 
 function section(id, tieuDe, moTa, noiDung, dem) {
   const badge = dem === undefined ? '' : `<span class="count${dem ? '' : ' zero'}">${dem}</span>`;
@@ -183,17 +274,37 @@ ${noiDung}
 </section>`;
 }
 
-// ---------------------------------------------------------------- dựng
+const HEALTH_LABEL = { 'khan-cap': 'Khẩn cấp', 'can-chu-y': 'Cần chú ý', 'on': 'Ổn' };
+
+function page(title, metaLine, body) {
+  return `<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<style>${CSS}</style>
+</head>
+<body>
+<header>
+  <h1>${esc(title)}</h1>
+  <p class="meta">${metaLine}</p>
+</header>
+<main>
+${body}
+</main>
+<footer>
+  <p>Sinh bởi <code>node tools/4ai.mjs report</code>. Mọi đề xuất trạng thái ở đây <strong>chưa được thi hành</strong> — chỉ chạy sau khi PM xác nhận.</p>
+</footer>
+</body>
+</html>`;
+}
+
+// ---------------------------------------------------------------- dựng: một dự án
 
 export function renderReport(payload, h) {
-  const { today, phases, urs } = enrich(payload, h);
-
-  const quaHan = urs.filter((u) => u._muc === 'qua-han');
-  const sapToi = urs.filter((u) => u._muc === 'sap-toi');
-  const chuaChot = phases.filter((p) => !p.xac_nhan_da_hen_yn);
+  const { today, phases, urs, quaHan, sapToi, chuaChot, congPm, ngoaiTlksThieuCanCu } = summarize(payload, h);
   const urChuaChot = urs.filter((u) => u._chotDaHen === false);
-  const congPm = urs.filter((u) => u.trang_thai === 'DD');
-  const ngoaiTlksThieuCanCu = urs.filter((u) => !u.tlks_yn && !u.canCu);
   const deXuatKl = urs.filter((u) => u.deXuat?.trang_thai === 'KL');
   const coDdl = urs.filter((u) => u.ghiChuDdl);
   const lichChuaChot = phases.some((p) => p.lichChuaChot);
@@ -221,7 +332,7 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
 
   const ddlBlock = coDdl.length ? coDdl.map((u) => `<article class="ddl">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
-<pre>${esc(u.ghiChuDdl)}</pre>
+<div class="sql"><span class="sql-chip">SQL — chờ PM xác nhận</span><pre>${highlightSql(u.ghiChuDdl)}</pre></div>
 </article>`).join('\n') : '<p class="empty">Không có yêu cầu nào nhắc tạo bảng hay thêm cột.</p>';
 
   const body = [
@@ -239,7 +350,7 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
       urTable(ngoaiTlksThieuCanCu, [colStt, colNoiDung, colGiaiDoan, colTrangThai]), ngoaiTlksThieuCanCu.length),
     section('de-xuat-kl', 'Đề xuất KL', 'Mỗi mục phải dẫn được node Capability verdict "khong" làm căn cứ.',
       urTable(deXuatKl, [colStt, colNoiDung, colDeXuat]), deXuatKl.length),
-    section('ddl', 'Gợi ý tạo bảng / thêm cột', 'Chỉ là ghi chú cho lập trình viên. Không script nào được chạy từ báo cáo này.',
+    section('ddl', 'Gợi ý tạo bảng / thêm cột', 'Script SQL đầy đủ cho lập trình viên — không tự chạy từ báo cáo này.',
       ddlBlock, coDdl.length),
     section('bieu-do', 'Biểu đồ', '', `
 <h3>Hạn theo giai đoạn</h3>
@@ -252,67 +363,145 @@ ${chartByPhase(urs, phases)}
 ${chartTlks(urs)}`),
   ].filter(Boolean).join('\n\n');
 
-  const tieuDe = `Rà soát ${payload.ma_da}${payload.ten_ngan ? ' — ' + payload.ten_ngan : ''} · ${fmtDate(today)}`;
-
-  return `<!doctype html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(tieuDe)}</title>
-<style>${CSS}</style>
-</head>
-<body>
-<header>
-  <h1>${esc(tieuDe)}</h1>
-  <p class="meta">Dự án <code>${esc(payload.ma_da)}</code>${payload.ma_pbsp ? ` · phiên bản <code>${esc(payload.ma_pbsp)}</code>` : ''} · phạm vi: LTQL ${esc(payload.pm ?? 'PM01')}, trạng thái DD/XN/TH · vai PM kết thúc ở HT.</p>
-</header>
-<main>
-${body}
-</main>
-<footer>
-  <p>Sinh bởi <code>node tools/4ai.mjs report</code>. Mọi đề xuất trạng thái ở đây <strong>chưa được thi hành</strong> — chỉ chạy sau khi PM xác nhận.</p>
-</footer>
-</body>
-</html>`;
+  const title = `Rà soát ${payload.ma_da}${payload.ten_ngan ? ' — ' + payload.ten_ngan : ''} · ${fmtDate(today)}`;
+  const metaLine = `Dự án <code>${esc(payload.ma_da)}</code>${payload.ma_pbsp ? ` · phiên bản <code>${esc(payload.ma_pbsp)}</code>` : ''} · phạm vi: LTQL ${esc(payload.pm ?? 'PM01')}, trạng thái DD/XN/TH · vai PM kết thúc ở HT. · <a href="../../_portfolio/${esc(payload.ngay_chay)}.html">← tổng quan mọi dự án</a>`;
+  return page(title, metaLine, body);
 }
 
+// ---------------------------------------------------------------- dựng: tổng quan nhiều dự án
+
+function projectCard(s, payload) {
+  const urgent = s.ganNhat ? `<p class="card-urgent ${s.ganNhat._muc}">${esc(s.ganNhat.fcode1 || s.ganNhat.stt_rec)} — ${s.ganNhat._soNgay < 0 ? `quá ${Math.abs(s.ganNhat._soNgay)} ngày LV` : `còn ${s.ganNhat._soNgay} ngày LV`}</p>`
+    : '<p class="card-urgent ok">Không có hạn khẩn cấp</p>';
+  return `<a class="pcard ${s.health}" href="../${esc(payload.ma_da)}/review/${esc(payload.ngay_chay)}.html">
+  <div class="pcard-head">
+    <span class="dot ${s.health}"></span>
+    <b>${esc(payload.ma_da)}</b>
+    <span class="pcard-health">${HEALTH_LABEL[s.health]}</span>
+  </div>
+  <p class="pcard-name">${esc(payload.ten_ngan ?? payload.ma_da)}</p>
+  <div class="pcard-counts">
+    <span class="bad">${s.quaHan.length} quá hạn</span>
+    <span class="warn">${s.sapToi.length} sắp tới</span>
+    <span>${s.congPm.length} chờ PM</span>
+  </div>
+  ${urgent}
+</a>`;
+}
+
+/**
+ * @param {Array<{payload: object, summary: object}>} items dự án hợp lệ
+ * @param {Array<{ma_da: string|null, errors: string[]}>} skipped dự án bị bỏ qua vì payload lỗi
+ */
+export function renderPortfolio(items, skipped, warned, meta, h) {
+  const allQuaHan = items.flatMap(({ payload, summary }) =>
+    summary.quaHan.map((u) => ({ ...u, _ma_da: payload.ma_da })));
+  const allSapToi = items.flatMap(({ payload, summary }) =>
+    summary.sapToi.map((u) => ({ ...u, _ma_da: payload.ma_da })));
+
+  const tongQuaHan = allQuaHan.length, tongSapToi = allSapToi.length;
+  const tongCongPm = items.reduce((n, { summary }) => n + summary.congPm.length, 0);
+  const soKhanCap = items.filter(({ summary }) => summary.health === 'khan-cap').length;
+
+  const boBoQua = skipped.length ? `<p class="banner">Bỏ qua ${skipped.length} dự án do payload lỗi nặng: ${skipped.map((s) => `<strong>${esc(s.ma_da ?? '?')}</strong> (${esc(s.errors.join('; '))})`).join(', ')}.</p>` : '';
+
+  const canhBaoChatLuong = warned.length ? `<div class="banner">
+  <strong>${warned.length} dự án có gợi ý DDL chưa đúng chuẩn</strong> — phần hạn/deadline vẫn đúng và vẫn hiện đầy đủ bên dưới, nhưng script SQL cần sửa trước khi giao lập trình viên:
+  <ul>${warned.map((w) => `<li><code>${esc(w.ma_da)}</code> — ${w.errors.map((e) => esc(e)).join('<br>')}</li>`).join('')}</ul>
+</div>` : '';
+
+  const cardsRow = `<div class="cards">
+  <div class="card ${soKhanCap ? 'bad' : ''}"><b>${soKhanCap}</b><span>dự án khẩn cấp</span></div>
+  <div class="card ${tongQuaHan ? 'bad' : ''}"><b>${tongQuaHan}</b><span>yêu cầu quá hạn (toàn danh mục)</span></div>
+  <div class="card ${tongSapToi ? 'warn' : ''}"><b>${tongSapToi}</b><span>yêu cầu sắp tới hạn</span></div>
+  <div class="card"><b>${tongCongPm}</b><span>chờ cổng PM (DD)</span></div>
+  <div class="card"><b>${items.length}</b><span>dự án đang theo dõi</span></div>
+</div>`;
+
+  const sorted = [...items].sort((a, b) => {
+    const rank = { 'khan-cap': 0, 'can-chu-y': 1, 'on': 2 };
+    return rank[a.summary.health] - rank[b.summary.health];
+  });
+  const grid = `<div class="pgrid">${sorted.map(({ payload, summary }) => projectCard(summary, payload)).join('\n')}</div>`;
+
+  const body = [
+    boBoQua,
+    canhBaoChatLuong,
+    cardsRow,
+    section('quan-trong-nhat', 'Danh mục — quá hạn', 'Gộp mọi dự án, ưu tiên xử lý trước.',
+      urTable(allQuaHan.sort((a, b) => a._soNgay - b._soNgay), [colDuAn, colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan, colConLai]), tongQuaHan),
+    section('sap-toi-toan-danh-muc', 'Danh mục — sắp tới hạn', '',
+      urTable(allSapToi.sort((a, b) => a._soNgay - b._soNgay), [colDuAn, colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan, colConLai]), tongSapToi),
+    section('theo-du-an', 'Theo dự án', 'Bấm vào thẻ để xem báo cáo chi tiết của dự án đó.', grid),
+  ].filter(Boolean).join('\n\n');
+
+  const title = `Tổng quan rà soát PM · ${fmtDate(meta.ngay_chay)}`;
+  const metaLine = `LTQL <code>${esc(meta.pm ?? 'PM01')}</code> · ${items.length} dự án${skipped.length ? ` (${skipped.length} bị bỏ qua)` : ''} · không chỉ định dự án cụ thể → xem toàn bộ.`;
+  return page(title, metaLine, body);
+}
+
+// ---------------------------------------------------------------- CSS — token thiết kế
+
 const CSS = `
-:root{--bg:#fff;--fg:#1a1a1a;--mut:#666;--line:#e3e3e3;--card:#f7f7f8;
---bad:#c0392b;--warn:#b7791f;--ok:#2f855a;--dd:#2b6cb0;--xn:#6b46c1;--th:#2c7a7b;--track:#ececef}
-@media (prefers-color-scheme:dark){:root{--bg:#16171a;--fg:#e8e8ea;--mut:#9a9aa2;--line:#2c2d33;--card:#1e1f24;
---bad:#f0776a;--warn:#e0b050;--ok:#63c48a;--dd:#63a4e0;--xn:#a98ae0;--th:#5fbfbf;--track:#2a2b31}}
+:root{
+  --bg:#F8FAFC;--surface:#FFFFFF;--fg:#0F172A;--mut:#64748B;--line:#E2E8F0;--track:#E2E8F0;
+  --primary:#1E40AF;
+  --bad:#DC2626;--bad-bg:#FEF2F2;
+  --warn:#D97706;--warn-bg:#FFFBEB;
+  --ok:#059669;--ok-bg:#ECFDF5;
+  --dd:#1D4ED8;--xn:#7C3AED;--th:#0D9488;
+  --code-bg:#0F172A;--code-fg:#E2E8F0;--code-kw:#7DD3FC;--code-ty:#FCA5A5;--code-cm:#64748B;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B1220;--surface:#131B2E;--fg:#E5EAF3;--mut:#94A3B8;--line:#253248;--track:#1E293B;
+  --primary:#60A5FA;
+  --bad:#F87171;--bad-bg:rgba(248,113,113,.12);
+  --warn:#FBBF24;--warn-bg:rgba(251,191,36,.12);
+  --ok:#34D399;--ok-bg:rgba(52,211,153,.12);
+  --dd:#60A5FA;--xn:#C4B5FD;--th:#5EEAD4;
+  --code-bg:#060B16;--code-fg:#E2E8F0;--code-kw:#7DD3FC;--code-ty:#FCA5A5;--code-cm:#64748B;
+}}
 *{box-sizing:border-box}
 body{margin:0;padding:0 20px 60px;background:var(--bg);color:var(--fg);
-font:15px/1.6 -apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;max-width:1000px;margin-inline:auto}
+font:15px/1.6 "Segoe UI",-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;max-width:1080px;margin-inline:auto}
+a{color:var(--primary)}
 header{padding:28px 0 12px;border-bottom:2px solid var(--line)}
-h1{font-size:24px;margin:0 0 6px}
+h1{font-size:24px;margin:0 0 6px;letter-spacing:-.01em}
 h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
 h3{font-size:15px;margin:22px 0 6px;color:var(--mut);font-weight:600}
 .meta,.lead{color:var(--mut);font-size:13px;margin:0 0 10px}
 section{padding:26px 0;border-bottom:1px solid var(--line)}
-.count{font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--line);
+.count{font-size:12px;font-weight:700;background:var(--surface);border:1px solid var(--line);
 border-radius:99px;padding:1px 9px;color:var(--mut)}
 .count.zero{opacity:.45}
 .cards{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 4px}
-.card{flex:1 1 140px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
-.card b{display:block;font-size:26px;line-height:1.1}
+.card{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card b{display:block;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
 .card span{font-size:12px;color:var(--mut)}
-.card.bad b{color:var(--bad)} .card.warn b{color:var(--warn)}
-.banner{background:var(--card);border-left:3px solid var(--warn);padding:10px 14px;margin:16px 0;font-size:13px;border-radius:0 6px 6px 0}
+.card.bad{background:var(--bad-bg);border-color:var(--bad)} .card.bad b{color:var(--bad)}
+.card.warn{background:var(--warn-bg);border-color:var(--warn)} .card.warn b{color:var(--warn)}
+.banner{background:var(--warn-bg);border-left:3px solid var(--warn);padding:10px 14px;margin:16px 0;font-size:13px;border-radius:0 6px 6px 0}
 table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
-th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);font-weight:600}
-tbody tr:hover{background:var(--card)}
-.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;white-space:nowrap}
+tbody tr:hover{background:var(--surface)}
+.mono{font-family:ui-monospace,"Cascadia Code","Fira Code",SFMono-Regular,Consolas,monospace;font-size:12px;white-space:nowrap}
 .empty{color:var(--mut);font-size:13px;font-style:italic;margin:8px 0}
 .pill{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;font-weight:700;
 padding:1px 7px;border-radius:4px;color:#fff}
 .tt-dd{background:var(--dd)} .tt-xn{background:var(--xn)} .tt-th{background:var(--th)} .dx{background:var(--mut)}
 .ok{color:var(--ok);font-weight:600} .warn{color:var(--warn);font-weight:600}
 .qua-han{color:var(--bad);font-weight:700}
-code{font-family:ui-monospace,monospace;font-size:.9em;background:var(--card);padding:1px 5px;border-radius:4px}
-pre{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px;
+code{font-family:ui-monospace,monospace;font-size:.9em;background:var(--surface);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.sql{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:6px}
+.sql-chip{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+color:var(--mut);background:var(--surface);padding:6px 12px;border-bottom:1px solid var(--line)}
+.sql pre{margin:0;background:var(--code-bg);color:var(--code-fg);padding:14px 16px;overflow-x:auto;
+font-family:ui-monospace,"Cascadia Code","Fira Code",SFMono-Regular,Consolas,monospace;font-size:12.5px;line-height:1.6}
+.sql-kw{color:var(--code-kw);font-weight:600}
+.sql-ty{color:var(--code-ty)}
+.sql-cm{color:var(--code-cm);font-style:italic}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;
 overflow-x:auto;font-size:12px;line-height:1.5}
 .ddl h3{margin-top:18px;color:var(--fg)}
 .chart{width:100%;height:auto;overflow:visible}
@@ -330,11 +519,27 @@ overflow-x:auto;font-size:12px;line-height:1.5}
 .legend{font-size:12px;color:var(--mut)}
 .key{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 12px}
 .key.tt-dd{background:var(--dd)} .key.tt-xn{background:var(--xn)} .key.tt-th{background:var(--th)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.pcard{display:block;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);
+border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--fg);transition:border-color .15s,transform .1s}
+.pcard:hover{transform:translateY(-1px)}
+.pcard.khan-cap{border-left-color:var(--bad)} .pcard.can-chu-y{border-left-color:var(--warn)} .pcard.on{border-left-color:var(--ok)}
+.pcard-head{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.pcard-head b{font-family:ui-monospace,monospace;font-size:14px}
+.pcard-health{margin-left:auto;font-size:11px;color:var(--mut)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.khan-cap{background:var(--bad)} .dot.can-chu-y{background:var(--warn)} .dot.on{background:var(--ok)}
+.pcard-name{font-size:13px;color:var(--mut);margin:2px 0 10px}
+.pcard-counts{display:flex;gap:12px;font-size:12px;font-weight:600;margin-bottom:8px}
+.card-urgent{font-size:12px;margin:0;padding-top:8px;border-top:1px dashed var(--line)}
+.card-urgent.qua-han{color:var(--bad)} .card-urgent.sap-toi{color:var(--warn)} .card-urgent.ok{color:var(--mut)}
 footer{padding:22px 0;color:var(--mut);font-size:12px}
 `;
 
+// ---------------------------------------------------------------- xây artifact
+
 /**
- * Đọc payload → trả mô tả file. KHÔNG ghi đĩa.
+ * Đọc payload một dự án → trả mô tả file. KHÔNG ghi đĩa.
  * @returns {{artifact: {relPath, content}|null, errors: string[]}}
  */
 export function buildReportArtifact(payload, hub = HUB) {
@@ -346,6 +551,40 @@ export function buildReportArtifact(payload, hub = HUB) {
     artifact: {
       relPath: `ledger/${payload.ma_da}/review/${ngay}.html`,
       content: renderReport(payload, h),
+    },
+    errors: [],
+  };
+}
+
+/**
+ * Đọc payload tổng quan { kind:"portfolio", ngay_chay, pm, projects:[...] } → trả mô tả file.
+ * Dự án nào payload lỗi thì BỊ BỎ QUA (không chặn cả trang) nhưng hiện rõ trong banner —
+ * không lặng lẽ mất một dự án ra khỏi tổng quan.
+ * @returns {{artifact: {relPath, content}|null, errors: string[]}}
+ */
+export function buildPortfolioArtifact(payload, hub = HUB) {
+  const topErrors = validatePortfolioPayload(payload);
+  if (topErrors.length) return { artifact: null, errors: topErrors };
+
+  const h = loadHolidays(hub);
+  const items = [];
+  const skipped = [];
+  const warned = [];
+  for (const proj of payload.projects) {
+    const { fatal, quality } = validatePayloadDetailed(proj);
+    if (fatal.length) { skipped.push({ ma_da: proj?.ma_da ?? null, errors: fatal }); continue; }
+    if (quality.length) warned.push({ ma_da: proj.ma_da, errors: quality });
+    items.push({ payload: proj, summary: summarize(proj, h) });
+  }
+  if (!items.length) {
+    return { artifact: null, errors: ['không có dự án nào hợp lệ trong `projects`', ...skipped.flatMap((s) => s.errors)] };
+  }
+
+  const ngay = String(payload.ngay_chay).slice(0, 10);
+  return {
+    artifact: {
+      relPath: `ledger/_portfolio/${ngay}.html`,
+      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: payload.pm }, h),
     },
     errors: [],
   };
