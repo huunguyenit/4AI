@@ -101,10 +101,7 @@ export async function executeReport(planId, sql, context = {}) {
     };
   }
 
-  const result = await executeQuery(
-    { sql: sqlStr, metadata: plan.metadata },
-    { ...context, maxRows: context.maxRows || plan.metadata.capabilities?.maxRows }
-  );
+  const result = await executeQuery({ sql: sqlStr, metadata: plan.metadata }, context);
 
   return {
     status: 'COMPLETED',

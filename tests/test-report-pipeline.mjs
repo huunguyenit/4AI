@@ -168,6 +168,49 @@ async function runTests() {
   }
   ok('execute_report chặn planId lạ', blockedUnknownPlan);
 
+
+  process.stdout.write('\n=== 6. QUERY EXECUTOR — CHỮ KÝ runSql VÀ HÌNH DẠNG KẾT QUẢ ===\n');
+  // runSql nhận MỘT object options, trả về { database, columns, rowCount, rows, truncated }.
+  // Gọi sai kiểu positional thì programPath thành undefined và sqlcmd chết với
+  // 'The "path" argument must be of type string' — bắt ở đây thay vì chờ tới lúc chạm DB thật.
+  const realSql = "SELECT COUNT(*) AS sl FROM nbphyc WHERE RTRIM(bp_lt) = 'FSD'";
+  let seen = null;
+  const fakeRunner = (opts) => {
+    seen = opts;
+    return { database: opts.database, columns: ['sl'], rowCount: 1, rows: [{ sl: 7 }], truncated: false };
+  };
+
+  const exec = await executeReport(plan.planId, realSql, { runSql: fakeRunner });
+  ok('execute_report chạy được câu SQL hợp lệ', exec.status === 'COMPLETED', JSON.stringify(exec.errors || exec.result?.error));
+  ok('runSql nhận object có programPath (không phải tham số vị trí)',
+    typeof seen?.programPath === 'string' && seen.programPath.length > 0, `programPath=${seen?.programPath}`);
+  ok('Chạy trên chương trình QLDA, không phải program khách',
+    seen?.programPath.includes('SRC-ONL'), seen?.programPath);
+  ok('Ép đúng database QLDA_APP', seen?.database === 'QLDA_APP', `database=${seen?.database}`);
+  ok('Dùng key dbType (không phải db)', seen?.dbType === 'app', `dbType=${seen?.dbType}`);
+  ok('Bóc đúng rows từ kết quả runSql',
+    exec.result?.success === true && exec.result.rows[0]?.sl === 7, JSON.stringify(exec.result?.rows));
+  ok('Đếm đúng theo rowCount', exec.result?.count === 1, `count=${exec.result?.count}`);
+
+  // Truyền program khách vẫn phải chạy trên QLDA — metadata.connection thắng context.
+  seen = null;
+  await executeReport(plan.planId, realSql, {
+    runSql: fakeRunner,
+    programPath: '\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422',
+  });
+  ok('Truyền nhầm program khách -> vẫn chạy trên QLDA',
+    seen?.programPath.includes('SRC-ONL'), seen?.programPath);
+
+  // Không có program thì phải báo lỗi, TUYỆT ĐỐI không trả số liệu bịa.
+  const noProgramPlan = await planReport('Tạo báo cáo doanh thu theo tháng năm 2026');
+  let refusedNoProgram = false;
+  try {
+    await executeReport(noProgramPlan.planId, 'SELECT ngay_ct, tien FROM hda');
+  } catch (err) {
+    refusedNoProgram = /không xác định được chương trình/i.test(err.message);
+  }
+  ok('Thiếu program -> báo lỗi chứ KHÔNG trả dữ liệu giả', refusedNoProgram);
+
   process.stdout.write(`\n=== TEST KẾT THÚC: ${failures === 0 ? 'TẤT CẢ PASS' : 'CÓ LỖI'} (${failures} thất bại) ===\n`);
   process.exit(failures === 0 ? 0 : 1);
 }
