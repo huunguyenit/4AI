@@ -79,7 +79,7 @@ Với payload `"kind": "performance"` → sinh dashboard KPI phòng ban (so sán
 ```
 Output: `ledger/_performance/<thang|tuan>-<ngay>.html`
 
-**Dữ liệu chuẩn bị:** Query QLDA_APP (QLDA) bằng `query_sql`, output dạng JSON, truyền vào payload. Không gọi DB từ tool — payload chứa sẵn dữ liệu phẳng, tool chỉ tính pivot/xếp hạng bằng JS.
+**Dữ liệu chuẩn bị:** Query QLDA database qua `query_sql`, output dạng JSON, truyền vào payload. Không gọi DB từ tool — payload chứa sẵn dữ liệu phẳng, tool chỉ tính pivot/xếp hạng bằng JS.
 
 **Thiết kế:** SVG chart tự vẽ (không CDN), CSS token dùng chung từ `report.mjs`, dark mode hỗ trợ.
 
