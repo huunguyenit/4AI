@@ -3,10 +3,10 @@ id: pm-deadline-review
 title: Deadline and TLKS review run
 kind: skill
 domain: project-mgmt
-description: Rà soát yêu cầu theo hạn giai đoạn và TLKS — lọc dự án LTQL, tính 3 ngày làm việc, kiểm chốt đã hẹn, đề xuất XN/TA/KL, sinh báo cáo HTML. Không chỉ định dự án = rà soát TOÀN BỘ + trang tổng quan.
+description: Rà soát yêu cầu theo hạn và TLKS cho dự án PM đứng tên LTQL (mặc định {PMName}) — tính ngày làm việc, kiểm chốt hẹn, đề xuất XN/TA/KL, gợi ý người tiếp nhận UR chưa giao. Bỏ trống = TOÀN BỘ dự án.
 requires: [4ai-fbo]
 see-also: [pm-capability-graph, pm-task-ledger, pm-customer-program-registry]
-version: 4
+version: 5
 ---
 
 ## Vì sao
@@ -19,7 +19,7 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
 
 ## Phạm vi
 
-- **Dự án**: `PM01` nằm trong `nbdmda.ma_lt1`, `ma_lt2` hoặc `ma_lt3`. Một dự án có
+- **Dự án**: `{PMName}` nằm trong `nbdmda.ma_lt1`, `ma_lt2` hoặc `ma_lt3`. Một dự án có
   nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận.
 - **Yêu cầu**: chỉ `trang_thai` thuộc `DD`, `XN`, `TH`. Vai PM kết thúc ở `HT` —
   `DT`/`OK`/`UP` là bộ phận khác, không đưa vào báo cáo.
@@ -104,15 +104,16 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
 
    Lệnh tự tính hạn, ngày làm việc còn lại và mức cảnh báo — **đừng tự tính rồi nhét số vào
    payload**, luật đếm nằm ở `tools/lib/workdays.mjs`. Output là
-   `ledger/<ma_da>/review/<ngay_chay>.html`, tự chứa, mở offline vẫn đúng, có biểu đồ SVG.
+   `<ledgerRoot>/review/<yyyyMMdd>/<MA_DA>/review.html`, tự chứa, mở offline vẫn đúng, có
+   biểu đồ SVG. Payload đặt cạnh nó: `review.payload.json`.
 
 9. **Sinh báo cáo — toàn bộ (không chỉ định dự án).** Lặp bước 8 cho từng dự án, rồi gói tất
    cả payload dự án vào một payload tổng quan và chạy CÙNG lệnh `report`:
 
-       { "kind": "portfolio", "ngay_chay": "2026-08-10", "pm": "PM01",
+       { "kind": "portfolio", "ngay_chay": "2026-08-10", "pm": "{PMName}",
          "projects": [ <payload dự án 1>, <payload dự án 2>, ... ] }
 
-   Sinh `ledger/_portfolio/<ngay_chay>.html` — thẻ tóm tắt sức khoẻ deadline từng dự án
+   Sinh `<ledgerRoot>/review/<yyyyMMdd>/_tong/tong.html` — thẻ tóm tắt sức khoẻ deadline từng dự án
    (khẩn cấp/cần chú ý/ổn), bảng "quá hạn"/"sắp tới hạn" gộp toàn danh mục, link sang từng
    report riêng. Dự án nào payload lỗi bị **bỏ qua có ghi rõ lý do** trong banner, không chặn
    cả trang. Đây là trang PM nên mở đầu tiên mỗi sáng.
@@ -120,11 +121,31 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
    Báo tóm tắt trong chat kèm đường dẫn (trang tổng quan trước, rồi từng dự án). Không tự gửi
    cho ai khác.
 
+## Bố cục thư mục
+
+Gom theo NGÀY trước, trong ngày mới chia dự án — một lượt rà soát nằm gọn một chỗ để xoá,
+nén hay gửi đi theo lô:
+
+    <ledgerRoot>/review/20260811/
+      _tong/     tong.html          ← trang điều hướng toàn danh mục, mở đầu tiên
+                 tong.payload.json
+      DEMO1/      review.html        ← báo cáo riêng một dự án
+                 review.payload.json
+      DEMO4/     review.html
+                 review.payload.json
+
+`_tong` có gạch dưới để luôn đứng đầu khi sắp xếp và không bao giờ đụng mã dự án thật.
+Hai trang nằm cùng cấp nên link chéo chỉ cần lùi một cấp (`../DEMO1/review.html`,
+`../_tong/tong.html`) — đổi tên thư mục ngày không làm gãy link.
+
+Đường dẫn do `tools/lib/report.mjs` quyết định (`duongDanTong`, `duongDanDuAn`) — đừng tự
+ghép chuỗi ở nơi khác.
+
 ## Payload
 
     {
       "ma_da": "DEMO1", "ten_ngan": "...", "ma_pbsp": "FBISP2422",
-      "pm": "PM01", "ngay_chay": "2026-08-10",
+      "pm": "{PMName}", "ngay_chay": "2026-08-10",
       "giaiDoan": [
         { "giai_doan_da": "...", "ngay_ht": "2026-08-13",
           "xac_nhan_da_hen_yn": false, "noi_dung": "..." }
@@ -139,7 +160,7 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
           "ghiChuDdl": "..." }
       ],
       "nhanSu": {
-        "ungVien": ["PM01", "..."],
+        "ungVien": ["{PMName}", "..."],
         "lichSuMenu":    [ { "menu_id": "01020304", "sysid": "SVTran", "ma_lt1": "...", "so_ur": 7 } ],
         "taiTrong":      [ { "ma_lt1": "...", "so_ur_toi_han": 2, "so_ur_dang_mo": 9 } ],
         "dongGopDauVao": [ { "nguon": "01020304", "ma_lt1": "...", "so_ur": 4 } ]

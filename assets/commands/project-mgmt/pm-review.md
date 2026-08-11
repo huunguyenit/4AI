@@ -3,12 +3,12 @@ id: pm-review
 title: /pm-review
 kind: command
 domain: project-mgmt
-description: Chạy rà soát yêu cầu theo hạn và TLKS cho các dự án LTQL PM01. Có tham số → 1 dự án. Bỏ trống → TOÀN BỘ, sinh thêm trang tổng quan portfolio.
+description: Chạy rà soát yêu cầu theo hạn và TLKS cho các dự án LTQL {PMName}. Có tham số → 1 dự án. Bỏ trống → TOÀN BỘ, sinh thêm trang tổng quan portfolio.
 argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự án đang quản lý]"
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-capability-graph, fbo-new-table-proposal]
 mode: agent
-version: 4
+version: 5
 ---
 
 ## Việc cần làm
@@ -21,11 +21,11 @@ Nạp skill [pm-deadline-review] và làm theo đúng quy trình ở đó. Tham 
 **Có mã dự án** → chỉ rà soát dự án đó, sinh một report.
 
 **Bỏ trống** → PM quản lý nhiều dự án cùng lúc, phải rà soát **TOÀN BỘ** mọi dự án mà
-`PM01` đứng tên LTQL trong một lượt, không chỉ dự án nói tới gần đây nhất trong hội
+`{PMName}` đứng tên LTQL trong một lượt, không chỉ dự án nói tới gần đây nhất trong hội
 thoại. Sinh report riêng cho từng dự án VÀ một trang tổng quan portfolio gộp tất cả.
 
 1. Đọc `data/qlda.json` → `review` để lấy bộ lọc, ngưỡng và đường dẫn output.
-2. Lấy DANH SÁCH mọi dự án có `PM01` trong `ma_lt1/2/3` (nếu không chỉ định mã), rồi lấy
+2. Lấy DANH SÁCH mọi dự án có `{PMName}` trong `ma_lt1/2/3` (nếu không chỉ định mã), rồi lấy
    yêu cầu (`DD`/`XN`/`TH`) từng dự án qua `query_sql` với `database: "QLDA_APP"`.
 3. Tính hạn hiệu lực `MAX(ngay_ht)` theo từng `(ma_da, giai_doan_da)`, RTRIM khi join.
 4. Tính ngày làm việc còn lại theo `data/holidays-vn.json`.
@@ -36,12 +36,12 @@ thoại. Sinh report riêng cho từng dự án VÀ một trang tổng quan port
 8. UR nhắc tạo bảng/thêm cột → soạn **script SQL thật** (`CREATE TABLE`/`ALTER TABLE` đầy đủ
    cột, kiểu, PK) theo [fbo-new-table-proposal] — không phải mô tả bằng lời.
 9. Ghi payload JSON ra scratchpad cho MỖI dự án, chạy `node tools/4ai.mjs report <payload.json>`
-   cho từng dự án để sinh `ledger/<ma_da>/review/<ngay_chay>.html`. Không tự tính ngày làm việc
+   cho từng dự án để sinh `<ledgerRoot>/review/<yyyyMMdd>/<MA_DA>/review.html`. Không tự tính ngày làm việc
    còn lại — lệnh tự tính theo `data/holidays-vn.json`.
 10. **Chỉ khi rà soát toàn bộ (không chỉ định mã dự án)**: ghi thêm một payload
-    `{ "kind": "portfolio", "ngay_chay": "...", "pm": "PM01", "projects": [<payload dự án 1>, <payload dự án 2>, ...] }`
+    `{ "kind": "portfolio", "ngay_chay": "...", "pm": "{PMName}", "projects": [<payload dự án 1>, <payload dự án 2>, ...] }`
     rồi chạy `node tools/4ai.mjs report <payload-portfolio.json>` để sinh
-    `ledger/_portfolio/<ngay_chay>.html`. Đây là trang PM mở đầu tiên mỗi sáng — tóm tắt trong
+    `<ledgerRoot>/review/<yyyyMMdd>/_tong/tong.html`. Đây là trang PM mở đầu tiên mỗi sáng — tóm tắt trong
     chat bắt đầu từ trang này, kèm đường dẫn từng report riêng.
 
 ## Ràng buộc

@@ -2,7 +2,7 @@
 // test-assignee.mjs — Test gợi ý người tiếp nhận UR ở DD chưa có ma_lt1.
 
 import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa } from '../tools/lib/assignee.mjs';
-import { validatePayload, renderReport } from '../tools/lib/report.mjs';
+import { validatePayload, renderReport, buildPortfolioArtifact } from '../tools/lib/report.mjs';
 import { loadHolidays } from '../tools/lib/workdays.mjs';
 
 let failures = 0;
@@ -161,6 +161,35 @@ const html2 = renderReport(khongNhanSu, loadHolidays());
 ok('Không có nhanSu -> vẫn dựng được báo cáo', html2.includes('Gợi ý người tiếp nhận'));
 ok('Không có nhanSu -> nói rõ thiếu, không im lặng',
   html2.includes('không có khối') && html2.includes('nhanSu'));
+
+
+process.stdout.write('\n=== 8. TRANG TỔNG QUAN PORTFOLIO ===\n');
+// Trang PM mở đầu tiên mỗi sáng — cột ma_lt1 và mục chưa giao phải có ở ĐÂY nữa,
+// không chỉ ở report của từng dự án.
+const dungPortfolio = (duAn) => {
+  const { artifact, errors } = buildPortfolioArtifact({
+    kind: 'portfolio', ngay_chay: '2026-08-11', pm: 'PM01', projects: duAn,
+  });
+  if (!artifact) throw new Error(`không dựng được portfolio: ${errors.join(' | ')}`);
+  return artifact.content;
+};
+const portfolio = dungPortfolio([payload]);
+
+ok('Portfolio có cột "LT thực hiện"', portfolio.includes('LT thực hiện'));
+ok('Portfolio có thẻ đếm DD chưa giao', portfolio.includes('DD chưa giao lập trình'));
+ok('Portfolio có mục "Chưa giao lập trình"', portfolio.includes('Chưa giao lập trình'));
+ok('Portfolio có cột gợi ý tiếp nhận', portfolio.includes('Gợi ý tiếp nhận'));
+// NV02: 6 UR trên M01 (100) trừ 4 UR tới hạn (−60) = 40, thắng NV04 (33.3).
+ok('Portfolio hiện ứng viên số 1 cho UR chưa giao',
+  /<strong class="mono">NV02<\/strong>/.test(portfolio),
+  'kỳ vọng NV02 đứng đầu cho UR-01 menu M01');
+ok('Portfolio nêu cả ứng viên dự phòng', portfolio.includes('rồi NV04'));
+ok('Portfolio vẫn hiện tên người đã giao ở bảng quá hạn/sắp tới', portfolio.includes('NV03'));
+
+// Dự án không khai nhanSu thì nói rõ, không im lặng bỏ trống.
+const { nhanSu: _bo, ...khongNs } = payload;
+ok('Portfolio thiếu nhanSu -> báo "chưa nạp", không bỏ trống',
+  dungPortfolio([khongNs]).includes('chưa nạp'));
 
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures === 0 ? 'TẤT CẢ PASS' : 'CÓ LỖI'} (${failures} thất bại) ===\n`);
 process.exit(failures === 0 ? 0 : 1);

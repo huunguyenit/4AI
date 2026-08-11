@@ -104,7 +104,7 @@
     },
     {
       "path": ".agents/rules/pm-ledger-discipline.md",
-      "sha256": "cb8effc8daba6bef5df5ad3f51157bb80fa9538c2ce0d287902f2b6d60ce60de",
+      "sha256": "7fd92cedd4c37bea32aa662bddda85d0d9c19f59bc714010ff0932f278609a32",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
@@ -200,9 +200,9 @@
     },
     {
       "path": ".agents/skills/pm-deadline-review/SKILL.md",
-      "sha256": "c6602e88b1790334d7452bf779cf08956fe61d66ff36dad80024ad4807fb3bea",
+      "sha256": "acca15a56e044ab378464677bf3a0a116c31f380e6503c6fe648749ce64d57fe",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".agents/skills/pm-release-handover/SKILL.md",
@@ -212,7 +212,7 @@
     },
     {
       "path": ".agents/skills/pm-task-ledger/SKILL.md",
-      "sha256": "02508976c15bf4cf0d9211a6a4c19b5f37803a0b1cc1ef1ef4db621a760336b5",
+      "sha256": "4355157803851c46fddd77db33c7bf1c3354938a6c6c61a855d73ab9b8d98c59",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -248,9 +248,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "99dcaa8f53b4a47f29de30e48c48216827cd1cbd7180e62271476c8556f1d719",
+      "sha256": "e927509d599d6c01355ff1c31f26fa8b37e38e12a7296b20eecd85d0d5b2f4ec",
       "sourceId": "pm-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -260,7 +260,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "724c5e4957119e4f4f7dc1a9b39e5b4fa9c2937a605dd9fd8ce4738ba153a0bc"
+      "sha256": "f22e183a01322a45461213bf1916267ce837282511c5b78dbeeb4bcbff7107de"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -354,9 +354,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "861d3c7124fb9b4c57469c54c5eaf8980c556630d222ed9c59991f48791bd73f",
+      "sha256": "51b0e52124e2936bcb72bde08187bc1d822ae1ee4a585cb7046df09457826728",
       "sourceId": "pm-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -474,9 +474,9 @@
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "c6602e88b1790334d7452bf779cf08956fe61d66ff36dad80024ad4807fb3bea",
+      "sha256": "acca15a56e044ab378464677bf3a0a116c31f380e6503c6fe648749ce64d57fe",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".claude/skills/pm-release-handover/SKILL.md",
@@ -486,7 +486,7 @@
     },
     {
       "path": ".claude/skills/pm-task-ledger/SKILL.md",
-      "sha256": "02508976c15bf4cf0d9211a6a4c19b5f37803a0b1cc1ef1ef4db621a760336b5",
+      "sha256": "4355157803851c46fddd77db33c7bf1c3354938a6c6c61a855d73ab9b8d98c59",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -576,9 +576,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "98509df9d1e72a9afc05bb3f66c1a6da25ee76725dc9f8339dc49e60de7ce079",
+      "sha256": "c30f0d38be9169633228a540eac63dc92d0a821ba92f56be4a401c53617a7afc",
       "sourceId": "pm-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -738,13 +738,13 @@
     },
     {
       "path": ".cursor/rules/pm-deadline-review.mdc",
-      "sha256": "946384c42eb55615c897de468d0c6dd48f78dfc3c63b8686509edd79d766357d",
+      "sha256": "639cb40a0f2313906442421233da59ca0809c5de56d287c1272f0e6b9d10d40f",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".cursor/rules/pm-ledger-discipline.mdc",
-      "sha256": "86b9ce406656998968d016cd2712594b66b77308232a8bb216d5012380e2cf30",
+      "sha256": "ca467082faac1dcc089f18c5e409f929defd9c66a858d38efd150ec2e5706fae",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
@@ -774,7 +774,7 @@
     },
     {
       "path": ".cursor/rules/pm-task-ledger.mdc",
-      "sha256": "916f95c811495546ec232f0cfcc4891d4c6638a783e230ab1c6fd6394d501c13",
+      "sha256": "c331a2bfbff2a4b8937caa6f11c80d5b01f9db552bd83ffa686ed2b445389283",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -822,7 +822,7 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "3e861fd5f1a4b88352cb539b28f69ec487ba57acc87f946a12cda01923ca0b48"
+      "sha256": "6cc2df2dc28c482f631b0c8cc7fdd689e9d1c651f48fbae5377fb7c989673cd2"
     },
     {
       "path": ".github/instructions/fbo-accent-free-search.instructions.md",
@@ -922,9 +922,9 @@
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "e304b9cd0b09c6a77d85122258de0419ec98cd01f63ca88914c40ed3cc6b7fcd",
+      "sha256": "b28e918073126e243569eb9cf2b6de314fa25774373dc6a44e0b21f1c1afb6d3",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".github/instructions/pm-release-handover.instructions.md",
@@ -934,7 +934,7 @@
     },
     {
       "path": ".github/instructions/pm-task-ledger.instructions.md",
-      "sha256": "f04acfb85523013ad5caf62d899d5916fc5e2485119543562a2c4cebae55fe51",
+      "sha256": "5c8a99452282a9268e9ee4e54901fff109e99223f9138522b0d374da3cf2c818",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -970,9 +970,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "80f5e7af9e98cb2a38de81d9cde512a6af85de9bba13db04b613fd9abd03b7cb",
+      "sha256": "05b02d54cc2b8ae14d3f675f9db94346ebdc8621f8f02518761e08fee9aa8173",
       "sourceId": "pm-review",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -1026,6 +1026,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-11T01:49:46.776Z",
+  "syncedAt": "2026-08-11T02:48:04.343Z",
   "target": "4ai"
 }

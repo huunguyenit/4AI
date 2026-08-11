@@ -488,7 +488,9 @@
 
     "baoCao": {
       "lich": { "gio": "08:00", "timezone": "Asia/Ho_Chi_Minh", "ngay": [1, 2, 3, 4, 5] },
-      "output": "<mcpDataRoot>/4ai/ledger/<ma_da>/review/<YYYY-MM-DD>.html",
+      "output": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/<MA_DA>/review.html",
+      "outputTong": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/_tong/tong.html",
+      "outputNote": "Gom theo NGÀY trước, trong ngày mới chia dự án — một lượt rà soát nằm gọn một thư mục. Payload đặt cạnh HTML cùng tên (review.payload.json / tong.payload.json). Đường dẫn do tools/lib/report.mjs quyết định (duongDanTong, duongDanDuAn), đừng tự ghép chuỗi.",
       "format": "HTML tự chứa, xem lại được offline.",
       "phanBaoCao": [
         "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua.",

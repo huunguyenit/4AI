@@ -26,6 +26,27 @@ export function ledgerDataRoot(hub = HUB) {
   return ledgerRoot(hub);
 }
 
+/** Mặc định khi máy chưa có `data/qlda.local.json` — giữ hành vi hiện tại của hub. */
+const DEFAULT_PM = { maNv: 'PM01', boPhanLt: 'FSD' };
+
+/**
+ * Danh tính PM hiện tại — đọc `pm.maNv`/`pm.boPhanLt` từ `data/qlda.local.json` (per máy,
+ * gitignore, cùng file `tools/lib/report.mjs` dùng). Chưa cấu hình thì lùi về `DEFAULT_PM`
+ * để asset chứa token `{PMName}`/`{PMDept}` vẫn render đúng như trước khi có token.
+ */
+export function pmIdentity(hub = HUB) {
+  const local = readJson(path.join(hub, 'data', 'qlda.local.json'), {});
+  return {
+    maNv: local.pm?.maNv || DEFAULT_PM.maNv,
+    boPhanLt: local.pm?.boPhanLt || DEFAULT_PM.boPhanLt,
+  };
+}
+
+/** Thay token `{PMName}`/`{PMDept}` trong nội dung asset bằng danh tính PM máy hiện tại. */
+export function applyPmTemplate(text, pm) {
+  return text.replaceAll('{PMName}', pm.maNv).replaceAll('{PMDept}', pm.boPhanLt);
+}
+
 const KIND_FOLDER = {
   doctrine: 'doctrine',
   rule: 'rules',
@@ -100,6 +121,7 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
   const files = fs.globSync('**/*.md', { cwd: root })
     .map(toPosix)
     .sort();
+  const pm = pmIdentity(hub);
 
   for (const rel of files) {
     const abs = path.join(root, rel);
@@ -160,9 +182,13 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
       continue;
     }
 
+    // Token {PMName}/{PMDept} thay bằng danh tính PM máy hiện tại — sau validate (giữ
+    // nguyên độ dài/định dạng của template được kiểm) chứ không phải trước.
+    if (typeof fm.description === 'string') fm.description = applyPmTemplate(fm.description, pm);
+
     const asset = {
       ...applyDefaults(fm),
-      body: body.replace(/^\n+/, ''),
+      body: applyPmTemplate(body.replace(/^\n+/, ''), pm),
       file: abs,
       rel: display,
       keyLines,

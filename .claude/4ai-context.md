@@ -246,10 +246,9 @@ không có vết. Ledger là bộ nhớ chung của mọi phiên làm việc và
 
 ## Quy tắc
 
-- Bắt đầu một thay đổi hướng khách: **BẮT BUỘC** mở entry trong `ledger/tasks.md` của hub
-  4AI — khách, program path, controller dự kiến đụng, trạng thái `Mới`.
+- Bắt đầu một thay đổi hướng khách: **BẮT BUỘC** mở entry trong `<mcpDataRoot>/4ai/ledger/tasks.md` — khách, program path, controller dự kiến đụng, trạng thái `Mới`. (`mcpDataRoot` từ `fbo-local.json`.)
 - Trạng thái đi theo vòng đời: `Mới → Đang làm → Chờ xác nhận → Xong`. Cập nhật khi chuyển.
-- Đóng task: **BẮT BUỘC** thêm dòng vào `ledger/CHANGELOG.md` — ngày, khách, controller,
+- Đóng task: **BẮT BUỘC** thêm dòng vào `<mcpDataRoot>/4ai/ledger/CHANGELOG.md` — ngày, khách, controller,
   một câu mô tả.
 - Không có entry ⇒ task **chưa xong**. Code chạy được không thay thế được vết.
 
@@ -441,6 +440,6 @@ corpus để sẵn bản đồ file.
 | `pm-adr` | Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau. |
 | `pm-capability-graph` | Đọc và bảo trì đồ thị năng lực FBO và mạng rà soát Request (Phase/Status/Evidence/PMReview/Plan) — file JSONL là nguồn thật, SQL Server graph là chỉ mục, dựng bằng 4ai graph build. |
 | `pm-customer-program-registry` | Đọc và bảo trì data/customers.json — tra "khách X nằm ở đâu" ra program path, dòng sản phẩm FBO/FBI, SP version, DB alias; cách thêm khách mới đúng schema. |
-| `pm-deadline-review` | Rà soát yêu cầu theo hạn giai đoạn và TLKS — lọc dự án LTQL, tính 3 ngày làm việc, kiểm chốt đã hẹn, đề xuất XN/TA/KL, sinh báo cáo HTML. Không chỉ định dự án = rà soát TOÀN BỘ + trang tổng quan. |
+| `pm-deadline-review` | Rà soát yêu cầu theo hạn và TLKS cho dự án PM đứng tên LTQL (mặc định PM01) — tính ngày làm việc, kiểm chốt hẹn, đề xuất XN/TA/KL, gợi ý người tiếp nhận UR chưa giao. Bỏ trống = TOÀN BỘ dự án. |
 | `pm-release-handover` | Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì. |
-| `pm-task-ledger` | Format entry trong ledger/tasks.md và vòng đời Mới → Đang làm → Chờ xác nhận → Xong — cách mở, cập nhật, đóng entry và chuyển sang CHANGELOG. |
+| `pm-task-ledger` | Format entry trong `<mcpDataRoot>/4ai/ledger/tasks.md` và vòng đời Mới → Đang làm → Chờ xác nhận → Xong — cách mở, cập nhật, đóng entry và chuyển sang CHANGELOG. |
