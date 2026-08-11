@@ -752,7 +752,7 @@ export function buildReportArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: `${payload.ma_da}/review/${ngay}.html`,
-      content: renderReport({ ...payload, pm: config.pm.maNv }, h),
+      content: renderReport({ ...payload, pm: payload.pm ?? config.pm.maNv }, h),
     },
     errors: [],
   };
@@ -787,7 +787,7 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: `_portfolio/${ngay}.html`,
-      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: config.pm.maNv }, h),
+      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv }, h),
     },
     errors: [],
   };
