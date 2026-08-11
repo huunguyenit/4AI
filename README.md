@@ -86,7 +86,50 @@ node tools/4ai.mjs explain <asset-id>    # Asset này emit ra file nào
 node tools/4ai.mjs check                  # Validate — exit 0 = OK
 ```
 
-## 📊 Báo cáo — Dashboard HTML ngoại tuyến
+## 📊 Báo cáo & Template
+
+### Report Templates — HTML Tự Chứa
+
+Báo cáo được dựng từ **template HTML tĩnh** — không CDN, không JavaScript phức tạp, xem offline:
+
+```
+tools/templates/report/
+├── page.html        # Template trang báo cáo (placeholder: {{title}}, {{body}}, {{metaLine}})
+├── dashboard.html   # Dashboard với biểu đồ
+└── report.css       # Stylesheet (bảng màu semantic, font hệ thống)
+```
+
+**Tùy chỉnh template:**
+1. Sửa HTML hoặc CSS
+2. Chạy `check` để validate
+3. Chạy `sync` để áp dụng trên tất cả platform
+
+### Report Workflow — MCP Tool
+
+Tạo báo cáo từ yêu cầu tự nhiên (tiếng Việt) → SQL → kết quả:
+
+**Bước 1: Plan Report** — phân giải yêu cầu, tạo metadata
+```bash
+node tools/4ai.mjs plan-report "Báo cáo rà soát dự án tháng 8"
+```
+Output:
+- `queryPlan` — bảng và cột cần truy vấn
+- `metadata` — enum, rule kinh doanh
+- `prompt` — hướng dẫn cho agent tự viết SQL
+- `planId` — dùng trong bước tiếp
+
+**Bước 2: Agent Tự Viết SQL** — sử dụng prompt từ bước 1
+Agent (Claude, Cursor) sử dụng `prompt` để tự viết câu SELECT phù hợp
+
+**Bước 3: Execute Report** — validate & chạy SQL
+```bash
+node tools/4ai.mjs execute-report <planId> "SELECT ..."
+```
+Output: dữ liệu được validate lại metadata chốt ở bước Plan
+
+**Bảo mật:** SQL luôn qua lớp validation dựa trên metadata đã chốt — không chạy trực tiếp từ input người dùng.
+
+### Dashboard HTML Ngoại Tuyến
 
 Tạo báo cáo không cần server, không phụ thuộc internet. Dashboard SVG tự render, xem offline:
 
@@ -127,6 +170,35 @@ Kết quả: `ledger/_performance/<thang|tuan>-<ngay>.html` — xem trong browse
 - Convert sang JSON (bảng phẳng, không PIVOT)
 - Tool xử lý pivot, xếp hạng, render chart tự động
 
+## 🔧 Tính Năng Mới — Prompt Tool & Assignee
+
+### Prompt Tool
+Tạo **prompt tự động** từ schema UR cho agent, giảm thời gian suy nghĩ:
+```bash
+# Xem `tools/lib/prompt.mjs`
+promptCuaUr(urRecord) → prompt hoàn chỉnh cho agent tự viết DDL/SQL
+```
+
+**Lợi ích:**
+- Prompt luôn phù hợp với cấu trúc UR hiện tại
+- Agent không phải suy diễn schema
+- Đảm bảo tính nhất quán
+
+### Assignee Tweaks
+Gợi ý phân công UR dựa trên **trọng số, lịch sử, năng lực**:
+```bash
+# Xem `tools/lib/assignee.mjs`
+goiYPhanCong(urList, staff) → danh sách gợi ý phân công cân bằng
+```
+
+**Chỉ số xem xét:**
+- Khối lượng hiện tại (không quá tải)
+- Chuyên môn (lịch sử commit)
+- Thời gian rảnh (progress UR)
+- Mức độ ưu tiên (hạn, dependency)
+
+Cấu hình trọng số: `data/qlda.json` → `review.phanCong` ghi đè mặc định
+
 ## 📁 Cấu trúc Thư mục
 
 | Nơi | Mục đích |
@@ -138,6 +210,8 @@ Kết quả: `ledger/_performance/<thang|tuan>-<ngay>.html` — xem trong browse
 | `assets/commands/` | Slash command (`/pm-status`, `/fbo-find`, v.v.) |
 | `data/` | Config tham chiếu (khách, chương trình, schema DB) |
 | `mcp/servers.json` | Kết nối tới API, database nội bộ |
+| `tools/lib/` | Library: report, prompt, assignee, template |
+| `tools/templates/report/` | HTML template, CSS cho báo cáo |
 | `ledger/` | Kho dự án: task, changelog, handover |
 | `docs/` | Hướng dẫn viết asset, kiến trúc |
 
