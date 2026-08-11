@@ -393,14 +393,15 @@ const colTlks = { ten: 'TLKS', get: (u) => u.tlks_yn
 const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
 const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
-const colMaLt1 = { ten: 'LT thực hiện', cls: 'mono', get: (u) => {
-  const nguoi = String(u.ma_lt1 ?? '').trim();
+/** Hiển thị ma_lt1 — BẮT BUỘC trên mọi danh sách việc gấp để PM biết ai để liên hệ. */
+function fmtMaLt1(u, { emptyAsWarn = false } = {}) {
+  const nguoi = String(u?.ma_lt1 ?? '').trim();
   if (nguoi) return esc(nguoi);
-  // Chưa giao mà đang ở DD là việc PM phải xử lý — tô vàng để không trôi qua mắt.
-  return u.trang_thai === 'DD'
-    ? '<span class="warn">chưa giao</span>'
-    : '<span class="muted">—</span>';
-} };
+  // Chưa giao mà đang ở DD (hoặc danh sách "phải xử lý ngay") là việc PM phải xử lý.
+  if (u?.trang_thai === 'DD' || emptyAsWarn) return '<span class="warn">chưa giao</span>';
+  return '<span class="muted">—</span>';
+}
+const colMaLt1 = { ten: 'LT thực hiện', cls: 'mono', get: (u) => fmtMaLt1(u) };
 
 export function section(id, tieuDe, moTa, noiDung, dem) {
   const badge = dem === undefined ? '' : `<span class="count${dem ? '' : ' zero'}">${dem}</span>`;
@@ -513,10 +514,11 @@ function heroLine(u, opts = {}) {
   }
   const con = u._soNgay < 0 ? `quá hạn ${Math.abs(u._soNgay)} ngày LV` : `còn ${u._soNgay} ngày LV`;
   const da = u._ma_da ? `<code>${esc(u._ma_da)}</code> · ` : '';
+  const lt = ` · LT <strong class="mono">${fmtMaLt1(u, { emptyAsWarn: true })}</strong>`;
   const href = opts.href ? ` <a class="hero-go" href="${opts.href}">mở →</a>` : '';
   return `<p class="hero ${u._muc}">
   <span class="hero-tag">Nóng nhất</span>
-  ${da}<strong>${esc(u.fcode1 || String(u.stt_rec).trim())}</strong> — ${esc(u.noi_dung ?? '')}
+  ${da}<strong>${esc(u.fcode1 || String(u.stt_rec).trim())}</strong>${lt} — ${esc(u.noi_dung ?? '')}
   <span class="hero-con">${con}</span>${href}</p>`;
 }
 
@@ -547,9 +549,11 @@ function actionList(rows, { top = 6, hrefOf } = {}) {
       : r._f.includes('sap') ? { t: 'GẤP', c: 'sv-warn' }
       : { t: 'CHỜ PM', c: 'sv-neu' };
     const href = hrefOf ? hrefOf(r) : null;
+    // ma_lt1 đứng ngay sau mã UR — PM nhìn dòng nào cũng biết ai đang làm để gọi.
     const inner = `<span class="a-sv ${mucNhan.c}">${mucNhan.t}</span>
     <span class="a-da">${esc(r._ma_da ?? '')}</span>
     <span class="a-ur mono">${esc(r.fcode1 || String(r.stt_rec).trim())}</span>
+    <span class="a-lt mono" title="LT thực hiện">${fmtMaLt1(r, { emptyAsWarn: true })}</span>
     <span class="a-nd">${esc(cutTo(r.noi_dung, 88))}</span>
     <span class="a-tt"><span class="pill ${TRANG_THAI[r.trang_thai]?.mau ?? ''}">${esc(r.trang_thai)}</span></span>
     <span class="a-han mono">${r._phase ? fmtDate(r._phase.ngay_ht) : '—'}</span>
@@ -564,6 +568,7 @@ function actionList(rows, { top = 6, hrefOf } = {}) {
     <h2>Phải xử lý ngay</h2>
     <div class="chips">${chip('all', 'Tất cả')}${chip('qua', 'Quá hạn')}${chip('sap', '≤ 3 ngày')}${chip('pm', 'Chờ PM')}</div>
   </div>
+  <div class="act-cols" aria-hidden="true"><span>Mức</span><span>Dự án</span><span>UR</span><span>Lập trình</span><span>Nội dung</span><span>TT</span><span>Hạn</span><span>Còn</span></div>
   <div class="act-list">${rows.map(dong).join('\n')}</div>
   ${con > 0 ? `<label class="xem-them" for="more"><span class="mo">Xem thêm ${con} mục</span><span class="dong">Thu gọn</span></label>` : ''}
   <p class="act-none">Không có mục nào khớp bộ lọc đang chọn.</p>
@@ -954,7 +959,7 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
     section('sap-toi-toan-danh-muc', 'Danh mục — sắp tới hạn', '',
       urTable(allSapToi.sort((a, b) => a._soNgay - b._soNgay), [colDuAn, colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), tongSapToi),
     section('chua-giao', 'Chưa giao lập trình (DD)',
-      'Yêu cầu đã duyệt nhưng chưa có ma_lt1. Ứng viên xếp theo: đã làm menu đó · đang gánh ít UR sắp tới hạn · báo cáo đầu ra thì ưu tiên người làm nhiều UR đầu vào. ĐỀ XUẤT — PM chốt rồi mới giao.',
+      'Yêu cầu đã duyệt nhưng chưa có lập trình. Ứng viên xếp theo: đã làm menu đó · đang gánh ít UR sắp tới hạn · báo cáo đầu ra thì ưu tiên người làm nhiều UR đầu vào. ĐỀ XUẤT — PM chốt rồi mới giao.',
       urTable(allChuaGiao.sort((a, b) => (a._soNgay ?? 99) - (b._soNgay ?? 99)),
         [colDuAn, colStt, colNoiDung, colHan, colConLai, colGoiY]), tongChuaGiao),
   ].filter(Boolean).join('\n\n');
@@ -1165,8 +1170,11 @@ background:var(--surface);color:var(--mut);cursor:pointer;user-select:none}
 #f-sap:checked~main .chip[for=f-sap],
 #f-pm:checked~main .chip[for=f-pm]{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
 .act-list{display:flex;flex-direction:column;gap:5px}
-.act-row{display:grid;grid-template-columns:72px 64px 74px 1fr 44px 78px 76px;align-items:center;gap:10px;
-padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);
+.act-cols,.act-row{display:grid;grid-template-columns:72px 64px 74px 92px 1fr 44px 78px 76px;align-items:center;gap:10px}
+.act-cols{padding:0 12px 4px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+color:var(--mut)}
+.act-cols span:nth-child(7),.act-cols span:nth-child(8){text-align:right}
+.act-row{padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);
 border-radius:9px;font-size:13px;text-decoration:none;color:var(--fg);
 box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .2s,transform .2s}
 a.act-row:hover{border-color:var(--primary);transform:translateX(2px)}
@@ -1178,6 +1186,8 @@ padding:3px 0;border-radius:5px;border:1px solid currentColor}
 .a-da{font-family:ui-monospace,monospace;font-size:11px;font-weight:700;color:var(--mut);
 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .a-ur{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.a-lt{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+color:var(--fg)}
 .a-nd{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .a-han,.a-con{font-size:12px;text-align:right;color:var(--mut)}
 .act-more{display:none}
@@ -1197,9 +1207,10 @@ border:1px dashed var(--ok);color:var(--mut);font-size:13px;text-align:center}
 @media (max-width:900px){
   .kpis{grid-template-columns:repeat(2,1fr)}
   .viz{grid-template-columns:1fr}
-  .act-row{grid-template-columns:72px 1fr 70px;grid-template-areas:"sv da ur" "nd nd nd" "tt han con"}
+  .act-cols{display:none}
+  .act-row{grid-template-columns:72px 1fr 90px;grid-template-areas:"sv da ur" "lt nd nd" "tt han con"}
   .a-sv{grid-area:sv}
-  .a-da{grid-area:da}.a-ur{grid-area:ur}.a-nd{grid-area:nd;white-space:normal}
+  .a-da{grid-area:da}.a-ur{grid-area:ur}.a-lt{grid-area:lt}.a-nd{grid-area:nd;white-space:normal}
   .a-tt{grid-area:tt}.a-han{grid-area:han}.a-con{grid-area:con;text-align:right}
   .top h1{font-size:16px}
   .tabs{overflow-x:auto}
