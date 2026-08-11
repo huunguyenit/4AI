@@ -57,6 +57,42 @@ ok('Người không dính menu vẫn được xét (xếp sau)',
   g1.ungVien.some(c => c.ma_lt1 === 'NV03'));
 
 
+process.stdout.write('\n=== 2b. KHÔNG COI CHUNG SYSID LÀ CHUNG KINH NGHIỆM — CẦN MENU_ID/BAR ===\n');
+// Dữ liệu THẬT đo trên DEMO1 (query_sql db=sys, object=wcommand): sysid `Customer` đứng sau
+// CẢ hai menu "Danh mục khách hàng" (04.07.01) LẪN "Danh mục nhà cung cấp" (05.07.01) — hai
+// nghiệp vụ khác hẳn nhau (AR vs AP) dùng chung một controller. Trước bản sửa này, hai UR đó
+// bị coi là "cùng kinh nghiệm" chỉ vì chung sysid — sai.
+const nhanSuKhachHang = {
+  lichSuMenu: [
+    { menu_id: '04.07.01', sysid: 'Customer', bar: 'Danh mục khách hàng', ma_lt1: 'DATNH', so_ur: 9 },
+  ],
+  taiTrong: [{ ma_lt1: 'DATNH', so_ur_toi_han: 0, so_ur_dang_mo: 3 }],
+};
+
+const urNhaCungCap = {
+  trang_thai: 'DD', menu_id: '05.07.01', sysid: 'Customer',
+  bar: 'Danh mục nhà cung cấp', noi_dung: 'Sửa validate mã số thuế nhà cung cấp',
+};
+const gKhacPhanHe = goiYNguoiTiepNhan(urNhaCungCap, nhanSuKhachHang);
+ok('Cùng sysid, KHÁC bar -> KHÔNG tính là kinh nghiệm (điểm menu = 0)',
+  (gKhacPhanHe.ungVien.find(c => c.ma_lt1 === 'DATNH')?.chiTiet.diemMenu ?? 0) === 0,
+  JSON.stringify(gKhacPhanHe.ungVien.find(c => c.ma_lt1 === 'DATNH')?.chiTiet));
+ok('Độ tin cậy tụt xuống thấp vì không còn bằng chứng kinh nghiệm',
+  gKhacPhanHe.ungVien.find(c => c.ma_lt1 === 'DATNH')?.doTinCay === 'thap');
+
+const urCungPhanHe = {
+  trang_thai: 'DD', menu_id: '99.99.99', sysid: 'Customer',
+  bar: 'Danh mục khách hàng', noi_dung: 'Sửa validate email khách hàng',
+};
+const gCungPhanHe = goiYNguoiTiepNhan(urCungPhanHe, nhanSuKhachHang);
+const datnhCungPhanHe = gCungPhanHe.ungVien.find(c => c.ma_lt1 === 'DATNH');
+ok('menu_id khác nhưng CÙNG bar -> vẫn tính là kinh nghiệm', datnhCungPhanHe?.chiTiet.diemMenu > 0,
+  JSON.stringify(datnhCungPhanHe?.chiTiet));
+ok('Độ tin cậy cao khi khớp theo bar', datnhCungPhanHe?.doTinCay === 'cao');
+ok('Lý do gọi đúng tên "phân hệ (bar)", không phải "controller"',
+  datnhCungPhanHe?.lyDo.some(r => r.includes('phân hệ (bar)')), datnhCungPhanHe?.lyDo.join(' · '));
+
+
 process.stdout.write('\n=== 3. TIÊU CHÍ 2 — TẢI PHÂN ĐỊNH KHI KINH NGHIỆM NGANG NHAU ===\n');
 const nganNhau = {
   lichSuMenu: [

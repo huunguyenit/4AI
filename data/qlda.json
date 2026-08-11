@@ -94,9 +94,12 @@
       "databaseName": "QLDA_APP",
       "sysDatabaseName": "QLDA_SYS",
       "resolveOrder": [
-        { "kind": "env", "name": "QLDA_APP_CONNECTION" },
+        { "kind": "env", "name": "QLDA_APP_CONNECTION", "type": "appConnectionString" },
+        { "kind": "env", "name": "QLDA_SYS_CONNECTION", "type": "sysConnectionString" },
         { "kind": "localFile", "path": "data/qlda.local.json", "key": "appConnectionString" },
-        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "appConnectionString" }
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "sysConnectionString" },
+        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "appConnectionString" },
+        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "sysConnectionString" }
       ],
       "note": "QLDA tự nó là một chương trình FBO — Web.config tại `path` chứa appConnectionString nên query_sql phân giải được kết nối. Web.config dùng placeholder %Database, vì vậy MỌI lệnh query_sql phải truyền `database: \"QLDA_APP\"`. Đây là DB nội bộ, KHÔNG phải DB nghiệp vụ của khách.",
       "indexedAt": "2026-08-08",

@@ -200,7 +200,7 @@
     },
     {
       "path": ".agents/skills/pm-deadline-review/SKILL.md",
-      "sha256": "acca15a56e044ab378464677bf3a0a116c31f380e6503c6fe648749ce64d57fe",
+      "sha256": "e6b689943203de33e877c244f64028f9c4ff60dd98ca5a90137a543d45e5459b",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 5
     },
@@ -474,7 +474,7 @@
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "acca15a56e044ab378464677bf3a0a116c31f380e6503c6fe648749ce64d57fe",
+      "sha256": "e6b689943203de33e877c244f64028f9c4ff60dd98ca5a90137a543d45e5459b",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 5
     },
@@ -738,7 +738,7 @@
     },
     {
       "path": ".cursor/rules/pm-deadline-review.mdc",
-      "sha256": "639cb40a0f2313906442421233da59ca0809c5de56d287c1272f0e6b9d10d40f",
+      "sha256": "0fbba0ae35e35fefef49814b476886dd6e14ffab20933b9f471d19df758b1c09",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 5
     },
@@ -922,7 +922,7 @@
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "b28e918073126e243569eb9cf2b6de314fa25774373dc6a44e0b21f1c1afb6d3",
+      "sha256": "b528942711df64d0df0ccda7bc600ef46686281ed90bc29452a241859b1dae84",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 5
     },
@@ -1026,6 +1026,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-11T04:37:52.651Z",
+  "syncedAt": "2026-08-11T07:51:15.935Z",
   "target": "4ai"
 }

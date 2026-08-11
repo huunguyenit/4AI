@@ -154,6 +154,24 @@ function validatePayloadDetailed(p) {
     } else if (u.ghiChuDdl && !DDL_RE.test(u.ghiChuDdl)) {
       quality.push(`${nhan}: \`ghiChuDdl\` không chứa câu DDL nào — gợi ý tạo bảng/thêm cột PHẢI là script SQL chạy được. Tốt hơn: dùng \`ddl\` có cấu trúc để bộ sinh tự viết SQL (tools/lib/ddl.mjs). Xem skill fbo-new-table-proposal.`);
     }
+    // `noi_dung` bị cắt tay khi agent copy từ kết quả `query_sql` vào payload là lỗi đã xảy ra
+    // thật (2026-08-11, UR DEMO1) dù skill đã dặn lấy đủ — chỉ dẫn trong skill là chưa đủ, y hệt
+    // lý do DDL_RE tồn tại ở trên. Luật này CƯỠNG CHẾ: agent khai thêm `noiDungLenGoc` = kết quả
+    // `LEN(noi_dung)` thật từ SQL cạnh `noi_dung`; lệch độ dài là bị chặn ngay, không phải chờ
+    // người đọc nhận ra câu cụt giữa chừng. Trường này TUỲ CHỌN — thiếu thì không kiểm được,
+    // nhưng không chặn dựng báo cáo (nhiều UR cũ trong payload hiện có chưa kịp bổ sung).
+    if (u.noiDungLenGoc !== undefined) {
+      const lenGoc = Number(u.noiDungLenGoc);
+      const lenHienTai = String(u.noi_dung ?? '').length;
+      // Ngưỡng 0.9, không so bằng tuyệt đối: gộp khoảng trắng thừa (nhiều dấu cách liền nhau
+      // do nguồn có xuống dòng/tab) là bước làm sạch HỢP LỆ, đo thực tế chỉ hụt ~1-3%. Cắt
+      // xén thật (bug đã gặp) hụt 40-70% — ngưỡng 0.9 bắt được cắt xén, không bắt nhầm gộp.
+      if (!Number.isFinite(lenGoc) || lenGoc <= 0) {
+        quality.push(`${nhan}: \`noiDungLenGoc\` phải là số > 0 (kết quả LEN(noi_dung) từ SQL).`);
+      } else if (lenHienTai < lenGoc * 0.9) {
+        quality.push(`${nhan}: \`noi_dung\` dài ${lenHienTai} ký tự nhưng LEN(noi_dung) gốc là ${lenGoc} (hụt hơn 10%) — có thể đã bị cắt khi copy từ query_sql. Lấy lại đủ, đừng tóm tắt.`);
+      }
+    }
     // Tính năng chạy trên màn hình FBO ĐÃ CÓ SẴN thì không đẻ bảng mới — cái cần ghi lại là
     // luồng dữ liệu nguồn → đích, không phải DDL.
     if (u.luongDuLieu) {

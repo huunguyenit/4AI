@@ -5,9 +5,14 @@
 // nói rõ, chứ không bịa ra một cái tên nghe hợp lý.
 //
 // Ba tiêu chí, đúng thứ tự ưu tiên PM đã nêu:
-//   1. Đã từng làm menu/chức năng đó trong lịch sử dự án  → ưu tiên cao nhất
+//   1. Đã từng làm ĐÚNG phân hệ đó trong lịch sử dự án  → ưu tiên cao nhất
 //   2. Đang gánh ít UR sắp tới hạn                          → điểm phạt theo tải
 //   3. UR là báo cáo đầu ra → ai đóng góp nhiều UR đầu vào liên quan
+//
+// "Đúng phân hệ" khớp theo menu_id, hoặc bar (tên phân hệ) khi menu_id khác — KHÔNG khớp
+// theo sysid đơn thuần: một controller (sysid) có thể phục vụ nhiều phân hệ hoàn toàn khác
+// nhau (vd sysid `Customer` dùng chung cho "Danh mục khách hàng" VÀ "Danh mục nhà cung cấp"
+// trên DEMO1) — coi chung sysid là "cùng kinh nghiệm" sẽ gợi ý sai người. Xem khopPhanHe().
 //
 // Kết quả là ĐỀ XUẤT. Không có đường nào từ đây tới `UPDATE nbphyc`.
 
@@ -22,7 +27,7 @@ export const TRONG_SO_MAC_DINH = {
 };
 
 /** Bỏ dấu tiếng Việt để so khớp — cùng quy tắc với chỉ mục không dấu của FBO. */
-function boDau(s) {
+export function boDau(s) {
   return String(s ?? '')
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
@@ -51,6 +56,27 @@ const chuan = (v) => String(v ?? '').trim();
 const khop = (a, b) => chuan(a) !== '' && chuan(a).toLowerCase() === chuan(b).toLowerCase();
 
 /**
+ * Hai dòng có CÙNG phân hệ nghiệp vụ không — dùng cho tiêu chí 1 (kinh nghiệm menu) và
+ * tiêu chí 3 (đóng góp UR đầu vào).
+ *
+ * `menu_id` là khớp chắc chắn nhất: dữ liệu thật (DEMO1) cho thấy mỗi menu_id chỉ gắn đúng
+ * một `bar`. Khi menu_id không khớp thì `bar` (tên phân hệ) là tín hiệu thứ hai — CỐ TÌNH
+ * không dùng `sysid` để khớp, vì một controller có thể phục vụ nhiều phân hệ khác hẳn nhau.
+ * Ví dụ thật đo được trên DEMO1: sysid `Customer` đứng sau CẢ hai menu "Danh mục khách hàng"
+ * (04.07.01) lẫn "Danh mục nhà cung cấp" (05.07.01) — coi hai việc đó là "cùng kinh nghiệm"
+ * chỉ vì chung controller là sai: một bên là khách hàng (AR), một bên là nhà cung cấp (AP).
+ * `sysid` vẫn được giữ lại trong dữ liệu để hiển thị tham khảo, không dùng để quyết định khớp.
+ *
+ * @returns {'menu_id'|'bar'|null}
+ */
+function khopPhanHe(a, b) {
+  if (khop(a?.menu_id, b?.menu_id)) return 'menu_id';
+  const barA = boDau(a?.bar), barB = boDau(b?.bar);
+  if (barA && barB && barA === barB) return 'bar';
+  return null;
+}
+
+/**
  * UR này CÓ THẬT SỰ chưa được giao không — tính cả trường hợp `ma_lt1` mang đúng mã PM.
  *
  * Màn hình BA dùng để lên UR mặc định `ma_lt1` = mã PM (PM là người duyệt/tiếp nhận đầu
@@ -71,7 +97,7 @@ export function laChuaPhanCong(maLt1, pmCode) {
 }
 
 /**
- * Cộng số UR mỗi người đã làm trên đúng menu/sysid của UR này.
+ * Cộng số UR mỗi người đã làm trên đúng phân hệ (menu_id hoặc bar) của UR này.
  * @returns {Map<string, {soUr: number, theo: string}>}
  */
 function kinhNghiemTheoMenu(u, lichSuMenu = []) {
@@ -80,22 +106,20 @@ function kinhNghiemTheoMenu(u, lichSuMenu = []) {
     const nguoi = chuan(row.ma_lt1);
     if (!nguoi) continue;
 
-    // menu_id là khớp chắc chắn nhất; sysid là đường thứ hai khi UR chưa gắn menu.
-    const theoMenu = khop(row.menu_id, u.menu_id);
-    const theoSysid = khop(row.sysid, u.sysid);
-    if (!theoMenu && !theoSysid) continue;
+    const theo = khopPhanHe(row, u);
+    if (!theo) continue;
 
-    const cu = out.get(nguoi) ?? { soUr: 0, theo: theoMenu ? 'menu_id' : 'sysid' };
+    const cu = out.get(nguoi) ?? { soUr: 0, theo };
     cu.soUr += Number(row.so_ur) || 0;
-    if (theoMenu) cu.theo = 'menu_id';
+    if (theo === 'menu_id') cu.theo = 'menu_id'; // menu_id luôn thắng nếu có ở dòng nào đó
     out.set(nguoi, cu);
   }
   return out;
 }
 
 /**
- * Cộng đóng góp UR đầu vào liên quan — khớp theo menu_id của UR, hoặc theo tên nguồn
- * dữ liệu đã khai ở `luongDuLieu.nguon`.
+ * Cộng đóng góp UR đầu vào liên quan — khớp theo phân hệ (menu_id/bar) của UR, hoặc theo
+ * tên nguồn dữ liệu đã khai ở `luongDuLieu.nguon`.
  * @returns {Map<string, {soUr: number, nguon: string[]}>}
  */
 function dongGopDauVaoLienQuan(u, dongGopDauVao = []) {
@@ -107,7 +131,10 @@ function dongGopDauVaoLienQuan(u, dongGopDauVao = []) {
     if (!nguoi) continue;
 
     const khoa = chuan(row.nguon);
-    const trung = khop(khoa, u.menu_id) || nguonUr.includes(khoa.toLowerCase());
+    // `row.nguon` mang giá trị của một khoá duy nhất (menu_id thường gặp nhất) — thử khớp
+    // theo phân hệ trước (đối xứng với tiêu chí 1), rồi mới tới danh sách nguồn khai tay.
+    const trung = khopPhanHe({ menu_id: row.nguon, bar: row.bar }, u)
+      || nguonUr.includes(khoa.toLowerCase());
     if (!trung) continue;
 
     const cu = out.get(nguoi) ?? { soUr: 0, nguon: [] };
@@ -134,7 +161,9 @@ function taiTrongTheoNguoi(taiTrong = []) {
 
 /**
  * Gợi ý người tiếp nhận cho MỘT ur.
- * @param {Object} u - UR (cần menu_id/sysid, noi_dung, luongDuLieu tuỳ chọn)
+ * @param {Object} u - UR (cần menu_id, nên có `bar`; sysid/noi_dung/luongDuLieu tuỳ chọn).
+ *   `bar` = tên phân hệ hiển thị (tra từ `wcommand.bar` trên CHÍNH DB sys của dự án đó) —
+ *   dùng để phân biệt các UR dùng chung controller nhưng khác nghiệp vụ (xem khopPhanHe()).
  * @param {Object} nhanSu - { ungVien[], lichSuMenu[], taiTrong[], dongGopDauVao[] }
  * @param {Object} [trongSo]
  * @returns {{ungVien: Array, laBaoCaoDauRa: boolean, nhanDienTu: string, thieuDuLieu: string[]}}
@@ -169,7 +198,7 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}) {
     const diem = Math.round((diemMenu + diemDauVao - phat) * 10) / 10;
 
     const lyDo = [];
-    if (kn) lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'controller'} trong dự án`);
+    if (kn) lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'} trong dự án`);
     if (dv) lyDo.push(`đóng góp ${dv.soUr} UR đầu vào liên quan (${dv.nguon.join(', ')})`);
     lyDo.push(t.toiHan ? `đang gánh ${t.toiHan} UR sắp tới hạn` : 'không có UR nào sắp tới hạn');
     if (t.dangMo) lyDo.push(`${t.dangMo} UR đang mở`);

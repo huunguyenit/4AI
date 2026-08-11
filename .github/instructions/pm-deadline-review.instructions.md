@@ -60,16 +60,64 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
    PHẢI là **script SQL thật** (`CREATE TABLE`/`ALTER TABLE` đầy đủ cột/kiểu/PK), không phải
    mô tả bằng lời — báo cáo hiển thị nguyên văn trong khối code.
 
-7b. **UR ở `DD` chưa có `ma_lt1`.** Lấy ba dữ kiện dưới đây vào khối `nhanSu` của payload;
+7b. **UR ở `DD` chưa phân lập trình.** Lấy ba dữ kiện dưới đây vào khối `nhanSu` của payload;
    `tools/lib/assignee.mjs` chấm điểm và xếp hạng, **đừng tự xếp rồi nhét thứ tự vào payload**.
 
-   *Tiêu chí 1 — ai đã làm menu đó trong lịch sử dự án* (ưu tiên cao nhất):
+   **"Chưa phân" gồm CẢ `ma_lt1` = mã PM**, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn
+   `ma_lt1` = PM (người duyệt đầu tiên), PM mới là người phân việc thật sự sau đó. Nên khi lọc
+   UR cần gợi ý, đừng chỉ `RTRIM(ma_lt1) = ''` — báo cáo tự xử lý bằng `laChuaPhanCong()` dựa
+   trên `payload.pm`, chỉ cần khai đúng `pm` trong payload là được. PM **vẫn** nằm trong danh
+   sách ứng viên vì PM cũng trực tiếp lập trình; UR đã sang `XN`/`TH` mang mã PM là PM tự làm
+   thật, không bị coi là chưa phân.
+
+   **Danh sách ứng viên (`ungVien`) PHẢI là toàn bộ nhân viên phòng ban, không suy từ lịch
+   sử.** Nếu bỏ trống `ungVien`, `goiYPhanCong()` chỉ xét những người ĐÃ xuất hiện trong ba
+   mảng dữ kiện bên dưới — người mới vào phòng hoặc đang rảnh hoàn toàn (0 UR ở cả ba nguồn)
+   sẽ không bao giờ được liệt kê, dù có thể là lựa chọn tốt nhất. Lấy roster thật — bảng
+   `userinfo2` nằm ở CHÍNH sys database của QLDA (`QLDA_SYS`), tra qua `db: "sys"` trên program
+   QLDA (`databases.qlda.path`), KHÔNG phải trên program của khách:
+
+       -- query_sql(program: databases.qlda.path, db: 'sys')
+       SELECT RTRIM(name) AS name, RTRIM(ma_bo_phan) AS ma_bo_phan FROM userinfo2
+       WHERE RTRIM(ma_bo_phan) = '<bp_lt>' AND status = '1' AND ma_kcv = 'LT' AND ma_chv = 'NV'
+
+   Bảng này nằm ở CSDL nhân sự nội bộ (`datasys`), **ngoài phạm vi kết nối mà `query_sql` tự
+   phân giải** — đã thử qua Web.config của cả DEMO1 lẫn QLDA, cả hai đều `Login failed` (không
+   có quyền/chưa đăng ký, không phải lỗi cú pháp). Chạy câu này bằng công cụ khác (SSMS…) rồi
+   dán kết quả vào `nhanSu.ungVien`.
+
+   *Tiêu chí 1 — ai đã làm ĐÚNG phân hệ đó trong lịch sử dự án* (ưu tiên cao nhất). Chỉ dùng
+   `menu_id` là **không đủ**: một controller (`sysid`) có thể phục vụ nhiều phân hệ khác hẳn
+   nhau — đo được thật trên DEMO1, `sysid=Customer` đứng sau CẢ "Danh mục khách hàng"
+   (`04.07.01`) LẪN "Danh mục nhà cung cấp" (`05.07.01`), hai nghiệp vụ AR/AP khác nhau dùng
+   chung một màn hình. Tương tự `HDA` có thể tồn tại ở cả phân hệ phải thu lẫn bán hàng. Coi
+   chung `sysid` là "cùng kinh nghiệm" sẽ gợi ý sai người — `assignee.mjs` vì vậy KHÔNG khớp
+   theo `sysid`, chỉ khớp theo `menu_id` rồi tới `bar` (tên phân hệ hiển thị). Hai bước:
+
+   **Bước A** — đếm lịch sử theo `menu_id` (tại `database: "QLDA_APP"`, như cũ):
 
        SELECT RTRIM(menu_id) AS menu_id, RTRIM(sysid) AS sysid,
               RTRIM(ma_lt1) AS ma_lt1, COUNT(*) AS so_ur
        FROM nbphyc
        WHERE RTRIM(ma_da) = '<ma_da>' AND RTRIM(ma_lt1) <> ''
        GROUP BY RTRIM(menu_id), RTRIM(sysid), RTRIM(ma_lt1)
+
+   **Bước B** — tra `bar` (tên phân hệ) cho từng `menu_id` DISTINCT thu được ở bước A, chạy
+   TRÊN CHÍNH DB sys CỦA DỰ ÁN ĐÓ (không phải QLDA_APP — hai CSDL khác nhau, không JOIN được
+   trong một câu; ghép bằng tay khi dựng payload):
+
+       -- query_sql(program: '<ma_da>', db: 'sys')
+       SELECT DISTINCT RTRIM(menu_id) AS menu_id, bar
+       FROM wcommand
+       WHERE RTRIM(menu_id) IN (<danh sách menu_id thu được ở bước A>)
+
+   Gắn `bar` vào từng dòng trước khi đưa vào `nhanSu.lichSuMenu`, và gắn `bar` của chính UR
+   đang xét vào `yeuCau[].bar`. Nếu `bar` vẫn chưa đủ rõ để kết luận (tên phân hệ chung
+   chung), đọc `noi_dung` của vài UR mẫu trước khi quyết định đưa một người vào `lichSuMenu`.
+
+   Bước B cần `ma_da` đã đăng ký program trong `data/customers.json` (`list_programs`) —
+   dự án nào chưa đăng ký thì `query_sql` báo lỗi thẳng, không đoán đường dẫn. Gặp trường hợp
+   đó thì bỏ qua `bar`, chỉ khớp theo `menu_id` và tự đọc `noi_dung` để phán đoán phân hệ.
 
    *Tiêu chí 2 — ai đang gánh bao nhiêu UR sắp tới hạn* (lấy toàn bộ dự án của bộ phận, không
    chỉ dự án đang rà — tải là tải chung của người đó):
@@ -86,13 +134,17 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
        GROUP BY RTRIM(y.ma_lt1)
 
    *Tiêu chí 3 — chỉ khi UR là báo cáo đầu ra*: xác định menu/nguồn dữ liệu đầu vào của báo
-   cáo (từ `luongDuLieu.nguon` nếu đã khai), rồi đếm ai làm nhiều UR trên chính những nguồn đó:
+   cáo (từ `luongDuLieu.nguon` nếu đã khai), rồi đếm ai làm nhiều UR trên chính những nguồn đó
+   — cùng nguyên tắc menu_id/bar ở tiêu chí 1, KHÔNG suy theo sysid:
 
        SELECT RTRIM(menu_id) AS nguon, RTRIM(ma_lt1) AS ma_lt1, COUNT(*) AS so_ur
        FROM nbphyc
        WHERE RTRIM(ma_da) = '<ma_da>' AND RTRIM(ma_lt1) <> ''
          AND RTRIM(menu_id) IN (<danh sách menu đầu vào>)
        GROUP BY RTRIM(menu_id), RTRIM(ma_lt1)
+
+   Rồi tra `bar` cho các `nguon` (menu_id) thu được y hệt Bước B ở trên, gắn vào từng dòng
+   `dongGopDauVao` — cần khi nguồn đầu vào cũng là một controller dùng chung nhiều phân hệ.
 
    Báo cáo tự nhận diện "báo cáo đầu ra" từ `noi_dung` (không dấu: `bao cao`, `mau in`,
    `thong ke`…). Nhận diện sai thì khai thẳng `laBaoCaoDauRa: true|false` ở UR để chặn đoán.
@@ -150,7 +202,7 @@ ghép chuỗi ở nơi khác.
           "xac_nhan_da_hen_yn": false, "noi_dung": "..." }
       ],
       "yeuCau": [
-        { "stt_rec": "...", "fcode1": "UR-02", "noi_dung": "...",
+        { "stt_rec": "...", "fcode1": "UR-02", "noi_dung": "...", "noiDungLenGoc": 531,
           "giai_doan_da": "...", "trang_thai": "DD",
           "tlks_yn": true, "trang_tlks": "TLKS KT tr.31",
           "menu_id": "", "sysid": "", "tg_dk_th": 8, "ma_lt1": "",
@@ -172,9 +224,18 @@ ghép chuỗi ở nơi khác.
 - `deXuat` là phần suy nghĩ của PM — báo cáo chỉ trình bày lại, không tự sinh.
 - `ghiChuDdl` PHẢI là script SQL thật (xem [fbo-new-table-proposal]) — báo cáo tô màu cú pháp
   SQL cho khối này, đưa văn xuôi vào đây sẽ hiện xấu và sai mục đích.
+- `noiDungLenGoc` **tuỳ chọn** nhưng nên luôn kèm — số ký tự lấy từ `SELECT LEN(noi_dung) ...`
+  ngay khi query. `report` đối chiếu với độ dài `noi_dung` thật trong payload, cho phép hụt tới
+  10% (gộp khoảng trắng thừa khi `REPLACE` xuống dòng/tab là hợp lệ); hụt hơn 10% là cảnh báo
+  `quality` ngay trên báo cáo (`tools/lib/report.mjs`) — đây là chỗ CƯỠNG CHẾ, không phải chỉ
+  dặn suông, vì bước copy tay từ kết quả `query_sql` vào payload đã từng cắt ngắn `noi_dung`
+  dù skill đã nói rõ phải lấy đủ (xem mục Bẫy).
 - `trang_thai` ngoài `DD`/`XN`/`TH` sẽ bị lệnh từ chối kèm chỉ số phần tử.
-- `ma_lt1` rỗng ở UR `DD` là tín hiệu "chưa giao" — báo cáo tô vàng và đưa vào mục gợi ý
-  phân công. Điền `ma_lt1` thì UR đó biến khỏi mục gợi ý.
+- `ma_lt1` ở UR `DD` là tín hiệu "chưa phân" khi **rỗng HOẶC bằng đúng `payload.pm`** — báo cáo
+  tô vàng (ghi rõ "mặc định — chưa phân") và đưa vào mục gợi ý. Điền tên người khác thì UR đó
+  biến khỏi mục gợi ý. Ngoài `DD` thì mã PM là tên hợp lệ, không gắn nhãn gì.
+- `pm` vì vậy KHÔNG còn là trường trang trí: sai mã PM là lọc sai toàn bộ mục gợi ý phân công.
+  Bỏ trống thì rớt về `qlda.local.json` → `pm.maNv`.
 - `nhanSu` **tuỳ chọn**: thiếu thì báo cáo vẫn dựng, chỉ mất phần xếp hạng ứng viên và hiện
   banner nói rõ thiếu gì. Thiếu `lichSuMenu` là mất tiêu chí 1 — mục gợi ý tụt xuống
   "tin cậy thấp", chỉ còn xếp theo tải.
@@ -190,6 +251,12 @@ Không tự `UPDATE nbphyc`.
 
 - `query_sql` trả kết quả **mất dấu tiếng Việt** (codepage sqlcmd). Đừng copy chuỗi đã mất dấu
   vào báo cáo hay UR — lấy văn bản đúng từ tài liệu nguồn.
+- `noi_dung` PHẢI lấy ĐỦ, không cắt ngắn/tóm tắt khi đưa vào payload — cột là `nvarchar(4000)`,
+  thường dài hơn nhiều so với những gì hiện trên một dòng kết quả `query_sql`. UR có xuống
+  dòng/tab thì `REPLACE` về khoảng trắng chứ không bỏ bớt đoạn cuối. Query luôn kèm
+  `LEN(noi_dung)` và ghi vào `noiDungLenGoc` (xem mục Payload) — đây là chỗ báo cáo tự đối
+  chiếu và CHẶN nếu lệch, không chỉ dặn bằng lời. Nội dung bị cắt làm sai luôn phần suy đoán
+  "tạo tính năng mới" (từ khoá thường nằm cuối câu) và khiến prompt gợi ý sinh sai hướng.
 - Cột khoá là `char` cố định dài (`ma_da char(32)`, `stt_rec char(13)`) — luôn `RTRIM` khi
   so sánh hay join.
 - Hạn lấy `MAX(ngay_ht)` **theo từng giai đoạn**, không gộp cả dự án về một hạn.
