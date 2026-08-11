@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { HUB, loadAssets, readJson, resolveMcpServers, scanSecrets } from './lib/assets.mjs';
+import { HUB, loadAssets, readJson, resolveMcpServers, scanSecrets, ledgerRoot } from './lib/assets.mjs';
 import { skeleton, KINDS } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
 import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
@@ -21,9 +21,11 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
                                         [--dry-run] [--target T] [--tool X] [--force]
   node tools/4ai.mjs graph check        validate đồ thị JSONL. Không bao giờ ghi
   node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
-  node tools/4ai.mjs report <payload>   dựng báo cáo rà soát HTML vào ledger/ [--dry-run]
+  node tools/4ai.mjs report <payload>   dựng báo cáo HTML vào <mcpDataRoot>/4ai/ledger/ [--dry-run]
+                                        (mcpDataRoot từ %USERPROFILE%\.cursor\fbo-local.json, lùi về <hub>/ledger nếu chưa có)
                                         payload có "kind":"portfolio" -> tổng quan nhiều dự án
                                         payload có "kind":"performance" -> hiệu suất theo phòng ban
+                                        payload có "kind":"kpi" -> KPI bộ phận theo LTQL (nhân viên)
 `;
 
 function fail(msg) {
@@ -292,6 +294,9 @@ async function cmdReport(payloadPath, opts) {
   if (payload?.kind === 'performance') {
     const { buildPerformanceReportArtifact } = await import('./lib/report-performance.mjs');
     ({ artifact, errors } = buildPerformanceReportArtifact(payload));
+  } else if (payload?.kind === 'kpi') {
+    const { buildKpiReportArtifact } = await import('./lib/report-kpi.mjs');
+    ({ artifact, errors } = buildKpiReportArtifact(payload));
   } else {
     const build = payload?.kind === 'portfolio' ? buildPortfolioArtifact : buildReportArtifact;
     ({ artifact, errors } = build(payload, HUB));
@@ -300,7 +305,7 @@ async function cmdReport(payloadPath, opts) {
     for (const e of errors) process.stderr.write(`  ${e}\n`);
     fail(`payload thiếu ${errors.length} chỗ — không dựng báo cáo.`);
   }
-  const plan = writeArtifacts({ destRoot: HUB, files: [artifact], dryRun: opts.dryRun });
+  const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files: [artifact], dryRun: opts.dryRun });
   for (const p of plan) {
     const verb = opts.dryRun ? `${p.action} (dry-run)` : p.action;
     process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);

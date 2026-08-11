@@ -626,7 +626,7 @@ export function buildReportArtifact(payload, hub = HUB) {
   const ngay = String(payload.ngay_chay).slice(0, 10);
   return {
     artifact: {
-      relPath: `ledger/${payload.ma_da}/review/${ngay}.html`,
+      relPath: `${payload.ma_da}/review/${ngay}.html`,
       content: renderReport({ ...payload, pm: config.pm.maNv }, h),
     },
     errors: [],
@@ -661,7 +661,7 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   const ngay = String(payload.ngay_chay).slice(0, 10);
   return {
     artifact: {
-      relPath: `ledger/_portfolio/${ngay}.html`,
+      relPath: `_portfolio/${ngay}.html`,
       content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: config.pm.maNv }, h),
     },
     errors: [],

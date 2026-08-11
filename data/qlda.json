@@ -457,7 +457,7 @@
     },
 
     "docCache": {
-      "path": "ledger/<ma_da>/docs/",
+      "path": "<mcpDataRoot>/4ai/ledger/<ma_da>/docs/",
       "rule": "Tài liệu khảo sát, biên bản, phụ lục, email tải từ sysfileinfo được để trong repo cho lần sau đọc lại. KHÔNG commit — .gitignore đã chặn thư mục này.",
       "invalidateBy": ["file_enc", "file_size"],
       "note": "Chỉ tải lại khi file_enc mới hoặc file_size lệch so với lần trước. Không đổi/xoá gì trong fileStore gốc."
@@ -477,7 +477,7 @@
 
     "baoCao": {
       "lich": { "gio": "08:00", "timezone": "Asia/Ho_Chi_Minh", "ngay": [1, 2, 3, 4, 5] },
-      "output": "ledger/<ma_da>/review/<YYYY-MM-DD>.html",
+      "output": "<mcpDataRoot>/4ai/ledger/<ma_da>/review/<YYYY-MM-DD>.html",
       "format": "HTML tự chứa, xem lại được offline.",
       "phanBaoCao": [
         "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua.",

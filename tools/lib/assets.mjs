@@ -9,6 +9,23 @@ import { applyDefaults, validateAsset, SECRET_PATTERNS, SECRET_WAIVER } from './
 /** Gốc hub, suy ra từ vị trí file này (tools/lib/assets.mjs → ../../). */
 export const HUB = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..');
 
+/**
+ * Ledger ngoài hub (tasks, CHANGELOG, HTML report) — vị trí đọc từ `mcpDataRoot` khai trong
+ * `%USERPROFILE%\.cursor\fbo-local.json` (per máy, không commit). Máy nào chưa có file đó
+ * thì lùi về `<hub>/ledger` — không suy đoán path bằng cấu trúc thư mục tương đối.
+ */
+export function ledgerRoot(hub = HUB) {
+  const localCfgPath = path.join(process.env.USERPROFILE ?? '', '.cursor', 'fbo-local.json');
+  const local = readJson(localCfgPath, {});
+  if (local.mcpDataRoot) return path.join(local.mcpDataRoot, '4ai', 'ledger');
+  return path.join(hub, 'ledger');
+}
+
+/** @deprecated dùng ledgerRoot — giữ alias cho chỗ gọi cũ */
+export function ledgerDataRoot(hub = HUB) {
+  return ledgerRoot(hub);
+}
+
 const KIND_FOLDER = {
   doctrine: 'doctrine',
   rule: 'rules',
@@ -176,11 +193,14 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
   return { assets, byId, errors, warnings };
 }
 
-/** Quét secret ngoài phạm vi asset (ledger/, data/). */
-export function scanSecrets({ hub = HUB, dirs = ['ledger', 'data'] } = {}) {
+/** Quét secret ngoài phạm vi asset (mcp/data/4ai/ledger, data/). */
+export function scanSecrets({ hub = HUB } = {}) {
+  const roots = [
+    { label: 'mcp/data/4ai/ledger', root: ledgerRoot(hub) },
+    { label: 'data', root: path.join(hub, 'data') },
+  ];
   const hits = [];
-  for (const dir of dirs) {
-    const root = path.join(hub, dir);
+  for (const { label, root } of roots) {
     if (!fs.existsSync(root)) continue;
     for (const rel of fs.globSync('**/*.{md,json,jsonl,txt}', { cwd: root })) {
       const abs = path.join(root, rel);
@@ -189,7 +209,7 @@ export function scanSecrets({ hub = HUB, dirs = ['ledger', 'data'] } = {}) {
         if (lines[i].includes(SECRET_WAIVER)) continue;
         for (const re of SECRET_PATTERNS) {
           if (re.test(lines[i])) {
-            hits.push({ file: `${dir}/${toPosix(rel)}`, line: i + 1,
+            hits.push({ file: `${label}/${toPosix(rel)}`, line: i + 1,
               message: `có shape connection string (${re.source}) — không bao giờ ghi credential vào đây` });
             break;
           }

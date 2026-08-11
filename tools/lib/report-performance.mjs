@@ -289,7 +289,7 @@ export function buildPerformanceReportArtifact(payload) {
   const ngay = String(payload.ngay_chay).slice(0, 10);
   return {
     artifact: {
-      relPath: `ledger/_performance/${payload.granularity}-${ngay}.html`,
+      relPath: `_performance/${payload.granularity}-${ngay}.html`,
       content: injectCss(renderPerformance(payload), PERF_CSS),
     },
     errors: [],
