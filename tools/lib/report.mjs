@@ -1225,7 +1225,7 @@ export function buildReportArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: duongDanDuAn(ngay, payload.ma_da),
-      content: renderReport({ ...payload, pm: config.pm.maNv }, h),
+      content: renderReport({ ...payload, pm: payload.pm ?? config.pm.maNv }, h),
     },
     errors: [],
   };
@@ -1270,7 +1270,7 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: duongDanTong(ngay),
-      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: config.pm.maNv, rong }, h),
+      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv, rong }, h),
     },
     errors: [],
   };
