@@ -1,7 +1,7 @@
 # Report shell templates — design
 
 **Date:** 2026-08-11  
-**Status:** approved for implementation (pending user review of this file)  
+**Status:** implemented  
 **Scope:** tách shell HTML + CSS dùng chung ra folder template; logic ráp dữ liệu giữ trong `.mjs`
 
 ## Vấn đề
