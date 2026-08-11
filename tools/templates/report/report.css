@@ -103,9 +103,7 @@ border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--fg);transi
 footer{padding:22px 0;color:var(--mut);font-size:12px}
 
 /* ============ dashboard 1 viewport ============ */
-/* fixed + clip: focus (click label) không scrollIntoView về đầu trang */
-.uin{position:fixed;top:0;left:0;width:1px;height:1px;margin:0;padding:0;border:0;
-opacity:0;pointer-events:none;overflow:hidden;clip:rect(0,0,0,0)}
+.uin{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
 body.dash{max-width:1200px;padding-bottom:40px}
 .top{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0 0;border-bottom:1px solid var(--line)}
 .top-main{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
