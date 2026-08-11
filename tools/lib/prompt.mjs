@@ -62,17 +62,17 @@ KHÔNG tạo chứng từ mới — đây là màn hình chuẩn hoặc đã cus
 
   const viecCanLam = laMoi
     ? `=== VIỆC CẦN LÀM ===
-1. Xác định đúng program path của khách hàng trên (data/customers.json; hỏi PM nếu chưa rõ).
+1. Xác định đúng program path của khách hàng trên trước khi sửa file đầu tiên (hỏi PM nếu chưa rõ).
 2. Tính năng MỚI — tạo controller mới (mã, vị trí trong Controllers do PM/LT chốt trước khi sửa file đầu tiên), không sửa lên controller${d.sysid ? ` ${d.sysid}` : ' đích'} có sẵn.
 3. Chia logic đúng 2 nơi:
    - XML — phục vụ GUI: form lọc/chọn nguồn dữ liệu trên, field cần điền, nút hành động, validate phía client.
    - SQL — xử lý data: procedure lọc nguồn, mapping, validate, ghi record vào ${d.bang ? `bảng ${d.bang}` : 'bảng đích'} đúng logic ở GHI CHÚ NGHIỆP VỤ.
-4. resolve_entities trước khi đọc/sửa Include dùng chung — không đụng nếu chưa đo used_by.
+4. Phân giải entity/Include dùng chung trước khi đọc/sửa (dùng tool tra cứu phù hợp có sẵn) — không đụng nếu chưa đo used_by.
 5. Verify bằng dữ liệu mẫu, rồi ghi entry vào ledger theo pm-task-ledger.`
     : `=== VIỆC CẦN LÀM ===
-1. Xác định đúng program path của khách hàng trên (data/customers.json; hỏi PM nếu chưa rõ).
+1. Xác định đúng program path của khách hàng trên trước khi sửa (hỏi PM nếu chưa rõ).
 2. Dùng describe_controller xác nhận controller đích, cặp .f/.xml, và field liên quan tới nguồn dữ liệu trên.
-3. resolve_entities trước khi đọc/sửa — không suy đoán nội dung DTD entity.
+3. Phân giải entity/DTD dùng chung trước khi đọc/sửa (dùng tool tra cứu phù hợp có sẵn) — không suy đoán nội dung.
 4. Sửa tối thiểu để nhận nguồn dữ liệu trên và ghi đúng field đích; không đụng Include dùng chung nếu chưa đo used_by.
 5. Verify bằng dữ liệu mẫu, rồi ghi entry vào ledger theo pm-task-ledger.`;
 

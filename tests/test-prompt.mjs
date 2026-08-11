@@ -29,7 +29,7 @@ ok('Liệt kê nguồn', r1.prompt?.includes('DEMO1_Mid.Cost') && r1.prompt?.inc
 ok('Nêu đích + controller', r1.prompt?.includes('Hóa đơn mua dịch vụ') && r1.prompt?.includes('controller APTran'));
 ok('Giữ ghi chú nghiệp vụ', r1.prompt?.includes('TLKS mục 4.4'));
 ok('Nhắc dùng describe_controller (nhánh dùng lại màn hình)', r1.prompt?.includes('describe_controller'));
-ok('Nhắc verify + ledger', r1.prompt?.includes('resolve_entities') && r1.prompt?.includes('pm-task-ledger'));
+ok('Nhắc verify + ledger', r1.prompt?.includes('Phân giải entity') && r1.prompt?.includes('pm-task-ledger'));
 ok('Không lạc sang wording tính năng mới', !r1.prompt?.includes('TẠO TÍNH NĂNG MỚI'));
 
 process.stdout.write('\n=== nhanDienTinhNangMoi: đọc từ noi_dung thật của UR (DV-012) ===\n');
@@ -53,7 +53,7 @@ ok('Nêu rõ TẠO TÍNH NĂNG MỚI', r4.prompt?.includes('TẠO TÍNH NĂNG M�
 ok('Nói rõ không tạo loại chứng từ mới nhưng là menu mới', r4.prompt?.includes('menu/controller MỚI HOÀN TOÀN'));
 ok('Không dùng lại wording "màn hình chuẩn hoặc đã customize"', !r4.prompt?.includes('màn hình chuẩn hoặc đã customize'));
 ok('Chia XML (GUI) / SQL (data)', r4.prompt?.includes('XML — phục vụ GUI') && r4.prompt?.includes('SQL — xử lý data'));
-ok('Vẫn nhắc program path + ledger', r4.prompt?.includes('data/customers.json') && r4.prompt?.includes('pm-task-ledger'));
+ok('Vẫn nhắc program path + ledger', r4.prompt?.includes('program path') && r4.prompt?.includes('pm-task-ledger'));
 
 process.stdout.write('\n=== promptCuaUr: override `laTinhNangMoi` thắng suy đoán từ noi_dung ===\n');
 const u5 = { ...u1, laTinhNangMoi: true };
