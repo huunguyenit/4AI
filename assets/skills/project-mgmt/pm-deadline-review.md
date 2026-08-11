@@ -61,8 +61,15 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
    PHẢI là **script SQL thật** (`CREATE TABLE`/`ALTER TABLE` đầy đủ cột/kiểu/PK), không phải
    mô tả bằng lời — báo cáo hiển thị nguyên văn trong khối code.
 
-7b. **UR ở `DD` chưa có `ma_lt1`.** Lấy ba dữ kiện dưới đây vào khối `nhanSu` của payload;
+7b. **UR ở `DD` chưa phân lập trình.** Lấy ba dữ kiện dưới đây vào khối `nhanSu` của payload;
    `tools/lib/assignee.mjs` chấm điểm và xếp hạng, **đừng tự xếp rồi nhét thứ tự vào payload**.
+
+   **"Chưa phân" gồm CẢ `ma_lt1` = mã PM**, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn
+   `ma_lt1` = PM (người duyệt đầu tiên), PM mới là người phân việc thật sự sau đó. Nên khi lọc
+   UR cần gợi ý, đừng chỉ `RTRIM(ma_lt1) = ''` — báo cáo tự xử lý bằng `laChuaPhanCong()` dựa
+   trên `payload.pm`, chỉ cần khai đúng `pm` trong payload là được. PM **vẫn** nằm trong danh
+   sách ứng viên vì PM cũng trực tiếp lập trình; UR đã sang `XN`/`TH` mang mã PM là PM tự làm
+   thật, không bị coi là chưa phân.
 
    *Tiêu chí 1 — ai đã làm menu đó trong lịch sử dự án* (ưu tiên cao nhất):
 
@@ -174,8 +181,11 @@ ghép chuỗi ở nơi khác.
 - `ghiChuDdl` PHẢI là script SQL thật (xem [fbo-new-table-proposal]) — báo cáo tô màu cú pháp
   SQL cho khối này, đưa văn xuôi vào đây sẽ hiện xấu và sai mục đích.
 - `trang_thai` ngoài `DD`/`XN`/`TH` sẽ bị lệnh từ chối kèm chỉ số phần tử.
-- `ma_lt1` rỗng ở UR `DD` là tín hiệu "chưa giao" — báo cáo tô vàng và đưa vào mục gợi ý
-  phân công. Điền `ma_lt1` thì UR đó biến khỏi mục gợi ý.
+- `ma_lt1` ở UR `DD` là tín hiệu "chưa phân" khi **rỗng HOẶC bằng đúng `payload.pm`** — báo cáo
+  tô vàng (ghi rõ "mặc định — chưa phân") và đưa vào mục gợi ý. Điền tên người khác thì UR đó
+  biến khỏi mục gợi ý. Ngoài `DD` thì mã PM là tên hợp lệ, không gắn nhãn gì.
+- `pm` vì vậy KHÔNG còn là trường trang trí: sai mã PM là lọc sai toàn bộ mục gợi ý phân công.
+  Bỏ trống thì rớt về `qlda.local.json` → `pm.maNv`.
 - `nhanSu` **tuỳ chọn**: thiếu thì báo cáo vẫn dựng, chỉ mất phần xếp hạng ứng viên và hiện
   banner nói rõ thiếu gì. Thiếu `lichSuMenu` là mất tiêu chí 1 — mục gợi ý tụt xuống
   "tin cậy thấp", chỉ còn xếp theo tải.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // test-assignee.mjs — Test gợi ý người tiếp nhận UR ở DD chưa có ma_lt1.
 
-import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa } from '../tools/lib/assignee.mjs';
+import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa, laChuaPhanCong } from '../tools/lib/assignee.mjs';
 import { validatePayload, renderReport, buildPortfolioArtifact } from '../tools/lib/report.mjs';
 import { loadHolidays } from '../tools/lib/workdays.mjs';
 
@@ -124,6 +124,40 @@ ok('Bỏ qua UR đã có người', !loc.some(x => x.ur.stt_rec === '2'));
 ok('Bỏ qua XN/TH', !loc.some(x => ['3', '4'].includes(x.ur.stt_rec)));
 
 
+process.stdout.write('\n=== 6b. ma_lt1 = MÃ PM LÀ MẶC ĐỊNH BA, KHÔNG PHẢI ĐÃ PHÂN ===\n');
+// Màn hình BA lên UR để sẵn ma_lt1 = PM; PM mới là người phân việc thật sự sau đó.
+ok('ma_lt1 rỗng -> chưa phân', laChuaPhanCong('', 'PM01') === true);
+ok('ma_lt1 = mã PM -> chưa phân', laChuaPhanCong('PM01', 'PM01') === true);
+ok('ma_lt1 = mã PM khác hoa/thường -> vẫn là chưa phân',
+  laChuaPhanCong('pm01', 'PM01') === true);
+ok('ma_lt1 = mã PM có khoảng trắng thừa (char cố định dài) -> chưa phân',
+  laChuaPhanCong('  PM01  ', 'PM01') === true);
+ok('ma_lt1 = người khác -> ĐÃ phân', laChuaPhanCong('DATNH', 'PM01') === false);
+// Không có mã PM thì không được coi mọi thứ là chưa phân — chỉ ô trống mới tính.
+ok('Không biết mã PM -> chỉ ô trống mới là chưa phân',
+  laChuaPhanCong('DATNH', '') === false && laChuaPhanCong('', '') === true);
+
+const ursPm = [
+  { stt_rec: 'P1', trang_thai: 'DD', ma_lt1: 'PM01', menu_id: 'M01', noi_dung: 'BA để mặc định' },
+  { stt_rec: 'P2', trang_thai: 'DD', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'đã phân thật' },
+  { stt_rec: 'P3', trang_thai: 'TH', ma_lt1: 'PM01', menu_id: 'M01', noi_dung: 'PM tự làm, đang chạy' },
+];
+const locPm = goiYPhanCong(ursPm, NHAN_SU, {}, 'PM01');
+ok('UR ở DD mang mã PM -> VÀO danh sách cần gợi ý',
+  locPm.some(x => x.ur.stt_rec === 'P1'), locPm.map(x => x.ur.stt_rec).join(','));
+ok('UR đã phân người khác -> không vào', !locPm.some(x => x.ur.stt_rec === 'P2'));
+ok('UR ngoài DD (PM tự làm, đang TH) -> không vào', !locPm.some(x => x.ur.stt_rec === 'P3'));
+
+// PM vẫn là ứng viên hợp lệ — PM cũng trực tiếp lập trình.
+const nhanSuCoPm = {
+  lichSuMenu: [{ menu_id: 'M01', ma_lt1: 'PM01', so_ur: 9 }],
+  taiTrong: [{ ma_lt1: 'PM01', so_ur_toi_han: 0, so_ur_dang_mo: 4 }],
+};
+const gPm = goiYNguoiTiepNhan({ trang_thai: 'DD', menu_id: 'M01', noi_dung: 'x' }, nhanSuCoPm);
+ok('PM KHÔNG bị loại khỏi danh sách ứng viên (PM cũng là lập trình)',
+  gPm.ungVien.some(c => c.ma_lt1 === 'PM01'), gPm.ungVien.map(c => c.ma_lt1).join(','));
+
+
 process.stdout.write('\n=== 7. TÍCH HỢP VÀO BÁO CÁO HTML ===\n');
 const payload = {
   ma_da: 'DEMO1', ten_ngan: 'Demo Co', pm: 'PM01', ngay_chay: '2026-08-11',
@@ -148,7 +182,7 @@ ok('Có cột "LT thực hiện"', html.includes('LT thực hiện'));
 ok('UR đã giao hiện tên người', html.includes('NV03'));
 ok('UR DD chưa giao hiện "chưa giao"', html.includes('chưa giao'));
 ok('Có mục gợi ý phân công', html.includes('Gợi ý người tiếp nhận'));
-ok('Thẻ tóm tắt đếm DD chưa giao', html.includes('DD chưa giao lập trình'));
+ok('Thẻ tóm tắt nêu số DD chưa giao', html.includes('2 chưa giao LT'));
 ok('Bảng ứng viên có cột độ tin cậy', html.includes('Độ tin cậy'));
 ok('Nêu rõ đây là đề xuất chờ PM', html.includes('PM chốt rồi mới giao'));
 
@@ -161,6 +195,44 @@ const html2 = renderReport(khongNhanSu, loadHolidays());
 ok('Không có nhanSu -> vẫn dựng được báo cáo', html2.includes('Gợi ý người tiếp nhận'));
 ok('Không có nhanSu -> nói rõ thiếu, không im lặng',
   html2.includes('không có khối') && html2.includes('nhanSu'));
+
+
+process.stdout.write('\n=== 7b. UR MANG MÃ PM TRONG BÁO CÁO HTML ===\n');
+const payloadPm = {
+  ...payload,
+  yeuCau: [
+    // BA lên UR để mặc định ma_lt1 = PM -> phải bị coi là chưa phân.
+    { stt_rec: 'R1', fcode1: 'UR-01', noi_dung: 'Sửa màn hình nhập liệu', giai_doan_da: 'GD1',
+      trang_thai: 'DD', tlks_yn: true, trang_tlks: 'TLKS tr.5', menu_id: 'M01', ma_lt1: 'PM01' },
+    // PM tự làm thật, đã sang TH -> vẫn là tên hợp lệ, không gắn cảnh báo.
+    { stt_rec: 'R3', fcode1: 'UR-03', noi_dung: 'PM tự làm', giai_doan_da: 'GD1',
+      trang_thai: 'TH', tlks_yn: true, trang_tlks: 'TLKS tr.2', menu_id: 'M09', ma_lt1: 'PM01' },
+  ],
+};
+const htmlPm = renderReport(payloadPm, loadHolidays());
+ok('UR-01 (DD + mã PM) được đếm là chưa giao', htmlPm.includes('1 chưa giao LT'));
+ok('Cột LT thực hiện nói rõ "mặc định — chưa phân"',
+  htmlPm.includes('PM01 (mặc định — chưa phân)'));
+ok('Giải thích vì sao UR mang tên PM vẫn nằm ở mục chưa phân',
+  htmlPm.includes('giá trị mặc định màn hình BA điền'));
+// Tách riêng ca "PM tự làm thật, đã sang TH": mang mã PM nhưng KHÔNG phải mặc định còn sót,
+// nên phải hiện tên trần. Dùng payload chỉ có UR đó để nhãn của UR khác không lẫn vào.
+const htmlChiTh = renderReport({
+  ...payloadPm,
+  yeuCau: [payloadPm.yeuCau.find((u) => u.trang_thai === 'TH')],
+}, loadHolidays());
+ok('UR ở TH mang mã PM -> hiện tên trần, KHÔNG gắn nhãn mặc định',
+  htmlChiTh.includes('PM01') && !htmlChiTh.includes('mặc định — chưa phân'));
+ok('UR ở TH mang mã PM -> không bị đếm là chưa giao',
+  !htmlChiTh.includes('chưa giao LT'));
+
+// Dự án của PM khác: cùng ma_lt1='PM01' nhưng PM là người khác -> ĐÃ phân.
+const payloadPmKhac = { ...payloadPm, pm: 'HOATV' };
+const htmlPmKhac = renderReport(payloadPmKhac, loadHolidays());
+ok('PM khác -> ma_lt1=PM01 tính là đã phân, không còn "chưa giao LT"',
+  !htmlPmKhac.includes('chưa giao LT'));
+ok('PM khác -> không gắn nhãn mặc định cho ai',
+  !htmlPmKhac.includes('mặc định — chưa phân'));
 
 
 process.stdout.write('\n=== 8. TRANG TỔNG QUAN PORTFOLIO ===\n');
@@ -176,7 +248,7 @@ const dungPortfolio = (duAn) => {
 const portfolio = dungPortfolio([payload]);
 
 ok('Portfolio có cột "LT thực hiện"', portfolio.includes('LT thực hiện'));
-ok('Portfolio có thẻ đếm DD chưa giao', portfolio.includes('DD chưa giao lập trình'));
+ok('Portfolio nêu số DD chưa giao', portfolio.includes('chưa giao LT'));
 ok('Portfolio có mục "Chưa giao lập trình"', portfolio.includes('Chưa giao lập trình'));
 ok('Portfolio có cột gợi ý tiếp nhận', portfolio.includes('Gợi ý tiếp nhận'));
 // NV02: 6 UR trên M01 (100) trừ 4 UR tới hạn (−60) = 40, thắng NV04 (33.3).

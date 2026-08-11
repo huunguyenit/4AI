@@ -209,11 +209,15 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}) {
 }
 
 /**
- * Lọc ra UR cần gợi ý (DD và chưa có ma_lt1) rồi chấm điểm từng cái.
+ * Lọc ra UR cần gợi ý (DD và chưa phân công thật sự) rồi chấm điểm từng cái.
+ * @param {Array} urs
+ * @param {Object} nhanSu
+ * @param {Object} [trongSo]
+ * @param {string} [pmCode] - Mã PM; `ma_lt1` bằng mã này là mặc định BA, coi như chưa giao
  * @returns {Array<{ur: Object, goiY: Object}>}
  */
-export function goiYPhanCong(urs = [], nhanSu = {}, trongSo = {}) {
+export function goiYPhanCong(urs = [], nhanSu = {}, trongSo = {}, pmCode = '') {
   return urs
-    .filter((u) => chuan(u.trang_thai) === 'DD' && !chuan(u.ma_lt1))
+    .filter((u) => chuan(u.trang_thai) === 'DD' && laChuaPhanCong(u.ma_lt1, pmCode))
     .map((u) => ({ ur: u, goiY: goiYNguoiTiepNhan(u, nhanSu, trongSo) }));
 }

@@ -16,8 +16,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
 import { renderDdl } from './ddl.mjs';
+import { promptCuaUr } from './prompt.mjs';
 import { HUB, readJson } from './assets.mjs';
-import { goiYPhanCong, TRONG_SO_MAC_DINH } from './assignee.mjs';
+import { goiYPhanCong, laChuaPhanCong, TRONG_SO_MAC_DINH } from './assignee.mjs';
 import { loadTemplate, renderTemplate } from './template.mjs';
 
 /** Tải cấu hình từ qlda.local.json; fallback về defaults nếu file không tồn tại. */
@@ -140,11 +141,12 @@ function validatePayloadDetailed(p) {
     if (!TRANG_THAI[u.trang_thai]) {
       fatal.push(`yeuCau[${i}] có trang_thai "${u.trang_thai}" — chỉ rà soát DD, XN, TH`);
     }
-    // UR ở DD chưa giao là việc PM phải xử lý; thiếu menu_id thì tiêu chí 1 (kinh nghiệm
+    // UR ở DD chưa phân là việc PM phải xử lý; thiếu menu_id thì tiêu chí 1 (kinh nghiệm
     // theo menu) không chấm được và gợi ý tụt xuống mức chỉ-xếp-theo-tải.
-    if (u.trang_thai === 'DD' && !String(u.ma_lt1 ?? '').trim()
+    // `ma_lt1` = mã PM tính là CHƯA phân (mặc định BA để lại) — xem laChuaPhanCong().
+    if (u.trang_thai === 'DD' && laChuaPhanCong(u.ma_lt1, p.pm)
         && !String(u.menu_id ?? '').trim() && !String(u.sysid ?? '').trim()) {
-      quality.push(`${nhan}: ở DD chưa có \`ma_lt1\` mà cũng không có \`menu_id\`/\`sysid\` — không khớp được lịch sử menu, gợi ý phân công sẽ chỉ dựa vào tải.`);
+      quality.push(`${nhan}: ở DD chưa phân lập trình mà cũng không có \`menu_id\`/\`sysid\` — không khớp được lịch sử menu, gợi ý phân công sẽ chỉ dựa vào tải.`);
     }
     if (u.ddl) {
       const { err } = sqlCuaUr(u);
@@ -205,7 +207,7 @@ function validatePayloadDetailed(p) {
         }
       }
       const coDdChuaGiao = (p.yeuCau ?? []).some(
-        (u) => u.trang_thai === 'DD' && !String(u.ma_lt1 ?? '').trim());
+        (u) => u.trang_thai === 'DD' && laChuaPhanCong(u.ma_lt1, p.pm));
       if (coDdChuaGiao && !ns.lichSuMenu?.length) {
         quality.push('`nhanSu` không có `lichSuMenu` — tiêu chí 1 (ưu tiên người đã làm menu đó) không chấm được.');
       }
@@ -234,7 +236,7 @@ export function validatePortfolioPayload(p) {
 }
 
 /** Ghép UR với hạn giai đoạn, xếp mức cảnh báo. */
-function enrich(payload, h) {
+function enrich(payload, h, pm = '') {
   const today = String(payload.ngay_chay).slice(0, 10);
   const byPhase = new Map();
   for (const g of payload.giaiDoan) {
@@ -249,14 +251,24 @@ function enrich(payload, h) {
       _muc: phase?.muc ?? 'khong-co-han',
       _soNgay: phase?.soNgay ?? null,
       _chotDaHen: phase ? !!phase.xac_nhan_da_hen_yn : null,
+      _pm: pm,
     };
   });
   return { today, phases: [...byPhase.values()], urs };
 }
 
+/**
+ * Mã PM của một payload — quyết định `ma_lt1` nào bị coi là "mặc định BA để lại", nên phải
+ * lấy đúng: payload khai gì dùng nấy, không có mới rớt về cấu hình.
+ */
+function pmCuaPayload(payload, hub = HUB) {
+  return String(payload?.pm ?? loadConfig(hub).pm.maNv ?? '').trim();
+}
+
 /** Tóm tắt một dự án dùng cho cả trang riêng lẫn thẻ trong trang tổng quan. */
 function summarize(payload, h) {
-  const { today, phases, urs } = enrich(payload, h);
+  const pm = pmCuaPayload(payload);
+  const { today, phases, urs } = enrich(payload, h, pm);
   const quaHan = urs.filter((u) => u._muc === 'qua-han');
   const sapToi = urs.filter((u) => u._muc === 'sap-toi');
 
@@ -279,11 +291,13 @@ function summarize(payload, h) {
   const phasesCoUr = phases.filter((p) => soUrTonDongTheoGiaiDoan.has(p.giai_doan_da));
   const soPhaseAn = phases.length - phasesCoUr.length;
   const congPm = urs.filter((u) => u.trang_thai === 'DD');
-  const chuaGiao = congPm.filter((u) => !String(u.ma_lt1 ?? '').trim());
+  // `ma_lt1` = mã PM là giá trị MẶC ĐỊNH màn hình BA để lại, không phải bằng chứng đã phân
+  // việc — xem laChuaPhanCong(). Coi như chưa giao, y hệt ô trống.
+  const chuaGiao = congPm.filter((u) => laChuaPhanCong(u.ma_lt1, pm));
   const ngoaiTlksThieuCanCu = urs.filter((u) => !u.tlks_yn && !u.canCu);
   const health = quaHan.length ? 'khan-cap' : sapToi.length || chuaChot.length ? 'can-chu-y' : 'on';
   const ganNhat = [...quaHan, ...sapToi].sort((a, b) => (a._soNgay ?? 0) - (b._soNgay ?? 0))[0] ?? null;
-  return { today, phases, phasesCoUr, soPhaseAn, urs, quaHan, sapToi, chuaChot, congPm, chuaGiao,
+  return { today, pm, phases, phasesCoUr, soPhaseAn, urs, quaHan, sapToi, chuaChot, congPm, chuaGiao,
     ngoaiTlksThieuCanCu, health, ganNhat };
 }
 
@@ -394,13 +408,26 @@ const colTlks = { ten: 'TLKS', get: (u) => u.tlks_yn
 const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
 const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
-/** Hiển thị ma_lt1 — BẮT BUỘC trên mọi danh sách việc gấp để PM biết ai để liên hệ. */
+/**
+ * Hiển thị ma_lt1 — BẮT BUỘC trên mọi danh sách việc gấp để PM biết ai để liên hệ.
+ * `_pm` do enrich() gắn: `ma_lt1` bằng đúng mã PM là giá trị mặc định BA để lại lúc lên UR,
+ * không phải đã phân việc — phải nói rõ chứ không hiện như một cái tên đã giao.
+ */
 function fmtMaLt1(u, { emptyAsWarn = false } = {}) {
   const nguoi = String(u?.ma_lt1 ?? '').trim();
-  if (nguoi) return esc(nguoi);
-  // Chưa giao mà đang ở DD (hoặc danh sách "phải xử lý ngay") là việc PM phải xử lý.
-  if (u?.trang_thai === 'DD' || emptyAsWarn) return '<span class="warn">chưa giao</span>';
-  return '<span class="muted">—</span>';
+
+  if (nguoi) {
+    // Mang mã PM và đang ở DD = mặc định BA còn sót. Ngoài DD (XN/TH) thì PM đã thật sự nhận
+    // việc — bám vào trang_thai, KHÔNG bám vào emptyAsWarn, nếu không nhãn sẽ rò sang mọi
+    // danh sách gấp và bôi bẩn cả những UR PM đang làm dở.
+    return u?.trang_thai === 'DD' && laChuaPhanCong(nguoi, u?._pm)
+      ? `<span class="warn">${esc(nguoi)} (mặc định — chưa phân)</span>`
+      : esc(nguoi);
+  }
+  // Ô trống: cảnh báo khi ở DD, hoặc khi đang nằm trong danh sách "phải xử lý ngay".
+  return u?.trang_thai === 'DD' || emptyAsWarn
+    ? '<span class="warn">chưa giao</span>'
+    : '<span class="muted">—</span>';
 }
 const colMaLt1 = { ten: 'LT thực hiện', cls: 'mono', get: (u) => fmtMaLt1(u) };
 
@@ -640,20 +667,27 @@ const DO_TIN_CAY = {
   'thap': { nhan: 'tin cậy thấp', cls: 'warn', vi: 'không có bằng chứng kinh nghiệm, chỉ xếp theo tải' },
 };
 
-/** Mục gợi ý người tiếp nhận cho UR ở DD chưa có ma_lt1. */
-function phanCongBlock(canGiao, nhanSu, trongSo) {
-  if (!canGiao.length) return { dem: 0, html: '<p class="empty">Mọi yêu cầu ở DD đều đã có lập trình thực hiện.</p>' };
+/** Mục gợi ý người tiếp nhận cho UR ở DD chưa phân công thật sự. */
+function phanCongBlock(canGiao, nhanSu, trongSo, pm) {
+  if (!canGiao.length) return { dem: 0, html: '<p class="empty">Mọi yêu cầu ở DD đều đã phân lập trình thực hiện.</p>' };
+
+  // Nói rõ vì sao những UR mang tên PM vẫn nằm ở đây — nếu không, PM nhìn cột thấy tên mình
+  // mà mục vẫn kêu "chưa giao" thì tưởng báo cáo sai.
+  const soMacDinhPm = canGiao.filter((u) => String(u.ma_lt1 ?? '').trim()).length;
+  const ghiChuPm = soMacDinhPm
+    ? `<p class="lead">${soMacDinhPm} yêu cầu đang để <code>ma_lt1 = ${esc(pm)}</code> — đó là giá trị mặc định màn hình BA điền lúc lên yêu cầu, không phải đã phân việc. Nếu thật sự PM tự làm thì bỏ qua, còn lại chọn người theo bảng dưới.</p>`
+    : '';
 
   if (!nhanSu) {
     return {
       dem: canGiao.length,
-      html: `<p class="banner">Có <strong>${canGiao.length}</strong> yêu cầu ở DD chưa giao, nhưng payload không có khối <code>nhanSu</code> nên không chấm điểm được ứng viên. Xem skill <code>pm-deadline-review</code> để lấy ba truy vấn dữ kiện (lịch sử menu · tải sắp tới hạn · đóng góp đầu vào).</p>
+      html: `${ghiChuPm}<p class="banner">Có <strong>${canGiao.length}</strong> yêu cầu ở DD chưa phân, nhưng payload không có khối <code>nhanSu</code> nên không chấm điểm được ứng viên. Xem skill <code>pm-deadline-review</code> để lấy ba truy vấn dữ kiện (lịch sử menu · tải sắp tới hạn · đóng góp đầu vào).</p>
 ${urTable(canGiao, [colStt, colNoiDung, colGiaiDoan, colHan, colMaLt1])}`,
     };
   }
 
-  const ketQua = goiYPhanCong(canGiao, nhanSu, trongSo);
-  const html = ketQua.map(({ ur, goiY }) => {
+  const ketQua = goiYPhanCong(canGiao, nhanSu, trongSo, pm);
+  const html = ghiChuPm + ketQua.map(({ ur, goiY }) => {
     const thieu = goiY.thieuDuLieu.length
       ? `<p class="banner">Thiếu dữ kiện: ${goiY.thieuDuLieu.map(esc).join(' · ')}. Xếp hạng bên dưới yếu đi tương ứng.</p>` : '';
 
@@ -690,7 +724,7 @@ ${bang}
 
 export function renderReport(payload, h) {
   const config = loadConfig();
-  const { today, phases, phasesCoUr, soPhaseAn, urs, quaHan, sapToi, chuaChot, congPm, chuaGiao,
+  const { today, pm, phases, phasesCoUr, soPhaseAn, urs, quaHan, sapToi, chuaChot, congPm, chuaGiao,
     ngoaiTlksThieuCanCu } = summarize(payload, h);
   const urChuaChot = urs.filter((u) => u._chotDaHen === false);
   const deXuatKl = urs.filter((u) => u.deXuat?.trang_thai === 'KL');
@@ -703,7 +737,7 @@ export function renderReport(payload, h) {
   const hangHom = isWorkingDay(h, today)
     ? '' : `<p class="banner">Hôm nay <strong>không phải ngày làm việc</strong> theo lịch đã khai.</p>`;
 
-  const phanCong = phanCongBlock(chuaGiao, payload.nhanSu, loadTrongSoPhanCong());
+  const phanCong = phanCongBlock(chuaGiao, payload.nhanSu, loadTrongSoPhanCong(), pm);
 
   const kpi = kpiRow([
     { n: quaHan.length, nhan: 'quá hạn', muc: 'bad' },
@@ -737,7 +771,7 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
     const { sql, err } = sqlCuaUr(u);
     const than = err
       ? `<p class="banner">Không sinh được SQL: ${esc(err)}</p>`
-      : `<div class="sql"><span class="sql-chip">SQL${u.ddl ? ' — sinh tự động' : ''} · chờ PM xác nhận</span><pre>${highlightSql(sql)}</pre></div>`;
+      : `<div class="sql"><div class="sql-chip"><span>SQL${u.ddl ? ' — sinh tự động' : ''} · chờ PM xác nhận</span><button class="sql-copy">Copy</button></div><pre>${highlightSql(sql)}</pre></div>`;
     return `<article class="ddl">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
 ${than}
@@ -750,6 +784,10 @@ ${than}
     const d = ld.dich ?? {};
     const dichMo = [d.syscode && `mã <code>${esc(d.syscode)}</code>`, d.sysid && `controller <code>${esc(d.sysid)}</code>`,
       d.bang && `bảng <code>${esc(d.bang)}</code>`].filter(Boolean).join(' · ');
+    const { prompt, err } = promptCuaUr(u, payload);
+    const promptBox = err
+      ? `<p class="banner">Không sinh được prompt gợi ý: ${esc(err)}</p>`
+      : `<div class="sql"><div class="sql-chip"><span>Prompt gợi ý — dán vào Claude Code</span><button class="sql-copy">Copy</button></div><pre>${esc(prompt)}</pre></div>`;
     return `<article class="flow">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
 <dl class="flow-dl">
@@ -757,6 +795,7 @@ ${than}
   <dt>Đích</dt><dd><strong>${esc(d.manHinh ?? '—')}</strong>${dichMo ? ` — ${dichMo}` : ''}</dd>
   ${ld.ghiChu ? `<dt>Ghi chú</dt><dd>${esc(ld.ghiChu)}</dd>` : ''}
 </dl>
+${promptBox}
 </article>`;
   }).join('\n') : '';
 
@@ -851,7 +890,7 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
   const trongSo = loadTrongSoPhanCong();
   const allChuaGiao = items.flatMap(({ payload, summary }) => {
     const goiYTheoUr = payload.nhanSu
-      ? new Map(goiYPhanCong(summary.chuaGiao, payload.nhanSu, trongSo)
+      ? new Map(goiYPhanCong(summary.chuaGiao, payload.nhanSu, trongSo, summary.pm)
         .map(({ ur, goiY }) => [ur.stt_rec, goiY]))
       : null;
     return summary.chuaGiao.map((u) => ({

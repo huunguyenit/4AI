@@ -457,7 +457,8 @@
     },
 
     "phanCong": {
-      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa có ma_lt1 (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
+      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa phân lập trình (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
+      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = DD — UR đã sang XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình.",
       "diemMenu": 100,
       "diemDauVao": 60,
       "phatMoiUrToiHan": 15,
