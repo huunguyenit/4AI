@@ -51,6 +51,26 @@ const chuan = (v) => String(v ?? '').trim();
 const khop = (a, b) => chuan(a) !== '' && chuan(a).toLowerCase() === chuan(b).toLowerCase();
 
 /**
+ * UR này CÓ THẬT SỰ chưa được giao không — tính cả trường hợp `ma_lt1` mang đúng mã PM.
+ *
+ * Màn hình BA dùng để lên UR mặc định `ma_lt1` = mã PM (PM là người duyệt/tiếp nhận đầu
+ * tiên); PM mới là người thật sự phân việc sau đó. Nên `ma_lt1 === mã PM` KHÔNG chứng minh
+ * đã giao — coi như trống, giống hệt `ma_lt1` rỗng.
+ *
+ * Không loại PM khỏi danh sách ứng viên: PM cũng trực tiếp lập trình, `ma_lt1` thật sự là
+ * PM (không phải giá trị mặc định còn sót) vẫn hợp lệ — hàm này chỉ trả lời "cần gợi ý
+ * không", không quyết định "PM có được đề xuất không".
+ *
+ * @param {string} maLt1
+ * @param {string} pmCode - Mã PM đang chạy rà soát (payload.pm hoặc qlda.json → review.pm.maNv)
+ */
+export function laChuaPhanCong(maLt1, pmCode) {
+  const nguoi = chuan(maLt1);
+  if (!nguoi) return true;
+  return khop(nguoi, pmCode);
+}
+
+/**
  * Cộng số UR mỗi người đã làm trên đúng menu/sysid của UR này.
  * @returns {Map<string, {soUr: number, theo: string}>}
  */
