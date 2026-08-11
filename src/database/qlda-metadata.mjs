@@ -43,6 +43,9 @@ export function loadQldaConfig(hub) {
 /**
  * Tín hiệu nhận domain QLDA. weight 2 = một mình đã đủ kết luận; weight 1 = từ chung,
  * cần ít nhất hai tín hiệu. `word: true` khớp theo ranh giới từ để mã ngắn khỏi ăn nhầm.
+ * Điểm nằm giữa 0 và ngưỡng (đúng 1 tín hiệu weight-1) là VÙNG MÙ MỜ — keyword tiếng Việt
+ * không phủ hết mọi cách diễn đạt nên không được tự chốt domain, phải trả về cho caller
+ * (agent LLM gọi tool) quyết định tường minh. Xem `resolveDomain` ở metadata-resolver.mjs.
  */
 const DOMAIN_SIGNALS = [
   { term: 'han hoan thanh', weight: 2 },
@@ -70,7 +73,7 @@ const DOMAIN_SIGNALS = [
   { term: 'deadline', weight: 1 },
 ];
 
-const DOMAIN_THRESHOLD = 2;
+export const DOMAIN_THRESHOLD = 2;
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -104,11 +107,11 @@ function derivedSignals(cfg) {
  * Chấm điểm xem một câu yêu cầu có thuộc domain QLDA không.
  * @param {string} text - Yêu cầu nguyên bản của người dùng
  * @param {Object} [cfg] - Nội dung qlda.json, dùng để suy thêm tín hiệu
- * @returns {{isQlda: boolean, score: number, matched: string[]}}
+ * @returns {{isQlda: boolean, isAmbiguous: boolean, score: number, matched: string[]}}
  */
 export function detectQldaDomain(text, cfg) {
   const hay = stripAccents(String(text || ''));
-  if (!hay.trim()) return { isQlda: false, score: 0, matched: [] };
+  if (!hay.trim()) return { isQlda: false, isAmbiguous: false, score: 0, matched: [] };
 
   const seen = new Set();
   const matched = [];
@@ -126,7 +129,10 @@ export function detectQldaDomain(text, cfg) {
     score += sig.weight;
   }
 
-  return { isQlda: score >= DOMAIN_THRESHOLD, score, matched };
+  const isQlda = score >= DOMAIN_THRESHOLD;
+  // Có tín hiệu nhưng chưa đủ ngưỡng: đừng đoán, đó là việc của caller (xem comment DOMAIN_SIGNALS).
+  const isAmbiguous = !isQlda && score > 0;
+  return { isQlda, isAmbiguous, score, matched };
 }
 
 /**

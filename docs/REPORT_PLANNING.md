@@ -63,6 +63,12 @@ Hai domain, hai nguồn schema hoàn toàn khác nhau. Chọn nhầm là sai b�
 Tín hiệu suy thêm từ chính `qlda.json` (tên bảng, lookup, mã bộ phận, mã dự án) nên thêm dự
 án mới vào config là bộ nhận diện tự mở rộng.
 
+**Vùng mù mờ.** Keyword tiếng Việt không phủ hết mọi cách diễn đạt — điểm nằm giữa 0 (chắc
+`fbo`) và ngưỡng (chắc `qlda`) không được tự chốt. `plan_report` trả `NEED_CLARIFICATION`
+kèm lý do và điểm, yêu cầu caller (agent LLM — bên duy nhất thật sự "hiểu" câu tiếng Việt
+trong pipeline này) gọi lại kèm `domain` tường minh, thay vì âm thầm đoán sai. Xem
+`resolveDomain` (`metadata-resolver.mjs`) và `detectQldaDomain` (`qlda-metadata.mjs`).
+
 > **Quan trọng**: "yêu cầu/UR" là khái niệm QLDA nội bộ, **độc lập với từng khách**. Hỏi
 > "yêu cầu của phòng FSD" trong khi truyền `program=DEMO1` vẫn phải ra domain `qlda` —
 > `nbphyc` không nằm trong chỉ mục của bất kỳ chương trình khách nào.
@@ -137,6 +143,9 @@ Bảng `fieldsKnown: false` (danh mục lookup chưa khai cột) được bỏ q
 
 Trả về `{ status, planId, domain, domainReason, primaryTable, metadata, queryPlan, prompt, nextStep }`.
 Không gọi LLM, không chạm database.
+
+Domain mù mờ (xem §2) → trả `{ status: 'NEED_CLARIFICATION', domainReason, detection, questions }`
+thay vì plan — không có `planId`, gọi lại `plan_report` kèm `domain: "qlda" | "fbo"`.
 
 ### `execute_report` — chạm DB, **không** autoApprove
 

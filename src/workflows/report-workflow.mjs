@@ -50,6 +50,19 @@ export async function planReport(userRequest, context = {}) {
   }
 
   const metadata = await resolveMetadata({}, { ...context, userRequest: request });
+
+  if (metadata.domain === 'ambiguous') {
+    return {
+      status: 'NEED_CLARIFICATION',
+      request,
+      domainReason: metadata.domainReason,
+      detection: metadata.detection,
+      questions: [
+        `Chưa đủ tín hiệu để phân giải domain — ${metadata.domainReason}. "qlda" = dự án/yêu cầu (UR)/hạn hoàn thành nội bộ; "fbo" = nghiệp vụ trong chương trình khách. Gọi lại plan_report kèm domain: "qlda" hoặc domain: "fbo".`,
+      ],
+    };
+  }
+
   const queryPlan = createQueryPlan({}, metadata);
   const prompt = buildQueryPrompt({ queryPlan, metadata });
 

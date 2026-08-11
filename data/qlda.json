@@ -456,6 +456,17 @@
       }
     },
 
+    "phanCong": {
+      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa có ma_lt1 (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
+      "diemMenu": 100,
+      "diemDauVao": 60,
+      "phatMoiUrToiHan": 15,
+      "phatToiDa": 60,
+      "baoHoaSoUr": 3,
+      "soGoiY": 3,
+      "doTinCay": "Đo bằng LOẠI bằng chứng chứ không phải bằng điểm: cao = có lịch sử làm đúng menu; trung-binh = chỉ có đóng góp UR đầu vào; thap = không có bằng chứng kinh nghiệm, chỉ xếp theo tải. Điểm cao nhờ mỗi 'đang rảnh' vẫn là phỏng đoán yếu."
+    },
+
     "docCache": {
       "path": "<mcpDataRoot>/4ai/ledger/<ma_da>/docs/",
       "rule": "Tài liệu khảo sát, biên bản, phụ lục, email tải từ sysfileinfo được để trong repo cho lần sau đọc lại. KHÔNG commit — .gitignore đã chặn thư mục này.",

@@ -17,6 +17,7 @@ import path from 'node:path';
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
 import { renderDdl } from './ddl.mjs';
 import { HUB, readJson } from './assets.mjs';
+import { goiYPhanCong, TRONG_SO_MAC_DINH } from './assignee.mjs';
 
 /** Tải cấu hình từ qlda.local.json; fallback về defaults nếu file không tồn tại. */
 function loadConfig(hub = HUB) {
@@ -27,6 +28,16 @@ function loadConfig(hub = HUB) {
     return readJson(localConfigPath, defaults);
   } catch {
     return defaults;
+  }
+}
+
+/** Trọng số chấm điểm phân công — data/qlda.json → review.phanCong ghi đè mặc định. */
+function loadTrongSoPhanCong(hub = HUB) {
+  try {
+    const cfg = readJson(path.join(hub, 'data', 'qlda.json'), {});
+    return { ...TRONG_SO_MAC_DINH, ...(cfg?.review?.phanCong ?? {}) };
+  } catch {
+    return { ...TRONG_SO_MAC_DINH };
   }
 }
 
@@ -113,6 +124,12 @@ function validatePayloadDetailed(p) {
     if (!TRANG_THAI[u.trang_thai]) {
       fatal.push(`yeuCau[${i}] có trang_thai "${u.trang_thai}" — chỉ rà soát DD, XN, TH`);
     }
+    // UR ở DD chưa giao là việc PM phải xử lý; thiếu menu_id thì tiêu chí 1 (kinh nghiệm
+    // theo menu) không chấm được và gợi ý tụt xuống mức chỉ-xếp-theo-tải.
+    if (u.trang_thai === 'DD' && !String(u.ma_lt1 ?? '').trim()
+        && !String(u.menu_id ?? '').trim() && !String(u.sysid ?? '').trim()) {
+      quality.push(`${nhan}: ở DD chưa có \`ma_lt1\` mà cũng không có \`menu_id\`/\`sysid\` — không khớp được lịch sử menu, gợi ý phân công sẽ chỉ dựa vào tải.`);
+    }
     if (u.ddl) {
       const { err } = sqlCuaUr(u);
       if (err) quality.push(`${nhan}: \`ddl\` sai spec — ${err}`);
@@ -149,6 +166,39 @@ function validatePayloadDetailed(p) {
       }
     }
   }
+
+  // Khối nhân sự là TUỲ CHỌN — thiếu thì báo cáo vẫn dựng, chỉ mất mục gợi ý phân công.
+  // Nhưng khai sai hình dạng thì phải nói ngay, đừng để chấm điểm ra kết quả rỗng khó hiểu.
+  const ns = p.nhanSu;
+  if (ns !== undefined) {
+    if (typeof ns !== 'object' || ns === null || Array.isArray(ns)) {
+      fatal.push('`nhanSu` phải là object { ungVien?, lichSuMenu, taiTrong, dongGopDauVao? }');
+    } else {
+      for (const [key, cot] of [
+        ['lichSuMenu', 'ma_lt1'],
+        ['taiTrong', 'ma_lt1'],
+        ['dongGopDauVao', 'ma_lt1'],
+      ]) {
+        const arr = ns[key];
+        if (arr === undefined) continue;
+        if (!Array.isArray(arr)) { fatal.push(`\`nhanSu.${key}\` phải là mảng`); continue; }
+        for (const [j, row] of arr.entries()) {
+          if (!row || !String(row[cot] ?? '').trim()) {
+            fatal.push(`nhanSu.${key}[${j}] thiếu \`${cot}\``);
+          }
+        }
+      }
+      const coDdChuaGiao = (p.yeuCau ?? []).some(
+        (u) => u.trang_thai === 'DD' && !String(u.ma_lt1 ?? '').trim());
+      if (coDdChuaGiao && !ns.lichSuMenu?.length) {
+        quality.push('`nhanSu` không có `lichSuMenu` — tiêu chí 1 (ưu tiên người đã làm menu đó) không chấm được.');
+      }
+      if (coDdChuaGiao && !ns.taiTrong?.length) {
+        quality.push('`nhanSu` không có `taiTrong` — tiêu chí 2 (tải sắp tới hạn) không chấm được.');
+      }
+    }
+  }
+
   return { fatal, quality };
 }
 
@@ -308,6 +358,14 @@ const colTlks = { ten: 'TLKS', get: (u) => u.tlks_yn
 const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
 const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
+const colMaLt1 = { ten: 'LT thực hiện', cls: 'mono', get: (u) => {
+  const nguoi = String(u.ma_lt1 ?? '').trim();
+  if (nguoi) return esc(nguoi);
+  // Chưa giao mà đang ở DD là việc PM phải xử lý — tô vàng để không trôi qua mắt.
+  return u.trang_thai === 'DD'
+    ? '<span class="warn">chưa giao</span>'
+    : '<span class="muted">—</span>';
+} };
 
 export function section(id, tieuDe, moTa, noiDung, dem) {
   const badge = dem === undefined ? '' : `<span class="count${dem ? '' : ' zero'}">${dem}</span>`;
@@ -346,6 +404,61 @@ ${body}
 
 // ---------------------------------------------------------------- dựng: một dự án
 
+const DO_TIN_CAY = {
+  'cao': { nhan: 'tin cậy cao', cls: 'ok', vi: 'có lịch sử làm đúng menu này' },
+  'trung-binh': { nhan: 'tin cậy trung bình', cls: 'warn', vi: 'chỉ dựa vào đóng góp UR đầu vào' },
+  'thap': { nhan: 'tin cậy thấp', cls: 'warn', vi: 'không có bằng chứng kinh nghiệm, chỉ xếp theo tải' },
+};
+
+/** Mục gợi ý người tiếp nhận cho UR ở DD chưa có ma_lt1. */
+function phanCongBlock(urs, nhanSu, trongSo) {
+  const canGiao = urs.filter((u) => u.trang_thai === 'DD' && !String(u.ma_lt1 ?? '').trim());
+  if (!canGiao.length) return { dem: 0, html: '<p class="empty">Mọi yêu cầu ở DD đều đã có lập trình thực hiện.</p>' };
+
+  if (!nhanSu) {
+    return {
+      dem: canGiao.length,
+      html: `<p class="banner">Có <strong>${canGiao.length}</strong> yêu cầu ở DD chưa giao, nhưng payload không có khối <code>nhanSu</code> nên không chấm điểm được ứng viên. Xem skill <code>pm-deadline-review</code> để lấy ba truy vấn dữ kiện (lịch sử menu · tải sắp tới hạn · đóng góp đầu vào).</p>
+${urTable(canGiao, [colStt, colNoiDung, colGiaiDoan, colHan, colMaLt1])}`,
+    };
+  }
+
+  const ketQua = goiYPhanCong(canGiao, nhanSu, trongSo);
+  const html = ketQua.map(({ ur, goiY }) => {
+    const thieu = goiY.thieuDuLieu.length
+      ? `<p class="banner">Thiếu dữ kiện: ${goiY.thieuDuLieu.map(esc).join(' · ')}. Xếp hạng bên dưới yếu đi tương ứng.</p>` : '';
+
+    const dauRa = goiY.laBaoCaoDauRa
+      ? `<p class="lead">Nhận diện là <strong>báo cáo đầu ra</strong> (${goiY.nhanDienTu === 'payload' ? 'payload khai rõ' : 'suy từ nội dung UR'}) — có áp tiêu chí 3.</p>`
+      : '';
+
+    const bang = goiY.ungVien.length
+      ? `<table><thead><tr><th>#</th><th>Ứng viên</th><th>Điểm</th><th>Độ tin cậy</th><th>Căn cứ</th></tr></thead><tbody>
+${goiY.ungVien.map((c, i) => {
+        const tc = DO_TIN_CAY[c.doTinCay] ?? DO_TIN_CAY['thap'];
+        return `<tr>
+  <td class="mono">${i + 1}</td>
+  <td class="mono"><strong>${esc(c.ma_lt1)}</strong></td>
+  <td class="mono">${c.diem}</td>
+  <td><span class="${tc.cls}">${tc.nhan}</span></td>
+  <td>${c.lyDo.map(esc).join(' · ')}</td>
+</tr>`;
+      }).join('\n')}
+</tbody></table>`
+      : '<p class="empty">Không có ứng viên nào khớp dữ kiện đã nạp.</p>';
+
+    return `<article class="phan-cong">
+<h3>${esc(ur.fcode1 || String(ur.stt_rec).trim())} — ${esc(ur.noi_dung ?? '')}</h3>
+<p class="lead">Menu <code>${esc(ur.menu_id || '—')}</code>${ur.sysid ? ` · controller <code>${esc(ur.sysid)}</code>` : ''}${ur._phase ? ` · hạn ${fmtDate(ur._phase.ngay_ht)}` : ''}</p>
+${dauRa}
+${thieu}
+${bang}
+</article>`;
+  }).join('\n');
+
+  return { dem: canGiao.length, html };
+}
+
 export function renderReport(payload, h) {
   const config = loadConfig();
   const { today, phases, urs, quaHan, sapToi, chuaChot, congPm, ngoaiTlksThieuCanCu } = summarize(payload, h);
@@ -360,11 +473,14 @@ export function renderReport(payload, h) {
   const hangHom = isWorkingDay(h, today)
     ? '' : `<p class="banner">Hôm nay <strong>không phải ngày làm việc</strong> theo lịch đã khai.</p>`;
 
+  const phanCong = phanCongBlock(urs, payload.nhanSu, loadTrongSoPhanCong());
+
   const tomTat = `<div class="cards">
   <div class="card ${quaHan.length ? 'bad' : ''}"><b>${quaHan.length}</b><span>quá hạn</span></div>
   <div class="card ${sapToi.length ? 'warn' : ''}"><b>${sapToi.length}</b><span>sắp tới hạn (≤ ${h.leadWorkingDays} ngày LV)</span></div>
   <div class="card ${chuaChot.length ? 'warn' : ''}"><b>${chuaChot.length}</b><span>giai đoạn chưa chốt hẹn</span></div>
   <div class="card"><b>${congPm.length}</b><span>chờ cổng PM (DD)</span></div>
+  <div class="card ${phanCong.dem ? 'warn' : ''}"><b>${phanCong.dem}</b><span>DD chưa giao lập trình</span></div>
   <div class="card ${ngoaiTlksThieuCanCu.length ? 'warn' : ''}"><b>${ngoaiTlksThieuCanCu.length}</b><span>ngoài TLKS, chưa có căn cứ</span></div>
   <div class="card"><b>${urs.length}</b><span>yêu cầu trong phạm vi</span></div>
 </div>`;
@@ -407,12 +523,15 @@ ${than}
     hangHom,
     tomTat,
     section('qua-han', 'Quá hạn', 'Yêu cầu còn ở DD/XN/TH mà hạn giai đoạn đã trôi qua.',
-      urTable(quaHan, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan, colConLai]), quaHan.length),
+      urTable(quaHan, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), quaHan.length),
     section('sap-toi', 'Sắp tới hạn', `Còn ${h.leadWorkingDays} ngày làm việc hoặc ít hơn, đã trừ T7/CN và ngày lễ.`,
-      urTable(sapToi, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan, colConLai]), sapToi.length),
+      urTable(sapToi, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), sapToi.length),
     section('chua-chot', 'Giai đoạn chưa tick chốt đã hẹn', '', phaseTable, chuaChot.length),
     section('cong-pm', 'Chờ cổng PM (DD)', 'Kiểm TLKS rồi quyết định XN / TA / KL. Đề xuất bên dưới chưa được thi hành.',
-      urTable(congPm, [colStt, colNoiDung, colHan, colTlks, colDeXuat]), congPm.length),
+      urTable(congPm, [colStt, colNoiDung, colMaLt1, colHan, colTlks, colDeXuat]), congPm.length),
+    section('phan-cong', 'Gợi ý người tiếp nhận (DD chưa giao)',
+      'Xếp hạng theo: (1) đã làm menu đó trong dự án · (2) đang gánh ít UR sắp tới hạn · (3) báo cáo đầu ra thì ưu tiên người đóng góp nhiều UR đầu vào. Đây là ĐỀ XUẤT — PM chốt rồi mới giao.',
+      phanCong.html, phanCong.dem),
     section('ngoai-tlks', 'Ngoài TLKS, chưa có căn cứ', 'Cần biên bản nghiệm thu, phụ lục hoặc email đính kèm ở cấp dự án. Chưa có thì đề xuất TA và tính thêm giờ công.',
       urTable(ngoaiTlksThieuCanCu, [colStt, colNoiDung, colGiaiDoan, colTrangThai]), ngoaiTlksThieuCanCu.length),
     section('de-xuat-kl', 'Đề xuất KL', 'Mỗi mục phải dẫn được node Capability verdict "khong" làm căn cứ.',
@@ -580,6 +699,12 @@ overflow-x:auto;font-size:12px;line-height:1.5}
 .flow-dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:8px 0 0;font-size:13px}
 .flow-dl dt{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);font-weight:600;padding-top:2px}
 .flow-dl dd{margin:0}
+.muted{color:var(--mut)}
+.phan-cong{border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;
+padding:2px 16px 14px;margin:12px 0;background:var(--surface)}
+.phan-cong h3{margin-top:14px;color:var(--fg)}
+.phan-cong table{margin-top:8px}
+.phan-cong tbody tr:first-child td{background:var(--track)}
 .chart{width:100%;height:auto;overflow:visible}
 .chart .ax{font-size:11px;fill:var(--mut)}
 .chart .val{font-size:11px;fill:var(--mut);font-family:ui-monospace,monospace}

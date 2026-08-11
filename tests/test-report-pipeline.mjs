@@ -34,6 +34,15 @@ async function runTests() {
   const forced = resolveDomain({}, { userRequest: FSD_REQUEST, domain: 'fbo' });
   ok('Ép domain qua context -> tôn trọng', forced.name === 'fbo', forced.reason);
 
+  // Vùng mù mờ: đúng 1 tín hiệu weight-1 ("du an"), dưới ngưỡng 2 — không được đoán fbo.
+  const AMBIGUOUS_REQUEST = 'Báo cáo tiến độ dự án hôm nay mà tôi quản lý';
+  const ambiguousDomain = resolveDomain({}, { userRequest: AMBIGUOUS_REQUEST });
+  ok('Tín hiệu chưa đủ ngưỡng -> domain ambiguous (không âm thầm rớt về fbo)',
+    ambiguousDomain.name === 'ambiguous', ambiguousDomain.reason);
+
+  // Không tín hiệu nào (score 0) vẫn phải là fbo chắc chắn, không phải ambiguous.
+  ok('Score 0 -> fbo chắc chắn, không phải ambiguous', revenueDomain.name === 'fbo');
+
 
   process.stdout.write('\n=== 2. METADATA QLDA TỪ data/qlda.json ===\n');
   const fsdMeta = await resolveMetadata({}, { userRequest: FSD_REQUEST });
@@ -142,6 +151,17 @@ async function runTests() {
 
   const emptyPlan = await planReport('   ');
   ok('Yêu cầu rỗng -> NEED_CLARIFICATION', emptyPlan.status === 'NEED_CLARIFICATION');
+
+  // Domain mù mờ phải escalate NEED_CLARIFICATION thay vì âm thầm build metadata fbo sai.
+  const ambiguousPlan = await planReport('Báo cáo tiến độ dự án hôm nay mà tôi quản lý');
+  ok('Domain mù mờ -> NEED_CLARIFICATION', ambiguousPlan.status === 'NEED_CLARIFICATION', ambiguousPlan.domainReason);
+  ok('Câu hỏi nhắc gọi lại kèm domain tường minh',
+    ambiguousPlan.questions?.some((q) => q.includes('domain')));
+
+  // Truyền domain tường minh thì bỏ qua hẳn bước chấm điểm, đi thẳng vào việc.
+  const disambiguatedPlan = await planReport('Báo cáo tiến độ dự án hôm nay mà tôi quản lý', { domain: 'qlda' });
+  ok('Ép domain qlda cho câu mù mờ -> READY', disambiguatedPlan.status === 'READY', disambiguatedPlan.domainReason);
+  ok('Ép domain -> đúng domain qlda', disambiguatedPlan.domain === 'qlda');
 
   // Execute nhận SQL do agent viết, validate theo metadata của CHÍNH plan đó.
   const badExec = await executeReport(plan.planId, 'SELECT xpass FROM nbdmda');

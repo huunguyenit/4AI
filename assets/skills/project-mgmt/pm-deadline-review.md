@@ -61,6 +61,43 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
    PHẢI là **script SQL thật** (`CREATE TABLE`/`ALTER TABLE` đầy đủ cột/kiểu/PK), không phải
    mô tả bằng lời — báo cáo hiển thị nguyên văn trong khối code.
 
+7b. **UR ở `DD` chưa có `ma_lt1`.** Lấy ba dữ kiện dưới đây vào khối `nhanSu` của payload;
+   `tools/lib/assignee.mjs` chấm điểm và xếp hạng, **đừng tự xếp rồi nhét thứ tự vào payload**.
+
+   *Tiêu chí 1 — ai đã làm menu đó trong lịch sử dự án* (ưu tiên cao nhất):
+
+       SELECT RTRIM(menu_id) AS menu_id, RTRIM(sysid) AS sysid,
+              RTRIM(ma_lt1) AS ma_lt1, COUNT(*) AS so_ur
+       FROM nbphyc
+       WHERE RTRIM(ma_da) = '<ma_da>' AND RTRIM(ma_lt1) <> ''
+       GROUP BY RTRIM(menu_id), RTRIM(sysid), RTRIM(ma_lt1)
+
+   *Tiêu chí 2 — ai đang gánh bao nhiêu UR sắp tới hạn* (lấy toàn bộ dự án của bộ phận, không
+   chỉ dự án đang rà — tải là tải chung của người đó):
+
+       SELECT RTRIM(y.ma_lt1) AS ma_lt1,
+              SUM(CASE WHEN h.ngay_ht <= DATEADD(day, 7, GETDATE()) THEN 1 ELSE 0 END) AS so_ur_toi_han,
+              COUNT(*) AS so_ur_dang_mo
+       FROM nbphyc y
+       LEFT JOIN (SELECT RTRIM(ma_da) AS ma_da, giai_doan_da, MAX(ngay_ht) AS ngay_ht
+                  FROM nbcnhanhtda GROUP BY RTRIM(ma_da), giai_doan_da) h
+              ON h.ma_da = RTRIM(y.ma_da) AND h.giai_doan_da = y.giai_doan_da
+       WHERE RTRIM(y.bp_lt) = '<bp_lt>' AND RTRIM(y.trang_thai) IN ('DD','XN','TH')
+         AND RTRIM(y.ma_lt1) <> ''
+       GROUP BY RTRIM(y.ma_lt1)
+
+   *Tiêu chí 3 — chỉ khi UR là báo cáo đầu ra*: xác định menu/nguồn dữ liệu đầu vào của báo
+   cáo (từ `luongDuLieu.nguon` nếu đã khai), rồi đếm ai làm nhiều UR trên chính những nguồn đó:
+
+       SELECT RTRIM(menu_id) AS nguon, RTRIM(ma_lt1) AS ma_lt1, COUNT(*) AS so_ur
+       FROM nbphyc
+       WHERE RTRIM(ma_da) = '<ma_da>' AND RTRIM(ma_lt1) <> ''
+         AND RTRIM(menu_id) IN (<danh sách menu đầu vào>)
+       GROUP BY RTRIM(menu_id), RTRIM(ma_lt1)
+
+   Báo cáo tự nhận diện "báo cáo đầu ra" từ `noi_dung` (không dấu: `bao cao`, `mau in`,
+   `thong ke`…). Nhận diện sai thì khai thẳng `laBaoCaoDauRa: true|false` ở UR để chặn đoán.
+
 8. **Sinh báo cáo — một dự án.** Ghi payload JSON ra scratchpad rồi chạy:
 
        node tools/4ai.mjs report <đường-dẫn-payload.json>
@@ -100,7 +137,13 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
           "canCu": "BBTN 2026-07-20",
           "deXuat": { "trang_thai": "XN", "lyDo": "..." },
           "ghiChuDdl": "..." }
-      ]
+      ],
+      "nhanSu": {
+        "ungVien": ["PM01", "..."],
+        "lichSuMenu":    [ { "menu_id": "01020304", "sysid": "SVTran", "ma_lt1": "...", "so_ur": 7 } ],
+        "taiTrong":      [ { "ma_lt1": "...", "so_ur_toi_han": 2, "so_ur_dang_mo": 9 } ],
+        "dongGopDauVao": [ { "nguon": "01020304", "ma_lt1": "...", "so_ur": 4 } ]
+      }
     }
 
 - `giaiDoan[].ngay_ht` là **hạn hiệu lực đã tính sẵn** = `MAX(ngay_ht)` của giai đoạn đó.
@@ -110,6 +153,13 @@ Cấu hình: `data/qlda.json` → `review`. Lịch nghỉ: `data/holidays-vn.jso
 - `ghiChuDdl` PHẢI là script SQL thật (xem [fbo-new-table-proposal]) — báo cáo tô màu cú pháp
   SQL cho khối này, đưa văn xuôi vào đây sẽ hiện xấu và sai mục đích.
 - `trang_thai` ngoài `DD`/`XN`/`TH` sẽ bị lệnh từ chối kèm chỉ số phần tử.
+- `ma_lt1` rỗng ở UR `DD` là tín hiệu "chưa giao" — báo cáo tô vàng và đưa vào mục gợi ý
+  phân công. Điền `ma_lt1` thì UR đó biến khỏi mục gợi ý.
+- `nhanSu` **tuỳ chọn**: thiếu thì báo cáo vẫn dựng, chỉ mất phần xếp hạng ứng viên và hiện
+  banner nói rõ thiếu gì. Thiếu `lichSuMenu` là mất tiêu chí 1 — mục gợi ý tụt xuống
+  "tin cậy thấp", chỉ còn xếp theo tải.
+- `ungVien` để giới hạn danh sách xét. Bỏ trống thì lấy hợp của mọi người xuất hiện trong ba
+  mảng dữ kiện — tiện nhưng dễ lọt người đã nghỉ hoặc khác bộ phận.
 
 ## Thi hành
 

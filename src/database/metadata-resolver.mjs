@@ -7,7 +7,7 @@
 // Chọn nhầm domain là ra sai bảng ngay từ bước đầu, nên bước phân giải này đứng trước tất cả.
 
 import { openIndex } from '../../mcp/fbo/lib/index.mjs';
-import { loadQldaConfig, detectQldaDomain, isQldaProgram, buildQldaMetadata } from './qlda-metadata.mjs';
+import { loadQldaConfig, detectQldaDomain, isQldaProgram, buildQldaMetadata, DOMAIN_THRESHOLD } from './qlda-metadata.mjs';
 
 /** Quy tắc đúng với mọi domain. */
 export const BASE_BUSINESS_RULES = [
@@ -20,6 +20,10 @@ export const BASE_BUSINESS_RULES = [
  * Xác định domain của một yêu cầu báo cáo.
  * @param {Object} reportSpec
  * @param {Object} context
+ * `name` là 'qlda' · 'fbo' · hoặc **'ambiguous'** — điểm từ khoá rơi vào vùng mù mờ (có tín
+ * hiệu nhưng chưa đủ ngưỡng). Domain 'ambiguous' KHÔNG được coi là 'fbo' mặc định: caller
+ * (agent LLM) phải tự phân giải ngữ nghĩa rồi gọi lại kèm `context.domain` tường minh — xem
+ * `resolveMetadata` và `planReport` để biết chỗ escalate thành NEED_CLARIFICATION.
  * @returns {{name: string, config: Object|null, reason: string, detection?: Object}}
  */
 export function resolveDomain(reportSpec = {}, context = {}) {
@@ -61,6 +65,15 @@ export function resolveDomain(reportSpec = {}, context = {}) {
     };
   }
 
+  if (detection.isAmbiguous) {
+    return {
+      name: 'ambiguous',
+      config: cfg,
+      reason: `tín hiệu domain chưa đủ rõ (điểm ${detection.score}/${DOMAIN_THRESHOLD}): ${detection.matched.join(', ')} — cần chỉ định domain tường minh`,
+      detection,
+    };
+  }
+
   return { name: 'fbo', config: cfg, reason: 'không có tín hiệu QLDA', detection };
 }
 
@@ -76,6 +89,21 @@ export async function resolveMetadata(reportSpec, context = {}) {
   const maxRows = context.maxRows || 10000;
 
   const domain = resolveDomain(reportSpec, context);
+
+  // --- Domain mù mờ: không đoán, trả marker cho planReport escalate NEED_CLARIFICATION.
+  if (domain.name === 'ambiguous') {
+    return {
+      domain: 'ambiguous',
+      domainReason: domain.reason,
+      detection: domain.detection,
+      source: 'chưa phân giải — domain mù mờ',
+      tables: [],
+      fields: [],
+      relationships: [],
+      businessRules: [...BASE_BUSINESS_RULES],
+      capabilities: { maxRows, supportsJoins: false, supportsAggregations: false },
+    };
+  }
 
   // --- Domain QLDA: schema lấy nguyên từ data/qlda.json, bỏ qua chỉ mục program.
   if (domain.name === 'qlda' && domain.config) {
