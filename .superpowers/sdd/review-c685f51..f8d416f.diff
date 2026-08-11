@@ -1,0 +1,31 @@
+# Review package: c685f5137f1e86182f3d0f435fb38ef7f6787c1e..f8d416ff02429e7b446c2ed703ceb0e035544443
+
+## Commits
+f8d416f Mark report templates design as implemented
+
+## Files changed
+ docs/superpowers/specs/2026-08-11-report-templates-design.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+## Diff
+diff --git a/docs/superpowers/specs/2026-08-11-report-templates-design.md b/docs/superpowers/specs/2026-08-11-report-templates-design.md
+index e78967a..974f43c 100644
+--- a/docs/superpowers/specs/2026-08-11-report-templates-design.md
++++ b/docs/superpowers/specs/2026-08-11-report-templates-design.md
+@@ -1,14 +1,14 @@
+ # Report shell templates ΓÇö design
+ 
+ **Date:** 2026-08-11  
+-**Status:** approved for implementation (pending user review of this file)  
++**Status:** implemented  
+ **Scope:** t├ích shell HTML + CSS d├╣ng chung ra folder template; logic r├íp dß╗» liß╗çu giß╗» trong `.mjs`
+ 
+ ## Vß║Ñn ─æß╗ü
+ 
+ `tools/lib/report.mjs` nh├║ng to├án bß╗Ö CSS (~250 d├▓ng) v├á hai shell HTML (`page`, `dashboardPage`) trong function. Sß╗¡a layout/CSS phß║úi ─æß╗ìc lß║½n logic Node; kh├│ mß╗ƒ file HTML trong editor ─æß╗â chß╗ënh giao diß╗çn.
+ 
+ ## Mß╗Ñc ti├¬u
+ 
+ - Shell HTML v├á CSS sß╗æng trong file t─⌐nh d╞░ß╗¢i `tools/templates/report/`
+ - Khi render, load template + thay placeholder `{{key}}`, nh├║ng CSS v├áo `<style>` nh╞░ hiß╗çn tß║íi (b├ío c├ío vß║½n self-contained, offline)
+

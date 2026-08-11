@@ -1,0 +1,95 @@
+# Review package: 4685e48ccf1779addc8a30c165375d7d5afd4c84..9ae0b4f0842909ca6f2f730f3bce71818d25d0fc
+
+## Commits
+9ae0b4f Add template loader with {{key}} substitution
+
+## Files changed
+ tests/test-template.mjs | 35 +++++++++++++++++++++++++++++++++++
+ tools/lib/template.mjs  | 36 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 71 insertions(+)
+
+## Diff
+diff --git a/tests/test-template.mjs b/tests/test-template.mjs
+new file mode 100644
+index 0000000..24f725a
+--- /dev/null
++++ b/tests/test-template.mjs
+@@ -0,0 +1,35 @@
++#!/usr/bin/env node
++import fs from 'node:fs';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { loadTemplate, renderTemplate, clearTemplateCache } from '../tools/lib/template.mjs';
++
++let failures = 0;
++function ok(label, cond, detail) {
++  process.stdout.write(`${cond ? 'PASS' : 'FAIL'}  ${label}${detail ? ` ΓÇö ${detail}` : ''}\n`);
++  if (!cond) failures++;
++}
++
++const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../tools/templates/report');
++fs.mkdirSync(dir, { recursive: true });
++const fixture = path.join(dir, '_test_fixture.html');
++fs.writeFileSync(fixture, 'Hello {{name}}! {{missing}}.', 'utf8');
++
++clearTemplateCache();
++ok('render thay key c├│ mß║╖t', renderTemplate('_test_fixture.html', { name: 'A' }) === 'Hello A! .');
++ok('key thiß║┐u ΓåÆ chuß╗ùi rß╗ùng', renderTemplate('_test_fixture.html', {}) === 'Hello ! .');
++ok('load cache c├╣ng nß╗Öi dung', loadTemplate('_test_fixture.html') === fs.readFileSync(fixture, 'utf8'));
++
++let threw = false;
++try {
++  clearTemplateCache();
++  loadTemplate('__does_not_exist__.html');
++} catch {
++  threw = true;
++}
++ok('thiß║┐u file ΓåÆ throw', threw);
++
++fs.unlinkSync(fixture);
++clearTemplateCache();
++
++process.exit(failures ? 1 : 0);
+diff --git a/tools/lib/template.mjs b/tools/lib/template.mjs
+new file mode 100644
+index 0000000..e25124f
+--- /dev/null
++++ b/tools/lib/template.mjs
+@@ -0,0 +1,36 @@
++// template.mjs ΓÇö load file t─⌐nh d╞░ß╗¢i tools/templates/report/, thay {{key}}.
++import fs from 'node:fs';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++
++const TEMPLATE_DIR = path.join(
++  path.dirname(fileURLToPath(import.meta.url)),
++  '../templates/report',
++);
++
++const cache = new Map();
++
++/** @param {string} name t├¬n file trong tools/templates/report/ */
++export function loadTemplate(name) {
++  if (cache.has(name)) return cache.get(name);
++  const abs = path.join(TEMPLATE_DIR, name);
++  if (!fs.existsSync(abs)) {
++    throw new Error(`template kh├┤ng tß╗ôn tß║íi: ${abs}`);
++  }
++  const text = fs.readFileSync(abs, 'utf8');
++  cache.set(name, text);
++  return text;
++}
++
++/**
++ * @param {string} name
++ * @param {Record<string, unknown>} [vars]
++ */
++export function renderTemplate(name, vars = {}) {
++  return loadTemplate(name).replace(/\{\{(\w+)\}\}/g, (_, key) => String(vars[key] ?? ''));
++}
++
++/** Chß╗ë d├╣ng trong test. */
++export function clearTemplateCache() {
++  cache.clear();
++}
+
