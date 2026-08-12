@@ -1,6 +1,7 @@
 // common.mjs — phần dùng chung của các emitter.
 
-import { isAlwaysOn } from '../paths.mjs';
+import path from 'node:path';
+import { isAlwaysOn, emitPaths } from '../paths.mjs';
 import { HUB } from '../assets.mjs';
 
 /** Banner đánh dấu file generate — đặt NGAY SAU frontmatter đóng. */
@@ -22,6 +23,56 @@ export function seeAlsoLine(asset) {
   const refs = asset['see-also'] ?? [];
   if (refs.length === 0) return '';
   return `\n\n> Xem thêm: ${refs.map((r) => `\`${r}\``).join(', ')}`;
+}
+
+// `[asset-id]` trong thân asset là cross-reference của corpus ("Nạp skill [pm-deadline-review]"),
+// KHÔNG phải link markdown. Claude Code có Skill tool nên gọi theo tên là đủ — nó nạp được
+// nguyên văn asset được tham chiếu. Cursor/Copilot/Antigravity KHÔNG có primitive tương đương:
+// để nguyên text trần thì agent chỉ thấy một cái tên, không có đường nào tới nội dung, nên nó
+// tự ứng biến từ phần tóm tắt trong command — đúng cái class lỗi "tự sinh script riêng thay vì
+// gọi CLI bắt buộc". Đổi thành link tương đối trỏ đúng file đã sinh cho chính tool đó.
+//
+// Không đảm bảo agent sẽ đọc (không tool nào ngoài Claude Code cưỡng chế được) — chỉ bảo đảm
+// đường dẫn tồn tại và đúng, thay vì bắt agent đoán.
+const REF_PATTERN = /\[([a-z][a-z0-9-]*)\](?![([:])/g;
+
+/**
+ * Đổi cross-reference `[id]` thành link tương đối tới file mà `tool` sinh cho asset đó.
+ * Chỉ đổi khi `id` THẬT SỰ là một asset trong corpus và asset đó ra file riêng (mode 'file')
+ * — id lạ, hay asset bị inline vào file gộp, đều giữ nguyên text cũ.
+ *
+ * @param {string} body      thân asset
+ * @param {object} p
+ * @param {Array}  p.assets  toàn bộ asset đang emit (để phân giải id)
+ * @param {string} p.tool    'cursor' | 'vscode' | 'antigravity' | 'claude'
+ * @param {string} p.fromPath rel path của chính file đang sinh — gốc để tính đường tương đối
+ * @param {object} [p.opts]  chuyển tiếp cho emitPaths (claudeRoot…)
+ */
+export function linkCrossRefs(body, { assets, tool, fromPath, opts = {} }) {
+  const target = new Map();
+  for (const a of assets) {
+    const first = emitPaths(a, tool, opts)[0];
+    if (first?.mode === 'file') target.set(a.id, first.path);
+  }
+
+  const fromDir = path.posix.dirname(fromPath.replace(/\\/g, '/'));
+  return body.replace(REF_PATTERN, (whole, id) => {
+    const dest = target.get(id);
+    if (!dest) return whole;
+    return `[${id}](${path.posix.relative(fromDir, dest.replace(/\\/g, '/'))})`;
+  });
+}
+
+/**
+ * Agent chỉ đọc — không có Edit/Write/NotebookEdit trong allowlist `tools`. Dùng để khai
+ * `readonly: true` cho Cursor subagent (Cursor chỉ có cờ readonly thô, không có allowlist
+ * theo từng tool như Claude Code) — chiếu lại đúng ý định đã khai ở `tools`, không phát
+ * minh thêm field nguồn mới.
+ */
+const WRITE_TOOLS = ['Edit', 'Write', 'NotebookEdit'];
+export function isReadonlyAgent(asset) {
+  return asset.kind === 'agent' && Array.isArray(asset.tools)
+    && !asset.tools.some((t) => WRITE_TOOLS.includes(t));
 }
 
 /** Sắp xếp asset ổn định: doctrine trước, rồi rule hard, luôn theo id. */

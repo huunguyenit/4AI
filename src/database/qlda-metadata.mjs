@@ -12,12 +12,59 @@ import { stripAccents } from '../../mcp/fbo/lib/encoding.mjs';
 
 const MODULE_HUB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const CONFIG_REL = path.join('data', 'qlda.json');
+const LOCAL_REL = path.join('data', 'qlda.local.json');
 
 /** configPath -> { mtimeMs, json } — nạp lại khi file đổi, không cache vĩnh viễn. */
 const configCache = new Map();
 
+/** Token sync-time `{PMName}`/`{PMDept}` — chưa gán từ local thì không dùng làm mã NV. */
+export function isPmPlaceholder(value) {
+  const s = String(value ?? '').trim();
+  return !s || /^\{[A-Za-z0-9_]+\}$/.test(s);
+}
+
+/**
+ * Đọc `pm` từ data/qlda.local.json (per máy, gitignore).
+ * @returns {{maNv?: string, boPhanLt?: string}|null}
+ */
+function loadLocalPm(root) {
+  const file = path.join(root, LOCAL_REL);
+  if (!fs.existsSync(file)) return null;
+  try {
+    const local = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return local?.pm && typeof local.pm === 'object' ? local.pm : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Gán review.pm từ qlda.local.json khi qlda.json còn placeholder hoặc local có giá trị.
+ * Không mutate object trong cache — trả bản shallow-clone phần `review.pm`.
+ */
+function overlayPmFromLocal(json, root) {
+  if (!json) return null;
+  const localPm = loadLocalPm(root);
+  if (!localPm) return json;
+
+  const base = json.review?.pm && typeof json.review.pm === 'object' ? json.review.pm : {};
+  const maNv = !isPmPlaceholder(localPm.maNv) ? String(localPm.maNv).trim()
+    : (!isPmPlaceholder(base.maNv) ? String(base.maNv).trim() : base.maNv);
+  const boPhanLt = !isPmPlaceholder(localPm.boPhanLt) ? String(localPm.boPhanLt).trim()
+    : (!isPmPlaceholder(base.boPhanLt) ? String(base.boPhanLt).trim() : base.boPhanLt);
+
+  return {
+    ...json,
+    review: {
+      ...json.review,
+      pm: { ...base, maNv, boPhanLt },
+    },
+  };
+}
+
 /**
  * Đọc data/qlda.json. Tìm lần lượt theo hub được truyền vào, gốc module, rồi cwd.
+ * Sau khi nạp, gán `review.pm` từ data/qlda.local.json nếu có (token `{PMName}`/`{PMDept}`).
  * @param {string} [hub] - Thư mục gốc hub 4AI
  * @returns {Object|null} Nội dung qlda.json, hoặc null nếu không tìm thấy file
  */
@@ -29,11 +76,16 @@ export function loadQldaConfig(hub) {
 
     const { mtimeMs } = fs.statSync(file);
     const hit = configCache.get(file);
-    if (hit && hit.mtimeMs === mtimeMs) return hit.json;
+    const base = hit && hit.mtimeMs === mtimeMs
+      ? hit.json
+      : (() => {
+          const json = JSON.parse(fs.readFileSync(file, 'utf8'));
+          configCache.set(file, { mtimeMs, json });
+          return json;
+        })();
 
-    const json = JSON.parse(fs.readFileSync(file, 'utf8'));
-    configCache.set(file, { mtimeMs, json });
-    return json;
+    // Overlay local mỗi lần gọi (local có thể đổi mà qlda.json không) — không cache bản đã gán.
+    return overlayPmFromLocal(base, root);
   }
   return null;
 }

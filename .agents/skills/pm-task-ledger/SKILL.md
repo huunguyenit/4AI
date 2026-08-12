@@ -16,7 +16,7 @@ description: Format entry trong `<mcpDataRoot>/4ai/ledger/tasks.md` và vòng đ
 ## Format entry
 
     ## <CODE KHÁCH> — <một dòng mô tả việc>
-    - Program: <programPath, lấy từ customers.json>
+    - Program: <programPath, lấy từ list_programs (nbdmda)>
     - Controller: <danh sách file dự kiến/đã đụng>
     - Trạng thái: Mới | Đang làm | Chờ xác nhận | Xong
     - Ngày mở: YYYY-MM-DD

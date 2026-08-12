@@ -21,6 +21,16 @@
       "notes": "Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
     },
     {
+      "name": "user-cursor-global",
+      "path": "C:\\Users\\USER\\.cursor",
+      "tools": ["cursor"],
+      "domains": ["fbo-xml", "project-mgmt"],
+      "scope": "user",
+      "globalPolicy": "on-demand-only",
+      "enabled": true,
+      "notes": "Cursor user-level: agents/commands/rules vào ~/.cursor (không lồng .cursor/). alwaysApply luôn false — mở program khách vẫn thấy subagent FBO/PM."
+    },
+    {
       "name": "fbi-sp24-corpus",
       "path": "D:\\Fast Source\\Development\\DevWorkFlow\\FBISP24",
       "tools": [],

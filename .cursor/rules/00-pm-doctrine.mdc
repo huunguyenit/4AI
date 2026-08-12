@@ -11,9 +11,9 @@ alwaysApply: true
 ## Đơn vị quản lý
 
 Một **khách hàng** = một hoặc nhiều **program** (bản FBO/FBI riêng, có SP version riêng,
-DB riêng). Registry chuẩn: `data/customers.json` trong hub 4AI — code khách, dòng sản phẩm,
-SP, program path, DB alias. Program path là căn cước của mọi thay đổi: nói tới một sửa đổi
-mà không nói program path là chưa nói gì.
+DB riêng). Registry chuẩn: bảng `nbdmda` trong DB QLDA nội bộ, tra qua tool `list_programs` —
+mã dự án (`ma_da`), dòng sản phẩm, SP, program path. Program path là căn cước của mọi thay
+đổi: nói tới một sửa đổi mà không nói program path là chưa nói gì.
 
 ## Vết để lại
 

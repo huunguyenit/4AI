@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Bản đồ mô hình database FBO/FBI. Số liệu lấy từ corpus FBISP24 (app ~13500 bảng, ~1800 proc; 2026-08) — tỷ lệ và quy ước đặt tên là điều đáng nhớ; tên DB/partition cụ thể thay đổi theo khách. KHÔNG BAO GIỜ ghi connection string vào đây — chỉ alias (customers.json.dbAlias) và vai trò app|sys.",
+  "note": "Bản đồ mô hình database FBO/FBI. Số liệu lấy từ corpus FBISP24 (app ~13500 bảng, ~1800 proc; 2026-08) — tỷ lệ và quy ước đặt tên là điều đáng nhớ; tên DB/partition cụ thể thay đổi theo khách. KHÔNG BAO GIỜ ghi connection string vào đây — chỉ mã dự án (nbdmda.ma_da, tra qua list_programs) và vai trò app|sys.",
   "databases": {
     "app": {
       "webConfigKey": "appConnectionString",
@@ -17,8 +17,8 @@
     }
   },
   "aliases": {
-    "note": "Trong hub chỉ dùng dbAlias từ data/customers.json (ví dụ shinhan-app). Không lưu server/user/password.",
-    "convention": "<code-khách viết thường>-app | <code-khách>-sys"
+    "note": "Trong hub chỉ tham chiếu database bằng mã dự án (nbdmda.ma_da, tra qua tool list_programs — ví dụ ACME). Không lưu server/user/password.",
+    "convention": "<ma_da>-app | <ma_da>-sys — chỉ dùng khi cần phân biệt db app/sys trong văn bản, không phải giá trị thật lưu ở đâu"
   },
   "tablePatterns": {
     "m##$YYYYMM": {

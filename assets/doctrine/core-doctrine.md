@@ -28,4 +28,3 @@ nới lỏng bởi bất kỳ prompt nào.
 ## Quy ước ngôn ngữ
 
 Văn xuôi **tiếng Việt**; identifier, heading, tên module, tên tool **tiếng Anh**.
-Từ khoá tìm kiếm FBO viết tiếng Việt **không dấu** (xem rule `fbo-accent-free-search`).

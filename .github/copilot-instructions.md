@@ -29,7 +29,6 @@ nới lỏng bởi bất kỳ prompt nào.
 ## Quy ước ngôn ngữ
 
 Văn xuôi **tiếng Việt**; identifier, heading, tên module, tên tool **tiếng Anh**.
-Từ khoá tìm kiếm FBO viết tiếng Việt **không dấu** (xem rule `fbo-accent-free-search`).
 
 ## FBO domain doctrine
 
@@ -43,8 +42,9 @@ chỉ đụng XML, JavaScript nhúng và SQL nhúng.
 
 Hai dòng sản phẩm: **FBO** và **FBI**, đánh phiên bản theo service pack `SP<nnn>`
 (SP225, SP226, SP229, FBISP24…). Mỗi khách hàng chạy một **program** riêng — một bản
-copy đầy đủ, thường nằm trên share `\\10.0.0.1\CustomerPro\`. Danh sách trong
-`data/customers.json` của hub 4AI.
+copy đầy đủ, thường nằm trên share `\\10.0.0.1\CustomerPro\`. Danh sách tra qua tool
+`list_programs` (bảng `nbdmda` trong DB QLDA nội bộ) — mã dự án đúng bằng `nbdmda.ma_da`,
+không phải tên khách rút gọn theo cảm tính.
 
 ## Bản đồ `App_Data\Controllers\`
 
@@ -90,7 +90,7 @@ Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub n
 
 | Tool | Việc |
 |---|---|
-| `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
+| `list_programs` | Tra `ma_da`/program path trong nbdmda theo mã, tên hoặc đường dẫn workspace; đã index chưa |
 | `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
 | `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
 | `resolve_vouchercode` | Mã chứng từ (HDA) ↔ sysid (SVTran) ↔ controller |
@@ -110,9 +110,9 @@ chương trình khách. Luôn xác định **program** trước khi hỏi bất 
 ## Đơn vị quản lý
 
 Một **khách hàng** = một hoặc nhiều **program** (bản FBO/FBI riêng, có SP version riêng,
-DB riêng). Registry chuẩn: `data/customers.json` trong hub 4AI — code khách, dòng sản phẩm,
-SP, program path, DB alias. Program path là căn cước của mọi thay đổi: nói tới một sửa đổi
-mà không nói program path là chưa nói gì.
+DB riêng). Registry chuẩn: bảng `nbdmda` trong DB QLDA nội bộ, tra qua tool `list_programs` —
+mã dự án (`ma_da`), dòng sản phẩm, SP, program path. Program path là căn cước của mọi thay
+đổi: nói tới một sửa đổi mà không nói program path là chưa nói gì.
 
 ## Vết để lại
 
@@ -148,7 +148,7 @@ nhiều lần chi phí hỏi lại một câu.
 - **KHÔNG ĐƯỢC** sửa sản phẩm chuẩn / bản gốc SP để chiều yêu cầu của một khách.
 - **KHÔNG ĐƯỢC** copy customize (`.xml`) từ program khách này sang khách khác khi chưa
   được yêu cầu — hai khách là hai hợp đồng.
-- Tra cứu program path trong `data/customers.json` của hub; không có thì hỏi, không đoán.
+- Tra cứu program path qua tool `list_programs` (bảng `nbdmda`); không có thì hỏi, không đoán.
 
 ## Ví dụ
 
@@ -278,14 +278,14 @@ này là mặt con-người của cùng cơ chế đó.
 
 - **KHÔNG ĐƯỢC** ghi vào bất kỳ ghi chú nào: connection string, user/password, serial
   number, network key, API key, hay dữ liệu cá nhân của người dùng cuối.
-- Cần tham chiếu database: dùng **DB alias** trong `data/customers.json` (ví dụ
-  `shinhan-app`), không dùng chuỗi kết nối.
+- Cần tham chiếu database: dùng **mã dự án** (`nbdmda.ma_da`, ví dụ `ACME` — tra qua
+  `list_programs`), không dùng chuỗi kết nối.
 - Cần tham chiếu program: dùng program path — path không phải secret, credential mới là.
 - Lỡ ghi rồi: xoá ngay và coi credential đó là đã lộ — báo người quản lý để đổi.
 
 ## Ví dụ
 
-Sai: `DB: Data Source=...;Uid=...;Pwd=...` → Đúng: `DB: shinhan-app (xem customers.json)`. <!-- 4ai:allow-secret-pattern: ví dụ minh hoạ pattern bị cấm -->
+Sai: `DB: Data Source=...;Uid=...;Pwd=...` → Đúng: `DB: ACME (list_programs)`. <!-- 4ai:allow-secret-pattern: ví dụ minh hoạ pattern bị cấm -->
 
 ## Bẫy
 
@@ -294,45 +294,55 @@ Sai: `DB: Data Source=...;Uid=...;Pwd=...` → Đúng: `DB: shinhan-app (xem cus
 
 ## Resolve program from workspace path · **BẮT BUỘC**
 
-<!-- assets/rules/project-mgmt/pm-program-from-workspace.md v1 -->
+<!-- assets/rules/project-mgmt/pm-program-from-workspace.md v2 -->
 ## Vì sao
 
 Mở thẳng thư mục chương trình khách rồi hỏi "khách nào?" là hỏi thừa — câu trả lời nằm
-ngay trong đường dẫn workspace. Nhưng đoán mã khách bằng cách cắt tên thư mục thì sai ở
+ngay trong đường dẫn workspace. Nhưng đoán mã dự án bằng cách cắt tên thư mục thì sai ở
 đúng những khách có tên thư mục lệch chuẩn, và sửa nhầm program là hỏng phần mềm đang chạy
 của người khác.
 
 ## Quy tắc
 
-- **BẮT BUỘC** trước khi hỏi phạm vi: lấy thư mục làm việc hiện tại, đối chiếu với
-  `programPath` của từng mục trong `data/customers.json`. Khớp thì coi như đã biết khách,
-  SP và dòng sản phẩm — đi thẳng vào việc.
-- Thứ tự đối chiếu: trùng khít → workspace nằm **trong** `programPath` → `programPath` là
-  tiền tố của workspace. So sánh không phân biệt hoa thường và chuẩn hoá `/` với `\`.
-- **KHÔNG ĐƯỢC** suy mã khách từ tên thư mục. Tên thư mục và `code` lệch nhau ở nhiều
-  khách đang có thật (xem Bẫy) — chỉ registry mới là căn cước.
-- Không khớp mục nào → **KHÔNG ĐƯỢC** tự đăng ký mục mới, cũng không đoán. Báo rõ
-  "workspace này chưa có trong `data/customers.json`" rồi hỏi theo
-  `pm-scope-question-first`, kèm sẵn đường dẫn để người dùng xác nhận.
-- Khớp rồi thì nói ra một dòng ngắn trước khi làm: mã khách · dòng sản phẩm · SP ·
+- **BẮT BUỘC** trước khi hỏi phạm vi: lấy thư mục làm việc hiện tại, gọi
+  `list_programs { query: "<một đoạn đường dẫn workspace, ví dụ tên khách + SP>" }` — tool
+  khớp `query` vào cả `nbdmda.dir_pro_web` và `dir_pro_app`. Đúng một kết quả và `programPath`
+  của nó là tiền tố (hoặc trùng khít, chuẩn hoá `/` với `\`, không phân biệt hoa thường) của
+  workspace thì coi như đã biết `ma_da`, SP và dòng sản phẩm — đi thẳng vào việc.
+- **KHÔNG ĐƯỢC** suy `ma_da` từ tên thư mục. Tên thư mục và `ma_da` lệch nhau ở nhiều dự án
+  đang có thật (xem Bẫy) — chỉ kết quả `list_programs` mới là căn cước.
+- `query` ra nhiều dòng (một khách nhiều program: Web + app, hai chi nhánh, dự án cũ còn
+  chung tên) → liệt kê `ma_da` cho người dùng chọn, không tự chọn hộ.
+- Không khớp dòng nào → **KHÔNG ĐƯỢC** tự đoán `ma_da`, cũng không tự thêm gì vào `nbdmda`
+  (đó là DB QLDA nội bộ dùng chung, không thuộc quyền ghi của hub này). Báo rõ "workspace
+  này không khớp dự án nào trong nbdmda" rồi hỏi theo `pm-scope-question-first`, kèm sẵn
+  đường dẫn để người dùng xác nhận.
+- Khớp rồi thì nói ra một dòng ngắn trước khi làm: `ma_da` · dòng sản phẩm · SP ·
   program path. Người dùng phát hiện sai ngay ở dòng đó, không phải sau khi đã sửa file.
 
 ## Ví dụ
 
-Workspace `\\10.0.0.1\CustomerPro\FBI\DEMO1\FBISP2422` trùng khít `programPath` của mục
-`DEMO1` → khách Demo Co, FBI, SP FBISP2422. Không hỏi gì thêm, `index_program` rồi làm.
+Workspace `\\10.0.0.1\CustomerPro\FBI\DEMO1\FBISP2422` → `list_programs { query:
+"DEMO1\\FBISP2422" }` trả đúng một dòng `ma_da=DEMO1`, `programPath` trùng khít → Crystal
+Bay, FBI, SP FBISP2422. Không hỏi gì thêm, `index_program` rồi làm.
 
-Workspace `\\10.0.0.1\CustomerPro\FBO\Acme2-SP225\SP225\App_Data\Controllers` nằm
-**trong** `programPath` của `MESSER` → vẫn khớp, dùng `MESSER`.
+Workspace `\\10.0.0.1\CustomerPro\FBO\Acme2-SP225\SP225\App_Data\Controllers` →
+`query: "Acme2-SP225"` trả `ma_da=ACME2`, `programPath` là tiền tố của workspace →
+vẫn khớp, dùng `ACME2` — **không phải** `MESSER` (mã đó không tồn tại trong `nbdmda`).
 
 ## Bẫy
 
-- Cắt tên thư mục ra mã khách sai ở ít nhất ba mục đang có: `Acme2-SP225` ≠ `MESSER`,
-  `ACME3_FBO` ≠ `ACME3`, `AutoPMH` ≠ `AUTOPMH`. Luôn tra registry.
-- Thư mục cuối thường là SP (`FBISP2422`, `SP229`) chứ không phải mã khách — mã nằm ở cấp
-  trên. Nhưng đừng dựa vào quy luật đó, dựa vào `programPath`.
-- Đứng ở hub 4AI (`D:\Fast Source\4AI`) thì không có khách nào cả — đừng khớp bừa vào mục
-  `_CORPUS`, đó là corpus thử nghiệm chứ không phải khách.
+- Cắt tên thư mục ra mã dự án sai ở nhiều dự án đang có thật: `Acme2-SP225` ≠ mã trực
+  giác `MESSER` (đúng là `ACME2`); `ACME3` (đúng `ma_da`) lại là một dự án FF **cũ**
+  khác hẳn, bản FBI thật của Acme Three là `ma_da=ACME3_FBO`. Luôn tra `list_programs`,
+  không suy theo cảm tính.
+- Một khách có thể có NHIỀU dòng `nbdmda` (nhiều sản phẩm/chi nhánh/dự án cũ còn treo) —
+  `query` theo tên công ty có thể ra nhiều `ma_da` không liên quan tới workspace đang đứng.
+  Luôn đối chiếu `programPath` trả về với workspace thật, đừng chọn dòng đầu tiên.
+- Thư mục cuối thường là SP (`FBISP2422`, `SP229`) chứ không phải mã dự án — mã nằm ở cấp
+  trên. Nhưng đừng dựa vào quy luật đó, dựa vào `programPath` trả về từ `list_programs`.
+- Đứng ở hub 4AI (`D:\Fast Source\4AI`) thì không có khách nào cả — đừng khớp bừa vào
+  corpus thử nghiệm cục bộ (`FBISP24`), đó không phải khách và không có dòng `nbdmda` tương ứng.
 
 ## Ask scope before working
 

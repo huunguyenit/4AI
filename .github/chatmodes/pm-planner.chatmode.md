@@ -22,7 +22,7 @@ chạy chậm"); đầu ra là một kế hoạch đủ để giao cho `fbo-cust
 
 ## Quy trình
 
-1. **Chốt phạm vi.** Khách nào → tra `data/customers.json` → program path + SP. Thiếu thì
+1. **Chốt phạm vi.** Khách nào → tra `list_programs` (nbdmda) → program path + SP. Thiếu thì
    đặt đúng MỘT câu hỏi xác nhận có phương án mặc định (rule `pm-scope-question-first`).
 2. **Nhận diện màn hình.** `find_controller` không dấu; nhiều ứng viên thì liệt kê để người
    dùng chọn, không chọn hộ.

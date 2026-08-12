@@ -8,15 +8,15 @@ argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự �
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-capability-graph, fbo-new-table-proposal]
 mode: agent
-version: 5
+version: 6
 ---
 
 ## Việc cần làm
 
 Rà soát yêu cầu cho: **$ARGUMENTS**
 
-Nạp skill [pm-deadline-review] và làm theo đúng quy trình ở đó. Tham số là mã dự án
-(`nbdmda.ma_da`).
+Giao việc cho sub-agent [pm-deadline-review] và làm theo đúng quy trình ở đó. Tham số là
+mã dự án (`nbdmda.ma_da`).
 
 **Có mã dự án** → chỉ rà soát dự án đó, sinh một report.
 

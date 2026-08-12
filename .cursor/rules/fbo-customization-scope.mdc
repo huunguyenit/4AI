@@ -24,7 +24,7 @@ nhiều lần chi phí hỏi lại một câu.
 - **KHÔNG ĐƯỢC** sửa sản phẩm chuẩn / bản gốc SP để chiều yêu cầu của một khách.
 - **KHÔNG ĐƯỢC** copy customize (`.xml`) từ program khách này sang khách khác khi chưa
   được yêu cầu — hai khách là hai hợp đồng.
-- Tra cứu program path trong `data/customers.json` của hub; không có thì hỏi, không đoán.
+- Tra cứu program path qua tool `list_programs` (bảng `nbdmda`); không có thì hỏi, không đoán.
 
 ## Ví dụ
 

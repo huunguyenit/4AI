@@ -152,9 +152,11 @@ export async function runSync(opts) {
     }
     for (const n of notes) process.stdout.write(`  NOTE ${n}\n`);
 
-    // CLAUDE.md là file viết tay — 4AI không sở hữu. Chưa có thì tạo tối thiểu,
-    // có rồi thì chỉ kiểm tra dòng @import và nhắc.
-    if (target.claudeMdImport || target.scope === 'user') {
+    // CLAUDE.md là file viết tay — 4AI không sở hữu. Chỉ áp cho target có tool claude
+    // (hoặc cờ claudeMdImport). Target user-cursor-global không đụng CLAUDE.md.
+    const wantsClaudeMd = target.claudeMdImport
+      || (target.scope === 'user' && (target.tools ?? []).includes('claude'));
+    if (wantsClaudeMd) {
       const line = target.scope === 'user' ? '@4ai-global.md' : '@.claude/4ai-context.md';
       const header = target.scope === 'user'
         ? '# CLAUDE.md (user scope)\n\nFile này là của bạn — 4AI chỉ cần dòng import bên dưới.'

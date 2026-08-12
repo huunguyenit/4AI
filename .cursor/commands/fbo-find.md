@@ -8,8 +8,8 @@
 
 Điều tra màn hình FBO: **$ARGUMENTS**
 
-1. Xác định program path — có trong tham số thì dùng, không thì tra `data/customers.json`
-   theo tên khách được nhắc, vẫn không rõ thì hỏi lại một câu.
+1. Xác định program path — có trong tham số thì dùng, không thì tra `list_programs`
+   (nbdmda) theo tên khách được nhắc, vẫn không rõ thì hỏi lại một câu.
 2. Giao việc cho sub-agent `fbo-explorer` (read-only) với mô tả màn hình và program path.
 3. Trình lại báo cáo của explorer đúng cấu trúc: Kết luận / Bản đồ file / Field liên quan /
    Include đáng chú ý / Chưa chắc chắn.

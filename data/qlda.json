@@ -36,12 +36,10 @@
         "maPbsp": "FBISP2422",
         "bpTk": "TK1",
         "bpLt": "FSD",
-        "customerCode": "DEMO1",
         "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422",
         "registeredInQlda": true,
-        "registeredInCustomersJson": true,
         "attachments": { "controller": "nbdmda", "syskey": "DEMO1", "count": 2 },
-        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo. Đã đăng ký data/customers.json 2026-08-08."
+        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo."
       }
     ]
   },
@@ -150,7 +148,7 @@
       ],
       "sensitiveColumns": {
         "columns": ["server", "xuser", "xpass", "db_sys"],
-        "rule": "Bảng này lưu server/user/pass truy cập chương trình khách dưới dạng varchar thường. KHÔNG BAO GIỜ SELECT các cột này, không đưa vào UR, ledger, changelog hay báo cáo. Cần biết khách nằm ở đâu thì tra data/customers.json.programPath."
+        "rule": "Bảng này lưu server/user/pass truy cập chương trình khách dưới dạng varchar thường. KHÔNG BAO GIỜ SELECT các cột này, không đưa vào UR, ledger, changelog hay báo cáo. Cần biết khách nằm ở đâu thì dùng tool list_programs (đọc dir_pro_web/dir_pro_app)."
       },
       "columns": [
         { "name": "ma_da", "type": "char(32)", "notNull": true, "pk": true, "label": "Mã dự án" },
@@ -402,11 +400,11 @@
   },
   "review": {
     "note": "Quy trình rà soát yêu cầu định kỳ của PM. Vai PM KẾT THÚC ở trạng thái HT — DT/OK/UP thuộc bộ phận khác, không đưa vào báo cáo.",
-    "pm": { "maNv": "PM01", "boPhanLt": "FSD" },
+    "pm": { "maNv": "{PMName}", "boPhanLt": "{PMDept}" },
 
     "scope": {
       "duAn": {
-        "rule": "Dự án mà PM đứng tên lập trình quản lý: PM01 nằm trong nbdmda.ma_lt1, ma_lt2 hoặc ma_lt3.",
+        "rule": "Dự án mà PM đứng tên lập trình quản lý: {PMName} nằm trong nbdmda.ma_lt1, ma_lt2 hoặc ma_lt3.",
         "note": "Một dự án có thể có nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận, chỉ lọc theo LTQL."
       },
       "yeuCau": {

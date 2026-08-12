@@ -10,7 +10,7 @@ argument-hint: <khách> <mô tả thay đổi>
 
 Yêu cầu customize: **$ARGUMENTS**
 
-1. **Chốt phạm vi** — tra khách trong `data/customers.json` → program path + SP. Nhắc lại
+1. **Chốt phạm vi** — tra khách qua `list_programs` (nbdmda) → program path + SP. Nhắc lại
    để xác nhận: "Áp vào `<programPath>`, đúng không?" (rule `fbo-customization-scope`).
 2. **Lập kế hoạch** theo `fbo-customization-workflow` (giao `pm-planner` nếu yêu cầu phức
    tạp): controller nào, cặp `.f`/`.xml` trạng thái gì, có chạm include chung không.

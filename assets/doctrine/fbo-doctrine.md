@@ -17,8 +17,9 @@ chỉ đụng XML, JavaScript nhúng và SQL nhúng.
 
 Hai dòng sản phẩm: **FBO** và **FBI**, đánh phiên bản theo service pack `SP<nnn>`
 (SP225, SP226, SP229, FBISP24…). Mỗi khách hàng chạy một **program** riêng — một bản
-copy đầy đủ, thường nằm trên share `\\10.0.0.1\CustomerPro\`. Danh sách trong
-`data/customers.json` của hub 4AI.
+copy đầy đủ, thường nằm trên share `\\10.0.0.1\CustomerPro\`. Danh sách tra qua tool
+`list_programs` (bảng `nbdmda` trong DB QLDA nội bộ) — mã dự án đúng bằng `nbdmda.ma_da`,
+không phải tên khách rút gọn theo cảm tính.
 
 ## Bản đồ `App_Data\Controllers\`
 
@@ -64,7 +65,7 @@ Mọi điều tra đi qua MCP server **`4ai-fbo`** — server riêng của hub n
 
 | Tool | Việc |
 |---|---|
-| `list_programs` | Chương trình nào đã đăng ký, đã index chưa |
+| `list_programs` | Tra `ma_da`/program path trong nbdmda theo mã, tên hoặc đường dẫn workspace; đã index chưa |
 | `index_program` | Quét cây Controllers vào chỉ mục cục bộ (chạy một lần cho mỗi program) |
 | `find_controller` | Tên nghiệp vụ → mã controller. Không dấu hay có dấu đều được |
 | `resolve_vouchercode` | Mã chứng từ (HDA) ↔ sysid (SVTran) ↔ controller |

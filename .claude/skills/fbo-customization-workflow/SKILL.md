@@ -16,7 +16,7 @@ thành một quy trình duy nhất để không bước nào bị nhảy cóc.
 
 ## Quy trình
 
-1. **Xác định program.** Khách nào → `data/customers.json` → program path. Thiếu thì hỏi
+1. **Xác định program.** Khách nào → `list_programs` (nbdmda) → program path. Thiếu thì hỏi
    (rule `pm-scope-question-first`). Nói rõ path trong đề xuất.
 2. **Mở ledger entry** — `ledger/tasks.md`, trạng thái `Mới`.
 3. **Xác nhận controller.** `find_controller` không dấu → mã controller → `describe_controller`

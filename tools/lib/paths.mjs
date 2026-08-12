@@ -19,14 +19,17 @@ export function isAlwaysOn(asset) {
 /**
  * @param {object} asset  asset đã applyDefaults
  * @param {'claude'|'cursor'|'vscode'|'antigravity'} tool
- * @param {{claudeRoot?: string}} opts
+ * @param {{claudeRoot?: string, cursorRoot?: string}} opts
  *        claudeRoot: '.claude' cho project scope, '.' khi dest CHÍNH LÀ ~/.claude
+ *        cursorRoot: '.cursor' cho project scope, '.' khi dest CHÍNH LÀ ~/.cursor
  * @returns {Array<{path: string, mode: 'file'|'inline'}>}
  */
 export function emitPaths(asset, tool, opts = {}) {
   const id = asset.id;
   const claudeRoot = opts.claudeRoot ?? '.claude';
+  const cursorRoot = opts.cursorRoot ?? '.cursor';
   const c = (p) => (claudeRoot === '.' ? p : `${claudeRoot}/${p}`);
+  const cu = (p) => (cursorRoot === '.' ? p : `${cursorRoot}/${p}`);
   const alwaysOn = isAlwaysOn(asset);
 
   switch (tool) {
@@ -39,13 +42,19 @@ export function emitPaths(asset, tool, opts = {}) {
       return [{ path: c(`skills/${id}/SKILL.md`), mode: 'file' }];
 
     case 'cursor':
-      if (asset.kind === 'agent' || asset.kind === 'command') {
-        return [{ path: `.cursor/commands/${id}.md`, mode: 'file' }];
+      // Cursor có subagent primitive thật (đọc .cursor/agents/ VÀ .claude/agents/ cho
+      // "Claude compatibility") — kind:agent ra file subagent thật, không còn giả làm command.
+      // User scope: dest = ~/.cursor → cursorRoot='.' → agents/<id>.md (không lồng .cursor/).
+      if (asset.kind === 'agent') {
+        return [{ path: cu(`agents/${id}.md`), mode: 'file' }];
+      }
+      if (asset.kind === 'command') {
+        return [{ path: cu(`commands/${id}.md`), mode: 'file' }];
       }
       if (asset.kind === 'doctrine') {
-        return [{ path: `.cursor/rules/00-${id}.mdc`, mode: 'file' }];
+        return [{ path: cu(`rules/00-${id}.mdc`), mode: 'file' }];
       }
-      return [{ path: `.cursor/rules/${id}.mdc`, mode: 'file' }];
+      return [{ path: cu(`rules/${id}.mdc`), mode: 'file' }];
 
     case 'vscode':
       if (asset.kind === 'agent') {
@@ -75,12 +84,17 @@ export function emitPaths(asset, tool, opts = {}) {
 /** Đường dẫn file cấu hình MCP của từng tool. */
 export function mcpPath(tool, opts = {}) {
   const claudeRoot = opts.claudeRoot ?? '.claude';
+  const cursorRoot = opts.cursorRoot ?? '.cursor';
   switch (tool) {
     case 'claude':
       // Scope user (~/.claude) không dùng .mcp.json — xem docs/TARGET-MATRIX.md.
       return claudeRoot === '.' ? null : { path: '.mcp.json', key: 'mcpServers' };
     case 'cursor':
-      return { path: '.cursor/mcp.json', key: 'mcpServers' };
+      // User scope: dest = ~/.cursor → mcp.json (không lồng .cursor/mcp.json).
+      return {
+        path: cursorRoot === '.' ? 'mcp.json' : '.cursor/mcp.json',
+        key: 'mcpServers',
+      };
     case 'vscode':
       return { path: '.vscode/mcp.json', key: 'servers' };
     case 'antigravity':

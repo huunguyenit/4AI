@@ -158,7 +158,7 @@ Thấp 2–4 giờ · Trung bình 4–8 giờ · Cao 8–16 giờ (mức Cao th�
 - `DoKho`, `CompanionLienDoi`, `CanLamRo` **chưa có cột chứa** trong `nbphyc`. Xuất ra
   bảng markdown, KHÔNG đề xuất nhét vào `ghi_chu` hay slot dự phòng khi chưa được duyệt.
 - KHÔNG BAO GIỜ đọc hay trích `nbdmda.server`, `xuser`, `xpass`, `db_sys` — đó là
-  credential khách. Cần biết khách ở đâu thì tra `data/customers.json.programPath`.
+  credential khách. Cần biết khách ở đâu thì tra `list_programs` (đọc `dir_pro_web`/`dir_pro_app`).
 - Output `query_sql` **mất dấu tiếng Việt** (codepage sqlcmd). Không copy chuỗi đã mất dấu
   vào bảng UR — lấy văn bản chính xác từ tài liệu nguồn.
 - Mọi `query_sql` tới QLDA phải truyền `database: QLDA_APP` (Web.config dùng `%Database`).

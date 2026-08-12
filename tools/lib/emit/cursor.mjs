@@ -1,50 +1,87 @@
 // cursor.mjs — emitter cho Cursor.
+//
+// Project scope (cursorRoot='.cursor'):
 //   .cursor/rules/<id>.mdc            frontmatter: description, globs, alwaysApply
-//   .cursor/commands/<id>.md          agent + command (Cursor không có sub-agent primitive)
+//   .cursor/commands/<id>.md
+//   .cursor/agents/<id>.md            subagent thật
 //   .cursor/mcp.json                  mcpServers (merge)
+//
+// User scope (cursorRoot='.', globalPolicy 'on-demand-only', dest = ~/.cursor):
+//   agents/ commands/ rules/ như trên (không lồng .cursor/), alwaysApply luôn false.
+//   mcp.json — merge MCP user-level (Cursor đọc ~/.cursor/mcp.json).
 
-import { emitPaths, mcpPath } from '../paths.mjs';
-import { banner, seeAlsoLine } from './common.mjs';
+import { emitPaths, mcpPath, isAlwaysOn } from '../paths.mjs';
+import {
+  banner, seeAlsoLine, linkCrossRefs, isReadonlyAgent,
+  alwaysOnAssets, onDemandAssets,
+} from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
-import { isAlwaysOn } from '../paths.mjs';
 
-function mdcFile(asset) {
+function mdcFile(asset, body, { forceOnDemand = false } = {}) {
   const fm = stringifyFrontmatter({
     description: asset.description,
     ...(asset.globs?.length ? { globs: asset.globs } : {}),
-    alwaysApply: isAlwaysOn(asset),
+    alwaysApply: forceOnDemand ? false : isAlwaysOn(asset),
   });
   const head = asset.severity === 'hard'
     ? `> **Rule cứng (severity: hard)** — vi phạm là sai, không phải lựa chọn.\n\n`
     : '';
-  return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${head}${asset.body}${seeAlsoLine(asset)}`;
+  return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${head}${body}${seeAlsoLine(asset)}`;
 }
 
-function commandFile(asset) {
-  const label = asset.kind === 'agent'
-    ? `> Vai trò sub-agent (Cursor không có primitive riêng — chạy như một command có kịch bản).\n\n`
-    : '';
-  return `${banner(asset)}\n\n# ${asset.title}\n\n${label}${asset.body}${seeAlsoLine(asset)}`;
+function commandFile(asset, body) {
+  return `${banner(asset)}\n\n# ${asset.title}\n\n${body}${seeAlsoLine(asset)}`;
 }
 
-export function emitCursor({ assets, mcpServers }) {
+/** Subagent thật của Cursor — cùng field với .claude/agents/ (Cursor đọc thẳng thư mục đó
+ * cho "Claude compatibility"), cộng `readonly` suy từ allowlist `tools`. */
+function agentFile(asset, body) {
+  const fm = stringifyFrontmatter({
+    name: asset.id,
+    description: asset.description,
+    model: asset.model,
+    ...(isReadonlyAgent(asset) ? { readonly: true } : {}),
+  });
+  return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${body}${seeAlsoLine(asset)}`;
+}
+
+/**
+ * @returns {{textFiles: [], jsonFiles: [], notes: []}}
+ */
+export function emitCursor({ assets, mcpServers, target = {} }) {
+  const isUserScope = target.scope === 'user';
+  const cursorRoot = isUserScope ? '.' : '.cursor';
+  const pathOpts = { cursorRoot };
   const textFiles = [];
   const jsonFiles = [];
   const notes = [];
 
-  for (const a of assets) {
-    for (const e of emitPaths(a, 'cursor')) {
-      if (a.kind === 'agent' || a.kind === 'command') {
-        textFiles.push({ relPath: e.path, content: commandFile(a), sourceId: a.id, sourceVersion: a.version });
-      } else {
-        textFiles.push({ relPath: e.path, content: mdcFile(a), sourceId: a.id, sourceVersion: a.version });
-      }
+  // User scope on-demand-only: không đẩy alwaysApply:true lên global. Doctrine/rule always
+  // vẫn emit thành file rule nhưng alwaysApply=false (agent chỉ nạp khi được nhắc tới).
+  const list = isUserScope
+    ? [
+      ...alwaysOnAssets(assets).filter((a) => a.kind !== 'doctrine'),
+      ...onDemandAssets(assets),
+      ...alwaysOnAssets(assets).filter((a) => a.kind === 'doctrine'),
+    ]
+    : assets;
+
+  for (const a of list) {
+    const forPath = isUserScope ? { ...a, always: false } : a;
+    for (const e of emitPaths(forPath, 'cursor', pathOpts)) {
+      const body = linkCrossRefs(a.body, {
+        assets: list, tool: 'cursor', fromPath: e.path, opts: pathOpts,
+      });
+      const content = a.kind === 'agent' ? agentFile(a, body)
+        : a.kind === 'command' ? commandFile(a, body)
+        : mdcFile(a, body, { forceOnDemand: isUserScope });
+      textFiles.push({ relPath: e.path, content, sourceId: a.id, sourceVersion: a.version });
     }
   }
 
-  const mp = mcpPath('cursor');
+  const mp = mcpPath('cursor', pathOpts);
   const serverIds = Object.keys(mcpServers);
-  if (serverIds.length > 0) {
+  if (mp && serverIds.length > 0) {
     const patch = { [mp.key]: {} };
     for (const [id, srv] of Object.entries(mcpServers)) {
       patch[mp.key][id] = {
