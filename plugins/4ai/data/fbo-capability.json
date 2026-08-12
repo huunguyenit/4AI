@@ -1,0 +1,406 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-10",
+  "latestSpVersion": "FBISP2422",
+  "note": "Master data của FBO tới thời điểm hiện tại — tổng hợp tính năng sản phẩm theo SP2422. Không chứa dữ liệu khách hay connection string. Dùng làm căn cứ lập kế hoạch, đề xuất, và tra cứu năng lực FBO.",
+  "products": [
+    {
+      "code": "FBO",
+      "name": "FastBusiness - Bán lẻ",
+      "latestSp": "SP229",
+      "description": "Giải pháp quản lý bán lẻ, cửa hàng, kho hàng"
+    },
+    {
+      "code": "FBI",
+      "name": "FastBusiness - Nhập khẩu",
+      "latestSp": "FBISP2422",
+      "description": "Giải pháp quản lý nhập khẩu, kho quản thế"
+    }
+  ],
+  "functionDomains": [
+    {
+      "id": "giao-dich-ban",
+      "name": "Giao dịch bán hàng",
+      "menus": ["HDA", "HDT", "PXB", "PXB20"],
+      "capabilities": [
+        "Nhập hoá đơn bán",
+        "Quản lý hóa đơn điện tử",
+        "Tính toán giá bán tự động",
+        "Áp dụng khuyến mại",
+        "Quản lý giảm giá",
+        "Post sổ bán hàng"
+      ]
+    },
+    {
+      "id": "nhap-kho",
+      "name": "Nhập kho hàng",
+      "menus": ["PNK", "PND", "HNK"],
+      "capabilities": [
+        "Nhập phiếu nhập kho",
+        "Quản lý đơn hàng mua",
+        "Nhập từ nhà cung cấp",
+        "Tính toán giá nhập",
+        "Post sổ nhập hàng"
+      ]
+    },
+    {
+      "id": "kho-hang",
+      "name": "Quản lý kho hàng",
+      "menus": ["PXK", "PKC", "PCC"],
+      "capabilities": [
+        "Xuất kho bán lẻ",
+        "Chuyên chở nội bộ",
+        "Điều chuyển kho",
+        "Quản lý số lượng",
+        "Báo cáo tồn kho"
+      ]
+    },
+    {
+      "id": "tai-chinh-ke-toan",
+      "name": "Tài chính - Kế toán",
+      "menus": ["CT1", "CT2", "BG", "CC"],
+      "capabilities": [
+        "Ghi sổ chi tiết",
+        "Hạch toán theo công thức",
+        "Báo cáo tài chính",
+        "Lấy số dư đối chiếu",
+        "Phân bổ chi phí",
+        "Kết chuyển"
+      ]
+    },
+    {
+      "id": "danh-muc",
+      "name": "Danh mục dữ liệu",
+      "menus": ["DM", "DMV", "DMS"],
+      "capabilities": [
+        "Quản lý hàng hoá",
+        "Quản lý khách hàng",
+        "Quản lý nhà cung cấp",
+        "Quản lý tài khoản",
+        "Quản lý bộ phận",
+        "Quản lý nhân viên"
+      ]
+    },
+    {
+      "id": "bao-cao",
+      "name": "Báo cáo",
+      "menus": ["RPT"],
+      "capabilities": [
+        "Báo cáo doanh số",
+        "Báo cáo tồn kho",
+        "Báo cáo chi tiết",
+        "Báo cáo tóm tắt",
+        "Export dữ liệu"
+      ]
+    }
+  ],
+  "featureTypes": [
+    {
+      "id": "danh-muc",
+      "name": "Danh mục",
+      "description": "Dữ liệu tham chiếu, danh sách",
+      "estimatedEffort": "1-2 giờ",
+      "customizableFields": true
+    },
+    {
+      "id": "chung-tu",
+      "name": "Chứng từ",
+      "description": "Biểu mẫu nhập liệu dữ liệu kinh tế",
+      "estimatedEffort": "2-4 giờ",
+      "customizableFields": true
+    },
+    {
+      "id": "bao-cao",
+      "name": "Báo cáo",
+      "description": "Crystal Reports báo cáo dữ liệu",
+      "estimatedEffort": "2-3 giờ",
+      "customizableFields": false
+    },
+    {
+      "id": "import",
+      "name": "Import",
+      "description": "Nhập dữ liệu từ file",
+      "estimatedEffort": "1-2 giờ",
+      "customizableFields": false
+    },
+    {
+      "id": "post-so",
+      "name": "Post sổ",
+      "description": "Hạch toán chứng từ",
+      "estimatedEffort": "2-3 giờ",
+      "customizableFields": false
+    },
+    {
+      "id": "thong-bao",
+      "name": "Thông báo",
+      "description": "Email, SMS, push notification",
+      "estimatedEffort": "1-2 giờ",
+      "customizableFields": true
+    },
+    {
+      "id": "duyet",
+      "name": "Duyệt",
+      "description": "Quy trình duyệt phê chuẩn",
+      "estimatedEffort": "1-2 giờ",
+      "customizableFields": true
+    },
+    {
+      "id": "ket-chuyen",
+      "name": "Kết chuyển",
+      "description": "Xử lý hết kỳ, kết chuyển sang kỳ mới",
+      "estimatedEffort": "2-3 giờ",
+      "customizableFields": false
+    },
+    {
+      "id": "phan-bo",
+      "name": "Phân bổ",
+      "description": "Phân bổ chi phí, doanh số",
+      "estimatedEffort": "2-3 giờ",
+      "customizableFields": false
+    }
+  ],
+  "supportLevels": [
+    {
+      "code": "builtin",
+      "name": "Built-in",
+      "description": "FBO có sẵn, không cần customize"
+    },
+    {
+      "code": "customizable",
+      "name": "Customizable",
+      "description": "FBO có cơ chế, cần customize cho khách"
+    },
+    {
+      "code": "workaround",
+      "name": "Workaround",
+      "description": "FBO làm được nhưng phải đi đường vòng, có giới hạn"
+    },
+    {
+      "code": "not_supported",
+      "name": "Không hỗ trợ",
+      "description": "Vượt khả năng xử lý của FBO ở SP này — cần đề xuất KL"
+    }
+  ],
+  "menuBars": [
+    {
+      "id": "HD",
+      "name": "Hóa đơn",
+      "category": "giao-dich-ban",
+      "controllers": {
+        "HDA": "Hóa đơn bán",
+        "HDT": "Hóa đơn bán trả lại",
+        "PXB": "Phiếu xuất bán",
+        "PXB20": "Phiếu xuất bán kho"
+      }
+    },
+    {
+      "id": "NK",
+      "name": "Nhập kho",
+      "category": "nhap-kho",
+      "controllers": {
+        "PNK": "Phiếu nhập kho",
+        "PND": "Phiếu nhập dùng",
+        "HNK": "Hóa đơn nhập"
+      }
+    },
+    {
+      "id": "XK",
+      "name": "Xuất kho",
+      "category": "kho-hang",
+      "controllers": {
+        "PXK": "Phiếu xuất kho",
+        "PKC": "Phiếu kiểm chỉnh",
+        "PCC": "Phiếu chuyên chở"
+      }
+    },
+    {
+      "id": "DM",
+      "name": "Danh mục",
+      "category": "danh-muc",
+      "controllers": {
+        "DMH": "Danh mục hàng",
+        "DMK": "Danh mục khách",
+        "DMS": "Danh mục sản phẩm",
+        "DMV": "Danh mục vận chuyển"
+      }
+    },
+    {
+      "id": "CT",
+      "name": "Chi tiết",
+      "category": "tai-chinh-ke-toan",
+      "controllers": {
+        "CT1": "Chi tiết TK",
+        "CT2": "Chi tiết hàng",
+        "BG": "Bảng giá",
+        "CC": "Chi phí"
+      }
+    },
+    {
+      "id": "RPT",
+      "name": "Báo cáo",
+      "category": "bao-cao",
+      "controllers": {
+        "RptDN": "Báo cáo doanh số",
+        "RptTK": "Báo cáo tồn kho",
+        "RptTC": "Báo cáo tài chính"
+      }
+    }
+  ],
+  "commonCapabilities": [
+    {
+      "name": "Tính năng core",
+      "items": [
+        {
+          "capability": "CRUD cơ bản",
+          "support": "builtin",
+          "description": "Thêm, sửa, xoá, tìm kiếm dữ liệu"
+        },
+        {
+          "capability": "Lưu trữ dữ liệu",
+          "support": "builtin",
+          "description": "Lưu vào cơ sở dữ liệu SQL Server"
+        },
+        {
+          "capability": "Tìm kiếm",
+          "support": "builtin",
+          "description": "Tìm kiếm, lọc, sắp xếp"
+        },
+        {
+          "capability": "In ấn",
+          "support": "builtin",
+          "description": "In báo cáo Crystal Reports"
+        },
+        {
+          "capability": "Export",
+          "support": "builtin",
+          "description": "Export Excel, PDF"
+        }
+      ]
+    },
+    {
+      "name": "Tính năng nâng cao",
+      "items": [
+        {
+          "capability": "Workflow duyệt",
+          "support": "customizable",
+          "description": "Cấu hình luồng duyệt phê chuẩn"
+        },
+        {
+          "capability": "Tính toán tự động",
+          "support": "customizable",
+          "description": "Formula, script tính toán giá, thuế"
+        },
+        {
+          "capability": "Thông báo",
+          "support": "customizable",
+          "description": "Email, SMS, đẩy notification"
+        },
+        {
+          "capability": "Import dữ liệu",
+          "support": "customizable",
+          "description": "Nhập từ file Excel, CSV"
+        },
+        {
+          "capability": "Tích hợp bên ngoài",
+          "support": "workaround",
+          "description": "Kết nối API, webservice"
+        },
+        {
+          "capability": "Quản lý số series",
+          "support": "builtin",
+          "description": "Tự động tăng số hiệu"
+        }
+      ]
+    }
+  ],
+  "knownLimitations": [
+    {
+      "limitation": "Hỗ trợ ngôn ngữ",
+      "current": "Tiếng Việt, Tiếng Anh",
+      "note": "Thêm ngôn ngữ khác cần customize"
+    },
+    {
+      "limitation": "Tương tác thời gian thực",
+      "current": "Limited",
+      "note": "WebSocket chưa tích hợp sẵn, cần custom"
+    },
+    {
+      "limitation": "Số người dùng đồng thời",
+      "current": "Tuỳ DB performance",
+      "note": "Không giới hạn ứng dụng, phụ thuộc infrastructure"
+    },
+    {
+      "limitation": "Tích hợp third-party",
+      "current": "API, webhooks",
+      "note": "Cần setup endpoint, không có SDK"
+    },
+    {
+      "limitation": "Mobile app",
+      "current": "Responsive web, không native app",
+      "note": "Có thể develop riêng dùng API"
+    }
+  ],
+  "spVersionHistory": [
+    {
+      "version": "FBISP2422",
+      "releaseDate": "2026-07-01",
+      "type": "FBI",
+      "majorFeatures": [
+        "Tỷ giá hối đoái tính theo quy định NĐ 252/2026",
+        "Cải thiện performance xử lý khối lượng lớn",
+        "Tích hợp hoá đơn điện tử mới"
+      ]
+    },
+    {
+      "version": "FBISP2421",
+      "releaseDate": "2026-04-01",
+      "type": "FBI",
+      "majorFeatures": [
+        "Hỗ trợ quản lý kho nước ngoài",
+        "Báo cáo thuế mới"
+      ]
+    },
+    {
+      "version": "SP229",
+      "releaseDate": "2025-06-01",
+      "type": "FBO",
+      "majorFeatures": [
+        "Quản lý bán lẻ nâng cao",
+        "Tích hợp POS"
+      ]
+    },
+    {
+      "version": "SP225",
+      "releaseDate": "2025-01-01",
+      "type": "FBO",
+      "majorFeatures": [
+        "Nâng cấp UI/UX"
+      ]
+    }
+  ],
+  "dataAccessPatterns": [
+    {
+      "pattern": "Read-only danh mục",
+      "use": "Tra cứu khách, sản phẩm, tài khoản",
+      "performance": "< 100ms"
+    },
+    {
+      "pattern": "Read chứng từ chi tiết",
+      "use": "Mở chi tiết hoá đơn, phiếu",
+      "performance": "< 500ms",
+      "note": "Có thể slow nếu chi tiết quá nhiều dòng"
+    },
+    {
+      "pattern": "Write/Post chứng từ",
+      "use": "Lưu, duyệt, post chứng từ",
+      "performance": "< 2s",
+      "note": "Phụ thuộc trigger, formula phức tạp"
+    },
+    {
+      "pattern": "Báo cáo tóm tắt",
+      "use": "Tổng hợp doanh số, tồn kho",
+      "performance": "< 5s",
+      "note": "Crystal Reports, có cache"
+    }
+  ]
+}

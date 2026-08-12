@@ -11,24 +11,14 @@
       "notes": "Hub là target đầu tiên của chính nó — dogfooding. Output generate được commit để diff cho thấy generate đã tạo ra cái gì."
     },
     {
-      "name": "user-global",
-      "path": "C:\\Users\\USER\\.claude",
-      "tools": ["claude"],
-      "domains": ["fbo-xml", "project-mgmt"],
-      "scope": "user",
-      "globalPolicy": "on-demand-only",
+      "name": "plugin",
+      "path": "D:\\Fast Source\\4AI\\plugins\\4ai",
+      "tools": ["plugin"],
+      "domains": ["core", "fbo-xml", "project-mgmt"],
       "enabled": true,
-      "notes": "Để mở thẳng thư mục chương trình khách trên share vẫn có skill FBO. Chỉ emit skill/agent/command; asset always:true KHÔNG lên scope global."
-    },
-    {
-      "name": "user-cursor-global",
-      "path": "C:\\Users\\USER\\.cursor",
-      "tools": ["cursor"],
-      "domains": ["fbo-xml", "project-mgmt"],
-      "scope": "user",
-      "globalPolicy": "on-demand-only",
-      "enabled": true,
-      "notes": "Cursor user-level: agents/commands/rules vào ~/.cursor (không lồng .cursor/). alwaysApply luôn false — mở program khách vẫn thấy subagent FBO/PM."
+      "pluginName": "4ai",
+      "pluginVersion": "0.1.0",
+      "notes": "Bản đóng gói phân phối qua marketplace trong chính repo này (.claude-plugin/marketplace.json). Output được commit — đây là artifact người khác cài, diff phải nhìn thấy được."
     },
     {
       "name": "fbi-sp24-corpus",

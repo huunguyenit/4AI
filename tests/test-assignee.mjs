@@ -194,6 +194,41 @@ ok('PM KHÔNG bị loại khỏi danh sách ứng viên (PM cũng là lập trì
   gPm.ungVien.some(c => c.ma_lt1 === 'PM01'), gPm.ungVien.map(c => c.ma_lt1).join(','));
 
 
+process.stdout.write('\n=== 6c. PM CŨNG LÀ NHÂN VIÊN — LUÔN CÓ MẶT DÙ ROSTER KHÔNG BẮT ĐƯỢC ===\n');
+// Bug thật: roster nhân sự (userinfo2) lọc theo chức vụ (ma_chv='NV') — nếu PM ghi chức vụ
+// khác trong hệ thống nhân sự thì bộ lọc đó loại PM ra khỏi `nhanSu.ungVien` dù PM có kinh
+// nghiệm/tải thật. Trước bản sửa: khai `ungVien` tường minh mà thiếu PM -> PM biến mất hoàn
+// toàn khỏi tenUngVien (nhánh khaiTuongMinh ăn đứt nhánh suy-từ-dữ-kiện), dù `lichSuMenu`
+// vẫn ghi nhận PM đã làm 9 UR đúng menu này.
+const nhanSuRosterThieuPm = {
+  ungVien: ['NV02', 'NV04'], // roster KHÔNG có PM01 — giả lập chức vụ HR không khớp 'NV'
+  lichSuMenu: [{ menu_id: 'M01', ma_lt1: 'PM01', so_ur: 9 }],
+  taiTrong: [{ ma_lt1: 'PM01', so_ur_toi_han: 0, so_ur_dang_mo: 2 }],
+};
+const gRosterThieuPm = goiYNguoiTiepNhan(
+  { trang_thai: 'DD', menu_id: 'M01', noi_dung: 'x' }, nhanSuRosterThieuPm, {}, 'PM01');
+ok('PM vẫn được thêm vào dù KHÔNG có trong ungVien khai tường minh',
+  gRosterThieuPm.ungVien.some(c => c.ma_lt1 === 'PM01'),
+  gRosterThieuPm.ungVien.map(c => c.ma_lt1).join(','));
+ok('PM vẫn được chấm điểm đầy đủ từ lichSuMenu/taiTrong (không phải ứng viên rỗng)',
+  gRosterThieuPm.ungVien.find(c => c.ma_lt1 === 'PM01')?.chiTiet.diemMenu > 0);
+ok('Roster gốc (NV02, NV04) vẫn còn nguyên, không bị PM thế chỗ',
+  gRosterThieuPm.ungVien.some(c => c.ma_lt1 === 'NV02') || gRosterThieuPm.ungVien.length <= 3);
+
+// Không truyền pmCode (gọi cũ, chưa nâng cấp call site) -> hành vi giữ nguyên như trước, không vỡ.
+const gKhongPmCode = goiYNguoiTiepNhan(
+  { trang_thai: 'DD', menu_id: 'M01', noi_dung: 'x' }, nhanSuRosterThieuPm);
+ok('Không truyền pmCode -> không tự thêm ai (tương thích ngược)',
+  !gKhongPmCode.ungVien.some(c => c.ma_lt1 === 'PM01'));
+
+// goiYPhanCong (đường đi thật từ report.mjs) phải tự thread pmCode xuống goiYNguoiTiepNhan.
+const locRosterThieuPm = goiYPhanCong(
+  [{ stt_rec: 'R1', trang_thai: 'DD', ma_lt1: '', menu_id: 'M01', noi_dung: 'x' }],
+  nhanSuRosterThieuPm, {}, 'PM01');
+ok('goiYPhanCong tự truyền pmCode xuống -> PM có mặt trong gợi ý',
+  locRosterThieuPm[0]?.goiY.ungVien.some(c => c.ma_lt1 === 'PM01'));
+
+
 process.stdout.write('\n=== 7. TÍCH HỢP VÀO BÁO CÁO HTML ===\n');
 const payload = {
   ma_da: 'DEMO1', ten_ngan: 'Demo Co', pm: 'PM01', ngay_chay: '2026-08-11',

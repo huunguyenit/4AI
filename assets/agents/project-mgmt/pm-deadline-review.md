@@ -236,6 +236,16 @@ script bạn chạy để sinh ra JSON đó.
    Báo tóm tắt trong chat kèm đường dẫn (trang tổng quan trước, rồi từng dự án). Không tự gửi
    cho ai khác.
 
+10. **Tự mở kết quả — đừng chờ PM tự mở file.** Chạy CHẠY NỀN (không chờ lệnh trả về, vì
+    server giữ tiến trình sống tới khi PM tắt):
+
+        node tools/4ai.mjs serve /review            (vừa rà soát TOÀN BỘ, có trang tổng quan)
+        node tools/4ai.mjs serve /review/<MA_DA>     (vừa rà soát một dự án)
+
+    `/review` và `/review/<MA_DA>` tự tìm đúng report NGÀY GẦN NHẤT — không cần tự ghép
+    `yyyyMMdd`. Lệnh tự mở trình duyệt tới `http://127.0.0.1:<port>`; PM tắt bằng Ctrl+C trong
+    cửa sổ đó khi xong. Nêu URL trong tóm tắt chat, không cần đợi lệnh kết thúc.
+
 ## Bố cục thư mục
 
 Gom theo NGÀY trước, trong ngày mới chia dự án — một lượt rà soát nằm gọn một chỗ để xoá,

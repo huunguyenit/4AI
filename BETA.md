@@ -10,12 +10,26 @@ danh sách thay đổi xem [CHANGELOG.md](CHANGELOG.md).
 - **Git**.
 - Không cần cài `npm install` gì cả — hub này cố tình **zero dependency**, chạy thẳng bằng Node.
 
-## Cài đặt
+## Cài đặt — cách nhanh (Claude Code)
+
+Không cần clone gì:
+
+```bash
+/plugin marketplace add huunguyenit/4AI
+```
+
+```bash
+/plugin install 4ai@fast-source-4ai
+```
+
+Gói đã gồm sẵn skill, agent, command, MCP `4ai-fbo` và CLI. Cập nhật về sau bằng
+`/plugin marketplace update`.
+
+## Cài đặt — cách clone (nếu bạn định sửa asset, hoặc dùng Cursor/Antigravity)
 
 ```bash
 git clone https://github.com/huunguyenit/4AI.git
 cd 4AI
-git checkout v0.1.0-beta
 
 node tools/4ai.mjs check   # phải ra "0 errors · 0 warnings"
 node tools/4ai.mjs sync    # ghi config vào .claude/, .cursor/, .agents/, .github/
@@ -33,6 +47,9 @@ node tools/4ai.mjs sync
 ```
 
 ## Test gì trong đợt beta này
+
+- **Cài bằng plugin** — đây là đường phân phối mới, cần feedback nhất: cài có trôi không, skill
+  và command có hiện đủ không, MCP `4ai-fbo` có kết nối được không.
 
 - **Claude Code**: `/fbo-find`, `/pm-status`, `/sync`, và các slash command khác — gõ `/` để xem
   danh sách đầy đủ.

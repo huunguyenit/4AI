@@ -26,7 +26,7 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "048c9eec574e568eb48ea91d9a9b92e120bdcbfe6f8caf704a6c682ecfa242f0",
+      "sha256": "2c0e3d3feed1567070899e2980f5265afa5ff1e3524d66e476c2a4a8e008d3ac",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 7
     },
@@ -242,7 +242,7 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "6e0527f516cb84ef441e274f02ebf0bec8f9cdd120e71c4903d32d02b817e7ba",
+      "sha256": "fca9be541ca0446b2c5dfa5836c0b69a871ed62b00aa1cacc260fce8fe8e7705",
       "sourceId": "pm-review",
       "sourceVersion": 6
     },
@@ -254,7 +254,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "28872c23a888ef0c7cbca023f7000494839725e1d1732a3d58ff4c3d79d32cf6"
+      "sha256": "5e79b6fd303dc5a0408a3a42b5a3f1a5d683b6a74be671a668b159ce1bbe0df7"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -282,7 +282,7 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "3e8376b342d1c168db3ca94b9fb8a451487710baea2946a60417eeda8bb81149",
+      "sha256": "a41f00a45e7a755a449bd6fbdbf284b4d2fb5f9088359332d89be5bd110c4a4d",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 7
     },
@@ -366,7 +366,7 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "a8f5c5fda81b12d10bc8346b646937cd3b8f69b97c7be6d2885c3579b4d94fbc",
+      "sha256": "5133de480d38790771a6eb38390936ded73615ce2d279c8aa6363dcf0496c7f1",
       "sourceId": "pm-review",
       "sourceVersion": 6
     },
@@ -504,7 +504,7 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "a5a5d73a705960355659c493eb0a6b2678f28803b57788766a32ac4af4ba8a56",
+      "sha256": "562f99ccc45ffb15dd98da5984536eb1329a431fcc14b087e6eca69320c0b49e",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 7
     },
@@ -588,7 +588,7 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "e521a2b16c1931ee9c7b2f811127511783936af7d18dd37a879101cfb25d41b8",
+      "sha256": "aa792f41de1bd7b2a2da6aee38ffec1fe7bcf5699af44080de99a53d9bd4996f",
       "sourceId": "pm-review",
       "sourceVersion": 6
     },
@@ -792,7 +792,7 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "ea7ed7df2537875dd180d279604ffbe963274bc60798d0ba61091a8296f04ed9",
+      "sha256": "f1c897c2276f99b30ffd867e8da04dfa895640f6db41454e4a4bff4efc9c12a0",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 7
     },
@@ -946,7 +946,7 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "2a914ef24d65ed2b8964234586bd4b2031163e786238629b4e59e69ce5cbc0a6",
+      "sha256": "d2afc7ff83acc4d7d8b28eaa11b548166e9ef386105fb2025fd250b7bee0197e",
       "sourceId": "pm-review",
       "sourceVersion": 6
     },
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-11T18:02:23.857Z",
+  "syncedAt": "2026-08-12T04:25:31.431Z",
   "target": "4ai"
 }

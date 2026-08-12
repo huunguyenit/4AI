@@ -1,0 +1,17 @@
+{
+  "name": "fast-source-4ai",
+  "owner": {
+    "name": "Fast Source",
+    "url": "https://github.com/huunguyenit/4AI"
+  },
+  "description": "Marketplace nội bộ Fast Source — trợ lý AI cho FBO/FBI.",
+  "plugins": [
+    {
+      "name": "4ai",
+      "displayName": "4AI — Trợ lý FBO/FBI",
+      "source": "./plugins/4ai",
+      "description": "Skill, agent, command và MCP tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi Include, truy vấn SQL qua Web.config.",
+      "keywords": ["fbo", "fbi", "fast-business", "erp", "vietnamese"]
+    }
+  ]
+}

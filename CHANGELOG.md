@@ -3,6 +3,26 @@
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/). Version đánh theo mốc bàn giao
 beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `package.json`.
 
+## [Chưa phát hành]
+
+### Thêm
+
+- **Đóng gói thành Claude Code plugin.** `plugins/4ai/` sinh tự động từ corpus, cài bằng
+  `/plugin marketplace add huunguyenit/4AI` rồi `/plugin install 4ai@fast-source-4ai` — không
+  phải clone repo. Gói tự chứa: 26 skill, 9 agent, 7 command, MCP `4ai-fbo`, và CLI.
+- **Emitter thứ năm** `tools/lib/emit/plugin.mjs` + target `plugin` trong `targets.json`.
+  Plugin là một phương ngữ của compiler như bốn phương ngữ kia, không phải thư mục dựng tay.
+- **`.claude-plugin/marketplace.json`** — repo này vừa là nguồn vừa là marketplace.
+- **Cờ `--data` cho MCP server** (và env `FBO_DATA_ROOT`) tách nơi ghi index khỏi nơi chứa code.
+  Mặc định vẫn là hub nên không đổi cách dùng hiện tại; khi chạy như plugin thì index nằm ở
+  `${CLAUDE_PLUGIN_DATA}` để sống sót qua mỗi lần update plugin.
+
+### Ghi chú
+
+- Lệnh bảo trì hub (`/sync`, `/doctor`, `/new-skill`, `/new-rule`, `/new-agent`,
+  `4ai-asset-authoring`) cố tình KHÔNG vào plugin — chúng chỉ có nghĩa khi đứng trong repo.
+- `data/qlda.local.json` và mọi `*.local.json` bị loại khỏi bản phân phối.
+
 ## [v0.1.0-beta] — 2026-08-11
 
 Bản đóng gói đầu tiên để đồng nghiệp nội bộ (dev/PM dùng FBO) thử nghiệm beta. Giai đoạn 1 —

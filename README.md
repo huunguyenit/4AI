@@ -2,6 +2,8 @@
 
 Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự động (agents) **tập trung cho FBO/FBI** — viết một lần, dùng trên tất cả platform: **Claude Code, Cursor, Antigravity** và VSCode/Copilot.
 
+> **Chỉ muốn dùng, không muốn sửa?** Cài bằng một lệnh — xem [Cài đặt](#-cài-đặt--hai-cách).
+
 ## 🎯 Tính năng chính
 
 | Tính năng | Mô tả | Dùng ở đâu |
@@ -12,6 +14,55 @@ Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự độ
 | **Commands** | Slash command: `/fbo-find`, `/pm-status`, `/sync` | Claude Code, Cursor |
 | **Báo cáo** | Dashboard HTML ngoại tuyến: rà soát UR, KPI phòng ban | Export từ tool |
 | **MCP Servers** | Kết nối tới database, API QLDA nội bộ | Claude, Cursor |
+
+## 📦 Cài đặt — hai cách
+
+Chọn theo việc bạn định làm gì với 4AI.
+
+| | **Cài plugin** | **Clone repo** |
+|---|---|---|
+| Dành cho | Người **dùng** skill/agent/command | Người **sửa** asset trong hub |
+| Cần | Claude Code | Claude Code, Cursor, VSCode hoặc Antigravity |
+| Cập nhật | `/plugin marketplace update` | `git pull` + `sync` |
+| Gồm | Asset + MCP + CLI, tự chứa | Toàn bộ hub, sửa và emit lại được |
+
+### Cách 1 — Cài plugin (khuyến nghị nếu chỉ để dùng)
+
+Chỉ dùng được trên Claude Code. Cài một lệnh, không phải clone gì:
+
+```bash
+/plugin marketplace add huunguyenit/4AI
+```
+
+```bash
+/plugin install 4ai@fast-source-4ai
+```
+
+Xong. Gói đã bao gồm sẵn:
+- **26 skill** — doctrine, rule và quy trình FBO/PM, model tự nạp khi task chạm phạm vi
+- **9 agent** — `fbo-explorer`, `fbo-customizer`, `pm-ur-analyst`, `pm-deadline-review`…
+- **7 command** — `/fbo-find`, `/fbo-review`, `/pm-status`, `/pm-review`…
+- **MCP `4ai-fbo`** — tra cứu controller, phân giải DTD entity, đo phạm vi Include, `query_sql`
+- **CLI `tools/4ai.mjs`** — để nhóm command PM dựng được báo cáo HTML
+
+Yêu cầu: **Node.js 22+** (MCP dùng `node:sqlite` built-in). Không cần `npm install` — zero dependency.
+
+Cập nhật về sau:
+
+```bash
+/plugin marketplace update
+```
+
+**Index SQLite sống sót qua update.** Nó nằm ở `${CLAUDE_PLUGIN_DATA}` chứ không nằm trong thư
+mục cache của plugin, nên không phải chạy lại `index_program` mỗi lần nâng cấp.
+
+**Lệnh bảo trì hub không có trong plugin** — `/sync`, `/doctor`, `/new-skill`, `/new-rule`,
+`/new-agent` chỉ có ý nghĩa khi bạn đang đứng trong repo, nên chúng cố tình bị loại khỏi bản
+phân phối. Cần chúng thì dùng cách 2.
+
+### Cách 2 — Clone repo (khi cần sửa asset)
+
+Xem [Quickstart](#quickstart--sửa-một-điều-gì-đó) bên dưới.
 
 ## 🚀 Dùng trên từng Platform
 
@@ -85,6 +136,35 @@ node tools/4ai.mjs list                   # Xem tất cả asset
 node tools/4ai.mjs explain <asset-id>    # Asset này emit ra file nào
 node tools/4ai.mjs check                  # Validate — exit 0 = OK
 ```
+
+### Dựng lại plugin sau khi sửa asset
+
+Plugin là **phương ngữ thứ năm** của compiler, không phải thư mục dựng tay — `plugins/4ai/`
+sinh ra từ chính corpus `assets/`, giống hệt `.claude/` hay `.cursor/`:
+
+```bash
+node tools/4ai.mjs sync --dry-run --target plugin
+```
+
+```bash
+node tools/4ai.mjs sync --target plugin
+```
+
+Output **được commit** — nó là artifact người khác cài, diff phải nhìn thấy được. Sửa asset mà
+quên dựng lại plugin thì người cài plugin vẫn nhận bản cũ.
+
+Ba điều emitter plugin làm khác các emitter kia:
+
+- **Doctrine và rule `always: true` hạ thành skill.** Plugin không có primitive "context luôn
+  nạp" như `.claude/4ai-context.md`, nên chúng thành skill để model tự nạp theo `description` —
+  đúng cách scope user-global vẫn làm.
+- **Gói kèm runtime.** `mcp/fbo/`, `src/`, `tools/`, `data/` được chép nguyên văn vào gói. Plugin
+  cấm đường dẫn `../` ra ngoài gốc, nên mọi thứ asset nhắc tới phải nằm trong gói. Layout giữ
+  nguyên so với hub để import tương đối giữa `mcp/fbo/` và `src/` còn đúng.
+- **`*.local.json` không bao giờ đi kèm.** Đó là cấu hình per-máy (`data/qlda.local.json` chứa
+  mã PM và connection string), gitignore và loại khỏi bản phân phối.
+
+Bump version plugin ở `targets.json` → `pluginVersion`, không sửa tay `plugin.json`.
 
 ## 📊 Báo cáo & Template
 
@@ -204,6 +284,8 @@ Cấu hình trọng số: `data/qlda.json` → `review.phanCong` ghi đè mặc 
 | Nơi | Mục đích |
 |---|---|
 | **`assets/`** | Tất cả rules, skills, commands, agents. Viết Markdown, auto-emit ra platform |
+| **`plugins/4ai/`** | Bản plugin sinh tự động — **không sửa tay**, chạy `sync --target plugin` |
+| `.claude-plugin/marketplace.json` | Catalog marketplace để `/plugin marketplace add` |
 | `assets/rules/` | Kiểm soát chất lượng (không lộ secret, tên biến, SQL injection, v.v.) |
 | `assets/skills/` | Quy trình chi tiết (customize FBO, audit, PM workflow) |
 | `assets/agents/` | Tác nhân tự động (phân tích tài liệu, code review) |

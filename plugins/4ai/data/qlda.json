@@ -1,0 +1,549 @@
+{
+  "version": 5,
+  "note": "Cấu hình dự án QLDA (quản lý dự án — yêu cầu — hạn hoàn thành). KHÔNG BAO GIỜ chứa connection string: ở đây chỉ có TÊN key và THỨ TỰ phân giải. Giá trị thật nằm ở biến môi trường hoặc data/qlda.local.json (đã gitignore). File này bị scanSecrets của `4ai check` soi — cố tình dán chuỗi kết nối vào sẽ fail build.",
+  "storage": {
+    "mode": "database",
+    "note": "Không còn mirror tài liệu cục bộ. Dev và release đọc CÙNG một nguồn: DB QLDA_APP + kho file attachments.fileStore. Không có khái niệm documentsRoot nữa, không có bước đồng bộ, nên không có nguy cơ đọc nhầm bản cũ.",
+    "decidedAt": "2026-08-08",
+    "supersedes": "environments.dev.storage=filesystem với documentsRoot=.management (bỏ ngày 2026-08-08)."
+  },
+  "documents": {
+    "note": "Tài liệu khảo sát, biên bản, email đính kèm KHÔNG nằm trên đĩa cục bộ. Nguồn duy nhất là bảng sysfileinfo — xem mục `attachments`. Cột text trên form (nbdmda.file_tlks, nbdmda.sProjectFolder, nbphyc.file_kem) KHÔNG phải nơi lưu file và không tin cậy: file_tlks của DEMO1 rỗng.",
+    "howToFetch": [
+      "1. Xác định khoá cha: ma_da (tài liệu cấp dự án) hoặc stt_rec (đính kèm của một UR).",
+      "2. query_sql database=QLDA_APP: SELECT line_nbr, file_name, file_ext, file_size, file_enc FROM sysfileinfo WHERE controller=<'nbdmda'|'nbphyc'> AND RTRIM(syskey)=<khoá> ORDER BY line_nbr",
+      "3. Đường dẫn đọc = attachments.fileStore.root + '\\' + file_enc (không có phần mở rộng).",
+      "4. Copy sang scratchpad và đặt lại tên theo file_name trước khi mở. Đối chiếu số byte với file_size để chắc đúng file.",
+      "5. KHÔNG ghi/đổi tên/xoá gì trong fileStore, KHÔNG copy tài liệu khách vào repo."
+    ],
+    "namingConvention": {
+      "note": "Quy ước đặt tên nằm ở sysfileinfo.file_name (tên gốc lúc upload), dùng để đoán loại tài liệu và giai đoạn. Không phải quy tắc bắt buộc — file đặt sai tên vẫn tồn tại, đọc nội dung để xác nhận.",
+      "kinds": [
+        { "prefix": "TLKS", "name": "Tài liệu khảo sát", "phase": "khảo sát" },
+        { "prefix": "BBTN", "name": "Biên bản thống nhất phạm vi", "phase": "thống nhất" },
+        { "prefix": "EMAIL", "name": "Email xác nhận theo giai đoạn", "phase": "xác nhận" },
+        { "prefix": "UR", "name": "Bảng UR draft/chốt", "phase": "mọi giai đoạn" }
+      ]
+    }
+  },
+  "projects": {
+    "note": "Dự án đang làm việc, khoá theo nbdmda.ma_da. Đây chỉ là bản ghi chú điều hướng — nguồn sự thật vẫn là bảng nbdmda.",
+    "items": [
+      {
+        "maDa": "DEMO1",
+        "tenNgan": "DEMO CO",
+        "sProjectFolder": "DEMO1_FBISP2422",
+        "maPbsp": "FBISP2422",
+        "bpTk": "TK1",
+        "bpLt": "FSD",
+        "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422",
+        "registeredInQlda": true,
+        "attachments": { "controller": "nbdmda", "syskey": "DEMO1", "count": 2 },
+        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo."
+      }
+    ]
+  },
+  "attachments": {
+    "note": "Tài liệu khảo sát, biên bản, mail đính kèm đều đi qua tab tệp đính kèm, lưu metadata ở bảng dùng chung sysfileinfo. Không tìm file qua cột text trên form.",
+    "table": "sysfileinfo",
+    "database": "QLDA_APP",
+    "primaryKey": ["controller", "syskey", "line_nbr"],
+    "lookupBy": {
+      "duAn": "controller='nbdmda' AND syskey=<ma_da>",
+      "yeuCau": "controller='nbphyc' AND syskey=<stt_rec>"
+    },
+    "usage": [
+      { "controller": "nbdmda", "rows": 2537, "keys": 951, "withBlob": 0 },
+      { "controller": "nbphyc", "rows": 44671, "keys": 34173, "withBlob": 16 }
+    ],
+    "columns": [
+      { "name": "controller", "type": "char(64)", "notNull": true, "pk": true, "note": "Tên controller sở hữu file — hiện chỉ có nbdmda và nbphyc." },
+      { "name": "syskey", "type": "char(32)", "notNull": true, "pk": true, "note": "Khoá bản ghi cha: ma_da khi controller='nbdmda', stt_rec khi controller='nbphyc'. Kiểu char nên phải RTRIM khi so sánh." },
+      { "name": "line_nbr", "type": "int", "notNull": true, "pk": true, "note": "Thứ tự file trong tab đính kèm, bắt đầu từ 1." },
+      { "name": "file_name", "type": "nvarchar(255)", "note": "Tên gốc người dùng upload — dùng để hiển thị và đoán loại tài liệu (TLKS_/BBTN_/...)." },
+      { "name": "file_ext", "type": "nvarchar(50)", "note": "Phần mở rộng không có dấu chấm, ví dụ 'docx'." },
+      { "name": "file_size", "type": "numeric(18,0)", "note": "Số byte — khớp chính xác kích thước file trên đĩa, dùng để verify." },
+      { "name": "file_type", "type": "bit" },
+      { "name": "file_enc", "type": "nvarchar(64)", "note": "TÊN FILE TRÊN ĐĨA. GUID 32 ký tự hex không gạch nối. Đây là kết quả rename khi upload." },
+      { "name": "file_data", "type": "image", "note": "Blob trong DB — hầu như luôn NULL. nbdmda: 0/2537 dòng có blob; nbphyc: 16/44671. Coi như file luôn nằm trên đĩa; nếu file_data khác NULL thì đó là dữ liệu cũ." },
+      { "name": "datetime0", "type": "datetime", "audit": true },
+      { "name": "datetime2", "type": "datetime", "audit": true },
+      { "name": "user_id0", "type": "int", "audit": true },
+      { "name": "user_id2", "type": "int", "audit": true }
+    ],
+    "fileStore": {
+      "root": "\\\\10.0.0.1\\FastPro$\\QLDASHARE\\RUN-ONL\\NB\\Files\\QLDA_APP",
+      "pathPattern": "<root>\\<file_enc>",
+      "extensionOnDisk": false,
+      "verified": "2026-08-08 — hai file của DEMO1 tồn tại đúng mẫu này, kích thước khớp file_size từng byte.",
+      "note": "File trên đĩa KHÔNG có phần mở rộng: tên đúng bằng file_enc, không nối thêm .docx. Muốn mở thì copy ra nơi khác rồi đặt lại tên theo file_name. Thư mục root chứa rất nhiều file — ĐỪNG liệt kê cả thư mục (ls treo trên 2 phút), luôn dựng đường dẫn từ file_enc lấy qua SQL.",
+      "rootDiffersFromProgram": "Chú ý share này là RUN-ONL (bản chạy), khác với databases.qlda.path là SRC-ONL (bản source)."
+    },
+    "readOnly": "Chỉ đọc metadata và copy file ra ngoài. KHÔNG ghi, đổi tên hay xoá gì trong thư mục này — đó là kho tài liệu đang chạy.",
+    "workingCopy": "Cần mở file thì copy sang scratchpad của phiên làm việc rồi đặt lại tên theo file_name. Không copy tài liệu khách vào repo 4AI dưới bất kỳ dạng nào."
+  },
+  "databases": {
+    "qlda": {
+      "alias": "qlda-app",
+      "connectionKey": "appConnectionString",
+      "provider": "sqlserver",
+      "path": "\\\\10.0.0.1\\FastPro$\\QLDASHARE\\SRC-ONL",
+      "pathKind": "fbo-program-root",
+      "databaseName": "QLDA_APP",
+      "sysDatabaseName": "QLDA_SYS",
+      "resolveOrder": [
+        { "kind": "env", "name": "QLDA_APP_CONNECTION", "type": "appConnectionString" },
+        { "kind": "env", "name": "QLDA_SYS_CONNECTION", "type": "sysConnectionString" },
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "appConnectionString" },
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "sysConnectionString" },
+        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "appConnectionString" },
+        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "sysConnectionString" }
+      ],
+      "note": "QLDA tự nó là một chương trình FBO — Web.config tại `path` chứa appConnectionString nên query_sql phân giải được kết nối. Web.config dùng placeholder %Database, vì vậy MỌI lệnh query_sql phải truyền `database: \"QLDA_APP\"`. Đây là DB nội bộ, KHÔNG phải DB nghiệp vụ của khách.",
+      "indexedAt": "2026-08-08",
+      "indexStats": { "files": 3310, "parsed": 823, "controllers": "Grid:1137 Filter:893 Report:479 Dir:459 Include:181" }
+    },
+    "graph4ai": {
+      "alias": "graph-4ai",
+      "connectionKey": "graphConnectionString",
+      "provider": "sqlserver",
+      "databaseName": "GRAPH_4AI",
+      "serverAlias": "fsd-sql2016",
+      "resolveOrder": [
+        { "kind": "env", "name": "GRAPH_4AI_CONNECTION" },
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "graphConnectionString" }
+      ],
+      "note": "DB nội bộ chứa CHỈ MỤC đồ thị năng lực FBO và mạng phụ thuộc UR. Nguồn sự thật là file JSONL trong repo — xem data/graph-schema.json. Không chứa dữ liệu nghiệp vụ của khách. Giá trị kết nối do PM tự điền vào qlda.local.json (đã gitignore) hoặc biến môi trường; KHÔNG BAO GIỜ ghi vào file này."
+    }
+  },
+  "schemaSource": {
+    "method": "INFORMATION_SCHEMA.COLUMNS + sys.indexes trên QLDA_APP, đối chiếu nhãn field từ describe_controller",
+    "verifiedAgainstDatabase": true,
+    "verifiedAt": "2026-08-08",
+    "conventions": {
+      "notNull": "Ràng buộc NOT NULL THẬT ở database.",
+      "required": "Controller khai allowNulls=false — bắt buộc ở tầng màn hình, nhưng cột vẫn NULL được ở DB. Hai thứ này khác nhau và ở QLDA lệch nhau rất nhiều.",
+      "label": "Nhãn tiếng Việt lấy từ Dir controller. Cột không có label là cột chỉ tồn tại ở DB, không hiện trên form.",
+      "spareSlots": "FBO cấp sẵn cột dự phòng đặt tên theo mẫu (s1..s9, fcode*, fdate*, fqty*, fnote*, ma_td*, sl_td*, gc_td*). Một số đã bị trưng dụng và có label. Cột dự phòng còn trống KHÔNG được coi là tự do cho tới khi soi hết command SQL trong controller."
+    },
+    "queryCaveats": [
+      "Web.config dùng %Database — mọi query_sql phải truyền database: \"QLDA_APP\".",
+      "Output query_sql MẤT DẤU tiếng Việt (sqlcmd codepage): nbdmda.ten_da của DEMO1 trả về 'CONG TY C? PH?N DEMO CO VI?T NAM'. Dữ liệu trong DB vẫn đúng — đừng copy chuỗi đã mất dấu vào UR, ledger hay tài liệu bàn giao. Cần văn bản chính xác thì đọc từ tài liệu nguồn hoặc từ màn hình.",
+      "Cột khoá là char cố định dài (ma_da char(32), stt_rec char(13), syskey char(32)) — luôn RTRIM khi so sánh hoặc join.",
+      "nbcnhanhtda.ma_da là varchar(33) trong khi nbdmda.ma_da là char(32) — join hai bảng này bắt buộc RTRIM cả hai vế."
+    ]
+  },
+  "tables": {
+    "danhMucDuAn": {
+      "physical": "nbdmda",
+      "title": "Dự án / Project",
+      "purpose": "Danh mục dự án — một dòng là một dự án triển khai/customize.",
+      "controllers": { "dir": "Dir\\nbdmda.xml", "grid": "Grid\\nbdmda.xml", "lookup": "Lookup\\nbdmda.xml", "structure": "Structure\\App\\nbdmda.xml" },
+      "customized": true,
+      "columnCount": 70,
+      "primaryKey": { "name": "PK_nbdmda", "columns": ["ma_da"] },
+      "childGrids": [
+        { "controller": "nbctda", "note": "Chi tiết dự án" },
+        { "controller": "nbdmdagd", "note": "Giai đoạn của dự án" }
+      ],
+      "sensitiveColumns": {
+        "columns": ["server", "xuser", "xpass", "db_sys"],
+        "rule": "Bảng này lưu server/user/pass truy cập chương trình khách dưới dạng varchar thường. KHÔNG BAO GIỜ SELECT các cột này, không đưa vào UR, ledger, changelog hay báo cáo. Cần biết khách nằm ở đâu thì dùng tool list_programs (đọc dir_pro_web/dir_pro_app)."
+      },
+      "columns": [
+        { "name": "ma_da", "type": "char(32)", "notNull": true, "pk": true, "label": "Mã dự án" },
+        { "name": "ten_da", "type": "nvarchar(250)", "notNull": true, "label": "Tên dự án" },
+        { "name": "ten_ngan", "type": "nvarchar(128)", "required": true, "label": "Tên ngắn" },
+        { "name": "ghi_chu", "type": "nvarchar(1000)", "label": "Ghi chú" },
+        { "name": "ma_da_tmp", "type": "char(32)", "label": "Mã dự án tmp" },
+        { "name": "old_code", "type": "varchar(33)" },
+        { "name": "loai_da", "type": "char(1)", "label": "Loại dự án" },
+        { "name": "pl_da", "type": "char(1)", "label": "Phân loại" },
+        { "name": "status", "type": "char(1)", "label": "Trạng thái" },
+        { "name": "phu_luc_yn", "type": "char(1)", "label": "Phụ lục" },
+        { "name": "ds_pl", "type": "nvarchar(128)", "label": "Ds phụ lục của dự án", "lookup": "nbdmda" },
+        { "name": "gia_tri", "type": "numeric(16,2)", "label": "Giá trị hợp đồng" },
+        { "name": "ma_pbsp", "type": "char(16)", "label": "Mã phiên bản", "lookup": "nbdmpbsp" },
+        { "name": "sProjectFolder", "type": "varchar(48)", "label": "Project Folder" },
+        { "name": "file_tlks", "type": "nvarchar(128)", "label": "File tài liệu KS" },
+        { "name": "dir_pro_app", "type": "varchar(250)", "label": "Đường dẫn app" },
+        { "name": "dir_src_app", "type": "varchar(250)", "label": "Source app" },
+        { "name": "dir_pro_web", "type": "varchar(250)", "label": "Đường dẫn web" },
+        { "name": "dir_src_web", "type": "varchar(250)", "label": "Source web" },
+        { "name": "dir_update", "type": "varchar(128)", "label": "Đường dẫn update" },
+        { "name": "web_host1", "type": "varchar(128)", "label": "Host (link) 1" },
+        { "name": "web_host2", "type": "varchar(128)", "label": "Host 2" },
+        { "name": "server", "type": "varchar(250)", "label": "Server/User/Pass", "lookup": "nbdmserver", "sensitive": true },
+        { "name": "xuser", "type": "varchar(50)", "label": "User", "sensitive": true },
+        { "name": "xpass", "type": "varchar(50)", "label": "Pass", "sensitive": true },
+        { "name": "db_sys", "type": "varchar(50)", "label": "Database Sys/Reg", "sensitive": true },
+        { "name": "addreg", "type": "nvarchar(1024)", "label": "Add reg" },
+        { "name": "bp_tk", "type": "char(4)", "label": "Bộ phận triển khai", "lookup": "nbdmbp" },
+        { "name": "bp_lt", "type": "char(4)", "label": "Bộ phận lập trình", "lookup": "nbdmbp" },
+        { "name": "bp_bh", "type": "char(4)", "label": "Bộ phận bảo hành", "lookup": "nbdmbp" },
+        { "name": "ma_lt1", "type": "char(16)", "label": "Lập trình QL", "lookup": "nbdmnhv" },
+        { "name": "ma_lt2", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_lt3", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv1", "type": "char(16)", "label": "Nghiệp vụ (nhóm)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv2", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv3", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_tester1", "type": "char(16)", "label": "Tester", "lookup": "nbdmnhv" },
+        { "name": "ma_tester2", "type": "char(16)", "label": "Tester 2", "lookup": "nbdmnhv" },
+        { "name": "ma_tester3", "type": "char(16)", "label": "Tester 3", "lookup": "nbdmnhv" },
+        { "name": "ma_test_l2", "type": "char(16)", "label": "Tester hỗ trợ", "lookup": "nbdmnhv" },
+        { "name": "ngay_ks", "type": "smalldatetime", "label": "Ngày khảo sát" },
+        { "name": "ngay_bd_yc", "type": "smalldatetime", "label": "Ngày bắt đầu yc" },
+        { "name": "ngay_xn", "type": "smalldatetime", "label": "Ngày xác nhận" },
+        { "name": "ngay_td1", "type": "smalldatetime", "label": "Ngày cài đặt" },
+        { "name": "ngay_td2", "type": "smalldatetime" },
+        { "name": "ngay_td3", "type": "smalldatetime" },
+        { "name": "ngay_nt", "type": "smalldatetime", "label": "Ngày nghiệm thu" },
+        { "name": "ngay_ch_bh", "type": "smalldatetime", "label": "Ngày chuyển BH" },
+        { "name": "ma_td1", "type": "char(16)", "spare": true },
+        { "name": "ma_td2", "type": "char(16)", "spare": true },
+        { "name": "ma_td3", "type": "char(16)", "spare": true },
+        { "name": "sl_td1", "type": "numeric(16,4)", "spare": true },
+        { "name": "sl_td2", "type": "numeric(16,4)", "spare": true },
+        { "name": "sl_td3", "type": "numeric(16,4)", "spare": true },
+        { "name": "gc_td1", "type": "nchar(64)", "spare": true },
+        { "name": "gc_td2", "type": "nchar(64)", "spare": true },
+        { "name": "gc_td3", "type": "nchar(64)", "spare": true },
+        { "name": "s1", "type": "char(16)", "spare": true },
+        { "name": "s2", "type": "char(16)", "spare": true },
+        { "name": "s3", "type": "char(16)", "spare": true },
+        { "name": "s4", "type": "numeric(16,4)", "spare": true },
+        { "name": "s5", "type": "numeric(16,4)", "spare": true },
+        { "name": "s6", "type": "numeric(16,4)", "spare": true },
+        { "name": "s7", "type": "smalldatetime", "spare": true },
+        { "name": "s8", "type": "smalldatetime", "spare": true },
+        { "name": "s9", "type": "smalldatetime", "spare": true },
+        { "name": "user_id0", "type": "int", "audit": true },
+        { "name": "user_id2", "type": "int", "audit": true },
+        { "name": "datetime0", "type": "datetime", "audit": true },
+        { "name": "datetime2", "type": "datetime", "audit": true }
+      ]
+    },
+    "capNhatYeuCau": {
+      "physical": "nbphyc",
+      "title": "Yêu cầu",
+      "purpose": "Phát sinh / cập nhật yêu cầu — một dòng là một UR. Đây là bảng đích của bảng UR draft do subagent phân tích tài liệu xuất ra.",
+      "controllers": { "dir": "Dir\\nbphyc.xml", "grid": "Grid\\nbphyc.xml", "filter": "Filter\\nbphyc.xml", "lookup": "Lookup\\nbphyc.xml", "structure": "Structure\\App\\nbphyc.xml" },
+      "customized": true,
+      "columnCount": 85,
+      "primaryKey": { "name": "PK_nbphyc", "columns": ["stt_rec"] },
+      "indexes": [{ "name": "ma_lt1", "columns": ["ma_lt1"], "unique": false }],
+      "foreignKeys": [
+        { "column": "ma_da", "references": "nbdmda.ma_da", "enforced": false, "note": "Không có FK constraint ở DB — quan hệ do controller và command SQL giữ." },
+        { "column": "stt_rec_me", "references": "nbphyc.stt_rec", "enforced": false, "note": "Yêu cầu cha khi tách yc" },
+        { "column": "stt_rec_cv", "references": "nbphcv.stt_rec", "enforced": false, "note": "Phiếu phân công việc" }
+      ],
+      "childGrids": [
+        { "controller": "nbctyc", "note": "Chi tiết yêu cầu" },
+        { "controller": "nbctyc2", "note": "Chi tiết yêu cầu 2" },
+        { "controller": "nbphycnote", "note": "Ghi chú theo yêu cầu" },
+        { "controller": "nbctdaumuc", "note": "Đầu mục công việc" }
+      ],
+      "columns": [
+        { "name": "stt_rec", "type": "char(13)", "notNull": true, "pk": true, "label": "Stt_rec" },
+        { "name": "ma_dvcs", "type": "char(8)", "label": "Đơn vị", "lookup": "Unit" },
+        { "name": "ma_da", "type": "char(32)", "required": true, "label": "Mã dự án", "lookup": "nbdmda" },
+        { "name": "giai_doan_da", "type": "varchar(64)", "label": "Giai đoạn", "lookup": "vnbdmdagd" },
+        { "name": "menu_id", "type": "char(8)", "required": true, "label": "Menu" },
+        { "name": "sysid", "type": "varchar(128)", "label": "SysID" },
+        { "name": "exe_link", "type": "varchar(128)", "label": "Exe/Link" },
+        { "name": "noi_dung", "type": "nvarchar(4000)", "required": true, "label": "Nội dung" },
+        { "name": "trang_tlks", "type": "nvarchar(128)", "required": true, "label": "Note TLKS/PL/XN khác" },
+        { "name": "tlks_yn", "type": "bit", "label": "Trong tài liệu ks" },
+        { "name": "ghi_chu_tlks", "type": "nvarchar(512)", "label": "Ghi chú thêm" },
+        { "name": "ko_tlks_test", "type": "bit", "label": "Chưa có tlks, bblv" },
+        { "name": "file_kem", "type": "nvarchar(256)", "label": "File" },
+        { "name": "list_img", "type": "varchar(4000)", "label": "Id hình" },
+        { "name": "ma_lyc", "type": "char(2)", "required": true, "label": "Mã loại yêu cầu", "lookup": "nbdmlyc" },
+        { "name": "ma_xlyc", "type": "char(3)", "required": true, "label": "Xử lý yêu cầu", "lookup": "nbdmxlyc" },
+        { "name": "nh_yc1", "type": "char(8)", "label": "Nhóm yc 1", "lookup": "nbdmnhyc" },
+        { "name": "nh_yc2", "type": "char(8)", "label": "Nhóm yc 2", "lookup": "nbdmnhyc" },
+        { "name": "nh_yc3", "type": "nvarchar(128)", "label": "Nhóm yc 3" },
+        { "name": "trang_thai", "type": "char(2)", "required": true, "label": "Trạng thái", "lookup": "nbdmttyc" },
+        { "name": "status", "type": "char(1)", "label": "Trạng thái (mask)" },
+        { "name": "edittype", "type": "varchar(10)", "label": "Loại sửa" },
+        { "name": "canh_bao", "type": "bit", "label": "Cảnh báo" },
+        { "name": "loi", "type": "nvarchar(1028)", "label": "Lỗi" },
+        { "name": "loi_chuan", "type": "int", "label": "Lỗi chuẩn", "mismatch": "Controller khai Boolean, DB là int." },
+        { "name": "bp_nhap", "type": "char(4)", "label": "Bộ phận nhập" },
+        { "name": "bp_lt", "type": "char(4)", "required": true, "label": "Bộ phận lập trình", "lookup": "nbdmbp" },
+        { "name": "nguoi_duyet", "type": "char(16)", "note": "Có ở DB nhưng KHÔNG có trên Dir form — chỉ command SQL ghi." },
+        { "name": "ma_lt1", "type": "char(16)", "label": "Lập trình", "lookup": "nbdmnhv", "indexed": true },
+        { "name": "ma_lt2", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_lt3", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv1", "type": "char(16)", "required": true, "label": "Nghiệp vụ (tr khai)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv2", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_nv3", "type": "char(16)", "lookup": "nbdmnhv" },
+        { "name": "ma_tester1", "type": "char(16)", "label": "Tester", "lookup": "nbdmnhv" },
+        { "name": "ma_tester2", "type": "char(16)", "label": "Tester 2", "lookup": "nbdmnhv" },
+        { "name": "ma_tester3", "type": "char(16)", "label": "Tester 3", "lookup": "nbdmnhv" },
+        { "name": "test_l2_yn", "type": "int", "label": "Có test hỗ trợ", "mismatch": "Controller khai Boolean, DB là int." },
+        { "name": "ma_test_l2", "type": "char(16)", "label": "Tester hỗ trợ", "lookup": "nbdmnhv" },
+        { "name": "tt_test_l2", "type": "varchar(33)", "label": "TT test 2", "lookup": "nbdmttyc" },
+        { "name": "ngay_nhap", "type": "smalldatetime", "label": "Ngày nhập" },
+        { "name": "ngay_duyet", "type": "smalldatetime", "label": "Ngày duyệt" },
+        { "name": "ngay_giao", "type": "smalldatetime", "label": "Ngày giao" },
+        { "name": "ngay_dn_ht", "type": "smalldatetime", "label": "Triển khai đề nghị ht" },
+        { "name": "ngay_dk_ht", "type": "smalldatetime", "label": "Lập trình dự kiến từ" },
+        { "name": "ngay_dk_ht2", "type": "smalldatetime", "label": "Lập trình dự kiến ht" },
+        { "name": "dc_ngay_dk_yn", "type": "bit", "label": "Điều chỉnh ngày dự kiến" },
+        { "name": "ngay_bd_th", "type": "smalldatetime", "label": "Ngày thực hiện từ", "note": "Form hiển thị qua field ngoài ngay_bd_th_tmp." },
+        { "name": "ngay_ht", "type": "smalldatetime", "label": "Ngày hoàn thành", "note": "Form hiển thị qua field ngoài ngay_ht_tmp." },
+        { "name": "ngay_test", "type": "smalldatetime", "label": "Ngày test" },
+        { "name": "ngay_ok", "type": "smalldatetime", "label": "Ngày OK" },
+        { "name": "tg_dk_th", "type": "numeric(6,2)", "label": "Thời gian dự kiến" },
+        { "name": "tg_ht", "type": "numeric(6,2)", "label": "Thời gian thực tế" },
+        { "name": "ghi_chu", "type": "nvarchar(1028)", "label": "Ghi chú" },
+        { "name": "tag", "type": "nvarchar(256)", "label": "Tag" },
+        { "name": "mail_yn", "type": "bit", "label": "Gửi mail" },
+        { "name": "stt_rec_cv", "type": "char(13)", "label": "Stt_rec_cv" },
+        { "name": "stt_rec_me", "type": "char(13)", "label": "Stt_rec_me" },
+        { "name": "fcode1", "type": "char(16)", "label": "Mã yc", "spare": "đã dùng" },
+        { "name": "fcode2", "type": "char(16)", "label": "Tách từ yc", "spare": "đã dùng" },
+        { "name": "fcode3", "type": "char(16)", "label": "Tách từ yc (2)", "spare": "đã dùng" },
+        { "name": "fnote1", "type": "nvarchar(4000)", "label": "Dự án kế thừa/COPY", "spare": "đã dùng" },
+        { "name": "fnote2", "type": "varchar(33)", "label": "Note", "spare": "đã dùng" },
+        { "name": "fdate1", "type": "smalldatetime", "spare": "đã dùng" },
+        { "name": "s5", "type": "numeric(16,4)", "label": "TLKS/PL KHÔNG hợp lệ", "spare": "đã dùng", "mismatch": "Controller khai Boolean CheckBox, DB là numeric(16,4)." },
+        { "name": "s6", "type": "numeric(16,4)", "label": "Ngày công trừ", "spare": "đã dùng" },
+        { "name": "fnote3", "type": "char(1)", "spare": true },
+        { "name": "fdate2", "type": "smalldatetime", "spare": true },
+        { "name": "fdate3", "type": "smalldatetime", "spare": true },
+        { "name": "fqty1", "type": "numeric(16,4)", "spare": true },
+        { "name": "fqty2", "type": "numeric(16,4)", "spare": true },
+        { "name": "fqty3", "type": "numeric(16,4)", "spare": true },
+        { "name": "s1", "type": "char(16)", "spare": true },
+        { "name": "s2", "type": "char(16)", "spare": true },
+        { "name": "s3", "type": "char(16)", "spare": true },
+        { "name": "s4", "type": "numeric(16,4)", "spare": true },
+        { "name": "s7", "type": "smalldatetime", "spare": true },
+        { "name": "s8", "type": "smalldatetime", "spare": true },
+        { "name": "s9", "type": "smalldatetime", "spare": true },
+        { "name": "sl_check", "type": "int" },
+        { "name": "ierror", "type": "int" },
+        { "name": "user_id0", "type": "int", "audit": true },
+        { "name": "user_id2", "type": "int", "audit": true },
+        { "name": "datetime0", "type": "datetime", "audit": true },
+        { "name": "datetime2", "type": "datetime", "audit": true }
+      ]
+    },
+    "capNhatHanHoanThanh": {
+      "physical": "nbcnhanhtda",
+      "title": "Hạn hoàn thành",
+      "purpose": "Hạn hoàn thành theo dự án × giai đoạn × bộ phận. KHÔNG phải nhật ký dời hạn: ngay_ht nằm TRONG khoá chính, nên mỗi hạn khác nhau là một dòng khác. Lịch sử hẹn đọc bằng cách liệt kê các dòng cùng (ma_bp_lt, ma_bp_tk, ma_da, giai_doan_da) sắp theo ngay_ht.",
+      "controllers": { "dir": "Dir\\nbcnhanhtda.xml", "grid": "Grid\\nbcnhanhtda.xml", "structure": "Structure\\App\\nbcnhanhtda.xml" },
+      "customized": true,
+      "columnCount": 14,
+      "primaryKey": { "name": "PK_nbcnhanhtda", "columns": ["ma_bp_lt", "ma_bp_tk", "ma_da", "ngay_ht", "giai_doan_da"] },
+      "foreignKeys": [
+        { "column": "ma_da", "references": "nbdmda.ma_da", "enforced": false, "note": "nbcnhanhtda.ma_da là varchar(33) còn nbdmda.ma_da là char(32) — kiểu lệch nhau, join phải RTRIM để khỏi hụt dòng." }
+      ],
+      "columns": [
+        { "name": "ma_bp_lt", "type": "varchar(4)", "notNull": true, "pk": true, "label": "Bộ phận lập trình", "lookup": "nbdmbp" },
+        { "name": "ma_bp_tk", "type": "varchar(4)", "notNull": true, "pk": true, "label": "Bộ phận TK", "lookup": "nbdmbp" },
+        { "name": "ma_da", "type": "varchar(33)", "notNull": true, "pk": true, "label": "Mã dự án", "lookup": "nbdmda" },
+        { "name": "ngay_ht", "type": "smalldatetime", "notNull": true, "pk": true, "label": "Hạn hoàn thành" },
+        { "name": "giai_doan_da", "type": "varchar(64)", "notNull": true, "pk": true, "label": "Giai đoạn", "lookup": "vnbdmdagd" },
+        { "name": "noi_dung", "type": "nvarchar(128)", "label": "Nội dung cần HT" },
+        { "name": "xac_nhan_da_hen_yn", "type": "bit", "label": "Chốt đã hẹn" },
+        { "name": "lt_xac_nhan", "type": "varchar(33)", "label": "Xác nhận đã hẹn" },
+        { "name": "status", "type": "char(1)" },
+        { "name": "sl", "type": "int" },
+        { "name": "user_id0", "type": "int", "audit": true },
+        { "name": "user_id2", "type": "int", "audit": true },
+        { "name": "datetime0", "type": "datetime", "audit": true },
+        { "name": "datetime2", "type": "datetime", "audit": true }
+      ]
+    }
+  },
+  "lookups": {
+    "note": "Bảng danh mục mà ba bảng trên trỏ tới. Muốn biết giá trị hợp lệ của một cột thì đọc bảng tương ứng, không tự đặt enum.",
+    "nbdmnhv": "Nhân viên",
+    "nbdmbp": "Bộ phận",
+    "nbdmttyc": "Trạng thái yêu cầu — xem enums.trangThaiYeuCau",
+    "nbdmlyc": "Loại yêu cầu",
+    "nbdmxlyc": "Hướng xử lý yêu cầu",
+    "nbdmnhyc": "Nhóm yêu cầu",
+    "nbdmpbsp": "Phiên bản sản phẩm",
+    "nbdmserver": "Server (chứa thông tin nhạy cảm — không đọc dữ liệu)",
+    "vnbdmdagd": "Giai đoạn dự án (view)",
+    "nbphcv": "Phiếu phân công việc — bảng riêng, nối với nbphyc qua stt_rec_cv",
+    "Unit": "Đơn vị cơ sở"
+  },
+  "enums": {
+    "note": "Ảnh chụp danh mục 2026-08-08 để khỏi phải đoán nghĩa mã viết tắt. NGUỒN SỰ THẬT vẫn là bảng trong DB — thấy mã lạ thì tra lại, đừng kết luận là sai.",
+    "trangThaiYeuCau": {
+      "table": "nbdmttyc",
+      "column": "nbphyc.trang_thai",
+      "type": "char(2)",
+      "values": [
+        { "ma": "TA", "ten": "Yêu cầu tạm (chỉ để nhập tạm chưa duyệt)", "duyetYn": 0 },
+        { "ma": "YC", "ten": "Yêu cầu", "duyetYn": 0 },
+        { "ma": "GC", "ten": "Ghi chú", "duyetYn": 1 },
+        { "ma": "DD", "ten": "Đã duyệt", "duyetYn": 1 },
+        { "ma": "XN", "ten": "Xác nhận chuyển LT", "duyetYn": 1 },
+        { "ma": "TH", "ten": "Đang thực hiện", "duyetYn": 1 },
+        { "ma": "HT", "ten": "Hoàn thành, chờ test", "duyetYn": 1 },
+        { "ma": "DT", "ten": "Đang test", "duyetYn": 1 },
+        { "ma": "OK", "ten": "Test OK (TK test lại)", "duyetYn": 1 },
+        { "ma": "UP", "ten": "Đã update (kết thúc)", "duyetYn": 1 },
+        { "ma": "CH", "ten": "Chờ", "duyetYn": 2 },
+        { "ma": "KL", "ten": "Không làm", "duyetYn": 2 },
+        { "ma": "KD", "ten": "Không duyệt", "duyetYn": 2 }
+      ],
+      "flowNote": "Luồng thường gặp: TA/YC → DD → XN → TH → HT → DT → OK → UP. Nhánh dừng: CH, KL, KD (duyet_yn=2)."
+    }
+  },
+  "review": {
+    "note": "Quy trình rà soát yêu cầu định kỳ của PM. Vai PM KẾT THÚC ở trạng thái HT — DT/OK/UP thuộc bộ phận khác, không đưa vào báo cáo.",
+    "pm": { "maNv": "{PMName}", "boPhanLt": "{PMDept}" },
+
+    "scope": {
+      "duAn": {
+        "rule": "Dự án mà PM đứng tên lập trình quản lý: {PMName} nằm trong nbdmda.ma_lt1, ma_lt2 hoặc ma_lt3.",
+        "note": "Một dự án có thể có nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận, chỉ lọc theo LTQL."
+      },
+      "yeuCau": {
+        "trangThai": ["DD", "XN", "TH"],
+        "rule": "Chỉ rà soát UR ở ba trạng thái này. TA/YC chưa vào luồng; HT trở đi đã ngoài vai PM; CH/KL/KD là nhánh dừng."
+      }
+    },
+
+    "deadline": {
+      "source": "nbcnhanhtda",
+      "hanHieuLuc": {
+        "rule": "MAX(ngay_ht) theo từng cặp (ma_da, giai_doan_da).",
+        "note": "ngay_ht nằm trong khoá chính nên mỗi lần hẹn lại là một dòng mới. Hạn hiệu lực của một giai đoạn là dòng có ngay_ht lớn nhất của giai đoạn đó. Mỗi giai đoạn có hạn riêng — không gộp cả dự án về một hạn."
+      },
+      "joinCaveat": "nbcnhanhtda.ma_da là varchar(33) còn nbdmda.ma_da là char(32) — bắt buộc RTRIM cả hai vế khi join, nếu không sẽ hụt dòng.",
+      "canhBao": {
+        "leadWorkingDays": 3,
+        "lichNghi": "data/holidays-vn.json",
+        "rule": "Cảnh báo khi số ngày làm việc còn lại tới hạn <= 3. Ngày làm việc loại T7/CN và mọi ngày trong holidays-vn.json.",
+        "quaHan": "Hạn đã qua mà UR vẫn ở DD/XN/TH thì báo mức QUÁ HẠN, tách riêng khỏi mức SẮP TỚI."
+      }
+    },
+
+    "chotDaHen": {
+      "column": "nbcnhanhtda.xac_nhan_da_hen_yn",
+      "rule": "Giai đoạn có hạn nhưng CHƯA tick chốt đã hẹn thì cảnh báo, và đề xuất đưa các UR chưa chốt được hạn trong giai đoạn đó về trạng thái TA.",
+      "note": "TA = 'Yêu cầu tạm (chỉ để nhập tạm chưa duyệt)', duyet_yn=0 — dùng để giữ chỗ khi chưa chốt được hạn hoàn thành."
+    },
+
+    "congPm": {
+      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái DD. UR ở XN/TH chỉ theo dõi hạn, không kiểm lại TLKS.",
+      "tai": "DD",
+      "quyetDinh": [
+        { "sang": "XN", "khi": "Chấp nhận — yêu cầu nằm trong phạm vi và đã chốt được hạn hoàn thành." },
+        { "sang": "TA", "khi": "Chưa chốt được hạn hoàn thành (giai đoạn chưa tick chốt đã hẹn)." },
+        { "sang": "KL", "khi": "Vượt khả năng xử lý của FBO — phải dẫn được node Capability verdict='khong' làm căn cứ." }
+      ],
+      "luongChuan": "DD → XN → TH → HT",
+      "thiHanh": "AI chỉ ĐỀ XUẤT và soạn sẵn câu lệnh. Mọi thay đổi trạng thái chỉ chạy sau khi PM xác nhận."
+    },
+
+    "kiemTlks": {
+      "note": "Áp dụng cho UR ở trạng thái DD.",
+      "rule": "tlks_yn chỉ được tick khi trang_tlks ghi rõ số trang / mục lục. Nhưng tick không đủ tin: có UR tick tlks_yn mà nội dung ghi không trùng tài liệu. LUÔN đọc nội dung tài liệu rồi mới kết luận.",
+      "ngoaiTlks": {
+        "rule": "UR không nằm trong TLKS thì phải có căn cứ khác đính kèm ở cấp dự án: biên bản nghiệm thu, phụ lục, hoặc email xác nhận có đúng nội dung đó.",
+        "kiemTaiDau": "sysfileinfo với controller='nbdmda' và syskey=<ma_da> — xem mục `attachments`.",
+        "khongCoCanCu": "Không tìm được căn cứ thì báo cáo nêu rõ 'ngoài TLKS, chưa có căn cứ' và đề xuất TA.",
+        "gioCong": "UR ngoài TLKS được tính thêm giờ công. Mức cộng KHÔNG đặt cứng — đề xuất dựa trên EffortSample đã có, PM xác nhận rồi ghi mẫu mới."
+      }
+    },
+
+    "phanCong": {
+      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa phân lập trình (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
+      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = DD — UR đã sang XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình.",
+      "diemMenu": 100,
+      "diemDauVao": 60,
+      "phatMoiUrToiHan": 15,
+      "phatToiDa": 60,
+      "baoHoaSoUr": 3,
+      "soGoiY": 3,
+      "doTinCay": "Đo bằng LOẠI bằng chứng chứ không phải bằng điểm: cao = có lịch sử làm đúng menu; trung-binh = chỉ có đóng góp UR đầu vào; thap = không có bằng chứng kinh nghiệm, chỉ xếp theo tải. Điểm cao nhờ mỗi 'đang rảnh' vẫn là phỏng đoán yếu."
+    },
+
+    "docCache": {
+      "path": "<mcpDataRoot>/4ai/ledger/<ma_da>/docs/",
+      "rule": "Tài liệu khảo sát, biên bản, phụ lục, email tải từ sysfileinfo được để trong repo cho lần sau đọc lại. KHÔNG commit — .gitignore đã chặn thư mục này.",
+      "invalidateBy": ["file_enc", "file_size"],
+      "note": "Chỉ tải lại khi file_enc mới hoặc file_size lệch so với lần trước. Không đổi/xoá gì trong fileStore gốc."
+    },
+
+    "capability": {
+      "graph": "data/graph-schema.json",
+      "rule": "Kết luận 'FBO làm được / không làm được' phải tra node Capability, không phán đoán tại chỗ. Thứ tự tra: tên menu (bar) → sysid controller → phân hệ → nghiệp vụ. Mốc so sánh là phiên bản SP của dự án (nbdmda.ma_pbsp).",
+      "khiChuaCo": "Không có node Capability tương ứng thì KHÔNG kết luận — hỏi PM, rồi ghi node mới vào data/graph/capability.jsonl."
+    },
+
+    "ddl": {
+      "config": "data/fbo-ddl.json",
+      "trigger": "UR có nội dung nhắc tới tạo bảng, thêm cột, thêm danh mục, thêm chứng từ.",
+      "output": "Ghi chú đính vào UR: tên bảng đề xuất, chứng từ tham khảo, aspx, controller, mẫu script. PM không chạy script."
+    },
+
+    "baoCao": {
+      "lich": { "gio": "08:00", "timezone": "Asia/Ho_Chi_Minh", "ngay": [1, 2, 3, 4, 5] },
+      "output": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/<MA_DA>/review.html",
+      "outputTong": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/_tong/tong.html",
+      "outputNote": "Gom theo NGÀY trước, trong ngày mới chia dự án — một lượt rà soát nằm gọn một thư mục. Payload đặt cạnh HTML cùng tên (review.payload.json / tong.payload.json). Đường dẫn do tools/lib/report.mjs quyết định (duongDanTong, duongDanDuAn), đừng tự ghép chuỗi.",
+      "format": "HTML tự chứa, xem lại được offline.",
+      "phanBaoCao": [
+        "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua.",
+        "Sắp tới hạn — còn <= 3 ngày làm việc.",
+        "Giai đoạn chưa tick chốt đã hẹn — kèm danh sách UR đề xuất về TA.",
+        "UR ở DD chờ cổng PM — kèm kết quả kiểm TLKS.",
+        "UR ngoài TLKS chưa có căn cứ đính kèm.",
+        "Đề xuất KL — kèm node Capability làm căn cứ.",
+        "UR nhắc tạo bảng/thêm cột — kèm gợi ý DDL.",
+        "Biểu đồ: tiến độ theo giai đoạn, phân bố UR trong/ngoài TLKS, đường deadline."
+      ],
+      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác."
+    }
+  },
+
+  "urFieldMap": {
+    "note": "Ánh xạ cột bảng UR draft (output của subagent phân tích tài liệu) sang cột thật của nbphyc.",
+    "target": "nbphyc",
+    "map": {
+      "STT": "fcode1",
+      "YeuCau": "noi_dung",
+      "NguonTaiLieu": "trang_tlks",
+      "CoTrongTLKS": "tlks_yn",
+      "GhiChuNguon": "ghi_chu_tlks",
+      "GiaiDoanPhatSinh": "giai_doan_da",
+      "MenuNghiepVu": "menu_id",
+      "ControllerSysid": "sysid",
+      "GioCongUocTinh": "tg_dk_th",
+      "GioCongThucTe": "tg_ht",
+      "TrangThai": "trang_thai",
+      "NguoiThucHien": "ma_lt1",
+      "GhiChu": "ghi_chu"
+    },
+    "constraints": [
+      "trang_tlks chỉ nvarchar(128) — nguồn tài liệu phải viết gọn (tên file viết tắt + số trang), không nhét cả câu.",
+      "noi_dung nvarchar(4000) — đủ cho mô tả paraphrase, không cần cắt.",
+      "tg_dk_th / tg_ht là numeric(6,2) — tối đa 9999.99 giờ, hai chữ số thập phân.",
+      "trang_thai chỉ char(2) — phải dùng đúng mã trong nbdmttyc, không ghi chuỗi 'cho-xac-nhan'."
+    ],
+    "unmapped": [
+      { "urColumn": "DoKho", "note": "nbphyc không có cột độ khó. Ứng viên: nh_yc1/nh_yc2 (char 8, lookup nbdmnhyc) nếu chấp nhận coi độ khó là một nhóm yc; hoặc một slot dự phòng như s1/s2 (char 16). CHƯA chốt — và trước khi dùng slot phải soi command SQL trong Dir\\nbphyc.xml xem slot đó có bị ghi đè không." },
+      { "urColumn": "CompanionLienDoi", "note": "Không có cột nào chứa danh sách controller liên đới. Chỗ hợp lý là grid nbctdaumuc (đầu mục công việc) hoặc nbphycnote (ghi chú), mỗi companion một dòng — chứ không nhồi vào một cột text." },
+      { "urColumn": "FileDinhKem", "note": "Không phải cột: đính kèm của một UR nằm ở sysfileinfo với controller='nbphyc' và syskey=<stt_rec>. Xem mục `attachments`." },
+      { "urColumn": "CanLamRo", "note": "Chưa có cột riêng. fnote1 (nvarchar 4000) đang mang nhãn 'Dự án kế thừa/COPY' nên không mượn được. Đề xuất dùng grid nbphycnote." }
+    ]
+  },
+  "openQuestions": [
+    "Thang độ khó dùng cho EffortSample chưa chốt — hỏi PM khi gặp trường hợp mới (xem data/graph-schema.json).",
+    "SOTran (DXA) và POTran (PO1) chưa biết menu_id/bar — corpus FBISP24 không có dòng wcommand cho hai mã này.",
+    "Họ bảng của PNA (71) suy từ chỉ mục controller, chưa đối chiếu dmct9 theo ma_ct='PNA'.",
+    "Chốt chỗ chứa cho DoKho / CompanionLienDoi / CanLamRo (xem urFieldMap.unmapped).",
+    "nbphcv (phiếu phân công việc) có cần khai thành bảng thứ tư không — hiện chỉ tham chiếu qua nbphyc.stt_rec_cv."
+  ]
+}
