@@ -143,22 +143,23 @@ function laQldaProgram(programPath) {
  * chỉ để quay lại đây.
  */
 function localConnString(key) {
-  // Cùng thứ tự dò như loadQldaConfig: data root của bản cài (plugin đặt FBO_DATA_ROOT), rồi
-  // gốc module, rồi cwd. Chạy như MCP server thì cwd KHÔNG chắc là hub — chỉ dựa vào cwd là
-  // lúc chạy dev thì thấy file, lúc chạy thật thì không, mà lại im lặng rớt về Web.config.
-  const goc = [dataRoot(MODULE_HUB_ROOT), MODULE_HUB_ROOT, process.cwd()].filter(Boolean);
-  for (const root of goc) {
-    const file = path.join(root, 'data', 'qlda.local.json');
-    if (!fs.existsSync(file)) continue;
-    try {
-      const v = JSON.parse(fs.readFileSync(file, 'utf8'))?.[key];
-      if (typeof v === 'string' && v.trim()) return v.trim();
-    } catch {
-      // File hỏng cú pháp thì coi như chưa khai — rớt tiếp xuống Web.config, đừng làm sập
-      // mọi truy vấn chỉ vì một dấu phẩy thừa trong file cấu hình cục bộ.
-    }
+  // ĐÚNG MỘT vị trí: data root của bản cài này — plugin đặt FBO_DATA_ROOT=${CLAUDE_PLUGIN_DATA},
+  // dev thì là gốc hub. Trùng khớp với chỗ `set_pm_identity` và `4ai setup` GHI ra, nên đọc và
+  // ghi không bao giờ lệch nhau.
+  //
+  // Cố tình KHÔNG dò thêm cwd hay các gốc khác: thêm vị trí dự phòng nghe thì an toàn, nhưng
+  // biến kết quả thành "tuỳ chạy từ thư mục nào" — thứ vừa khó dò khi hỏng, vừa làm test phụ
+  // thuộc trạng thái máy đang chạy.
+  const file = path.join(dataRoot(MODULE_HUB_ROOT), 'data', 'qlda.local.json');
+  if (!fs.existsSync(file)) return '';
+  try {
+    const v = JSON.parse(fs.readFileSync(file, 'utf8'))?.[key];
+    return typeof v === 'string' ? v.trim() : '';
+  } catch {
+    // File hỏng cú pháp thì coi như chưa khai — rớt xuống Web.config, đừng làm sập mọi truy
+    // vấn chỉ vì một dấu phẩy thừa trong file cấu hình cục bộ.
+    return '';
   }
-  return '';
 }
 
 /**

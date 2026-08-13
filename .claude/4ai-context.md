@@ -424,7 +424,7 @@ corpus để sẵn bản đồ file.
 | `pm-release-auditor` | Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá. |
 | `pm-release-handover` | Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì. |
 | `pm-ur-analyst` | Sub-agent read-only cho yêu cầu/UR — lối A mặc định UR trạng thái DD (tài liệu, ảnh hưởng, phân việc); lối B bóc tài liệu thành UR draft. Không sửa file. |
-| `doctor` | Chạy 4AI check và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. |
+| `doctor` | Chạy 4AI doctor và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. Gồm cả cấu hình runtime của máy này. |
 | `new-agent` | Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only. |
 | `new-rule` | Tạo rule mới trong hub 4AI — hỏi 3 điều không suy ra được (severity, always/globs, targets), viết file đúng schema, chạy check. |
 | `new-skill` | Tạo skill mới trong hub 4AI — ép nội dung thành quy trình cụ thể với tool-call và path thật thay vì lời khuyên chung chung, rồi chạy check. |

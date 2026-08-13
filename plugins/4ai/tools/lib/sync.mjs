@@ -26,7 +26,11 @@ export async function runSync(opts) {
     targetsCfg.targets = targetsCfg.targets.map((t) => ({ ...t, ...localByName.get(t.name) }));
   }
   const mcpCfg = readJson(path.join(HUB, 'mcp', 'servers.json'), { servers: {} });
-  mcpCfg.servers = resolveMcpServers(mcpCfg.servers);
+  // KHÔNG resolve `{{HUB}}` ở đây. Token phải còn nguyên tới lúc emitter chạy, vì mỗi target
+  // giải nó ra một gốc khác nhau: target cục bộ giải ra đường dẫn hub trên máy này, còn plugin
+  // giải ra `${CLAUDE_PLUGIN_ROOT}` — gốc gói trên máy NGƯỜI CÀI. Resolve sớm ở đây thì tới
+  // lượt plugin không còn token nào để thay, và gói xuất xưởng mang cứng đường dẫn máy dev
+  // (`D:\...\4AI\mcp\fbo\server.mjs`) — ai cài về cũng không khởi động nổi MCP server.
   const { assets, errors } = loadAssets({
     domains: targetsCfg.domains ?? null,
     mcpServerIds: Object.keys(mcpCfg.servers),
@@ -107,8 +111,11 @@ export async function runSync(opts) {
     const notes = [];
     for (const tool of tools) {
       const subset = domainAssets.filter((a) => a.targets.includes(tool));
-      const mcpServers = Object.fromEntries(
+      const thoServers = Object.fromEntries(
         Object.entries(mcpCfg.servers).filter(([, s]) => (s.targets ?? []).includes(tool)));
+      // Plugin nhận bản CÒN TOKEN và tự giải sang `${CLAUDE_PLUGIN_ROOT}`; target cục bộ nhận
+      // bản đã giải ra đường dẫn hub trên máy này.
+      const mcpServers = tool === 'plugin' ? thoServers : resolveMcpServers(thoServers);
       const out = EMITTERS[tool]({ assets: subset, mcpServers, target });
       textFiles.push(...out.textFiles);
       jsonFiles.push(...out.jsonFiles);

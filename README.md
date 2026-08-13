@@ -70,6 +70,31 @@ Xem [Quickstart](#quickstart--sửa-một-điều-gì-đó) bên dưới.
 trước khi `query_sql`, `get_review_dataset` hay `node tools/4ai.mjs report` chạy được.
 `data/qlda.json` chỉ chứa **tên key**, không bao giờ chứa giá trị thật (bị `4ai check` soi).
 
+### Cách nhanh nhất — `setup` rồi `doctor`
+
+Mở terminal, chạy hai lệnh (cài plugin thì `cd` vào thư mục plugin trước):
+
+```bash
+node tools/4ai.mjs setup
+```
+
+Hỏi lần lượt mã nhân viên PM, bộ phận, rồi ba chuỗi kết nối. **Ký tự gõ vào không hiện lên
+màn hình**, và giá trị đi thẳng vào `data/qlda.local.json` trên máy bạn — không đi qua model
+AI, không nằm lại trong transcript phiên chat. Bỏ trống một mục = giữ nguyên giá trị cũ.
+
+```bash
+node tools/4ai.mjs doctor
+```
+
+Báo còn thiếu gì: Node, `sqlcmd`, danh tính PM, chuỗi kết nối, và QLDA đang lấy kết nối từ
+đâu. Chỉ in **tên khoá và trạng thái**, không bao giờ in giá trị — dán output này cho người
+khác xem để nhờ hỗ trợ được, không lộ gì.
+
+> Đừng nhờ AI ghi hộ chuỗi kết nối qua chat. Truyền qua chat là nó nằm lại trong transcript;
+> `setup` tồn tại chính để tránh chuyện đó.
+
+Phần dưới giải thích từng mục, cho ai muốn khai tay.
+
 ### 1. Yêu cầu hệ thống
 
 - **Node.js 22+** — MCP dùng `node:sqlite` built-in, không `npm install`.
@@ -77,10 +102,11 @@ trước khi `query_sql`, `get_review_dataset` hay `node tools/4ai.mjs report` c
   SQL Server Tools\Binn, go-sqlcmd). Cài chỗ khác thì đặt env `FBO_SQLCMD` trỏ thẳng vào
   `sqlcmd.exe` — không cần sửa code.
 
-### 2. Danh tính PM — `set_pm_identity`
+### 2. Danh tính PM — `setup` hoặc `set_pm_identity`
 
-Gọi tool MCP `set_pm_identity` (agent gọi giúp, hoặc tự yêu cầu agent gọi) với mã nhân viên và
-mã bộ phận thật:
+`node tools/4ai.mjs setup` hỏi luôn mục này. Muốn nhờ agent thì gọi tool MCP `set_pm_identity`
+với mã nhân viên và mã bộ phận thật — mã NV và bộ phận **không phải bí mật** nên đi qua chat
+không sao (khác hẳn chuỗi kết nối):
 
 ```
 set_pm_identity(maNv: "PM01", boPhanLt: "FSD")

@@ -6,7 +6,7 @@
     },
     {
       "path": ".mcp.json",
-      "sha256": "cc7c7554ad47e81cc7bfe308c49ca24752d6cc6ccbf853ea5a9705b30544b572"
+      "sha256": "0e23643116ed9e88547f31bd36e40346e2885ab62b2749dd0fbc65418fd7f02b"
     },
     {
       "path": "agents/fbo-change-reviewer.md",
@@ -162,7 +162,7 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "2c4ce0eb740eba02e828eba454b6aff40485f082634b02a2743962918ccf6b8c"
+      "sha256": "9ab0305cde832f959a09d577d84ef708b25f4248c83fad3c579b136c65e74cb9"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
@@ -366,11 +366,11 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "c2100d3f91c02a8ca913588679ad74613505769feff3d795a73dcae226b8fb2b"
+      "sha256": "6900f48b5cd6548ec2fa54ae2233fac62e0b73e5b4ced8c391ac053943b5633e"
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "dbcf4ed7e814939d313d1a409165295f2155c02abea5d94717a845664f1fc488"
+      "sha256": "7f188da927d1566db4f9ced63c5133b6002e4e0d31d2f0893c026bcca7e28901"
     },
     {
       "path": "tools/lib/assignee.mjs",
@@ -398,7 +398,7 @@
     },
     {
       "path": "tools/lib/emit/plugin.mjs",
-      "sha256": "175ed9e43d3e23829877b88e96607290d8741b9ac3df1e902a5ef517f788609a"
+      "sha256": "b0b077e07712e9df6bd04feb6b6c1fae426d3a80b90a2527d0b4053aeffbf8bc"
     },
     {
       "path": "tools/lib/emit/vscode.mjs",
@@ -457,12 +457,16 @@
       "sha256": "8fd80f22d5eb82d0f9c48bd1630d423526700833739d8a2ec4acee5e9c4a857d"
     },
     {
+      "path": "tools/lib/setup.mjs",
+      "sha256": "9d6d4b101afa2b32ab83a79f5cc37a91168f1dbb90fcb4276f60676a36bc8a59"
+    },
+    {
       "path": "tools/lib/staffing.mjs",
       "sha256": "a4894fcb261a0a31f0f195a616c4ae6020780c52b7a781858307446b590c8e4f"
     },
     {
       "path": "tools/lib/sync.mjs",
-      "sha256": "2691ce5c455c160015eef3397e1484080b9a226e20292fd4fa0886612435d32f"
+      "sha256": "146eb28bd8086d36afeec6973ed3ea0224b640ae232f407074cf0e7ffd5d9bf4"
     },
     {
       "path": "tools/lib/template.mjs",
@@ -492,6 +496,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T05:03:18.222Z",
+  "syncedAt": "2026-08-13T06:44:48.523Z",
   "target": "plugin"
 }

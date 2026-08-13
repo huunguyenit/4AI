@@ -227,6 +227,16 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
   return { assets, byId, errors, warnings };
 }
 
+/**
+ * File `*.local.json` là NƠI ĐƯỢC PHÉP giữ credential — bỏ qua khi quét.
+ *
+ * Việc của scanSecrets là chặn secret lọt vào file ĐƯỢC COMMIT, không phải cấm máy này có
+ * cấu hình cục bộ. `.gitignore` đã chặn `*.local.json`, và `data/qlda.local.json` chính là chỗ
+ * `4ai setup` ghi chuỗi kết nối vào. Quét cả nó thì máy nào cấu hình ĐÚNG lại làm `check` đỏ —
+ * mà `check` phải sạch trên mọi máy, kể cả máy chưa cấu hình gì.
+ */
+const LA_FILE_LOCAL = /(^|[\\/])[^\\/]*\.local\.json$/i;
+
 /** Quét secret ngoài phạm vi asset (mcp/data/4ai/ledger, data/). */
 export function scanSecrets({ hub = HUB } = {}) {
   const roots = [
@@ -237,6 +247,7 @@ export function scanSecrets({ hub = HUB } = {}) {
   for (const { label, root } of roots) {
     if (!fs.existsSync(root)) continue;
     for (const rel of fs.globSync('**/*.{md,json,jsonl,txt}', { cwd: root })) {
+      if (LA_FILE_LOCAL.test(rel)) continue;
       const abs = path.join(root, rel);
       const lines = readText(abs).split('\n');
       for (let i = 0; i < lines.length; i++) {

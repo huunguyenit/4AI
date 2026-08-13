@@ -254,7 +254,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "33407179ede17b1b779877a25ba3c309e458918fb7aaa9e691b2041bed6a50dc"
+      "sha256": "5fc9fd1b367ebf3020d0c5e4f38e9505ad346e36557c3b0218af6b08707079f9"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -312,9 +312,9 @@
     },
     {
       "path": ".claude/commands/doctor.md",
-      "sha256": "4c40727cc86e6b8f3348fd6e454801de1cd73e950517fe45f27fc2c61dcda26d",
+      "sha256": "c9505923428f67cb90282c23c1fbc40e151c3ae8e222164069821e1a65d2ffdd",
       "sourceId": "doctor",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/commands/fbo-customize.md",
@@ -534,9 +534,9 @@
     },
     {
       "path": ".cursor/commands/doctor.md",
-      "sha256": "9946307ba9aeac9e93011226231df52caa9b89dfde5268054d73b18cb0be755f",
+      "sha256": "448ef9c9f3353478a5f36d048f2b8c110d60d47fca0abd999b2327bbba2a265f",
       "sourceId": "doctor",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/commands/fbo-customize.md",
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T03:44:00.571Z",
+  "syncedAt": "2026-08-13T06:44:48.466Z",
   "target": "4ai"
 }

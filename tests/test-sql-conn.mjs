@@ -3,9 +3,15 @@
 // Web.config. Không chạm DB, không dùng chuỗi kết nối thật.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { nguonKetNoi, redact } from '../mcp/fbo/lib/sql.mjs';
+
+// Trỏ data root vào thư mục tạm TRƯỚC khi nạp sql.mjs: máy dev có thể đã khai chuỗi kết nối
+// thật trong data/qlda.local.json, để nguyên thì test đo trạng thái máy chứ không đo code.
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-conn-'));
+process.env.FBO_DATA_ROOT = tmp;
+const { nguonKetNoi, redact } = await import('../mcp/fbo/lib/sql.mjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const QLDA = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'qlda.json'), 'utf8')).databases.qlda.path;
@@ -27,12 +33,19 @@ const donDep = () => {
 delete process.env.QLDA_APP_CONNECTION;
 delete process.env.QLDA_SYS_CONNECTION;
 
-process.stdout.write('=== chưa khai env: rớt về Web.config (bước cuối resolveOrder) ===\n');
-// Máy hiện tại chưa khai gì — hành vi phải y hệt trước khi có tính năng này.
+process.stdout.write('=== chưa khai gì: rớt về Web.config (bước cuối resolveOrder) ===\n');
+// Máy chưa cấu hình — hành vi phải y hệt trước khi có tính năng này.
 ok('QLDA app -> Web.config', nguonKetNoi(QLDA, 'app') === 'Web.config');
 ok('QLDA sys -> Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
 
-process.stdout.write('\n=== khai env: QLDA đi theo env ===\n');
+process.stdout.write('\n=== khai ở qlda.local.json: đứng giữa env và Web.config ===\n');
+fs.mkdirSync(path.join(tmp, 'data'), { recursive: true });
+fs.writeFileSync(path.join(tmp, 'data', 'qlda.local.json'),
+  JSON.stringify({ appConnectionString: 'Data Source=L;Initial Catalog=QLDA_APP' }));
+ok('Có local, chưa có env -> qlda.local.json', nguonKetNoi(QLDA, 'app') === 'qlda.local.json');
+ok('Khoá chưa khai vẫn rớt về Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
+
+process.stdout.write('\n=== khai env: env THẮNG local ===\n');
 process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=QLDA_APP;Integrated Security=SSPI';
 ok('QLDA app -> env', nguonKetNoi(QLDA, 'app') === 'env');
 ok('Chưa khai env sys thì leg sys KHÔNG ăn theo leg app',
@@ -63,5 +76,6 @@ ok('redact bịt user + server',
   && redact('Data Source=SRV;').includes('Data Source=***'));
 
 donDep();
+fs.rmSync(tmp, { recursive: true, force: true });
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures ? `${failures} thất bại` : 'TẤT CẢ PASS (0 thất bại)'} ===\n`);
 process.exit(failures ? 1 : 0);

@@ -12,6 +12,9 @@ import { auditLedger } from './lib/ledger-audit.mjs';
 
 const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
 
+  node tools/4ai.mjs setup              khai danh tính PM + chuỗi kết nối vào qlda.local.json
+                                        (gõ trong terminal của bạn — giá trị KHÔNG đi qua model AI)
+  node tools/4ai.mjs doctor             chẩn đoán: hub + sqlcmd + PM + nguồn kết nối. Không ghi
   node tools/4ai.mjs check              validate hub. Exit 0/1. Không bao giờ ghi
   node tools/4ai.mjs list               bảng asset [--kind K] [--domain D] [--json]
   node tools/4ai.mjs explain <id>       asset này emit ra đường dẫn nào, theo từng tool
@@ -62,7 +65,26 @@ function loadHub() {
 
 // ---------------------------------------------------------------- check
 
-function cmdCheck(opts) {
+/**
+ * `doctor` = `check` (hub có hợp lệ không) + chẩn đoán RUNTIME (máy này chạy được chưa).
+ *
+ * Tách khỏi `check` vì hai câu hỏi khác nhau: `check` là bài test của compiler, phải sạch trên
+ * MỌI máy kể cả máy chưa cấu hình gì; còn thiếu sqlcmd hay chưa khai PM là chuyện riêng của
+ * từng máy, không phải lỗi của hub. Cả hai đều KHÔNG BAO GIỜ ghi.
+ */
+async function cmdDoctor(opts) {
+  const { chanDoan, inChanDoan } = await import('./lib/setup.mjs');
+  const maHub = cmdCheck(opts, { exit: false });
+  const maRuntime = inChanDoan(chanDoan(HUB));
+  process.exit(maHub || maRuntime);
+}
+
+async function cmdSetup() {
+  const { chaySetup } = await import('./lib/setup.mjs');
+  process.exit(await chaySetup(HUB));
+}
+
+function cmdCheck(opts, { exit = true } = {}) {
   const { assets, errors, warnings, targetsCfg, mcpCfg } = loadHub();
   errors.push(...scanSecrets({}).map((h) => ({ file: h.file, line: h.line, message: h.message })));
 
@@ -121,6 +143,9 @@ function cmdCheck(opts) {
     for (const w of warnings) process.stdout.write(`WARN  ${w.file}:${w.line} — ${w.message}\n`);
     process.stdout.write(summary + '\n');
   }
+  // `doctor` gọi lại hàm này rồi in tiếp phần runtime — nó tự quyết định mã thoát, nên ở đây
+  // chỉ trả về. Gọi trực tiếp (`check`) thì vẫn thoát ngay như cũ: exit 0/1 là hợp đồng của nó.
+  if (!exit) return errors.length > 0 ? 1 : 0;
   process.exit(errors.length > 0 ? 1 : 0);
 }
 
@@ -466,8 +491,11 @@ if (values.help || !cmd) {
 
 switch (cmd) {
   case 'check':
-  case 'doctor':
     cmdCheck(values); break;
+  case 'doctor':
+    await cmdDoctor(values); break;
+  case 'setup':
+    await cmdSetup(); break;
   case 'list':
     cmdList(values); break;
   case 'explain':

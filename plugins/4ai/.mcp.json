@@ -2,11 +2,11 @@
   "mcpServers": {
     "4ai-fbo": {
       "args": [
-        "D:/Fast Source/4AI/mcp/fbo/server.mjs",
+        "${CLAUDE_PLUGIN_ROOT}/mcp/fbo/server.mjs",
         "--hub",
-        "D:/Fast Source/4AI"
+        "${CLAUDE_PLUGIN_ROOT}"
       ],
-      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "command": "node",
       "cwd": "${CLAUDE_PLUGIN_ROOT}",
       "env": {
         "FBO_DATA_ROOT": "${CLAUDE_PLUGIN_DATA}"

@@ -14,6 +14,16 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Sửa
 
+- **Plugin xuất xưởng mang cứng đường dẫn máy dev — ai cài về cũng không chạy được.**
+  `sync.mjs` giải `{{HUB}}` ra đường dẫn hub thật cho MỌI target *trước khi* emitter chạy, nên
+  tới lượt plugin không còn token nào để thay: `.mcp.json` ship ra trỏ vào
+  `D:/Fast Source/4AI/mcp/fbo/server.mjs` — thư mục không tồn tại trên máy người cài, MCP server
+  không khởi động nổi. Nay chỉ target cục bộ mới giải sẵn; plugin nhận bản còn token và tự giải
+  sang `${CLAUDE_PLUGIN_ROOT}`. `command` cũng đổi từ đường dẫn `node.exe` tuyệt đối sang lệnh
+  trần để máy người cài tự phân giải qua PATH.
+- **`4ai check` báo đỏ trên máy đã cấu hình ĐÚNG.** `scanSecrets` quét cả `data/qlda.local.json`
+  — mà đó chính là nơi được phép giữ credential (đã gitignore, và là chỗ `setup` ghi vào). Nay
+  bỏ qua mọi `*.local.json`; file được commit vẫn bắt như cũ.
 - **Kết nối QLDA khai bằng env nhưng code không dùng.** `data/qlda.json → databases.qlda.resolveOrder`
   và README đều khai env → `qlda.local.json` → `Web.config` từ lâu, nhưng `sql.mjs` chưa bao giờ
   cài đặt bước env/local — mọi truy vấn QLDA đều đi thẳng Web.config. Hỏng này im lặng: kết quả
@@ -42,6 +52,17 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Thêm
 
+- **`4ai setup` — khai cấu hình cục bộ mà không đưa bí mật qua model.** Hỏi danh tính PM và ba
+  chuỗi kết nối ngay trong terminal của người dùng, ký tự gõ vào không hiện lên màn hình, giá
+  trị ghi thẳng vào `qlda.local.json` ở data root của lần cài (plugin: `${CLAUDE_PLUGIN_DATA}`,
+  sống sót qua update). Bỏ trống một mục = giữ nguyên giá trị cũ. CỐ TÌNH không làm bằng MCP
+  tool: chuỗi kết nối truyền qua tool argument sẽ nằm lại trong context và transcript phiên chat,
+  phá đúng hàng rào mà `sql.mjs` và `scanSecrets` dựng lên. Stdin không phải TTY thì từ chối và
+  chỉ sang đường env, không hỏi nửa vời.
+- **`4ai doctor` — chẩn đoán máy này chạy được chưa.** Gồm `check` cũ, cộng thêm Node, `sqlcmd`,
+  danh tính PM, khoá nào đã khai và khai ở đâu (env / `qlda.local.json` / `Web.config`). Chỉ in
+  **tên khoá và trạng thái**, không bao giờ in giá trị — dán output đi nhờ hỗ trợ được mà không
+  lộ gì. `check` giữ nguyên nghĩa cũ: bài test của compiler, phải sạch trên mọi máy.
 - **Link trong nội dung UR bấm được trên báo cáo HTML.** `escLink()` escape trước rồi mới
   dựng thẻ `<a>` — thứ tự đó là thứ giữ an toàn: `noi_dung` do người dùng nhập nên không được
   chảy thẳng vào HTML. Dấu câu cuối câu (`.` `)` …) nằm ngoài href, `&` trong query string

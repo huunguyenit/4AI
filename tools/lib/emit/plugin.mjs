@@ -128,7 +128,12 @@ export function emitPlugin({ assets, mcpServers, target }) {
     const servers = {};
     for (const [id, srv] of Object.entries(mcpServers)) {
       servers[id] = {
-        command: srv.command,
+        // `mcp/servers.json` ghi đường dẫn node.exe tuyệt đối — đúng cho máy này (một số
+        // client spawn với PATH tối giản), nhưng SAI cho gói phân phối: máy người cài có thể
+        // dùng nvm hoặc cài Node chỗ khác, đường dẫn cứng của máy dev chắc chắn trượt. Gói đi
+        // xa thì phải dựa vào PATH; máy nào PATH tối giản thì `4ai doctor` chỉ ra và người
+        // dùng tự ghi đè trong cấu hình MCP của họ.
+        command: pluginCommand(srv.command),
         args: (srv.args ?? []).map(pluginPath),
         cwd: '${CLAUDE_PLUGIN_ROOT}',
         env: { ...(srv.env ?? {}), FBO_DATA_ROOT: '${CLAUDE_PLUGIN_DATA}' },
@@ -150,6 +155,17 @@ export function emitPlugin({ assets, mcpServers, target }) {
 /** {{HUB}} trong mcp/servers.json trỏ về gốc plugin khi chạy dưới dạng plugin. */
 function pluginPath(v) {
   return typeof v === 'string' ? v.replaceAll('{{HUB}}', '${CLAUDE_PLUGIN_ROOT}').replace(/\\/g, '/') : v;
+}
+
+/**
+ * Đường dẫn tuyệt đối tới runtime (node.exe) chỉ đúng trên máy sinh ra gói — đổi thành tên
+ * lệnh trần để máy người cài tự phân giải qua PATH. Lệnh đã là tên trần thì giữ nguyên.
+ */
+function pluginCommand(cmd) {
+  const s = String(cmd ?? '').trim();
+  if (!/[\\/]/.test(s)) return s;
+  const ten = s.split(/[\\/]/).pop().replace(/\.exe$/i, '');
+  return ten || s;
 }
 
 function pluginName(target) {
