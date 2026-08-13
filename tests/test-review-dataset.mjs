@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   bit, todayIso, buildReviewSql, buildReviewWhere, mergeReviewRows, datasetToPayloads,
-  STATUS_MAC_DINH,
+  resolveReviewFilters, STATUS_MAC_DINH,
 } from '../tools/lib/review-dataset.mjs';
 import { validatePayload, validatePortfolioPayload, buildReportArtifact } from '../tools/lib/report.mjs';
 
@@ -143,6 +143,36 @@ ok('Không còn fail bắt payload.json', !cli.includes("cách dùng: report <pa
 ok('USAGE có report không argument', cli.includes('node tools/4ai.mjs report             lấy dataset UR cố định'));
 ok('Có --project', cli.includes('project: { type: \'string\' }'));
 ok('Có --dept', cli.includes('dept: { type: \'string\' }'));
+
+process.stdout.write('\n=== chưa gán PM: thông báo phải chỉ ra CÁCH CHỮA, không chỉ ra file ===\n');
+// Bề mặt không có shell (chat/Cowork) không đọc/ghi được qlda.local.json — đường dẫn đúng
+// nằm trong ${CLAUDE_PLUGIN_DATA}. Thông báo chỉ vào file là bế tắc: model quay ra hỏi "họ
+// tên của bạn là gì" rồi bịa mã ví dụ. Nên nó phải gọi tên tool chữa được ở mọi bề mặt.
+const CHUA_GAN_PM = path.join(ROOT, '.4ai', 'scratch', 'khong-co-pm-cho-test');
+const envCu = process.env.FBO_DATA_ROOT;
+process.env.FBO_DATA_ROOT = CHUA_GAN_PM;
+let loiPm = '';
+try {
+  resolveReviewFilters(ROOT, {});
+} catch (e) {
+  loiPm = e.message;
+}
+if (envCu === undefined) delete process.env.FBO_DATA_ROOT; else process.env.FBO_DATA_ROOT = envCu;
+
+ok('Cài đặt chưa gán PM thì ném lỗi', loiPm !== '', loiPm);
+ok('Thông báo gọi tên tool `set_pm_identity`', loiPm.includes('set_pm_identity'), loiPm);
+ok('Thông báo nói rõ maNv là MÃ, không phải họ tên',
+  /KHÔNG phải/.test(loiPm) && /họ tên/.test(loiPm), loiPm);
+ok('Thông báo vẫn nêu đường truyền thẳng project/pmName/pmDept',
+  loiPm.includes('project') && loiPm.includes('pmName') && loiPm.includes('pmDept'), loiPm);
+ok('Cấm đoán / bịa ví dụ', /không đoán|không bịa/i.test(loiPm), loiPm);
+
+// Cùng lỗi đó ở list_programs — hai tool khác nhau, cùng một cách chữa.
+const toolsSrc = fs.readFileSync(path.join(ROOT, 'mcp', 'fbo', 'lib', 'tools.mjs'), 'utf8');
+const khoiListPrograms = toolsSrc.slice(toolsSrc.indexOf('Thiếu `query` và'), toolsSrc.indexOf('Thiếu `query` và') + 600);
+ok('list_programs cũng trỏ tới set_pm_identity', khoiListPrograms.includes('set_pm_identity'));
+ok('set_pm_identity khai cả render_review_report trong danh sách tool báo lỗi',
+  /set_pm_identity[\s\S]{0,2000}?render_review_report/.test(toolsSrc));
 
 process.stdout.write('\n');
 process.exit(failures ? 1 : 0);

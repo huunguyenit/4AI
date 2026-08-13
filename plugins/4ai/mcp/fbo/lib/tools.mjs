@@ -343,7 +343,10 @@ export const TOOLS = [
       + 'Trả về: file đã ghi, tổng quan theo dự án, `ddUR[]` (UR trạng thái DD — NGUYÊN nội dung, đây là phạm vi '
       + 'cổng PM) và `nhanSu` để đề xuất phân việc. UR XN/TH CỐ Ý chỉ có số đếm và hạn gần nhất: chúng đã qua '
       + 'cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại. '
-      + 'Chỉ ĐỀ XUẤT đổi trạng thái (XN/TA/KL) — không bao giờ tự UPDATE nbphyc.',
+      + 'Chỉ ĐỀ XUẤT đổi trạng thái (XN/TA/KL) — không bao giờ tự UPDATE nbphyc. '
+      + 'GỌI THẲNG, KHÔNG THAM SỐ trước: phạm vi mặc định là PM đã cấu hình trên máy này. '
+      + 'Báo "CHƯA GÁN PM" thì chữa bằng `set_pm_identity`, đừng hỏi người dùng họ tên hay '
+      + 'đi tra danh sách nhân viên bằng SQL.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -358,7 +361,7 @@ export const TOOLS = [
   {
     name: 'set_pm_identity',
     description:
-      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, chạy như plugin thì ghi ${CLAUDE_PLUGIN_DATA}/data/qlda.local.json (sống sót qua update, không phải chỗ hub/gói plugin read-only). Gọi tool này khi list_programs/get_review_dataset báo "chưa gán PM": hỏi người dùng mã NV và bộ phận rồi gọi lại — không tự đoán giá trị, không tự viết trực tiếp bằng Write vì đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
+      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, chạy như plugin thì ghi ${CLAUDE_PLUGIN_DATA}/data/qlda.local.json (sống sót qua update, không phải chỗ hub/gói plugin read-only). Gọi tool này NGAY khi list_programs / get_review_dataset / render_review_report báo "CHƯA GÁN PM" — đừng đi hỏi vòng hay tự tra bằng SQL. Hỏi người dùng đúng hai giá trị: `maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên đầy đủ) và `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Không tự đoán, không bịa mã ví dụ, và không viết file bằng Write — đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -403,8 +406,11 @@ export const HANDLERS = {
         `(RTRIM(ma_lt1) = '${lit}' OR RTRIM(ma_lt2) = '${lit}' OR RTRIM(ma_lt3) = '${lit}') ORDER BY ma_da`;
     } else {
       throw new Error(
-        'Thiếu `query` và chưa gán PM — khai `pm.maNv` trong data/qlda.local.json ' +
-        '(ghi đè token {PMName} của data/qlda.json → review.pm), hoặc truyền `query` (mã dự án hoặc tên) để tìm.');
+        'Thiếu `query` và CHƯA GÁN PM. Cách chữa: gọi tool `set_pm_identity({ maNv, boPhanLt })` ' +
+        '— chạy được ở mọi bề mặt, tự ghi đúng chỗ (bề mặt không có shell thì đây là đường DUY NHẤT: ' +
+        'đường dẫn qlda.local.json nằm trong ${CLAUDE_PLUGIN_DATA}, không sửa tay được). ' +
+        '`maNv` là MÃ nhân viên trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên). ' +
+        'Hoặc truyền `query` (mã dự án hoặc tên) để tìm mà không cần danh tính PM.');
     }
 
     const res = runSql({ programPath, database, dbType: 'app', sql, maxRows: limit });

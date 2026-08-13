@@ -67,8 +67,17 @@ export function resolveReviewFilters(hub, args = {}) {
     pmName = pmSelf;
   }
   if (!project && !pmName && !pmDept) {
+    // Thông báo này là toàn bộ thứ model có để tự chữa. Chỉ vào FILE là bế tắc ở bề mặt
+    // không có shell (chat/Cowork): ở đó đường dẫn đúng nằm trong ${CLAUDE_PLUGIN_DATA},
+    // model không tính ra được và cũng không ghi được. Nên phải gọi TÊN TOOL trước, và
+    // nói rõ hình dạng giá trị — thiếu chỗ đó model đi hỏi "họ tên đầy đủ" rồi bịa ví dụ.
     throw new Error(
-      'Cần ít nhất một trong project / pmName / pmDept — hoặc gán pm.maNv trong data/qlda.local.json.');
+      'CHƯA GÁN PM. Cách chữa, theo thứ tự: (1) gọi tool `set_pm_identity({ maNv, boPhanLt })` — '
+      + 'chạy được ở mọi bề mặt, tự ghi đúng chỗ; (2) có shell thì `node tools/4ai.mjs setup`; '
+      + '(3) hoặc truyền thẳng `project` / `pmName` / `pmDept` cho lần gọi này. '
+      + '`maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải '
+      + 'họ tên), `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Hỏi người dùng hai giá '
+      + 'trị đó — không đoán, không bịa ví dụ.');
   }
   const statusList = (Array.isArray(args.statusUR) && args.statusUR.length ? args.statusUR : STATUS_MAC_DINH)
     .map(trimmed).filter(Boolean);

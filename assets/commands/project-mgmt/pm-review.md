@@ -8,7 +8,7 @@ argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự �
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-capability-graph, fbo-new-table-proposal]
 mode: agent
-version: 8
+version: 9
 ---
 
 ## Việc cần làm
@@ -31,6 +31,11 @@ Sau khi HTML có: **chỉ phân tích UR `trang_thai = DD`** (tài liệu đầu
 Không viết SQL danh sách UR, không ghép payload, không dùng `plan_report`.
 **Không bao giờ tự dựng báo cáo từ `get_review_dataset`** — đó là dữ liệu thô: báo cáo tự chế
 bỏ qua validate payload, không nằm trong ledger, và luôn kéo theo việc phân tích cả `XN`/`TH`.
+
+**Báo "CHƯA GÁN PM"** → máy/cài đặt này chưa có danh tính PM. Gọi `set_pm_identity({ maNv, boPhanLt })`
+rồi chạy lại. `maNv` là **mã** nhân viên (chuỗi in hoa không dấu, dùng trong `nbdmda.ma_lt1`), không
+phải họ tên. Hỏi đúng hai giá trị đó — đừng hỏi "tên bạn là gì", đừng bịa mã ví dụ, đừng tra danh
+sách nhân viên bằng SQL.
 
 ## Ràng buộc
 

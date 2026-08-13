@@ -34,9 +34,9 @@
     },
     {
       "path": "agents/pm-deadline-review.md",
-      "sha256": "25596e6911557a37f036c23348095b96f3479d55b9d5f13f4b044d06d9c124aa",
+      "sha256": "b10eed5dbb9972f9e8eca509916f33acfcc318b5dadffcb95e95ba3d7f575457",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": "agents/pm-planner.md",
@@ -94,9 +94,9 @@
     },
     {
       "path": "commands/pm-review.md",
-      "sha256": "56c38bac2ccd6bdc100cd54c2d4f3ed4df8572d1ffd729628efbf669b130c5f4",
+      "sha256": "16f2fb65cc64a3dd345bf1d654ab06b470347e5c957f3e9daaf059ac727e980a",
       "sourceId": "pm-review",
-      "sourceVersion": 8
+      "sourceVersion": 9
     },
     {
       "path": "commands/pm-status.md",
@@ -166,7 +166,7 @@
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "f701d158fd28201ca45bca383f007a53b16c9b5e465ed600ed6ca17b97971112"
+      "sha256": "3bf12d3e3f04b3c24ddddc20a48afd4b05115b0eddf936139871b56cbcc0f4fa"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -450,7 +450,7 @@
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "b12c10e50dc5664a200e7003af0e00a337a6da17ef52e410baf21fed540b8cf8"
+      "sha256": "9bc359eb04d097bf13c1f78bf4f7a04acc68e2f889e6097394271268904e3e23"
     },
     {
       "path": "tools/lib/review-report.mjs",
@@ -504,6 +504,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T08:30:55.929Z",
+  "syncedAt": "2026-08-13T08:45:27.131Z",
   "target": "plugin"
 }

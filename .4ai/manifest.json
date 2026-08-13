@@ -26,9 +26,9 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "07cd5cf9865b8a1cc6b35ca7f7c77c3eef29cac3a1a8715e59d50dddeae2a057",
+      "sha256": "25a5e1064afa3149a6cf9155ffeafb05bd58f6cba9f1ca7436a9f99f8439b4d6",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": ".agents/agents/pm-planner.md",
@@ -242,9 +242,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "91ec4c16f40f4a7b7eead267ed72d91363f498a9b46b7d24536bc533ff41ae79",
+      "sha256": "2a432f4dee1d55eb93ae9763989e03d86a1537f7c741c7de234b7e04c69543e9",
       "sourceId": "pm-review",
-      "sourceVersion": 8
+      "sourceVersion": 9
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -282,9 +282,9 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "61a31d91d358162e15b14184f3af9dad13df984117d0f4a4314622ffc2d80155",
+      "sha256": "a31989ba18b2b41e84d74320c39adb185d94461b226dfd12d3f95c37c30ddace",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": ".claude/agents/pm-planner.md",
@@ -366,9 +366,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "126f03f6b06ea67a5ba7c30a1b9265455e5d6e06f28780282e2180cf31be15fb",
+      "sha256": "cbee2629cf2f13742d8d744e5e32463f98dcc5a03deba62ed9c075bd88c5f33c",
       "sourceId": "pm-review",
-      "sourceVersion": 8
+      "sourceVersion": 9
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -504,9 +504,9 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "9e5ec2afdd976c7193ad461d30a8b9d5857be929010d6faedd797c329c067bc3",
+      "sha256": "2153cb6322b811ac742934ea6a95f7ab17d5ed8e8ca87127d30b512e5dd2654f",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": ".cursor/agents/pm-planner.md",
@@ -588,9 +588,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "bee74e7e2046d74008b2cb7967564bc5cdd16d450301569de7020754f423e2ee",
+      "sha256": "803a28b0a70281704da4b88b52dea2f46c432528caf8be6981d9a5391204efba",
       "sourceId": "pm-review",
-      "sourceVersion": 8
+      "sourceVersion": 9
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -792,9 +792,9 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "742d9d7b548c6139d7e6aed754e1d71c3a771e5817c82d7a4575cf09691c2f93",
+      "sha256": "7990e498baac5a429e6fbf2c43b7cdfa9bd209b699ac0e9232a0e71e644b9bb4",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": ".github/chatmodes/pm-planner.chatmode.md",
@@ -946,9 +946,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "a0c2793153d653b61f20996763ac5f4ba68e89aab53bfcfdc566d8f44f195097",
+      "sha256": "26327100232d6feae049ccaf1bd68c743f0a3b30bc4256ad4d4c7aba792bfc2d",
       "sourceId": "pm-review",
-      "sourceVersion": 8
+      "sourceVersion": 9
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T08:30:55.878Z",
+  "syncedAt": "2026-08-13T08:45:27.087Z",
   "target": "4ai"
 }

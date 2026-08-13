@@ -8,7 +8,7 @@ tools: [Read, Write, Grep, Glob, Bash, mcp__4ai-fbo__list_programs, mcp__4ai-fbo
 model: inherit
 requires: [4ai-fbo]
 see-also: [pm-capability-graph, pm-task-ledger, pm-customer-program-registry, pm-ur-analyst]
-version: 10
+version: 11
 ---
 
 ## Nhiệm vụ
@@ -43,6 +43,11 @@ output, chỉ khác đường vào:
 
 Nó trả luôn `ddUR[]` cho Bước 2, nên khỏi gọi thêm gì. Không có shell **không phải** lý do để
 tự ghép báo cáo từ `get_review_dataset`.
+
+Cả hai đường đều bắt đầu **không tham số** — phạm vi mặc định là PM đã cấu hình trên máy này.
+Báo `CHƯA GÁN PM` thì gọi `set_pm_identity({ maNv, boPhanLt })` rồi chạy lại: `maNv` là **mã**
+nhân viên (in hoa, không dấu, khớp `nbdmda.ma_lt1`), `boPhanLt` là mã bộ phận (`nbphyc.bp_lt`).
+Hỏi đúng hai giá trị đó, không hỏi họ tên và không bịa mã ví dụ.
 
 Output: `<ledgerRoot>/review/<yyyyMMdd>/`. Báo tóm tắt trong chat kèm đường dẫn. Không tự gửi cho ai khác.
 

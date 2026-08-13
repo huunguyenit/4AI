@@ -24,8 +24,24 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
     `<hub>/ledger`: chạy như plugin thì `hub` là gốc gói, bị ghi đè mỗi lần update — báo cáo ghi
     vào đó là mất. Biến này chỉ có trong tiến trình MCP nên CLI ở hub không đổi hành vi.
   - `tests/test-review-report-build.mjs` (mới) — dataset giả, không chạm DB, không chạm đĩa.
-  - `pm-review` (v8), `pm-deadline-review` (v10), `pm-ur-routing` (v2) ghi rõ nhánh không-có-shell
+  - `pm-review` (v9), `pm-deadline-review` (v11), `pm-ur-routing` (v2) ghi rõ nhánh không-có-shell
     và cấm dựng báo cáo tay từ `get_review_dataset`.
+
+### Sửa
+
+- **Cài đặt chưa gán PM báo lỗi chỉ vào một file không với tới được.** `resolveReviewFilters()`
+  và `list_programs` đều bảo "khai `pm.maNv` trong data/qlda.local.json" — vô nghĩa ở bề mặt
+  không có shell: đường dẫn thật nằm trong `${CLAUDE_PLUGIN_DATA}`, model không tính ra được và
+  cũng không ghi được. Không thông báo nào gọi tên `set_pm_identity`, đúng cái tool sinh ra để
+  chữa việc này. Hệ quả quan sát được trong chat: model bỏ luôn `render_review_report`, quay ra
+  hỏi "mã nhân viên **hoặc tên** của bạn là gì" và bịa ví dụ (`MA001`, `Nguyễn Văn A`) —
+  `maNv` phải khớp `nbdmda.ma_lt1`, họ tên không bao giờ khớp.
+  - Cả hai thông báo nay mở đầu bằng `CHƯA GÁN PM`, gọi tên `set_pm_identity({ maNv, boPhanLt })`
+    trước, `4ai setup` sau, và nói rõ `maNv` là **mã** in hoa không dấu chứ không phải họ tên.
+  - `set_pm_identity` khai thêm `render_review_report` vào danh sách tool có thể báo lỗi này;
+    `render_review_report` khai rõ "gọi thẳng, không tham số trước".
+  - Test canh nội dung thông báo trong `tests/test-review-dataset.mjs` — chữ nghĩa ở đây là
+    giao diện thật với model, đổi nó là đổi hành vi.
 
 ### Tài liệu
 
