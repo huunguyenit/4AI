@@ -66,6 +66,35 @@ export const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
+/**
+ * URL trong text ĐÃ escape. Chạy SAU esc() nên `&` đã thành `&amp;` — bắt luôn dạng đó để
+ * không cắt query string làm đôi ở tham số thứ hai (`...?t=35336&amp;p=366179`).
+ *
+ * Ký tự cuối cùng bị loại khỏi URL: `.,;:` và `)` `]` hay đứng liền sau link trong câu tiếng
+ * Việt ("theo link forum: https://...?t=35383."). Dấu chấm cuối câu mà nuốt vào href thì link
+ * mở ra 404.
+ */
+const URL_RE = /https?:\/\/[^\s<>"']+/g;
+const DUOI_URL = /(?:&amp;|[.,;:!?)\]}]|&quot;)+$/;
+
+/**
+ * Escape rồi biến URL thành thẻ bấm được.
+ *
+ * THỨ TỰ QUAN TRỌNG: escape TRƯỚC, dựng thẻ SAU. Làm ngược lại (linkify trên chuỗi thô rồi
+ * escape) sẽ escape luôn cả thẻ `<a>` vừa dựng; còn nếu bỏ escape để giữ thẻ thì `noi_dung`
+ * của UR — do người dùng nhập, có thể chứa `<script>` — chảy thẳng vào HTML. Vì escape chạy
+ * trước, phần href cũng đã an toàn: không thể chèn `"` để thoát khỏi attribute.
+ *
+ * `target="_blank"` + `rel="noopener noreferrer"`: báo cáo là file HTML tự chứa, mở bằng
+ * file:// — điều hướng cả tab đi mất thì mất luôn trang đang đọc.
+ */
+export const escLink = (s) => esc(s).replace(URL_RE, (raw) => {
+  const duoi = (raw.match(DUOI_URL) ?? [''])[0];
+  const url = raw.slice(0, raw.length - duoi.length);
+  if (!url) return raw;
+  return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${duoi}`;
+});
+
 export const fmtDate = (iso) => {
   const s = String(iso ?? '').slice(0, 10);
   const [y, m, d] = s.split('-');
@@ -414,7 +443,7 @@ function urTable(urs, cols) {
 }
 
 const colStt = { ten: 'UR', cls: 'mono', get: (u) => esc(u.fcode1 || String(u.stt_rec).trim()) };
-const colNoiDung = { ten: 'Nội dung', get: (u) => esc(u.noi_dung ?? '') };
+const colNoiDung = { ten: 'Nội dung', get: (u) => escLink(u.noi_dung ?? '') };
 const colGiaiDoan = { ten: 'Giai đoạn', get: (u) => esc(u.giai_doan_da ?? '') };
 const colTrangThai = { ten: 'TT', cls: 'mono', get: (u) => `<span class="pill ${TRANG_THAI[u.trang_thai]?.mau ?? ''}">${esc(u.trang_thai)}</span>` };
 const colHan = { ten: 'Hạn', cls: 'mono', get: (u) => u._phase ? fmtDate(u._phase.ngay_ht) : '—' };
@@ -531,7 +560,7 @@ function heroLine(u, opts = {}) {
   const href = opts.href ? ` <a class="hero-go" href="${opts.href}">mở →</a>` : '';
   return `<p class="hero ${u._muc}">
   <span class="hero-tag">Nóng nhất</span>
-  ${da}<strong>${esc(u.fcode1 || String(u.stt_rec).trim())}</strong>${lt} — ${esc(u.noi_dung ?? '')}
+  ${da}<strong>${esc(u.fcode1 || String(u.stt_rec).trim())}</strong>${lt} — ${escLink(u.noi_dung ?? '')}
   <span class="hero-con">${con}</span>${href}</p>`;
 }
 
@@ -760,7 +789,7 @@ ${goiY.ungVien.map((c, i) => {
       : '<p class="empty">Không có ứng viên nào khớp dữ kiện đã nạp.</p>';
 
     return `<article class="phan-cong">
-<h3>${esc(ur.fcode1 || String(ur.stt_rec).trim())} — ${esc(ur.noi_dung ?? '')}</h3>
+<h3>${esc(ur.fcode1 || String(ur.stt_rec).trim())} — ${escLink(ur.noi_dung ?? '')}</h3>
 <p class="lead">Menu <code>${esc(ur.menu_id || '—')}</code>${ur.sysid ? ` · controller <code>${esc(ur.sysid)}</code>` : ''}${ur._phase ? ` · hạn ${fmtDate(ur._phase.ngay_ht)}` : ''}</p>
 ${dauRa}
 ${thieu}
@@ -769,6 +798,39 @@ ${bang}
   }).join('\n');
 
   return { dem: canGiao.length, html };
+}
+
+/**
+ * Nội dung topic forum của UR ở DD.
+ *
+ * Rất nhiều UR chỉ ghi "update theo link forum: <url>" — đọc mỗi UR thì không có gì để phân
+ * tích, yêu cầu thật nằm ở topic. Mở sẵn ra đây để PM khỏi phải rời báo cáo đi tra tay.
+ *
+ * Thu trong `<details>`: một topic có thể tới 22 bài / hơn 11 nghìn ký tự, bung hết ra sẽ đè
+ * mất phần còn lại của báo cáo. Mặc định đóng, cần thì bấm mở.
+ */
+function forumBlock(urs) {
+  const coForum = urs.filter((u) => u.trang_thai === 'DD' && u.forum?.length);
+  if (!coForum.length) {
+    return { dem: 0, html: '<p class="empty">Không có yêu cầu nào ở DD kèm link forum.fast.com.vn.</p>' };
+  }
+  const html = coForum.map((u) => {
+    const topics = u.forum.map((t) => {
+      const bai = (t.baiViet ?? []).map((b) => `<article class="fr-post">
+  <p class="fr-meta"><strong>#${b.thu_tu}</strong> ${esc(b.nguoi_viet ?? '')}${b.ngay_viet ? ` · ${fmtDate(b.ngay_viet)}` : ''}</p>
+  <p>${escLink(b.noi_dung ?? '')}</p>
+</article>`).join('\n');
+      return `<details class="fr-topic">
+<summary>Topic <code>${t.topicId}</code> · ${(t.baiViet ?? []).length} bài — <a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">mở trên forum</a></summary>
+${bai}
+</details>`;
+    }).join('\n');
+    return `<article class="forum">
+<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
+${topics}
+</article>`;
+  }).join('\n');
+  return { dem: coForum.length, html };
 }
 
 export function renderReport(payload, h) {
@@ -787,6 +849,7 @@ export function renderReport(payload, h) {
     ? '' : `<p class="banner">Hôm nay <strong>không phải ngày làm việc</strong> theo lịch đã khai.</p>`;
 
   const phanCong = phanCongBlock(chuaGiao, payload, loadTrongSoPhanCong(), pm);
+  const forum = forumBlock(urs);
 
   const kpi = kpiRow([
     { n: quaHan.length, nhan: 'quá hạn', muc: 'bad' },
@@ -822,7 +885,7 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
       ? `<p class="banner">Không sinh được SQL: ${esc(err)}</p>`
       : `<div class="sql"><div class="sql-chip"><span>SQL${u.ddl ? ' — sinh tự động' : ''} · chờ PM xác nhận</span><button class="sql-copy">Copy</button></div><pre>${highlightSql(sql)}</pre></div>`;
     return `<article class="ddl">
-<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
+<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
 ${than}
 </article>`;
   }).join('\n') : '<p class="empty">Không có yêu cầu nào nhắc tạo bảng hay thêm cột.</p>';
@@ -838,7 +901,7 @@ ${than}
       ? `<p class="banner">Không sinh được prompt gợi ý: ${esc(err)}</p>`
       : `<div class="sql"><div class="sql-chip"><span>Prompt gợi ý — dán vào Claude Code</span><button class="sql-copy">Copy</button></div><pre>${esc(prompt)}</pre></div>`;
     return `<article class="flow">
-<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${esc(u.noi_dung ?? '')}</h3>
+<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
 <dl class="flow-dl">
   <dt>Nguồn</dt><dd>${(ld.nguon ?? []).map((n) => `<code>${esc(n)}</code>`).join(' + ') || '—'}</dd>
   <dt>Đích</dt><dd><strong>${esc(d.manHinh ?? '—')}</strong>${dichMo ? ` — ${dichMo}` : ''}</dd>
@@ -859,6 +922,9 @@ ${promptBox}
     section('phan-cong', 'Gợi ý người tiếp nhận (DD chưa giao)',
       'Xếp hạng theo: (1) đã làm menu đó trong dự án · (2) đang gánh ít UR sắp tới hạn · (3) báo cáo đầu ra thì ưu tiên người đóng góp nhiều UR đầu vào. Đây là ĐỀ XUẤT — PM chốt rồi mới giao.',
       phanCong.html, phanCong.dem),
+    section('forum', 'Nội dung forum kèm theo (DD)',
+      'UR chỉ ghi "update theo link forum" thì yêu cầu thật nằm ở topic, không nằm trong UR. Nội dung dưới đây lấy từ bản sao forum trong DB — đọc nó rồi mới kết luận phạm vi và giờ công.',
+      forum.html, forum.dem),
     section('ngoai-tlks', 'Ngoài TLKS, chưa có căn cứ', 'Cần biên bản nghiệm thu, phụ lục hoặc email đính kèm ở cấp dự án. Chưa có thì đề xuất TA và tính thêm giờ công.',
       urTable(ngoaiTlksThieuCanCu, [colStt, colNoiDung, colGiaiDoan, colTrangThai]), ngoaiTlksThieuCanCu.length),
     section('de-xuat-kl', 'Đề xuất KL', 'Mỗi mục phải dẫn được node Capability verdict "khong" làm căn cứ.',

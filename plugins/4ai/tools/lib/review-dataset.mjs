@@ -6,10 +6,14 @@
 // Khối nhân sự (roster phòng · lịch sử menu · tải hiện tại) do `staffing.mjs` dựng và đi kèm
 // dataset. Không có nó thì mục "Chưa giao lập trình (DD)" chỉ liệt kê được UR chứ không gợi
 // ý nổi ai nhận — xem buildNhanSu().
+//
+// Nội dung forum của UR ở DD do `forum.mjs` phân giải: nhiều UR chỉ ghi "update theo link
+// forum: <url>", yêu cầu thật nằm ở topic chứ không nằm trong UR — xem fetchForum().
 
 import { runSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadata.mjs';
 import { buildNhanSu, pmCuaDuAn } from './staffing.mjs';
+import { fetchForum } from './forum.mjs';
 
 export const STATUS_MAC_DINH = ['DD', 'XN', 'TH'];
 
@@ -332,9 +336,17 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
     ngayChay: args.ngayChay || todayIso(),
   }, deps);
 
+  // UR ở DD chỉ ghi "update theo link forum: <url>" thì nội dung yêu cầu nằm ở topic, không
+  // nằm trong UR — mở sẵn ra đây để cả PM lẫn agent phân tích được mà không phải rời báo cáo.
+  const forum = fetchForum(hub, { yeuCau: merged.yeuCau, maxTopic: args.maxTopicForum }, deps);
+  for (const u of merged.yeuCau) {
+    const topics = forum.theoUr[trimmed(u.stt_rec)];
+    if (topics?.length) u.forum = topics;
+  }
+
   return {
     source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA · QLDA_APP) — 4 câu SQL cố định'
-      + ', kèm nhân sự từ userinfo2 (DB sys)',
+      + ', kèm nhân sự từ userinfo2 (DB sys) và nội dung forum từ frpost',
     filters: {
       project: filters.project || undefined,
       pmName: filters.pmName || undefined,
@@ -346,12 +358,16 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
     projects: merged.projects,
     yeuCau: merged.yeuCau,
     nhanSu,
+    forum: { soTopic: forum.soTopic, thieuDuLieu: forum.thieuDuLieu },
     hint: 'Mỗi phần tử `yeuCau[]` là MỘT UR; `daumuc[]` đã gộp sẵn. `projects[]` là danh sách dự án có UR. '
       + '`ngay_ht`/`xac_nhan_da_hen_yn` lấy MAX(ngay_ht) theo (ma_da, giai_doan_da). '
       + '`truncated: true` = một trong bốn câu bị cắt ở maxRows. '
       + 'noi_dung mất dấu tiếng Việt do codepage sqlcmd — đối chiếu `noi_dung_len`. '
       + '`nhanSu.roster` là người CÒN làm và CÒN ở bộ phận đó (userinfo2.status=1, ma_bo_phan=dept); '
       + 'LTQL của dự án mà không có trong roster nghĩa là đã off hoặc chuyển phòng, khi đó PM là cấp PP. '
+      + '`yeuCau[].forum[]` (chỉ UR ở DD có link forum.fast.com.vn) là nội dung topic lấy từ bản sao '
+      + '`frpost` — với những UR chỉ ghi "update theo link forum" thì ĐÂY mới là yêu cầu thật, PHẢI đọc '
+      + 'nó rồi mới phân tích, đừng kết luận chỉ từ noi_dung của UR. '
       + 'AI chỉ phân tích UR trang_thai=DD; XN/TH chỉ hiện trên báo cáo để theo dõi hạn.',
   };
 }
@@ -435,6 +451,9 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
       // Mã đầu mục công việc (nbctdaumuc.ma_daumuc) — tín hiệu đầu vào/đầu ra thật cho
       // assignee.mjs → nhanDienBaoCaoDauRa(), mạnh hơn đoán qua từ khoá tự do trong noi_dung.
       maDaumuc: (u.daumuc ?? []).map((d) => trimmed(d.ma_daumuc)).filter(Boolean),
+      // Nội dung topic forum (chỉ UR ở DD có link) — với UR chỉ ghi "update theo link forum"
+      // thì đây mới là yêu cầu thật. Xem forum.mjs.
+      ...(u.forum?.length ? { forum: u.forum } : {}),
     });
   }
 

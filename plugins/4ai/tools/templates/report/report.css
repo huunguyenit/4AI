@@ -395,6 +395,62 @@ pre {
   background: var(--surface)
 }
 
+.forum {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--dd);
+  border-radius: 8px;
+  padding: 2px 16px 14px;
+  margin: 12px 0;
+  background: var(--surface)
+}
+
+.forum h3 {
+  margin-top: 14px;
+  color: var(--fg)
+}
+
+.fr-topic {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin: 8px 0;
+  background: var(--bg)
+}
+
+.fr-topic > summary {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mut)
+}
+
+.fr-topic[open] > summary {
+  border-bottom: 1px solid var(--line)
+}
+
+.fr-post {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.6
+}
+
+.fr-post:first-of-type {
+  border-top: none
+}
+
+.fr-meta {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: var(--mut)
+}
+
+.fr-post p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere
+}
+
 .phan-cong h3 {
   margin-top: 14px;
   color: var(--fg)

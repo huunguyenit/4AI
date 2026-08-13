@@ -293,7 +293,16 @@ function execSql(sqlcmd, conn, sql, { maxRows = 100, timeoutMs = 30000 } = {}) {
   const args = [
     '-S', conn.server,
     '-d', conn.database,
-    // -W (bỏ khoảng trắng thừa) loại trừ nhau với -Y; -W là thứ làm parseTsv chạy được.
+    // -W (bỏ khoảng trắng thừa) loại trừ nhau với -Y VÀ -y; -W là thứ làm parseTsv chạy được.
+    //
+    // Hệ quả phải biết: cột kiểu ĐỘ DÀI THAY ĐỔI (nvarchar(max)/varchar(max)/text/xml) bị
+    // sqlcmd cắt ở 256 ký tự theo mặc định của -y, và vì -y không dùng chung được với -W nên
+    // KHÔNG sửa được ở đây. Cắt này ÂM THẦM: không cảnh báo, không cờ truncated. Đo trên
+    // frpost.noi_dung: topic 28934 có 11.252 ký tự thật, chỉ nhận về 4.901.
+    //
+    // Cách xử lý là ở CÂU TRUY VẤN, không phải ở đây: CAST cột MAX sang nvarchar(4000) và
+    // SELECT kèm LEN() thật để caller đối chiếu, thấy hụt thì báo. Xem tools/lib/forum.mjs.
+    // Cột khai độ dài rõ (nvarchar(4000) như nbphyc.noi_dung) không dính.
     '-s', '\t', '-W', '-w', '65535',
     // Ép codepage ĐẦU RA sang UTF-8. Mặc định sqlcmd in theo codepage OEM của console —
     // codepage đó không biểu diễn được tiếng Việt nên nhãn bị thành '?' NGAY TRONG sqlcmd,

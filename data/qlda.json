@@ -479,6 +479,26 @@
       "thiHanh": "AI chỉ ĐỀ XUẤT và soạn sẵn câu lệnh. Mọi thay đổi trạng thái chỉ chạy sau khi PM xác nhận."
     },
 
+    "linkForum": {
+      "note": "Rất nhiều UR chỉ ghi 'update theo link forum: <url>' — nội dung yêu cầu THẬT nằm ở topic trên forum.fast.com.vn chứ không nằm trong UR. Đọc mỗi noi_dung của UR thì không đủ để phân tích phạm vi hay giờ công.",
+      "apDung": "CHỈ UR ở trang_thai = DD. Đó là cổng PM — chỗ duy nhất cần đủ dữ kiện để quyết định. UR đã sang XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng báo cáo.",
+      "nguon": {
+        "bang": "frpost",
+        "database": "app (QLDA_APP) — bản sao diễn đàn: 76.151 bài / 17.533 topic, url_goc giữ link gốc",
+        "cot": ["topic_id", "thu_tu", "post_id", "nguoi_viet", "ngay_viet", "noi_dung"],
+        "khongGoiHttp": "KHÔNG gọi HTTP ra forum — đã có bản sao trong DB, vừa không cần mạng vừa không phụ thuộc phiên đăng nhập.",
+        "vsFrPostsearch": "Proc dbo.fr_postsearch là công cụ TÌM KIẾM theo từ khoá. Ở đây đã có sẵn topic_id lấy từ chính link nên tra thẳng frpost là đường ngắn và chắc hơn — khớp đúng topic, không phụ thuộc thuật toán xếp hạng từ khoá."
+      },
+      "dangLink": "showthread.php?t=<topic>[&p=<post>][#post<post>] — đo trên 16 UR thật ở DD/XN/TH thì 100% theo dạng này. `t=` là bắt buộc; thiếu nó thì bỏ qua link chứ không đoán.",
+      "khongNhamOforum": "oforum.fast.com.vn là diễn đàn CŨ, không có trong frpost. Khớp lỏng theo chuỗi con sẽ đi tra topic_id của hệ thống khác rồi trả về bài không liên quan — phải khớp có ranh giới host.",
+      "catManh": {
+        "vanDe": "frpost.noi_dung là nvarchar(MAX), mà sqlcmd CẮT ÂM THẦM cột kiểu độ dài thay đổi ở 256 ký tự (mặc định của -y, không tắt được vì -y xung khắc với -W). Đo thật: 33.622/76.151 bài (44%) dài quá 256; topic 28934 có 11.252 ký tự nhưng chỉ nhận về 4.901.",
+        "cachXuLy": "Cắt thành mảnh nvarchar(4000) trong SQL rồi ghép lại ở JS (32 mảnh = 128.000 ký tự, phủ được bài dài nhất đang có là 124.769). Cột khai độ dài rõ như nbphyc.noi_dung KHÔNG dính lỗi này.",
+        "luoiAnToan": "SELECT kèm LEN() thật rồi đối chiếu sau khi ghép; hụt thì báo ra thieuDuLieu. Cắt lặng lẽ là kiểu hỏng khó thấy nhất — chuỗi trả về trông vẫn như một giá trị hoàn chỉnh."
+      },
+      "implementedAt": "tools/lib/forum.mjs (bóc link + SQL + ghép mảnh); tools/lib/report.mjs → forumBlock() và escLink()."
+    },
+
     "kiemTlks": {
       "note": "Áp dụng cho UR ở trạng thái DD.",
       "rule": "tlks_yn chỉ được tick khi trang_tlks ghi rõ số trang / mục lục. Nhưng tick không đủ tin: có UR tick tlks_yn mà nội dung ghi không trùng tài liệu. LUÔN đọc nội dung tài liệu rồi mới kết luận.",

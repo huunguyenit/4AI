@@ -14,6 +14,12 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Sửa
 
+- **sqlcmd cắt âm thầm cột `nvarchar(MAX)` ở 256 ký tự.** Mặc định của cờ `-y`, và không tắt
+  được vì `-y` xung khắc với `-W` (thứ làm parser TSV chạy được). Cắt này không cảnh báo,
+  không cờ `truncated` — chuỗi trả về trông vẫn như một giá trị hoàn chỉnh. Đo trên `frpost`:
+  44% số bài dài quá 256; topic 28934 có 11.252 ký tự nhưng chỉ nhận về 4.901. Cột khai độ
+  dài rõ (`nbphyc.noi_dung` nvarchar(4000)) không dính, nên lỗi nằm im tới giờ. Cách chữa là
+  ở câu truy vấn: cắt mảnh `nvarchar(4000)` rồi ghép lại, kèm `LEN()` thật để đối chiếu.
 - **Mục "Chưa giao lập trình (DD)" không lấy được nhân sự gợi ý.** Từ lúc `4ai report` bỏ
   payload khai tay, `datasetToPayloads()` không dựng khối `nhanSu` nên mọi dòng đều in
   "chưa nạp `nhanSu`" — `assignee.mjs` vẫn đúng, chỉ là không ai đưa dữ kiện cho nó.
@@ -29,6 +35,14 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Thêm
 
+- **Link trong nội dung UR bấm được trên báo cáo HTML.** `escLink()` escape trước rồi mới
+  dựng thẻ `<a>` — thứ tự đó là thứ giữ an toàn: `noi_dung` do người dùng nhập nên không được
+  chảy thẳng vào HTML. Dấu câu cuối câu (`.` `)` …) nằm ngoài href, `&` trong query string
+  không cắt link làm đôi.
+- **UR ở DD có link forum.fast.com.vn được mở sẵn nội dung topic.** Nhiều UR chỉ ghi "update
+  theo link forum: <url>" — yêu cầu thật nằm ở topic chứ không nằm trong UR. `tools/lib/forum.mjs`
+  bóc link, tra bản sao diễn đàn trong DB (`frpost`) và gắn vào payload; báo cáo hiện trong
+  mục "Nội dung forum kèm theo (DD)", thu trong `<details>`. Không gọi HTTP ra ngoài.
 - **Báo cáo lấy lên cả việc PM tự làm.** Phạm vi rà soát nay có hai lý do OR với nhau: dự án
   PM đứng tên LTQL (hoặc bộ phận `--dept`), **hoặc** UR mang `nbphyc.ma_lt1 = {PMName}` ở
   trạng thái XN/TH. PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình — lọc theo LTQL
