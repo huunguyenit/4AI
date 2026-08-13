@@ -64,6 +64,77 @@ phân phối. Cần chúng thì dùng cách 2.
 
 Xem [Quickstart](#quickstart--sửa-một-điều-gì-đó) bên dưới.
 
+## ⚙️ Cấu hình cục bộ (trước khi dùng `query_sql` / `report`)
+
+Áp dụng cho **cả hai cách cài** — MCP `4ai-fbo` cần biết chuỗi kết nối DB và danh tính PM
+trước khi `query_sql`, `get_review_dataset` hay `node tools/4ai.mjs report` chạy được.
+`data/qlda.json` chỉ chứa **tên key**, không bao giờ chứa giá trị thật (bị `4ai check` soi).
+
+### 1. Yêu cầu hệ thống
+
+- **Node.js 22+** — MCP dùng `node:sqlite` built-in, không `npm install`.
+- **sqlcmd** — tự dò ở PATH rồi tới các thư mục cài quen thuộc (Client SDK\ODBC\<ver>\Tools\Binn,
+  SQL Server Tools\Binn, go-sqlcmd). Cài chỗ khác thì đặt env `FBO_SQLCMD` trỏ thẳng vào
+  `sqlcmd.exe` — không cần sửa code.
+
+### 2. Danh tính PM — `set_pm_identity`
+
+Gọi tool MCP `set_pm_identity` (agent gọi giúp, hoặc tự yêu cầu agent gọi) với mã nhân viên và
+mã bộ phận thật:
+
+```
+set_pm_identity(maNv: "PM01", boPhanLt: "FSD")
+```
+
+Tool tự ghi vào `data/qlda.local.json` (đã gitignore) ở đúng data root của lần cài (dev: gốc
+hub; plugin: `${CLAUDE_PLUGIN_DATA}` — sống sót qua update). Các tool khác (`list_programs`,
+`get_review_dataset`, `report`) đọc lại giá trị này ngay lần gọi tiếp theo, không cần khởi động
+lại MCP server. Nhập nhầm dạng token mẫu (`{PMName}`) sẽ bị tool từ chối, không âm thầm nuốt.
+
+### 3. Chuỗi kết nối DB — env hoặc `qlda.local.json`
+
+Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.json` sau, cuối cùng mới dò
+`Web.config` của chương trình QLDA**:
+
+| Biến môi trường | Tương đương trong `qlda.local.json` | Dùng cho |
+|---|---|---|
+| `QLDA_APP_CONNECTION` | `appConnectionString` | DB nghiệp vụ QLDA (`QLDA_APP`) |
+| `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA (`QLDA_SYS`) |
+| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | Chỉ mục đồ thị năng lực (`GRAPH_4AI`) |
+
+Đa số máy **không cần khai gì cả** — `Web.config` của QLDA tự phân giải được. Chỉ cần override
+khi máy không truy cập được share chứa QLDA, hoặc muốn trỏ DB khác lúc test.
+
+Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.gitignore`):
+
+```json
+{
+  "pm": { "maNv": "PM01", "boPhanLt": "FSD" },
+  "appConnectionString": "...",
+  "sysConnectionString": "...",
+  "graphConnectionString": "..."
+}
+```
+
+**Không bao giờ** dán chuỗi kết nối vào `data/qlda.json` (file commit) — `4ai check` chạy
+`scanSecrets` và sẽ fail build.
+
+### 4. Override target theo máy — `targets.local.json` (tuỳ chọn, chỉ Cách 2)
+
+Chỉ cần khi đường dẫn trong `targets.json` không đúng trên máy bạn (ví dụ hub sync ra ổ đĩa
+khác). Tạo `targets.local.json` ở gốc repo (đã gitignore), merge theo `name` vào `targets.json`
+lúc `sync` chạy:
+
+```json
+{ "targets": [{ "name": "4ai", "path": "D:\\đường\\dẫn\\khác\\4AI" }] }
+```
+
+Không cần tạo nếu máy bạn dùng đúng path mặc định trong `targets.json`.
+
+### 5. `.cursor/mcp.json` — không tạo tay
+
+Sinh tự động bởi `sync` (đã gitignore) — đừng chỉnh tay, chỉnh xong `sync` sẽ ghi đè.
+
 ## 🚀 Dùng trên từng Platform
 
 ### Claude Code

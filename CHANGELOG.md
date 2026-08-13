@@ -5,6 +5,13 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Tài liệu
+
+- **README thiếu hướng dẫn setup cục bộ.** Thêm mục "Cấu hình cục bộ" — yêu cầu Node.js 22+,
+  cách gọi `set_pm_identity` để ghi `data/qlda.local.json`, bảng biến môi trường
+  (`QLDA_APP_CONNECTION`, `QLDA_SYS_CONNECTION`, `GRAPH_4AI_CONNECTION`, `FBO_SQLCMD`) và thứ
+  tự phân giải, cách dùng `targets.local.json` để override path theo máy.
+
 ### Sửa
 
 - **Mục "Chưa giao lập trình (DD)" không lấy được nhân sự gợi ý.** Từ lúc `4ai report` bỏ
