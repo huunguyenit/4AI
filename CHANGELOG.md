@@ -14,6 +14,13 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Sửa
 
+- **Kết nối QLDA khai bằng env nhưng code không dùng.** `data/qlda.json → databases.qlda.resolveOrder`
+  và README đều khai env → `qlda.local.json` → `Web.config` từ lâu, nhưng `sql.mjs` chưa bao giờ
+  cài đặt bước env/local — mọi truy vấn QLDA đều đi thẳng Web.config. Hỏng này im lặng: kết quả
+  vẫn đúng nên không ai nhận ra, cho tới lúc máy không truy cập được share chứa QLDA thì mới vỡ.
+  Nay phân giải đúng thứ tự đã khai. Chương trình của **khách** (đường dẫn từ `nbdmda`) vẫn đọc
+  `Web.config` của chính nó — mỗi khách một server/database riêng, không được lấy nhầm kết nối
+  QLDA. Thêm `nguonKetNoi()` để kiểm nguồn mà không phải in chuỗi bí mật.
 - **sqlcmd cắt âm thầm cột `nvarchar(MAX)` ở 256 ký tự.** Mặc định của cờ `-y`, và không tắt
   được vì `-y` xung khắc với `-W` (thứ làm parser TSV chạy được). Cắt này không cảnh báo,
   không cờ `truncated` — chuỗi trả về trông vẫn như một giá trị hoàn chỉnh. Đo trên `frpost`:

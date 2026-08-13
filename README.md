@@ -105,6 +105,16 @@ Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.
 Đa số máy **không cần khai gì cả** — `Web.config` của QLDA tự phân giải được. Chỉ cần override
 khi máy không truy cập được share chứa QLDA, hoặc muốn trỏ DB khác lúc test.
 
+Thứ tự này **chỉ áp cho DB nội bộ QLDA**. Chương trình của **khách** (đường dẫn lấy từ
+`nbdmda`) luôn đọc `Web.config` của chính nó — mỗi khách một server/database riêng, không có
+cách nào khai trước bằng env, và không được phép lấy nhầm kết nối QLDA.
+
+Khai bằng env/local thì **không phải truyền `database` ở mỗi lệnh** nữa (thiếu `Initial Catalog`
+thì lấy `databaseName`/`sysDatabaseName` trong `data/qlda.json`); chỉ khi rớt xuống `Web.config`
+mới cần, vì Web.config của QLDA để placeholder `%Database`. Muốn kiểm kết nối đang lấy từ đâu
+mà không phải in chuỗi bí mật ra màn hình thì dùng `nguonKetNoi(programPath, dbType)` trong
+`mcp/fbo/lib/sql.mjs` — nó chỉ trả về tên nguồn (`env` / `qlda.local.json` / `Web.config`).
+
 Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.gitignore`):
 
 ```json

@@ -1,14 +1,32 @@
 // sql.mjs — chạy SQL trên database của một program FBO.
 //
-// HỢP ĐỒNG BẢO MẬT: module này đọc connection string từ Web.config và KHÔNG BAO GIỜ
+// HỢP ĐỒNG BẢO MẬT: module này đọc connection string từ env và KHÔNG BAO GIỜ
 // trả nó ra ngoài. Không có hàm nào ở đây trả về chuỗi kết nối, user hay password —
 // kể cả trong message lỗi. Lỗi từ sqlcmd được lọc trước khi trả về.
+//
+// HAI LOẠI DATABASE, HAI ĐƯỜNG PHÂN GIẢI KHÁC HẲN NHAU:
+//
+//   QLDA (DB nội bộ của công ty — nbdmda/nbphyc/frpost/userinfo2)
+//     → env `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION`, rồi `data/qlda.local.json`.
+//       Web.config chỉ là chốt cuối. Xem `data/qlda.json → databases.qlda.resolveOrder`.
+//
+//   DA — chương trình của KHÁCH (đường dẫn lấy từ nbdmda.dir_pro_web)
+//     → Web.config của chính program đó. Mỗi khách một server/database riêng, không có
+//       cách nào khai trước bằng env, và cũng KHÔNG được lấy nhầm kết nối QLDA.
+//
+// Phân biệt bằng `programPath`: khớp với `databases.qlda.path` thì là QLDA. Xem laQldaProgram().
 
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { readSource, decodeSource } from './encoding.mjs';
+import { dataRoot } from './index.mjs';
+import { loadQldaConfig } from '../../../src/database/qlda-metadata.mjs';
+
+/** Gốc hub tính từ chính file này (mcp/fbo/lib/ → lên ba cấp), không phụ thuộc cwd. */
+const MODULE_HUB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 const SECRET_SHAPES = [
   /(?:password|pwd)\s*=\s*[^;"'\s]+/gi,
@@ -37,9 +55,6 @@ function scrub(text, conn) {
       out = out.split(secret).join('***');
     }
   }
-  // Chưa đủ: Web.config có thể trỏ tới alias, còn SQL Server tự khai TÊN INSTANCE THẬT trong
-  // message (`Msg 208 … Server FSGSERVER\SQL2014EX, Line 3`). Tên đó không nằm ở đâu để mà
-  // đối chiếu, nên chặn theo pattern của sqlcmd.
   return out.replace(/\bServer\s+[^,\n]+,/gi, 'Server ***,');
 }
 
@@ -81,7 +96,14 @@ function connFromWebConfig(text, dbType) {
   if (!m) {
     throw new Error(`Web.config không có connectionStrings entry \`${wanted}\`.`);
   }
-  const p = parseConnStringPairs(m[1]);
+  return connFromString(m[1]);
+}
+
+// ---------------------------------------------------------------- QLDA (DB nội bộ)
+
+/** Tham số kết nối từ một chuỗi connection string — dùng chung cho env và local file. */
+function connFromString(cs) {
+  const p = parseConnStringPairs(cs);
   return {
     server: p['data source'] ?? p.server ?? '',
     database: p['initial catalog'] ?? p.database ?? '',
@@ -91,8 +113,112 @@ function connFromWebConfig(text, dbType) {
   };
 }
 
+/**
+ * So đường dẫn program KHÔNG phân biệt hoa thường, dấu gạch xuôi/ngược và gạch thừa ở cuối.
+ * `\\SERVER\Share\SRC-ONL\` và `//server/share/fsgsrc-onl` là một chỗ — so chuỗi thô sẽ
+ * trượt và lặng lẽ rơi xuống Web.config, tức là mất tác dụng của env mà không ai biết.
+ */
+function chuanHoaDuongDan(p) {
+  return String(p ?? '').trim().replace(/\//g, '\\').replace(/\\+$/, '').toLowerCase();
+}
+
+/** Khối `databases.qlda` của data/qlda.json. Trả null khi hub không có file cấu hình. */
+function qldaConfig() {
+  return loadQldaConfig()?.databases?.qlda ?? null;
+}
+
+/** Program này có phải chính chương trình QLDA nội bộ không. */
+function laQldaProgram(programPath) {
+  const khai = qldaConfig()?.path;
+  if (!khai) return false;
+  return chuanHoaDuongDan(programPath) === chuanHoaDuongDan(khai);
+}
+
+/**
+ * Đọc chuỗi kết nối QLDA từ `data/qlda.local.json`.
+ *
+ * File này ĐÃ gitignore và bị `4ai check` soi — giá trị thật chỉ được nằm ở đây hoặc ở env.
+ * Đọc thẳng trong sql.mjs chứ không mượn qlda-metadata.mjs: hợp đồng bảo mật ở đầu file nói
+ * connection string không rời khỏi module này, nên nó cũng không được đi vào một module khác
+ * chỉ để quay lại đây.
+ */
+function localConnString(key) {
+  // Cùng thứ tự dò như loadQldaConfig: data root của bản cài (plugin đặt FBO_DATA_ROOT), rồi
+  // gốc module, rồi cwd. Chạy như MCP server thì cwd KHÔNG chắc là hub — chỉ dựa vào cwd là
+  // lúc chạy dev thì thấy file, lúc chạy thật thì không, mà lại im lặng rớt về Web.config.
+  const goc = [dataRoot(MODULE_HUB_ROOT), MODULE_HUB_ROOT, process.cwd()].filter(Boolean);
+  for (const root of goc) {
+    const file = path.join(root, 'data', 'qlda.local.json');
+    if (!fs.existsSync(file)) continue;
+    try {
+      const v = JSON.parse(fs.readFileSync(file, 'utf8'))?.[key];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    } catch {
+      // File hỏng cú pháp thì coi như chưa khai — rớt tiếp xuống Web.config, đừng làm sập
+      // mọi truy vấn chỉ vì một dấu phẩy thừa trong file cấu hình cục bộ.
+    }
+  }
+  return '';
+}
+
+/**
+ * Kết nối này đến TỪ ĐÂU — chỉ trả về TÊN NGUỒN, không bao giờ trả giá trị.
+ *
+ * Có hàm này vì hỏng kiểu "env khai rồi mà vẫn đi đọc Web.config" hoàn toàn im lặng: kết quả
+ * truy vấn vẫn đúng nên không ai nhận ra, cho tới lúc máy khác mất share thì mới vỡ. Đây là
+ * cách kiểm mà không phải in chuỗi kết nối ra màn hình.
+ *
+ * @returns {'env'|'qlda.local.json'|'Web.config'}
+ */
+export function nguonKetNoi(programPath, dbType = 'app') {
+  if (!laQldaProgram(programPath)) return 'Web.config';
+  const laSys = dbType === 'sys';
+  if (String(process.env[laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'] ?? '').trim()) return 'env';
+  if (localConnString(laSys ? 'sysConnectionString' : 'appConnectionString')) return 'qlda.local.json';
+  return 'Web.config';
+}
+
+/**
+ * Kết nối QLDA theo đúng `resolveOrder` đã khai ở data/qlda.json: env → qlda.local.json.
+ * Không có cái nào thì trả null để caller rớt về Web.config (bước cuối của resolveOrder).
+ */
+function qldaConn(dbType) {
+  const laSys = dbType === 'sys';
+  const cs = String(process.env[laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'] ?? '').trim()
+    || localConnString(laSys ? 'sysConnectionString' : 'appConnectionString');
+  if (!cs) return null;
+
+  const conn = connFromString(cs);
+  if (!conn.server) {
+    throw new Error(
+      `Chuỗi kết nối QLDA (${laSys ? 'sys' : 'app'}) không có \`Data Source\`/\`Server\` — kiểm lại `
+      + `biến env ${laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'} hoặc data/qlda.local.json.`);
+  }
+  // Chuỗi kết nối không khai Initial Catalog thì lấy tên DB đã khai sẵn trong qlda.json —
+  // nhờ vậy không phải truyền `database` ở mọi lệnh như thời còn đọc Web.config (%Database).
+  if (isPlaceholder(conn.database)) {
+    const cfg = qldaConfig();
+    conn.database = (laSys ? cfg?.sysDatabaseName : cfg?.databaseName) ?? '';
+  }
+  return conn;
+}
+
+// ---------------------------------------------------------------- phân giải theo leg
+
 /** Leg sys: placeholder thì rớt về appSetting `sysDatabaseName`. */
 function resolveSysConn(programPath, databaseOverride) {
+  if (laQldaProgram(programPath)) {
+    const conn = qldaConn('sys');
+    if (conn) {
+      if (databaseOverride) conn.database = databaseOverride;
+      if (isPlaceholder(conn.database)) {
+        throw new Error(
+          'Kết nối QLDA (sys) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
+          + 'kết nối, hoặc `databases.qlda.sysDatabaseName` trong data/qlda.json, hoặc truyền `database`.');
+      }
+      return conn;
+    }
+  }
   const text = readWebConfigText(programPath);
   const conn = connFromWebConfig(text, 'sys');
   if (databaseOverride) {
@@ -133,7 +259,7 @@ function lookupEntityDatabase(sqlcmd, programPath, entityCode) {
     throw new Error(entityCode
       ? `Database hệ thống \`${sys.database}\` không có entity \`${entityCode}\` (hoặc cdata rỗng).`
       : `Bảng entity của database hệ thống \`${sys.database}\` không có dòng nào có cdata — ` +
-        'không suy ra được database app. Truyền tham số `database`.');
+      'không suy ra được database app. Truyền tham số `database`.');
   }
   if (rows.length > 1 && !entityCode) {
     throw new Error(
@@ -147,6 +273,19 @@ function lookupEntityDatabase(sqlcmd, programPath, entityCode) {
 
 /** Leg app: override > entity lookup > giá trị ghi thẳng trong Web.config. */
 function resolveAppConn(sqlcmd, programPath, databaseOverride, entityCode) {
+  if (laQldaProgram(programPath)) {
+    const conn = qldaConn('app');
+    if (conn) {
+      if (databaseOverride) conn.database = databaseOverride;
+      // QLDA là DB nội bộ một entity — không đi tra bảng `entity` như chương trình khách.
+      if (isPlaceholder(conn.database)) {
+        throw new Error(
+          'Kết nối QLDA (app) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
+          + 'kết nối, hoặc `databases.qlda.databaseName` trong data/qlda.json, hoặc truyền `database`.');
+      }
+      return conn;
+    }
+  }
   const conn = connFromWebConfig(readWebConfigText(programPath), 'app');
   if (databaseOverride) {
     conn.database = databaseOverride;
