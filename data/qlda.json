@@ -428,9 +428,17 @@
     "pm": { "maNv": "{PMName}", "boPhanLt": "{PMDept}" },
 
     "scope": {
+      "note": "Hai LÝ DO một UR lọt vào phạm vi, OR với nhau: (1) thuộc quyền quản lý của PM, (2) là việc PM tự làm. Cưỡng chế ở tools/lib/review-dataset.mjs → buildReviewWhere().",
       "duAn": {
         "rule": "Dự án mà PM đứng tên lập trình quản lý: {PMName} nằm trong nbdmda.ma_lt1, ma_lt2 hoặc ma_lt3.",
         "note": "Một dự án có thể có nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận, chỉ lọc theo LTQL."
+      },
+      "vieCPmTuLam": {
+        "rule": "Kéo thêm mọi UR có nbphyc.ma_lt1 = {PMName} và trang_thai thuộc XN/TH, kể cả khi dự án đó do người khác đứng LTQL.",
+        "viSao": "PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình — PM cần thấy công việc của chính mình. Lọc theo LTQL dự án chỉ ra việc PM QUẢN LÝ, không ra việc PM ĐANG LÀM. Đo trên dữ liệu thật (PM01, DD/XN/TH): 10 UR mang tên PM thì 6 nằm ở dự án người khác quản lý — lọt 6/10 nếu thiếu lý do này.",
+        "chiXnTh": "CỐ Ý bỏ DD. DD là cổng PM: ma_lt1 = mã PM ở trạng thái đó chỉ là giá trị mặc định màn hình BA để lại, chưa phải việc đã nhận (xem review.phanCong.chuaPhanCong). Kéo cả DD vào sẽ bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.",
+        "chiMoRong": "Nhánh này chỉ MỞ RỘNG một phạm vi đã có, không bao giờ đứng một mình. Chỉ truyền `--project` (không pmName/pmDept) thì phạm vi vốn đã là toàn bộ UR của dự án — thêm nhánh vào lúc đó biến OR thành phép thu hẹp.",
+        "khongPhaThuHep": "`project` và `statusUR` vẫn AND ở ngoài — chúng là phép thu hẹp tường minh, nhánh này không được phép phá. Lọc statusUR=['DD'] mà vẫn lòi ra XN/TH thì filter mất nghĩa."
       },
       "yeuCau": {
         "trangThai": ["DD", "XN", "TH"],

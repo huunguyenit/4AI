@@ -36,6 +36,37 @@ ok('WHERE có ma_da DEMO1 và DD/XN/TH',
   && buildReviewWhere(filters).includes("'DD'")
   && buildReviewWhere(filters).includes("'TH'"));
 
+process.stdout.write('\n=== phạm vi: kéo thêm việc PM tự làm (ma_lt1 = PM, XN/TH) ===\n');
+// PM cũng là nhân viên của phòng. Lọc theo LTQL dự án chỉ ra việc PM QUẢN LÝ — đo trên dữ
+// liệu thật (PM01): 10 UR mang tên PM thì 6 nằm ở dự án người khác đứng LTQL.
+const wMacDinh = buildReviewWhere(
+  { project: '', pmName: 'PM01', pmDept: '', pmSelf: 'PM01', statusList: STATUS_MAC_DINH });
+ok('Mặc định: OR thêm nhánh việc PM tự làm',
+  wMacDinh.includes("RTRIM(yc.ma_lt1) = 'PM01'") && wMacDinh.includes(' OR '), wMacDinh);
+ok('Nhánh PM tự làm CHỈ lấy XN/TH, không lấy DD (DD là cổng PM, mặc định BA để lại)',
+  /RTRIM\(yc\.ma_lt1\) = 'PM01' AND RTRIM\(yc\.trang_thai\) IN \('XN', 'TH'\)/.test(wMacDinh), wMacDinh);
+
+const wDept = buildReviewWhere(
+  { project: '', pmName: '', pmDept: 'FSD', pmSelf: 'PM01', statusList: STATUS_MAC_DINH });
+ok('--dept cũng OR thêm việc PM tự làm (UR có bp_lt phòng khác vẫn lấy được)',
+  wDept.includes("RTRIM(yc.bp_lt) = 'FSD' OR") && wDept.includes("RTRIM(yc.ma_lt1) = 'PM01'"), wDept);
+
+// Nhánh này chỉ MỞ RỘNG phạm vi đã có. Đứng một mình nó biến OR thành phép thu hẹp.
+const wProject = buildReviewWhere(
+  { project: 'DEMO1', pmName: '', pmDept: '', pmSelf: 'PM01', statusList: STATUS_MAC_DINH });
+ok('--project đứng một mình KHÔNG bị nhánh PM cắt hẹp lại',
+  !wProject.includes('ma_lt1') && wProject.includes("RTRIM(yc.ma_da) = 'DEMO1'"), wProject);
+
+// project/statusUR là phép THU HẸP tường minh — nhánh PM không được phép phá.
+const wChiDd = buildReviewWhere(
+  { project: '', pmName: 'PM01', pmDept: '', pmSelf: 'PM01', statusList: ['DD'] });
+ok('statusUR=[DD] vẫn chốt DD ở ngoài, XN/TH không lọt ra',
+  wChiDd.endsWith("RTRIM(yc.trang_thai) IN ('DD')"), wChiDd);
+
+ok('Không cấu hình PM -> WHERE y như cũ, không thêm nhánh nào',
+  buildReviewWhere({ project: '', pmName: '', pmDept: 'FSD', pmSelf: '', statusList: STATUS_MAC_DINH })
+  === "RTRIM(yc.bp_lt) = 'FSD' AND RTRIM(yc.trang_thai) IN ('DD', 'XN', 'TH')");
+
 process.stdout.write('\n=== mergeReviewRows ===\n');
 const merged = mergeReviewRows({
   yeuCauRows: [

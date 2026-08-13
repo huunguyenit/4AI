@@ -146,7 +146,7 @@
     },
     {
       "path": "data/qlda.json",
-      "sha256": "317700e05256e6b54c8f12b0e8e3a1bafed3be077efb1106525b52b913963b49"
+      "sha256": "a2a9787097f9f7c6904ed624acbba4557389ce5bd0a1a24337e5f6270469cfc4"
     },
     {
       "path": "mcp/fbo/lib/encoding.mjs",
@@ -442,7 +442,7 @@
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "d3306f68f05ad3e81f91ba19cfbf545627db9e1f52078f1491afba122e364196"
+      "sha256": "040e10082cf2d448d4620fe541e9c6545691d3044e3fc446827fcc1f20bae90b"
     },
     {
       "path": "tools/lib/schema.mjs",
@@ -488,6 +488,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T03:08:29.740Z",
+  "syncedAt": "2026-08-13T04:19:41.500Z",
   "target": "plugin"
 }

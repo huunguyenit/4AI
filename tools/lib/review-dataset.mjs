@@ -42,18 +42,25 @@ function qldaConnection(hub) {
   return { programPath: qlda.path, database: qlda.databaseName };
 }
 
+/** Trạng thái mà UR mang tên PM được coi là "việc PM đang tự làm" — xem buildReviewWhere(). */
+export const STATUS_PM_TU_LAM = ['XN', 'TH'];
+
 /**
  * Chốt filter AND. Bỏ trống cả project/pmName/pmDept → lấy pm.maNv từ qlda.local.json.
- * pmDept một mình = toàn phòng, không tự thêm PM.
+ * pmDept một mình = toàn phòng, không tự thêm PM vào phạm vi dự án.
+ *
+ * `pmSelf` LUÔN được phân giải từ cấu hình (không phụ thuộc filter nào được truyền) — nó
+ * không thu hẹp phạm vi mà chỉ dùng để KÉO THÊM việc PM tự làm, xem buildReviewWhere().
  */
 export function resolveReviewFilters(hub, args = {}) {
   const project = trimmed(args.project);
   let pmName = trimmed(args.pmName);
   const pmDept = trimmed(args.pmDept);
+  const cfg = loadQldaConfig(hub);
+  const cfgPm = trimmed(cfg?.review?.pm?.maNv);
+  const pmSelf = !isPmPlaceholder(cfgPm) ? cfgPm : '';
   if (!project && !pmName && !pmDept) {
-    const cfg = loadQldaConfig(hub);
-    const pmCode = trimmed(cfg?.review?.pm?.maNv);
-    pmName = !isPmPlaceholder(pmCode) ? pmCode : '';
+    pmName = pmSelf;
   }
   if (!project && !pmName && !pmDept) {
     throw new Error(
@@ -64,18 +71,50 @@ export function resolveReviewFilters(hub, args = {}) {
   if (statusList.length === 0) {
     throw new Error('statusUR rỗng sau khi lọc — truyền ít nhất một mã trạng thái.');
   }
-  return { project, pmName, pmDept, statusList };
+  return { project, pmName, pmDept, pmSelf, statusList };
 }
 
-/** WHERE dùng chung bốn câu — alias bắt buộc `yc` (nbphyc) và `dm` (nbdmda). */
-export function buildReviewWhere({ project, pmName, pmDept, statusList }) {
-  const where = [];
-  if (project) where.push(`RTRIM(yc.ma_da) = '${sqlLiteral(project)}'`);
+/**
+ * WHERE dùng chung bốn câu — alias bắt buộc `yc` (nbphyc) và `dm` (nbdmda).
+ *
+ * Hai LÝ DO một UR lọt vào phạm vi, OR với nhau:
+ *   1. Phạm vi quản lý — dự án PM đứng tên LTQL (`pmName`) và/hoặc bộ phận lập trình
+ *      (`pmDept`). Đây là phần cũ, giữ nguyên quan hệ AND giữa hai filter đó.
+ *   2. VIỆC PM TỰ LÀM — `nbphyc.ma_lt1` = PM, chỉ ở trạng thái XN/TH.
+ *
+ * Vì sao cần lý do 2: PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình. Lọc theo
+ * LTQL dự án chỉ trả về việc PM QUẢN LÝ, không trả về việc PM ĐANG LÀM trên dự án người khác
+ * quản lý — đo trên dữ liệu thật (PM01, DD/XN/TH): 10 UR mang tên PM thì 6 nằm ở dự án
+ * do người khác đứng LTQL, tức lọt 6/10 nếu chỉ có lý do 1.
+ *
+ * Vì sao CHỈ XN/TH: DD là cổng PM — UR ở DD mang tên PM chỉ là giá trị mặc định màn hình BA
+ * để lại, chưa phải việc đã nhận (xem laChuaPhanCong() ở assignee.mjs); kéo chúng vào đây sẽ
+ * bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.
+ *
+ * `project` và `statusList` vẫn AND ở ngoài: chúng là phép THU HẸP tường minh, lý do 2 không
+ * được phép phá. Lọc `statusUR=['DD']` mà vẫn lòi ra XN/TH thì filter mất nghĩa.
+ */
+export function buildReviewWhere({ project, pmName, pmDept, pmSelf, statusList }) {
+  const phamVi = [];
   if (pmName) {
     const lit = sqlLiteral(pmName);
-    where.push(`(RTRIM(dm.ma_lt1) = '${lit}' OR RTRIM(dm.ma_lt2) = '${lit}' OR RTRIM(dm.ma_lt3) = '${lit}')`);
+    phamVi.push(`(RTRIM(dm.ma_lt1) = '${lit}' OR RTRIM(dm.ma_lt2) = '${lit}' OR RTRIM(dm.ma_lt3) = '${lit}')`);
   }
-  if (pmDept) where.push(`RTRIM(yc.bp_lt) = '${sqlLiteral(pmDept)}'`);
+  if (pmDept) phamVi.push(`RTRIM(yc.bp_lt) = '${sqlLiteral(pmDept)}'`);
+
+  const lyDo = [];
+  if (phamVi.length) lyDo.push(phamVi.join(' AND '));
+  // Lý do 2 chỉ MỞ RỘNG một phạm vi đã có, không bao giờ tự đứng một mình. Không có phamVi
+  // (vd chỉ truyền `--project`) thì phạm vi vốn đã là "mọi UR của dự án đó" — thêm nhánh này
+  // vào lúc đó biến OR thành phép THU HẸP, cắt báo cáo dự án xuống còn mỗi việc của PM.
+  if (pmSelf && phamVi.length) {
+    const tuLam = STATUS_PM_TU_LAM.map((s) => `'${sqlLiteral(s)}'`).join(', ');
+    lyDo.push(`(RTRIM(yc.ma_lt1) = '${sqlLiteral(pmSelf)}' AND RTRIM(yc.trang_thai) IN (${tuLam}))`);
+  }
+
+  const where = [];
+  if (project) where.push(`RTRIM(yc.ma_da) = '${sqlLiteral(project)}'`);
+  if (lyDo.length) where.push(lyDo.length > 1 ? `(${lyDo.join(' OR ')})` : lyDo[0]);
   where.push(`RTRIM(yc.trang_thai) IN (${statusList.map((s) => `'${sqlLiteral(s)}'`).join(', ')})`);
   return where.join(' AND ');
 }

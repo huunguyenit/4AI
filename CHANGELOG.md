@@ -29,6 +29,13 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Thêm
 
+- **Báo cáo lấy lên cả việc PM tự làm.** Phạm vi rà soát nay có hai lý do OR với nhau: dự án
+  PM đứng tên LTQL (hoặc bộ phận `--dept`), **hoặc** UR mang `nbphyc.ma_lt1 = {PMName}` ở
+  trạng thái XN/TH. PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình — lọc theo LTQL
+  dự án chỉ ra việc PM *quản lý*, không ra việc PM *đang làm*. Đo trên dữ liệu thật: 10 UR
+  mang tên PM thì 6 nằm ở dự án người khác quản lý, trước đây lọt hết. Cố ý bỏ DD (mã PM ở
+  DD chỉ là mặc định màn hình BA để lại) và nhánh này chỉ mở rộng phạm vi đã có, không được
+  đứng một mình — `--project` đơn lẻ vẫn trả về nguyên dự án.
 - **Nhân sự lấy từ `userinfo2` (DB sys), không đoán.** Ứng viên = người CÒN làm và CÒN ở bộ
   phận (`status='1'`, `ma_bo_phan={PMDept}`). Ai off hoặc chuyển bộ phận thì không được đề
   xuất nhận việc mới, dù tên vẫn còn trên dự án cũ.
