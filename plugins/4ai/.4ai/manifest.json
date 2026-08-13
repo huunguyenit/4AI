@@ -390,7 +390,11 @@
     },
     {
       "path": "tools/lib/emit/common.mjs",
-      "sha256": "fd9ba0adb6d185f1dbf7e252af01e5c82af7d7ce724d9cbe5775b6efdaa7aa6e"
+      "sha256": "f71ef3ec405cf3c0077b23d7dd326e6544881d773708c0609a186204f70d2fe4"
+    },
+    {
+      "path": "tools/lib/emit/cursor-plugin.mjs",
+      "sha256": "a388eec060cabeeade316ab63f85e1a616e8133b89f88a0506a49a91a8497854"
     },
     {
       "path": "tools/lib/emit/cursor.mjs",
@@ -398,7 +402,7 @@
     },
     {
       "path": "tools/lib/emit/plugin.mjs",
-      "sha256": "b0b077e07712e9df6bd04feb6b6c1fae426d3a80b90a2527d0b4053aeffbf8bc"
+      "sha256": "515726ede3cd09baf279ca10a7297b60629e4def7e99514c781752abc7e78e70"
     },
     {
       "path": "tools/lib/emit/vscode.mjs",
@@ -426,7 +430,7 @@
     },
     {
       "path": "tools/lib/paths.mjs",
-      "sha256": "cf87c78e5b0bd08b8bf9d849c00e62763b827cc5f8ca56de62af5afb301715ff"
+      "sha256": "cd520ad281c6cdd0fd084dfecc67a61378229b1dd6a5572404e81169255e32ef"
     },
     {
       "path": "tools/lib/prompt.mjs",
@@ -450,7 +454,7 @@
     },
     {
       "path": "tools/lib/schema.mjs",
-      "sha256": "0e14322f3e40f6e42d8232cf5e8829dbb5389aa8a56ccde389ba10b07871f7ad"
+      "sha256": "fd26da9088718539ec77191e59357b85bafacbd15dd53992b46ce96086d4222f"
     },
     {
       "path": "tools/lib/serve.mjs",
@@ -466,7 +470,7 @@
     },
     {
       "path": "tools/lib/sync.mjs",
-      "sha256": "146eb28bd8086d36afeec6973ed3ea0224b640ae232f407074cf0e7ffd5d9bf4"
+      "sha256": "9b4f2e7fe909d15ea0340643614528389d10e7007c9f02bf80046e1d05af8fdb"
     },
     {
       "path": "tools/lib/template.mjs",
@@ -496,6 +500,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T06:44:48.523Z",
+  "syncedAt": "2026-08-13T07:05:55.960Z",
   "target": "plugin"
 }

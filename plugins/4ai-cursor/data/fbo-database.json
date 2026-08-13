@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "note": "Bản đồ mô hình database FBO/FBI. Số liệu lấy từ corpus FBISP24 (app ~13500 bảng, ~1800 proc; 2026-08) — tỷ lệ và quy ước đặt tên là điều đáng nhớ; tên DB/partition cụ thể thay đổi theo khách. KHÔNG BAO GIỜ ghi connection string vào đây — chỉ mã dự án (nbdmda.ma_da, tra qua list_programs) và vai trò app|sys.",
+  "databases": {
+    "app": {
+      "webConfigKey": "appConnectionString",
+      "purpose": "Nghiệp vụ: chứng từ, danh mục, sổ cái, công nợ, tồn kho",
+      "querySqlDb": "app",
+      "namingHint": "Thường kết thúc _A (ví dụ corpus …_A). Web.config hay để placeholder %Database — truyền database khi query_sql đòi."
+    },
+    "sys": {
+      "webConfigKey": "sysConnectionString",
+      "sysDatabaseNameKey": "sysDatabaseName",
+      "purpose": "Hệ thống: menu, phân quyền, cấu hình form/grid/report, từ điển mã chứng từ (wcommand)",
+      "querySqlDb": "sys",
+      "namingHint": "Thường kết thúc _S. Có thể resolve qua appSettings sysDatabaseName khi catalog là placeholder."
+    }
+  },
+  "aliases": {
+    "note": "Trong hub chỉ tham chiếu database bằng mã dự án (nbdmda.ma_da, tra qua tool list_programs — ví dụ ACME). Không lưu server/user/password.",
+    "convention": "<ma_da>-app | <ma_da>-sys — chỉ dùng khi cần phân biệt db app/sys trong văn bản, không phải giá trị thật lưu ở đâu"
+  },
+  "tablePatterns": {
+    "m##$YYYYMM": {
+      "purpose": "Master chứng từ (header) — phân vùng theo kỳ",
+      "example": "m31$000000",
+      "corpusCount": 2328,
+      "notes": "Prefix số (31, 21, 81…) là Tag chứng từ; phần sau $ là partition (thường yyyymm, mặc định 000000)."
+    },
+    "d##$YYYYMM": {
+      "purpose": "Detail chứng từ (dòng hàng / dòng hạch toán)",
+      "example": "d31$000000",
+      "corpusCount": 2328,
+      "notes": "Cùng Tag với master; join qua stt_rec."
+    },
+    "c##$YYYYMM": {
+      "purpose": "Bảng điều khiển partition / chỉ mục kỳ của chứng từ",
+      "example": "c31$000000",
+      "corpusCount": 98,
+      "notes": "Khai báo trong <partition table=\"c##$…\" prime=\"m##$\" inquiry=\"i##$\" field=\"ngay_ct\" …/>."
+    },
+    "i##$YYYYMM": {
+      "purpose": "Inquiry / bảng tra cứu chứng từ theo kỳ",
+      "example": "i31$000000",
+      "notes": "Thuộc tính inquiry trên <partition>; dùng khi cập nhật inquiry table."
+    },
+    "r##$YYYYMM": {
+      "purpose": "Bảng phụ chứng từ (VAT detail, post GL snapshot…)",
+      "example": "r30$000000",
+      "notes": "Ví dụ r30 = dòng thuế GTGT gắn phiếu; r00 = bản sao ct00 theo kỳ."
+    },
+    "dm*": {
+      "purpose": "Danh mục (master data) — không partition theo tháng",
+      "example": "dmkh, dmvt, dmtk",
+      "corpusCount": 298
+    },
+    "ct*": {
+      "purpose": "Sổ / bảng chứng từ tổng hợp (không theo Tag partition)",
+      "example": "ct00, ctgt20, cttt20",
+      "corpusCount": 92
+    },
+    "wcommand*": {
+      "purpose": "Bảng phân quyền (sys)",
+      "example": "wcommand (sys)",
+      "corpusCount": 40
+    },
+    "other": {
+      "purpose": "Module mở rộng (HR, POS, BI, …) — không ép vào pattern m/d/c",
+      "corpusCount": 8365
+    }
+  },
+  "partition": {
+    "controllerAttr": "table=\"m##$000000\" trên root <dir>",
+    "partitionElement": "<partition table=\"c##$000000\" prime=\"m##$\" inquiry=\"i##$\" field=\"ngay_ct\" expression=\"convert(char(6), {0}, 112)\" increase=\"dateadd(month, 1, {0})\" default=\"000000\"/>",
+    "runtimeTokens": [
+      "@@prime$partition$current",
+      "@@inquiry$partition$current",
+      "$partition$current",
+      "$partition$previous",
+      "@@sysDatabaseName",
+      "@@id",
+      "@@userID"
+    ],
+    "rule": "Tách bảng vật lý theo kỳ (thường tháng yyyymm từ ngay_ct). Khi đọc/ghi phải đúng partition — đừng SELECT toàn bộ m##$%."
+  },
+  "columnConventions": {
+    "naming": "Tiếng Việt không dấu, snake_case — trùng tên field màn hình",
+    "examples": ["dien_giai", "ten_vt", "ma_kh", "ngay_ct", "so_ct", "stt_rec"],
+    "suffixes": {
+      "_nt": "Nguyên tệ (foreign currency amount) — cặp với cột VND cùng gốc: t_tien / t_tien_nt, gia2 / gia_nt2",
+      "%l": "Field external đa ngôn ngữ trên form (ten_kh%l) — không phải cột SQL thuần"
+    },
+    "voucherKeys": {
+      "stt_rec": "Khóa chứng từ (primary)",
+      "ma_ct": "Mã chứng từ nghiệp vụ (HD1, PN1, HDA…)",
+      "ngay_ct": "Ngày chứng từ — cũng là field partition",
+      "so_ct": "Số chứng từ",
+      "ma_dvcs": "Đơn vị / chi nhánh",
+      "ma_nt": "Mã ngoại tệ",
+      "ty_gia": "Tỷ giá",
+      "status": "Trạng thái chứng từ",
+      "ma_kh": "Mã khách hàng / nhà cung cấp"
+    }
+  },
+  "objectPrefixes": {
+    "ff_": "Scalar / table-valued function tiện ích (ff_BaseCurr, ff_CheckColumnExists…)",
+    "fs_": "Stored procedure nghiệp vụ chứng từ (fs_PostAPTran…)",
+    "fs20_": "Proc lớp sổ / sau cập nhật (fs20_AfterUpdateGL…)",
+    "FastBusiness$": "Proc khung nền tảng (FastBusiness$App$Voucher$UpdateInquiryTable…)"
+  },
+  "keyTables": {
+    "sys": {
+      "wcommand": {
+        "purpose": "Từ điển menu / mã chứng từ hệ thống",
+        "keys": ["syscode", "sysid", "bar", "bar2", "link"],
+        "use": "resolve_vouchercode: syscode (HDA) ↔ sysid (SVTran)"
+      },
+      "voucherinfo": {
+        "purpose": "Tham số chứng từ phía sys (groupby…)",
+        "use": "Post/SQL tham chiếu @@sysDatabaseName..voucherinfo"
+      },
+      "sys*": {
+        "purpose": "Phân quyền, bố cục form/grid/filter/report (sysunitrights, sysfields, sysreport…)",
+        "use": "Cấu hình runtime — ít khi sửa tay khi customize nghiệp vụ"
+      }
+    },
+    "app": {
+      "dmct9": {
+        "purpose": "Ánh xạ mã chứng từ → prefix bảng vật lý",
+        "keys": ["ma_ct", "m$", "d$", "c$"],
+        "example": "PN1 → m31$ / d31$ / c31$"
+      },
+      "dmct": {
+        "purpose": "Danh mục chứng từ (metadata nghiệp vụ bổ sung)"
+      },
+      "dmkh": { "purpose": "Danh mục khách hàng / NCC", "controller": "Customer" },
+      "dmvt": { "purpose": "Danh mục vật tư / hàng hoá", "controller": "Item" },
+      "dmtk": { "purpose": "Danh mục tài khoản kế toán", "controller": "Account" },
+      "dmnt": { "purpose": "Danh mục ngoại tệ" },
+      "dmkho": { "purpose": "Danh mục kho" },
+      "dmdvt": { "purpose": "Đơn vị tính" },
+      "dmbp": { "purpose": "Bộ phận" },
+      "dmvv": { "purpose": "Vụ việc" },
+      "dmtd1": { "purpose": "Tự do 1" },
+      "dmtd2": { "purpose": "Tự do 2" },
+      "dmtd3": { "purpose": "Tự do 3" },
+      "ct00": { "purpose": "Bút toán / phát sinh GL gắn chứng từ" },
+      "ctgt20": { "purpose": "Sổ thuế GTGT" },
+      "cttt20": { "purpose": "Sổ thanh toán / công nợ chi tiết" },
+      "options": { "purpose": "Tuỳ chọn hệ thống phía app" }
+    }
+  },
+  "voucherExamples": {
+    "note": "Đối chiếu từ wcommand (sys) + dmct9 (app) trên corpus FBISP24. Program khác có thể lệch Tag — luôn verify bằng resolve_vouchercode / query_sql.",
+    "rows": [
+      { "ma_ct": "HDA", "sysid": "SVTran", "title": "Hóa đơn bán hàng", "m$": "m81$", "d$": "d81$", "c$": "c81$" },
+      { "ma_ct": "HD1", "sysid": "ARTran", "title": "Hóa đơn dịch vụ", "m$": "m21$", "d$": "d21$", "c$": "c21$" },
+      { "ma_ct": "PN1", "sysid": "APTran", "title": "Hóa đơn mua hàng dịch vụ", "m$": "m31$", "d$": "d31$", "c$": "c31$" },
+      { "ma_ct": "PC1", "sysid": "CDTran", "title": "Phiếu chi tiền mặt", "m$": "m51$", "d$": "d51$", "c$": "c51$" },
+      { "ma_ct": "PT1", "sysid": "CRTran", "title": "Phiếu thu tiền mặt", "m$": "m41$", "d$": "d41$", "c$": "c41$" },
+      { "ma_ct": "BN1", "sysid": "CPTran", "title": "Giấy báo nợ", "m$": "m56$", "d$": "d56$", "c$": "c56$" },
+      { "ma_ct": "BC1", "sysid": "CBTran", "title": "Giấy báo có", "m$": "m46$", "d$": "d46$", "c$": "c46$" },
+      { "ma_ct": "PK1", "sysid": "GLTran", "title": "Phiếu kế toán tổng hợp", "m$": "m11$", "d$": "d11$", "c$": "c11$" },
+      { "ma_ct": "PND", "sysid": "IRTran", "title": "Phiếu nhập kho", "m$": "m74$", "d$": "d74$", "c$": "c74$" },
+      { "ma_ct": "PXA", "sysid": null, "title": "Phiếu xuất kho (prefix)", "m$": "m84$", "d$": "d84$", "c$": "c84$", "notes": "Có trong dmct9 corpus; sysid tra wcommand theo program." },
+      { "ma_ct": "PO1", "sysid": null, "title": "Đơn mua hàng (prefix)", "m$": "m94$", "d$": "d94$", "c$": "c94$", "notes": "Có trong dmct9 corpus; sysid tra wcommand theo program." }
+    ]
+  },
+  "concepts": {
+    "ma_ct_vs_sysid": {
+      "ma_ct": "Mã chứng từ nghiệp vụ người dùng nói (HDA, HD1, PN1) — sống ở wcommand.syscode / dmct9.ma_ct",
+      "sysid": "Mã controller / file (SVTran, APTran) — sống ở wcommand.sysid và Controllers\\Dir\\<sysid>.xml",
+      "tool": "resolve_vouchercode — find_controller không tìm được theo ma_ct"
+    },
+    "tag": {
+      "purpose": "Số Tag trong controller (ENTITY Tag \"31\") khớp số trong m31$/d31$/c31$",
+      "example": "APTran Tag=31 → table m31$000000, detail d31$, partition c31$"
+    },
+    "information_attr": {
+      "purpose": "Field lookup khai báo information=\"ma_kh$dmkh.ten_kh%l\" → cột/bảng nguồn autocomplete",
+      "example": "ma_kh$dmkh = khóa trên dmkh; ten_tk$dmtk = tài khoản"
+    }
+  },
+  "queryHints": {
+    "tool": "query_sql của 4ai-fbo (hoặc query_database của fastbusiness-mcp)",
+    "rules": [
+      "Luôn chọn db: app | sys trước khi kết luận object không tồn tại",
+      "Truyền database khi Web.config dùng %Database — hỏi người dùng, không đoán",
+      "Thăm dò chứng từ: SELECT TOP 20 … và lọc theo partition/kỳ",
+      "Soi cấu trúc: object: \"dmkh\" | \"fs_PostAPTran\" — không cần viết SQL",
+      "Ghi (INSERT/UPDATE/DELETE/DDL/EXEC) mặc định bị chặn — cần allowWrite và duyệt câu lệnh trước",
+      "Không bao giờ echo connection string từ Web.config hay output lỗi"
+    ]
+  }
+}

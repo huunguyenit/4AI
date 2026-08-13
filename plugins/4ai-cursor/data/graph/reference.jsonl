@@ -1,0 +1,74 @@
+// Node cấu trúc FBO đã xác minh. Một dòng một node. Dòng `//` là chú thích.
+// Nguồn: resolve_vouchercode trên corpus _CORPUS (FBISP24) ngày 2026-08-10 —
+// wcommand (db sys) cho menu/sysid, dmct9 (db app) cho họ bảng.
+// KHÔNG thêm dòng nào bằng suy đoán. Chưa tra được thì để trống, đừng bịa.
+
+// ---- Status (lookup TĨNH, dùng chung mọi dự án) ----
+// Nguồn: data/qlda.json → enums.trangThaiYeuCau, ảnh chụp bảng nbdmttyc ngày 2026-08-08.
+// Đây là DUY NHẤT nơi khai Status — mọi Request trỏ vào đây qua cạnh HAS_STATUS,
+// không tạo Status riêng theo dự án.
+{"_":"node","kind":"Status","code":"TA","ten":"Yêu cầu tạm (chỉ để nhập tạm chưa duyệt)","duyetYn":0}
+{"_":"node","kind":"Status","code":"YC","ten":"Yêu cầu","duyetYn":0}
+{"_":"node","kind":"Status","code":"GC","ten":"Ghi chú","duyetYn":1}
+{"_":"node","kind":"Status","code":"DD","ten":"Đã duyệt","duyetYn":1}
+{"_":"node","kind":"Status","code":"XN","ten":"Xác nhận chuyển LT","duyetYn":1}
+{"_":"node","kind":"Status","code":"TH","ten":"Đang thực hiện","duyetYn":1}
+{"_":"node","kind":"Status","code":"HT","ten":"Hoàn thành, chờ test","duyetYn":1}
+{"_":"node","kind":"Status","code":"DT","ten":"Đang test","duyetYn":1}
+{"_":"node","kind":"Status","code":"OK","ten":"Test OK (TK test lại)","duyetYn":1}
+{"_":"node","kind":"Status","code":"UP","ten":"Đã update (kết thúc)","duyetYn":1}
+{"_":"node","kind":"Status","code":"CH","ten":"Chờ","duyetYn":2}
+{"_":"node","kind":"Status","code":"KL","ten":"Không làm","duyetYn":2}
+{"_":"node","kind":"Status","code":"KD","ten":"Không duyệt","duyetYn":2}
+
+// ---- phiên bản sản phẩm ----
+{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP24","product":"FBI","ghi_chu":"Corpus test cục bộ, dùng để phân giải mã chứng từ chuẩn."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2421","product":"FBI","ghi_chu":"Acme Three."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2422","product":"FBI","ghi_chu":"Demo Co, DEMO2."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP225","product":"FBO","ghi_chu":"Acme Two."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP229","product":"FBO","ghi_chu":"Acme."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP22621","product":"FBO","ghi_chu":"Demo Six."}
+
+// ---- menu (wcommand) ----
+{"_":"node","kind":"Menu","menu_id":"03.01.02","wmenu_id":"06.10.02","bar":"Giấy báo nợ","bar2":"Bank Debit Advice","link":"cactbn1.aspx","syscode":"BN1","sysid":"CPTran"}
+{"_":"node","kind":"Menu","menu_id":"05.01.04","wmenu_id":"09.30.01","bar":"Hóa đơn mua hàng trong nước","bar2":"Domestic Purchase Invoice","link":"poctpna.aspx","syscode":"PNA","sysid":"PVTran"}
+{"_":"node","kind":"Menu","menu_id":"06.01.04","wmenu_id":"07.10.06","bar":"Hóa đơn bán hàng (C)","bar2":"Sales Invoice","link":"socthda.aspx","syscode":"HDA","sysid":"SVTran"}
+{"_":"node","kind":"Menu","menu_id":"08.01.01","wmenu_id":"15.01.01","bar":"Phiếu nhập kho","bar2":"Receipt","link":"inctpnd.aspx","syscode":"PND","sysid":"IRTran"}
+{"_":"node","kind":"Menu","menu_id":"08.01.04","wmenu_id":"15.01.09","bar":"Phiếu xuất điều chuyển","bar2":"Stock Transfer","link":"inctpxb.aspx","syscode":"PXB","sysid":"ITTran"}
+{"_":"node","kind":"Menu","menu_id":"08.01.05","wmenu_id":"15.01.10","bar":"Phiếu nhập điều chuyển","bar2":"Stock Transfer in","link":"inctpnf.aspx","syscode":"PNF","sysid":"IPTran"}
+
+// ---- controller ----
+// `customized` cố tình để trống: nó phụ thuộc từng chương trình khách, không phải
+// thuộc tính toàn cục. Tra bằng describe_controller trên đúng program khi cần.
+{"_":"node","kind":"Controller","sysid":"CPTran","type":"Voucher","table":"","title":"Giấy báo nợ","entry":"Dir\\CPTran.f"}
+{"_":"node","kind":"Controller","sysid":"IPTran","type":"Voucher","table":"","title":"Phiếu nhập điều chuyển","entry":"Dir\\IPTran.f"}
+{"_":"node","kind":"Controller","sysid":"IRTran","type":"Voucher","table":"m74$","title":"Phiếu nhập kho","entry":"Dir\\IRTran.f"}
+{"_":"node","kind":"Controller","sysid":"ITTran","type":"Voucher","table":"m85$","title":"Phiếu xuất điều chuyển","entry":"Dir\\ITTran.f"}
+{"_":"node","kind":"Controller","sysid":"POTran","type":"Voucher","table":"m94$","title":"Đơn hàng mua","entry":"Dir\\POTran.f"}
+{"_":"node","kind":"Controller","sysid":"PVTran","type":"Voucher","table":"m71$","title":"Hóa đơn mua hàng trong nước","entry":"Dir\\PVTran.f"}
+{"_":"node","kind":"Controller","sysid":"SOTran","type":"Voucher","table":"m64$","title":"Đơn hàng bán","entry":"Dir\\SOTran.f"}
+{"_":"node","kind":"Controller","sysid":"SVTran","type":"Voucher","table":"m81$","title":"Hóa đơn bán hàng","entry":"Dir\\SVTran.f"}
+
+// ---- bảng (dmct9) ----
+{"_":"node","kind":"Table","name":"c64$","family":"DXA","so_hieu":"64","role":"config"}
+{"_":"node","kind":"Table","name":"m64$","family":"DXA","so_hieu":"64","role":"master"}
+{"_":"node","kind":"Table","name":"d64$","family":"DXA","so_hieu":"64","role":"detail"}
+{"_":"node","kind":"Table","name":"i64$","family":"DXA","so_hieu":"64","role":"inquiry"}
+{"_":"node","kind":"Table","name":"m71$","family":"PNA","so_hieu":"71","role":"master"}
+{"_":"node","kind":"Table","name":"d71$","family":"PNA","so_hieu":"71","role":"detail"}
+{"_":"node","kind":"Table","name":"c74$","family":"PND","so_hieu":"74","role":"config"}
+{"_":"node","kind":"Table","name":"m74$","family":"PND","so_hieu":"74","role":"master"}
+{"_":"node","kind":"Table","name":"d74$","family":"PND","so_hieu":"74","role":"detail"}
+{"_":"node","kind":"Table","name":"i74$","family":"PND","so_hieu":"74","role":"inquiry"}
+{"_":"node","kind":"Table","name":"c81$","family":"HDA","so_hieu":"81","role":"config"}
+{"_":"node","kind":"Table","name":"m81$","family":"HDA","so_hieu":"81","role":"master"}
+{"_":"node","kind":"Table","name":"d81$","family":"HDA","so_hieu":"81","role":"detail"}
+{"_":"node","kind":"Table","name":"i81$","family":"HDA","so_hieu":"81","role":"inquiry"}
+{"_":"node","kind":"Table","name":"c85$","family":"PXB","so_hieu":"85","role":"config"}
+{"_":"node","kind":"Table","name":"m85$","family":"PXB","so_hieu":"85","role":"master"}
+{"_":"node","kind":"Table","name":"d85$","family":"PXB","so_hieu":"85","role":"detail"}
+{"_":"node","kind":"Table","name":"i85$","family":"PXB","so_hieu":"85","role":"inquiry"}
+{"_":"node","kind":"Table","name":"c94$","family":"PO1","so_hieu":"94","role":"config"}
+{"_":"node","kind":"Table","name":"m94$","family":"PO1","so_hieu":"94","role":"master"}
+{"_":"node","kind":"Table","name":"d94$","family":"PO1","so_hieu":"94","role":"detail"}
+{"_":"node","kind":"Table","name":"i94$","family":"PO1","so_hieu":"94","role":"inquiry"}

@@ -5,7 +5,32 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Thêm
+
+- **Cursor Plugin — phương ngữ thứ sáu của compiler.** `tools/lib/emit/cursor-plugin.mjs`
+  (target mới `plugin-cursor`, tools `cursor-plugin`) dựng gói `.cursor-plugin/plugin.json` +
+  `rules/*.mdc` (doctrine/rule ra file rule THẬT với `alwaysApply`, không hạ thành skill như
+  bên Claude) + `agents/` + `commands/` + `mcp.json` (biến `${PLUGIN_ROOT}`) + runtime chép
+  nguyên văn — cùng khuôn với `plugin.mjs` (Claude Code) nhưng KHÔNG dùng chung thư mục output
+  vì hai định dạng manifest khác nhau. Thêm `.cursor-plugin/marketplace.json` ở gốc repo để
+  Cursor Team Marketplace import trực tiếp từ GitHub (Dashboard → Plugins → Add Marketplace →
+  Import from Repo). `plugins/4ai-cursor/` đã dựng và commit.
+  - Chưa xác nhận biến path bền qua update kiểu `${CLAUDE_PLUGIN_DATA}` phía Cursor — index
+    SQLite của MCP ghi ngay trong thư mục cài (`${PLUGIN_ROOT}/.4ai/index/`), có thể mất khi
+    plugin update. Ghi rõ trong code comment và README, không tự đoán tên biến.
+  - Rút `RUNTIME_DIRS`/`RUNTIME_EXCLUDE`/`runtimeFiles()`/`bareCommand()` từ `plugin.mjs` sang
+    `emit/common.mjs` — hai emitter đóng gói dùng chung logic bundling runtime, tránh hai bản
+    trôi lệch nhau.
+  - `schema.mjs` TARGETS, `paths.mjs` (emitPaths/mcpPath), `mcp/servers.json` targets,
+    `targets.json` đều thêm `cursor-plugin`/`plugin-cursor` theo đúng chỗ đã khai (không
+    hardcode tên tool ở emitter).
+
 ### Tài liệu
+
+- **README — cài đặt Cursor qua Team Marketplace.** Mục "Cài đặt" tách theo tool (Claude Code /
+  Cursor) vì hai bên marketplace không dùng chung cơ chế; thêm hướng dẫn Import from Repo, Auto
+  Refresh (cần Cursor GitHub App), và mục "Dựng lại plugin sau khi sửa asset" cập nhật cho cả
+  hai emitter đóng gói.
 
 - **README thiếu hướng dẫn setup cục bộ.** Thêm mục "Cấu hình cục bộ" — yêu cầu Node.js 22+,
   cách gọi `set_pm_identity` để ghi `data/qlda.local.json`, bảng biến môi trường

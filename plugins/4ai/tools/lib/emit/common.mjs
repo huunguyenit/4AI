@@ -1,5 +1,6 @@
 // common.mjs — phần dùng chung của các emitter.
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { isAlwaysOn, emitPaths } from '../paths.mjs';
 import { HUB } from '../assets.mjs';
@@ -90,4 +91,43 @@ export function alwaysOnAssets(assets) {
 /** Các asset "theo yêu cầu". */
 export function onDemandAssets(assets) {
   return assets.filter((a) => !isAlwaysOn(a));
+}
+
+// Cây runtime chép vào gói phân phối (Claude plugin, Cursor plugin — bất kỳ dialect nào đóng
+// gói tự chứa). Giữ NGUYÊN đường dẫn tương đối so với hub: mcp/fbo/lib/tools.mjs import
+// '../../../src/...' và src/database/*.mjs import '../../mcp/fbo/lib/...' — chép cùng layout
+// thì mọi import còn đúng, không phải viết lại đường dẫn.
+export const RUNTIME_DIRS = ['mcp/fbo', 'src', 'tools', 'data'];
+
+// *.local.json là cấu hình per-máy, gitignore — không bao giờ đi kèm bản phân phối.
+export const RUNTIME_EXCLUDE = /(^|\/)[^/]*\.local\.json$/;
+
+/**
+ * Đường dẫn tuyệt đối tới runtime (node.exe…) chỉ đúng trên máy sinh ra gói phân phối —
+ * đổi thành tên lệnh trần để máy người cài tự phân giải qua PATH. Lệnh đã là tên trần thì
+ * giữ nguyên. Dùng chung cho mọi dialect đóng gói (Claude plugin, Cursor plugin…).
+ */
+export function bareCommand(cmd) {
+  const s = String(cmd ?? '').trim();
+  if (!/[\\/]/.test(s)) return s;
+  const ten = s.split(/[\\/]/).pop().replace(/\.exe$/i, '');
+  return ten || s;
+}
+
+/** Liệt kê file runtime cần chép, đường dẫn tương đối so với hub, thứ tự ổn định. */
+export function runtimeFiles() {
+  const out = [];
+  for (const dir of RUNTIME_DIRS) {
+    const abs = path.join(HUB, dir);
+    if (!fs.existsSync(abs)) continue;
+    // node:fs.globSync không có `nodir` (đó là option của npm glob) — lọc thư mục bằng dirent.
+    for (const d of fs.globSync('**/*', { cwd: abs, withFileTypes: true })) {
+      if (!d.isFile()) continue;
+      const sub = path.relative(abs, path.join(d.parentPath ?? d.path, d.name));
+      const rel = `${dir}/${sub.replace(/\\/g, '/')}`;
+      if (RUNTIME_EXCLUDE.test(rel)) continue;
+      out.push(rel);
+    }
+  }
+  return out.sort();
 }

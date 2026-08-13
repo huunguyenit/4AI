@@ -8,7 +8,7 @@
       "args": ["{{HUB}}\\mcp\\fbo\\server.mjs", "--hub", "{{HUB}}"],
       "cwd": "{{HUB}}",
       "env": {},
-      "targets": ["claude", "cursor", "vscode", "antigravity", "plugin"],
+      "targets": ["claude", "cursor", "vscode", "antigravity", "plugin", "cursor-plugin"],
       "autoApprove": [
         "list_programs",
         "index_program",

@@ -10,8 +10,17 @@ import { emitCursor } from './emit/cursor.mjs';
 import { emitVscode } from './emit/vscode.mjs';
 import { emitAntigravity } from './emit/antigravity.mjs';
 import { emitPlugin } from './emit/plugin.mjs';
+import { emitCursorPlugin } from './emit/cursor-plugin.mjs';
 
-const EMITTERS = { claude: emitClaude, cursor: emitCursor, vscode: emitVscode, antigravity: emitAntigravity, plugin: emitPlugin };
+const EMITTERS = {
+  claude: emitClaude, cursor: emitCursor, vscode: emitVscode, antigravity: emitAntigravity,
+  plugin: emitPlugin, 'cursor-plugin': emitCursorPlugin,
+};
+
+// Hai dialect đóng gói (Claude plugin, Cursor plugin) nhận bản MCP CÒN TOKEN {{HUB}} và tự
+// giải sang biến runtime của chính chúng (${CLAUDE_PLUGIN_ROOT} / ${PLUGIN_ROOT}); mọi target
+// cục bộ khác nhận bản đã giải ra đường dẫn hub trên máy này.
+const PACKAGE_TOOLS = new Set(['plugin', 'cursor-plugin']);
 
 function isUnc(p) {
   return /^[\\/]{2}/.test(p);
@@ -113,9 +122,7 @@ export async function runSync(opts) {
       const subset = domainAssets.filter((a) => a.targets.includes(tool));
       const thoServers = Object.fromEntries(
         Object.entries(mcpCfg.servers).filter(([, s]) => (s.targets ?? []).includes(tool)));
-      // Plugin nhận bản CÒN TOKEN và tự giải sang `${CLAUDE_PLUGIN_ROOT}`; target cục bộ nhận
-      // bản đã giải ra đường dẫn hub trên máy này.
-      const mcpServers = tool === 'plugin' ? thoServers : resolveMcpServers(thoServers);
+      const mcpServers = PACKAGE_TOOLS.has(tool) ? thoServers : resolveMcpServers(thoServers);
       const out = EMITTERS[tool]({ assets: subset, mcpServers, target });
       textFiles.push(...out.textFiles);
       jsonFiles.push(...out.jsonFiles);

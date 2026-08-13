@@ -1,0 +1,285 @@
+{
+  "version": 2,
+  "note": "Lược đồ đồ thị dùng chung cho kho năng lực FBO và mạng phụ thuộc/rà soát yêu cầu. MỘT đồ thị duy nhất, nhiều loại node — vì câu hỏi hữu ích nhất luôn đi xuyên loại: 'đổi màn hình này thì Request nào chết', 'yêu cầu này FBO đã làm được từ SP nào', 'PM Review nào dựa trên CapabilityVerdict nào'.",
+
+  "layers": {
+    "note": "Ba tầng thông tin, KHÔNG trộn lẫn. Một node chỉ thuộc đúng một tầng.",
+    "fact": {
+      "nghia": "Dữ liệu gốc, không suy luận — chép gần nguyên từ DB QLDA hoặc từ chỉ mục FBO đã xác minh.",
+      "kinds": ["Project", "Phase", "Status", "Request", "ScopeEvidence", "Menu", "Controller", "Table", "SpVersion"]
+    },
+    "decision": {
+      "nghia": "Suy luận/đánh giá do PM hoặc quy trình rà soát tạo ra.",
+      "kinds": ["PMReview", "CapabilityVerdict", "Capability"]
+    },
+    "plan": {
+      "nghia": "Thực thi — cái sẽ làm hoặc đã làm.",
+      "kinds": ["ImplementationPlan", "EffortSample"]
+    },
+    "derivedNotStored": {
+      "nghia": "Nhãn như 'Quá hạn', 'Sắp tới hạn', 'Chờ cổng PM', 'Ngoài TLKS' KHÔNG BAO GIỜ là node hay property lưu trữ — luôn tính lúc truy vấn từ Phase.deadline, Request→Status, Request→ScopeEvidence. Xem tools/lib/workdays.mjs và report.mjs: chúng tính `_muc` tại chỗ, không ghi xuống JSONL.",
+      "vidu": ["Quá hạn = hôm nay > Phase.deadline (qua IN_PHASE) và Status ∉ {HT,UP,...}", "Chờ cổng PM = Request HAS_STATUS Status{code:'DD'}", "Ngoài TLKS = ScopeEvidence.verdict = 'OUT'"]
+    }
+  },
+
+  "sourceOfTruth": {
+    "kind": "files",
+    "note": "Node và cạnh nằm ở file JSONL versioned trong repo. Database chỉ là CHỈ MỤC dựng lại được — xoá DB không mất dữ liệu. Nhờ vậy mọi thay đổi đồ thị đều review được bằng git diff.",
+    "layout": [
+      { "path": "data/graph/reference.jsonl", "chua": "node cấu trúc kỹ thuật đã xác minh từ FBO: Menu, Controller, Table, SpVersion, và Status (lookup tĩnh từ nbdmttyc, dùng chung mọi dự án)" },
+      { "path": "data/graph/capability.jsonl", "chua": "node Capability và CapabilityVerdict — FBO làm được / chưa được, do PM xác nhận, theo từng phiên bản SP" },
+      { "path": "data/graph/effort-samples.jsonl", "chua": "node EffortSample — mẫu giờ công PM đã duyệt" },
+      { "path": "data/graph/edges.jsonl", "chua": "cạnh giữa các node dùng chung (tầng kỹ thuật + tầng năng lực)" },
+      { "path": "ledger/<ma_da>/graph.jsonl", "chua": "node Project (một dòng, gốc của file), Phase, Request, ScopeEvidence, PMReview, ImplementationPlan và cạnh riêng của một dự án" }
+    ],
+    "format": "Mỗi dòng một object JSON. Object có `_` = 'node' hoặc 'edge'. Một dòng một thực thể để git diff gọn và merge được."
+  },
+
+  "database": {
+    "provider": "sqlserver",
+    "databaseName": "GRAPH_4AI",
+    "serverAlias": "fsd-sql2016",
+    "note": "DB nội bộ của 4AI, tách khỏi DB nghiệp vụ (QLDA_APP) và khỏi DB của khách. Chỉ chứa chỉ mục đồ thị — không chứa dữ liệu nghiệp vụ, không chứa tài liệu khách.",
+    "connectionKey": "graphConnectionString",
+    "resolveOrder": [
+      { "kind": "env", "name": "GRAPH_4AI_CONNECTION" },
+      { "kind": "localFile", "path": "data/qlda.local.json", "key": "graphConnectionString" }
+    ],
+    "secretRule": "Giá trị thật KHÔNG BAO GIỜ nằm trong file này hay bất kỳ file nào được commit. `*.local.json` đã gitignore; `4ai check` sẽ fail nếu có shape connection string lọt vào data/ hoặc ledger/."
+  },
+
+  "buildPipeline": {
+    "note": "Hub là compiler, zero npm dependency — Node không nói chuyện được với SQL Server. Nên hub SINH RA script, người/công cụ khác nạp.",
+    "steps": [
+      "1. `node tools/4ai.mjs graph build` đọc mọi file JSONL theo `sourceOfTruth.layout`.",
+      "2. Validate: node trùng key, prop lạ, cạnh trỏ tới node không tồn tại, edgeType không hợp lệ (tra cả `edgeTypes` lẫn `reviewEdgeTypes`), cặp (from,to) không nằm trong `allowedPairs` → báo lỗi, không sinh file.",
+      "3. Sinh `.4ai/graph/GRAPH_4AI.sql`: CREATE TABLE ... AS NODE / AS EDGE (nếu chưa có) + nạp toàn bộ dữ liệu. Script idempotent — chạy hai lần cho cùng kết quả.",
+      "4. Nạp bằng sqlcmd hoặc query_sql. Bước này CẦN PM xác nhận, hub không tự chạy."
+    ],
+    "outputPath": ".4ai/graph/GRAPH_4AI.sql",
+    "outputIgnored": true
+  },
+
+  "sql": {
+    "note": "Tên cột và kiểu dữ liệu CHỈ khai ở đây. Emitter không được hardcode tên field — giống luật schema.mjs của hub.",
+    "schemaName": "dbo",
+    "keyColumn": "key",
+    "nodeTablePrefix": "node_",
+    "defaultColumnType": "NVARCHAR(400)",
+    "columnTypes": {
+      "noi_dung": "NVARCHAR(MAX)",
+      "moTa": "NVARCHAR(MAX)",
+      "cachXuLy": "NVARCHAR(MAX)",
+      "ghiChu": "NVARCHAR(MAX)",
+      "ghi_chu": "NVARCHAR(MAX)",
+      "trang_tlks": "NVARCHAR(400)",
+      "tg_dk_th": "DECIMAL(9,2)",
+      "gioCong": "DECIMAL(9,2)",
+      "doTinCay": "DECIMAL(3,2)",
+      "customized": "BIT",
+      "trongTlks": "BIT",
+      "tlks_yn": "BIT",
+      "completionRequired": "BIT",
+      "deadline": "SMALLDATETIME",
+      "reason": "NVARCHAR(MAX)",
+      "note": "NVARCHAR(MAX)",
+      "template": "NVARCHAR(MAX)",
+      "columns": "NVARCHAR(MAX)",
+      "constraints": "NVARCHAR(MAX)",
+      "reviewedAt": "SMALLDATETIME",
+      "duyetVaoSp": "NVARCHAR(64)"
+    },
+    "arrayProps": ["columns", "constraints"],
+    "arrayPropsNote": "Các prop này nhận mảng trong JSONL (vd `\"columns\": [\"ma_ct\",\"ten_ct\"]`). Emitter tự JSON.stringify khi sinh literal SQL — cột lưu chuỗi JSON trong NVARCHAR(MAX), không có kiểu mảng native trong SQL Server graph node.",
+    "reloadStrategy": {
+      "kind": "full",
+      "note": "Xoá sạch rồi nạp lại toàn bộ, cạnh trước node sau. Hợp lệ vì DB chỉ là chỉ mục — nguồn thật là JSONL. Đổi lại script luôn idempotent và không cần MERGE phức tạp."
+    }
+  },
+
+  "nodeKinds": {
+    "Project": {
+      "key": "ma_da",
+      "keyNote": "nbdmda.ma_da. Một node cho mỗi dự án — khai ở đầu ledger/<ma_da>/graph.jsonl.",
+      "props": ["ma_da", "ten_da", "ten_ngan", "ma_pbsp"],
+      "sqlTable": "node_Project"
+    },
+    "Phase": {
+      "key": "id",
+      "keyNote": "Ghép `ma_da|giai_doan_da` làm id — một giai đoạn của một dự án. `deadline` là MAX(ngay_ht) của giai đoạn đó, tính một lần khi ghi node, KHÔNG tách thành node Deadline riêng (chỉ là một ngày, không có thuộc tính nào khác — tách ra chỉ thêm một join vô ích).",
+      "props": ["id", "ma_da", "giai_doan_da", "deadline", "completionRequired", "noi_dung"],
+      "sqlTable": "node_Phase"
+    },
+    "Status": {
+      "key": "code",
+      "keyNote": "Lookup TĨNH từ nbdmttyc (xem data/qlda.json → enums.trangThaiYeuCau) — 13 node cố định, khai trong data/graph/reference.jsonl, dùng CHUNG cho mọi dự án và mọi Request. Không tạo Status riêng theo từng dự án.",
+      "props": ["code", "ten", "duyetYn"],
+      "sqlTable": "node_Status"
+    },
+    "Request": {
+      "key": "stt_rec",
+      "keyNote": "nbphyc.stt_rec, char(13) — luôn RTRIM. Bền qua mọi lần đổi nội dung; fcode1 chỉ là nhãn hiển thị, có thể đổi.",
+      "props": ["stt_rec", "fcode1", "noi_dung", "tg_dk_th", "tg_ht", "ma_lt1"],
+      "propsNote": "KHÔNG có ma_da/giai_doan_da/trang_thai/tlks_yn trên node này — những thứ đó là QUAN HỆ (BELONGS_TO/IN_PHASE/HAS_STATUS/HAS_EVIDENCE), không phải property lặp lại. Đây là điểm khác so với v1 của lược đồ này.",
+      "sqlTable": "node_Request"
+    },
+    "ScopeEvidence": {
+      "key": "id",
+      "keyNote": "Một node cho mỗi bằng chứng phạm vi của một Request — thường một Request có 0 hoặc 1 node này (điền khi kiểm TLKS/ngoài TLKS).",
+      "props": ["id", "type", "document", "page", "verdict", "note"],
+      "typeValues": ["TLKS", "BBTN", "PhuLuc", "Email"],
+      "verdictValues": ["IN", "OUT", "NONE"],
+      "verdictNote": "IN = nằm trong TLKS đúng như tick. OUT = ngoài TLKS. NONE = ngoài TLKS và CHƯA tìm thấy căn cứ (BBTN/phụ lục/email) — đây là cơ sở để đề xuất TA. Không suy đoán verdict từ tlks_yn; phải đọc nội dung tài liệu thật (xem skill pm-deadline-review).",
+      "sqlTable": "node_ScopeEvidence"
+    },
+    "Menu": {
+      "key": "menu_id",
+      "keyNote": "Ưu tiên số 1 khi tra năng lực — tên menu (bar) là thứ PM và khách cùng gọi tên.",
+      "props": ["menu_id", "wmenu_id", "bar", "bar2", "link", "syscode", "sysid"],
+      "sqlTable": "node_Menu"
+    },
+    "Controller": {
+      "key": "sysid",
+      "props": ["sysid", "title", "type", "table", "entry", "customized"],
+      "sqlTable": "node_Controller"
+    },
+    "Table": {
+      "key": "name",
+      "keyNote": "Tên bảng vật lý, gồm cả partition khi cần (m81$000000).",
+      "props": ["name", "family", "so_hieu", "role"],
+      "roleValues": ["master", "detail", "inquiry", "config", "danh-muc"],
+      "sqlTable": "node_Table"
+    },
+    "SpVersion": {
+      "key": "ma_pbsp",
+      "keyNote": "Mốc thời gian của kho năng lực là PHIÊN BẢN SP, không phải ngày. Ví dụ FBISP2422, SP229.",
+      "props": ["ma_pbsp", "product", "ghi_chu"],
+      "productValues": ["FBO", "FBI"],
+      "sqlTable": "node_SpVersion"
+    },
+    "Capability": {
+      "key": "id",
+      "keyNote": "Slug do người đặt. Thứ tự ưu tiên khi tra: menuBar → sysid → phanHe → nghiepVu. Điền được cái nào thì điền, ít nhất phải có một. Node này là KHÁI NIỆM ổn định ('báo cáo công nợ theo tuổi nợ') — verdict theo từng phiên bản SP nằm ở node CapabilityVerdict riêng, không phải property ở đây.",
+      "props": ["id", "menuBar", "menu_id", "sysid", "phanHe", "nghiepVu"],
+      "sqlTable": "node_Capability"
+    },
+    "CapabilityVerdict": {
+      "key": "id",
+      "keyNote": "Ghép `capabilityId|ma_pbsp` làm id — một node cho mỗi lần chốt kết luận của một Capability tại một phiên bản SP. Năng lực đổi theo SP thì THÊM node mới, KHÔNG sửa đè node cũ — nhờ vậy tra được 'SP2421 chưa có, SP2422 mới có'.",
+      "props": ["id", "capabilityId", "ma_pbsp", "verdict", "source", "note"],
+      "verdictValues": [
+        { "ma": "co", "nghia": "FBO đáp ứng sẵn, không cần customize." },
+        { "ma": "workaround", "nghia": "Làm được nhưng phải customize / đi đường vòng — cần có ImplementationPlan kèm theo." },
+        { "ma": "khong", "nghia": "Vượt khả năng xử lý của FBO ở phiên bản này → cơ sở để đề xuất trạng thái KL." }
+      ],
+      "sqlTable": "node_CapabilityVerdict"
+    },
+    "PMReview": {
+      "key": "id",
+      "keyNote": "Một node cho MỖI LẦN PM xét một Request ở cổng DD — giữ lịch sử, không sửa đè. 'Hiện tại' = node có reviewedAt lớn nhất theo Request đó.",
+      "props": ["id", "verdict", "reason", "reviewer", "reviewedAt"],
+      "verdictValues": ["XN", "TA", "KL"],
+      "sqlTable": "node_PMReview"
+    },
+    "ImplementationPlan": {
+      "key": "id",
+      "keyNote": "Hoá cấu trúc gợi ý DDL — thay cho ghi chú tự do. `template` nên trỏ tới một mục trong data/fbo-ddl.json → referenceVouchers khi là chứng từ, hoặc mô tả ngắn khi là danh mục.",
+      "props": ["id", "target", "action", "template", "columns", "constraints", "notes"],
+      "targetValues": ["Table", "Report", "Danh-muc", "Cot"],
+      "actionValues": ["CREATE", "ALTER"],
+      "columnsNote": "Mảng tên cột dự kiến (JSON text khi lưu SQL) — chỉ để đọc, KHÔNG phải lệnh chạy được. Xem skill fbo-new-table-proposal.",
+      "sqlTable": "node_ImplementationPlan"
+    },
+    "EffortSample": {
+      "key": "id",
+      "keyNote": "Mẫu giờ công PM ĐÃ DUYỆT, dùng làm căn cứ đề xuất lần sau. Không tự sinh — chỉ ghi khi PM chốt một con số.",
+      "props": ["id", "featureType", "doKho", "trongTlks", "menu_id", "sysid", "gioCong", "ur_stt_rec", "ma_da", "duyetBoi", "duyetVaoSp", "ghiChu"],
+      "featureTypeSource": "data/fbo-ddl.json → featureTypes.items",
+      "doKhoNote": "Thang độ khó CHƯA CHỐT — hỏi PM khi gặp trường hợp mới, ghi lại giá trị PM dùng rồi chuẩn hoá sau.",
+      "trongTlksNote": "true = yêu cầu nằm trong TLKS; false = ngoài TLKS, thường cộng thêm giờ. Mức cộng lấy từ chính các mẫu này chứ không đặt hệ số cứng.",
+      "sqlTable": "node_EffortSample"
+    }
+  },
+
+  "edgeTypes": {
+    "domain": "Tầng kỹ thuật/năng lực — quan hệ giữa Request và cấu trúc FBO (Menu/Controller/Table/Capability/SpVersion).",
+    "note": "Đúng 8 loại, không tự thêm. Thiếu ngữ nghĩa thì dùng RELATED_TO rồi phân loại lại sau — đừng bịa loại mới.",
+    "items": [
+      {
+        "type": "REQUIRES",
+        "cauHoi": "Cần cái gì trước?",
+        "allowedPairs": [["Request", "Request"], ["Request", "Capability"], ["Capability", "SpVersion"], ["Request", "Table"]]
+      },
+      {
+        "type": "DEPENDS_ON",
+        "cauHoi": "Nếu thay đổi cái này, cái gì có thể bị ảnh hưởng?",
+        "allowedPairs": [["Request", "Request"], ["Request", "Controller"], ["Controller", "Table"], ["Capability", "Capability"]]
+      },
+      {
+        "type": "REFERENCES",
+        "cauHoi": "Đang tham chiếu đến đâu?",
+        "allowedPairs": [["Request", "Menu"], ["Request", "Controller"], ["Request", "Table"], ["Capability", "Menu"], ["ImplementationPlan", "Table"]]
+      },
+      {
+        "type": "USES",
+        "cauHoi": "Đang sử dụng cái gì?",
+        "allowedPairs": [["Controller", "Table"], ["Request", "Capability"], ["Menu", "Controller"]]
+      },
+      {
+        "type": "CALLS",
+        "cauHoi": "Thực thi/gọi cái gì?",
+        "allowedPairs": [["Controller", "Controller"], ["Menu", "Controller"]]
+      },
+      {
+        "type": "REPLACES",
+        "cauHoi": "Cái gì thay thế cái gì?",
+        "allowedPairs": [["Request", "Request"], ["Capability", "Capability"], ["Controller", "Controller"]]
+      },
+      {
+        "type": "IMPACTS",
+        "cauHoi": "Thay đổi cái này ảnh hưởng đâu?",
+        "allowedPairs": [["Request", "Controller"], ["Request", "Table"], ["Request", "Menu"], ["Controller", "Menu"]]
+      },
+      {
+        "type": "RELATED_TO",
+        "cauHoi": "Có liên quan nhưng chưa đủ semantic để phân loại.",
+        "allowedPairs": "*",
+        "note": "Cặp nào cũng được. Coi như hàng chờ phân loại — báo cáo định kỳ nên liệt kê số cạnh RELATED_TO đang tồn để dọn dần."
+      }
+    ],
+    "edgeProps": ["ghi_chu", "nguon", "taoTuUr", "doTinCay"],
+    "nguonNote": "`nguon` ghi vì sao có cạnh này: 'tlks', 'pm-xac-nhan', 'suy-tu-controller', 'radar'. Cạnh do máy suy ra phải để doTinCay < 1 và chờ PM duyệt."
+  },
+
+  "reviewEdgeTypes": {
+    "domain": "Tầng rà soát/quyết định — khung của một Request tại một thời điểm: dự án nào, giai đoạn nào, trạng thái nào, có bằng chứng gì, PM đã xét ra sao, khớp năng lực nào, kế hoạch thực thi ra sao. Tách RIÊNG khỏi `edgeTypes` vì đây là quan hệ có cấu trúc cố định 1-1 hoặc 1-nhiều rất khác về hình dạng so với đồ thị phụ thuộc tự do ở trên — nhập chung sẽ làm loãng cả hai.",
+    "note": "10 loại, cũng không tự thêm — bổ sung loại mới thì sửa file này trước, đừng lách bằng RELATED_TO của bộ trên.",
+    "items": [
+      { "type": "BELONGS_TO", "cauHoi": "Yêu cầu thuộc dự án nào?", "allowedPairs": [["Request", "Project"]] },
+      { "type": "IN_PHASE", "cauHoi": "Yêu cầu phát sinh ở giai đoạn nào?", "allowedPairs": [["Request", "Phase"]] },
+      { "type": "HAS_STATUS", "cauHoi": "Trạng thái hiện tại là gì?", "allowedPairs": [["Request", "Status"]] },
+      { "type": "HAS_EVIDENCE", "cauHoi": "Bằng chứng phạm vi là gì?", "allowedPairs": [["Request", "ScopeEvidence"]] },
+      { "type": "HAS_PM_REVIEW", "cauHoi": "PM đã xét ra sao?", "allowedPairs": [["Request", "PMReview"]] },
+      { "type": "BASED_ON", "cauHoi": "Quyết định này dựa trên căn cứ nào?", "allowedPairs": [["PMReview", "CapabilityVerdict"]] },
+      { "type": "MATCHES", "cauHoi": "Yêu cầu này khớp năng lực nào?", "allowedPairs": [["Request", "Capability"]] },
+      { "type": "HAS_VERDICT", "cauHoi": "Năng lực này đã có kết luận nào?", "allowedPairs": [["Capability", "CapabilityVerdict"]] },
+      { "type": "HAS_EFFORT_SAMPLE", "cauHoi": "Năng lực này có mẫu giờ công nào?", "allowedPairs": [["Capability", "EffortSample"]] },
+      { "type": "HAS_IMPLEMENTATION_PLAN", "cauHoi": "Kế hoạch thực thi là gì?", "allowedPairs": [["Request", "ImplementationPlan"]] }
+    ],
+    "edgeProps": ["ghi_chu", "nguon", "taoTuUr", "doTinCay"]
+  },
+
+  "queryExamples": {
+    "note": "Câu hỏi thật mà đồ thị phải trả lời được. Viết bằng cú pháp MATCH của SQL Server graph khi sinh script — KHÔNG phải Cypher/Gremlin, hub này chạy trên SQL Server graph (đã chốt ở database.provider).",
+    "items": [
+      "Request này bị chặn bởi Request nào chưa xong? — duyệt REQUIRES từ Request, lọc Status chưa HT (qua HAS_STATUS).",
+      "Đổi controller này thì Request nào bị ảnh hưởng? — duyệt ngược IMPACTS/DEPENDS_ON về node Request.",
+      "Nghiệp vụ này FBO làm được chưa, từ SP nào? — Capability theo menuBar/sysid, rồi HAS_VERDICT tới CapabilityVerdict, lọc ma_pbsp.",
+      "Yêu cầu tương tự trước đây mất bao nhiêu giờ? — MATCHES tới Capability, rồi HAS_EFFORT_SAMPLE, lọc featureType + trongTlks + độ khó.",
+      "Những gì FBO chưa đáp ứng tính tới SP hiện tại? — CapabilityVerdict verdict='khong' có ma_pbsp <= SP đang chạy.",
+      "PM đang chờ xét gì? — Request HAS_STATUS Status{code:'DD'}, chưa có HAS_PM_REVIEW mới hơn ngày hôm nay.",
+      "Đề xuất KL nào có căn cứ hợp lệ? — PMReview{verdict:'KL'} BASED_ON CapabilityVerdict{verdict:'khong'}.",
+      "SELECT r.fcode1, r.noi_dung, rev.verdict, rev.reason, cv.verdict AS capability_verdict FROM node_Request r, HAS_PM_REVIEW hpr, node_PMReview rev, BASED_ON bo, node_CapabilityVerdict cv WHERE MATCH(r-(hpr)->rev-(bo)->cv) AND rev.verdict = 'TA';"
+    ]
+  }
+}

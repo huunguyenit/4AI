@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "4ai-fbo": {
+      "args": [
+        "${PLUGIN_ROOT}/mcp/fbo/server.mjs",
+        "--hub",
+        "${PLUGIN_ROOT}"
+      ],
+      "command": "node",
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

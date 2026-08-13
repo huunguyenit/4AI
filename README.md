@@ -2,7 +2,7 @@
 
 Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự động (agents) **tập trung cho FBO/FBI** — viết một lần, dùng trên tất cả platform: **Claude Code, Cursor, Antigravity** và VSCode/Copilot.
 
-> **Chỉ muốn dùng, không muốn sửa?** Cài bằng một lệnh — xem [Cài đặt](#-cài-đặt--hai-cách).
+> **Chỉ muốn dùng, không muốn sửa?** Cài bằng một lệnh — xem [Cài đặt](#-cài-đặt).
 
 ## 🎯 Tính năng chính
 
@@ -15,7 +15,12 @@ Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự độ
 | **Báo cáo** | Dashboard HTML ngoại tuyến: rà soát UR, KPI phòng ban | Export từ tool |
 | **MCP Servers** | Kết nối tới database, API QLDA nội bộ | Claude, Cursor |
 
-## 📦 Cài đặt — hai cách
+## 📦 Cài đặt
+
+Chọn theo tool bạn dùng — Claude Code và Cursor mỗi bên có marketplace riêng, không dùng chung
+cơ chế cài.
+
+### Claude Code
 
 Chọn theo việc bạn định làm gì với 4AI.
 
@@ -63,6 +68,54 @@ phân phối. Cần chúng thì dùng cách 2.
 ### Cách 2 — Clone repo (khi cần sửa asset)
 
 Xem [Quickstart](#quickstart--sửa-một-điều-gì-đó) bên dưới.
+
+### Cursor
+
+Cursor có **Plugin + Marketplace riêng**, khác cơ chế `/plugin marketplace add` của Claude Code
+— không dùng chung, không thể trỏ Claude Code vào marketplace của Cursor hay ngược lại.
+
+| | **Cài qua Marketplace** | **Clone repo (`sync`)** |
+|---|---|---|
+| Dành cho | Người **dùng**, không cần sửa asset | Người **sửa** asset trong hub |
+| Cần | Cursor + Team Marketplace của tổ chức | Cursor + Node.js 22+ |
+| Cập nhật | Tự động (Auto Refresh) hoặc bấm lại trong Dashboard | `git pull` + `sync` |
+| Gồm | rules + agents + commands + MCP, tự chứa | Toàn bộ hub |
+
+#### Cách A — Team Marketplace từ GitHub
+
+Repo này đã có sẵn `.cursor-plugin/marketplace.json` ở gốc, trỏ vào gói `plugins/4ai-cursor/`
+(dựng bởi `node tools/4ai.mjs sync --target plugin-cursor`, đã commit sẵn) — không cần cấu hình
+thêm gì phía repo.
+
+1. Trong Cursor: **Dashboard → Plugins → Add Marketplace**.
+2. Chọn **Import from Repo**, trỏ vào `https://github.com/huunguyenit/4AI`.
+3. (Tuỳ chọn) bật **Enable Auto Refresh** để marketplace tự cập nhật khi có commit mới lên
+   `main` — cần cài **Cursor GitHub App** cho tổ chức/repo.
+4. Mở **Customize** ở thanh bên → tìm plugin **4ai** → **Install** → chọn scope *project* hoặc
+   *user*.
+
+Gói cài gồm: rule (doctrine + rule, ra file `.mdc` thật với `alwaysApply` đúng khai báo trong
+hub — **không** hạ xuống thành skill như bên Claude), agent, command, và MCP `4ai-fbo`. Không có
+thư mục `skills/`: 4AI hiện gộp skill-kind asset vào rule cho Cursor, giống hệt hành vi khi
+`sync` thẳng vào `.cursor/rules/` của một project đã clone.
+
+Yêu cầu: **Node.js 22+** trên máy chạy Cursor (MCP dùng `node:sqlite` built-in).
+
+> **Chưa publish public marketplace.** Plugin hiện chỉ cài được qua Team Marketplace nội bộ
+> (Import from Repo). Đưa lên `cursor.com/marketplace/publish` (public, cần review của đội
+> Cursor) là quyết định công khai thêm — hỏi trước khi làm, không tự động theo bước này.
+
+> **Index SQLite chưa xác nhận sống sót qua update** như bên Claude Code (`${CLAUDE_PLUGIN_DATA}`)
+> — Cursor chưa có biến tương đương được xác nhận, nên `mcp.json` của gói không set
+> `FBO_DATA_ROOT`: index ghi ngay trong thư mục cài (`${PLUGIN_ROOT}/.4ai/index/`). Cập nhật
+> plugin có thể mất index, phải index lại chương trình. Xem ghi chú đầu
+> `tools/lib/emit/cursor-plugin.mjs`.
+
+#### Cách B — Clone repo (khi cần sửa asset)
+
+Giống Cách 2 của Claude Code ở trên — xem [Quickstart](#quickstart--sửa-một-điều-gì-đó). Sau
+khi `sync`, Cursor đọc trực tiếp `.cursor/rules/`, `.cursor/agents/`, `.cursor/commands/`,
+`.cursor/mcp.json` trong chính repo.
 
 ## ⚙️ Cấu hình cục bộ (trước khi dùng `query_sql` / `report`)
 
@@ -183,8 +236,9 @@ Sau khi `sync`, assets tự động xuất hiện trong thư mục `.claude/`:
 Ví dụ: `/pm-status` hiển thị trạng thái tất cả task trong `ledger/`, phân theo dự án.
 
 ### Cursor
-Cung cấp rules + commands cho Copilot, để làm việc FBO/FBI tự động:
-- **Cursor Rules** → `.cursor/rules/` — chạy mỗi lần gõ, giúp tránh lỗi thường gặp
+Cài qua Marketplace hoặc clone+sync — xem [Cài đặt → Cursor](#cursor). Dù cài cách nào, kết quả
+tương đương:
+- **Cursor Rules** → `.cursor/rules/` (hoặc `rules/` trong gói plugin) — chạy mỗi lần gõ, giúp tránh lỗi thường gặp
 - **Rules áp dụng:** Không viết SQL tay, luôn dùng `query_sql`; không lộ connection string; dùng `resolve_entities` trước khi sửa XML FBO
 - Cursor hoạt động offline — chuẩn bị tài liệu trước bằng `query_sql` rồi truyền vào prompt
 
@@ -246,32 +300,46 @@ node tools/4ai.mjs check                  # Validate — exit 0 = OK
 
 ### Dựng lại plugin sau khi sửa asset
 
-Plugin là **phương ngữ thứ năm** của compiler, không phải thư mục dựng tay — `plugins/4ai/`
-sinh ra từ chính corpus `assets/`, giống hệt `.claude/` hay `.cursor/`:
+Plugin **Claude Code** là phương ngữ thứ năm của compiler, plugin **Cursor** là phương ngữ thứ
+sáu — cả hai không phải thư mục dựng tay, sinh ra từ chính corpus `assets/`, giống hệt `.claude/`
+hay `.cursor/`:
 
 ```bash
-node tools/4ai.mjs sync --dry-run --target plugin
+node tools/4ai.mjs sync --dry-run --target plugin --target plugin-cursor
 ```
 
 ```bash
-node tools/4ai.mjs sync --target plugin
+node tools/4ai.mjs sync --target plugin --target plugin-cursor
 ```
 
-Output **được commit** — nó là artifact người khác cài, diff phải nhìn thấy được. Sửa asset mà
-quên dựng lại plugin thì người cài plugin vẫn nhận bản cũ.
+(Dựng riêng từng cái thì bỏ `--target` còn lại — `--target plugin` chỉ Claude, `--target
+plugin-cursor` chỉ Cursor.)
 
-Ba điều emitter plugin làm khác các emitter kia:
+Output **được commit** — đây là artifact người khác cài, diff phải nhìn thấy được. Sửa asset mà
+quên dựng lại plugin thì người cài (cả hai bên) vẫn nhận bản cũ.
 
-- **Doctrine và rule `always: true` hạ thành skill.** Plugin không có primitive "context luôn
-  nạp" như `.claude/4ai-context.md`, nên chúng thành skill để model tự nạp theo `description` —
-  đúng cách scope user-global vẫn làm.
+Những điều hai emitter plugin làm khác các emitter "sync trực tiếp vào workspace" kia:
+
 - **Gói kèm runtime.** `mcp/fbo/`, `src/`, `tools/`, `data/` được chép nguyên văn vào gói. Plugin
   cấm đường dẫn `../` ra ngoài gốc, nên mọi thứ asset nhắc tới phải nằm trong gói. Layout giữ
   nguyên so với hub để import tương đối giữa `mcp/fbo/` và `src/` còn đúng.
 - **`*.local.json` không bao giờ đi kèm.** Đó là cấu hình per-máy (`data/qlda.local.json` chứa
   mã PM và connection string), gitignore và loại khỏi bản phân phối.
+- **Đường dẫn runtime tuyệt đối (node.exe) đổi thành tên lệnh trần**, để máy người cài tự phân
+  giải qua PATH thay vì dùng đường dẫn cứng của máy build.
 
-Bump version plugin ở `targets.json` → `pluginVersion`, không sửa tay `plugin.json`.
+Hai emitter khác nhau ở đúng một điểm — cách xử lý doctrine/rule:
+
+- **Claude plugin:** không có primitive "context luôn nạp" như `.claude/4ai-context.md` và
+  không có primitive rule theo path — doctrine và rule `always: true` đều hạ thành **skill**
+  (model tự nạp theo `description`), đúng cách scope user-global vẫn làm.
+- **Cursor plugin:** CÓ primitive `rules/` auto-discover thật — doctrine và rule ra file `.mdc`
+  thật với `alwaysApply` đúng khai báo, giống hệt hành vi `sync` trực tiếp vào `.cursor/rules/`.
+  Không có `skills/`: skill-kind asset cũng gộp vào `rules/*.mdc`, nhất quán với live target
+  `cursor` hiện tại (xem `tools/lib/emit/cursor-plugin.mjs`).
+
+Bump version plugin ở `targets.json` → `pluginVersion` (áp cho cả hai target `plugin` và
+`plugin-cursor`), không sửa tay `plugin.json`.
 
 ## 📊 Báo cáo & Template
 
@@ -391,8 +459,10 @@ Cấu hình trọng số: `data/qlda.json` → `review.phanCong` ghi đè mặc 
 | Nơi | Mục đích |
 |---|---|
 | **`assets/`** | Tất cả rules, skills, commands, agents. Viết Markdown, auto-emit ra platform |
-| **`plugins/4ai/`** | Bản plugin sinh tự động — **không sửa tay**, chạy `sync --target plugin` |
-| `.claude-plugin/marketplace.json` | Catalog marketplace để `/plugin marketplace add` |
+| **`plugins/4ai/`** | Bản plugin Claude Code sinh tự động — **không sửa tay**, chạy `sync --target plugin` |
+| **`plugins/4ai-cursor/`** | Bản plugin Cursor sinh tự động — **không sửa tay**, chạy `sync --target plugin-cursor` |
+| `.claude-plugin/marketplace.json` | Catalog marketplace Claude Code để `/plugin marketplace add` |
+| `.cursor-plugin/marketplace.json` | Catalog marketplace Cursor để Import from Repo (Team Marketplace) |
 | `assets/rules/` | Kiểm soát chất lượng (không lộ secret, tên biến, SQL injection, v.v.) |
 | `assets/skills/` | Quy trình chi tiết (customize FBO, audit, PM workflow) |
 | `assets/agents/` | Tác nhân tự động (phân tích tài liệu, code review) |

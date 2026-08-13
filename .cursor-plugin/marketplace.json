@@ -1,0 +1,14 @@
+{
+  "name": "fast-source-4ai",
+  "owner": {
+    "name": "Fast Source"
+  },
+  "plugins": [
+    {
+      "name": "4ai",
+      "description": "Rule, agent, command và MCP tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi Include, truy vấn SQL qua Web.config.",
+      "source": "./plugins/4ai-cursor",
+      "keywords": ["fbo", "fbi", "fast-business", "erp", "vietnamese"]
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "version": 1,
+  "note": "Quy ước đặt tên bảng/cột và mẫu script cho FBO. PM dùng file này để GỢI Ý cho lập trình viên khi một yêu cầu nhắc tới 'tạo bảng' hoặc 'thêm cột' — KHÔNG tự chạy script, KHÔNG tự tạo bảng. Đầu ra của PM là ghi chú đính vào UR: tên bảng đề xuất, chứng từ tham khảo, aspx, controller.",
+  "pmScope": {
+    "duocLam": [
+      "Đề xuất tên bảng theo quy ước dưới đây.",
+      "Chỉ ra chứng từ chuẩn để lập trình viên sao chép cấu trúc.",
+      "Ghi rõ trang aspx và controller tương ứng của chứng từ tham khảo.",
+      "Viết SCRIPT SQL THẬT (CREATE TABLE / ALTER TABLE đầy đủ cột, kiểu, PK) đính vào ghi chú UR — không phải mô tả bằng lời. Lập trình viên phải đọc được và chạy được ngay, chỉ chờ PM xác nhận."
+    ],
+    "khongLam": [
+      "Chạy bất kỳ lệnh DDL nào.",
+      "Tạo sẵn bảng, view, proc trên DB của khách.",
+      "Chốt số hiệu chứng từ mà chưa quét DB App của chính dự án đó."
+    ],
+    "rule": "Mọi script chỉ được chạy sau khi PM xác nhận, và do người có quyền chạy — không phải AI."
+  },
+
+  "danhMuc": {
+    "scopeNote": "Quy ước `zc` + 5 cột bắt buộc dưới đây CHỈ áp dụng cho bảng danh mục trong DB App của FBO (nơi có sysgendata, sysmenu, hệ thống controller). KHÔNG áp dụng cho bảng trong DB trung gian — xem mục `bangTrungGian`.",
+    "namingRule": "Bảng danh mục customize đặt tiền tố `zc` — `z` là chữ cái cuối bảng chữ cái (đẩy xuống cuối khi sắp xếp), `c` là customize. Phần còn lại giữ nguyên quy ước FBO: `dm` + viết tắt nghiệp vụ.",
+    "examples": [
+      { "table": "zcdmtdtt", "nghia": "Danh mục tiến độ thanh toán" }
+    ],
+    "mandatoryColumns": [
+      { "name": "status", "purpose": "Trạng thái bản ghi — FBO dùng để ẩn/hiện và khoá sửa." },
+      { "name": "user_id0", "purpose": "Người tạo (audit)." },
+      { "name": "user_id2", "purpose": "Người sửa cuối (audit)." },
+      { "name": "datetime0", "purpose": "Thời điểm tạo (audit)." },
+      { "name": "datetime2", "purpose": "Thời điểm sửa cuối (audit)." }
+    ],
+    "mandatoryNote": "Năm cột trên là BẮT BUỘC với mọi bảng danh mục trong DB App. Ngoài ra kiểu dữ liệu và các cột nghiệp vụ phải sao chép từ một bảng danh mục chuẩn cùng loại trong chính chương trình đó — không tự nghĩ ra kiểu."
+  },
+
+  "bangTrungGian": {
+    "note": "Bảng trong một DATABASE TRUNG GIAN (staging) — không phải DB App của FBO. Mục đích: kéo dữ liệu từ hệ thống của khách (Samo, đối tác, file nạp...) về trước khi import vào FBO. Đây không phải danh mục hay chứng từ FBO nên KHÔNG áp quy ước `zc`, KHÔNG bắt buộc 5 cột audit — bảng chỉ cần mirror đúng cấu trúc của hệ nguồn để nhận dữ liệu nguyên vẹn.",
+    "rule": [
+      "Đặt tên bảng đúng theo tên ở hệ nguồn (không dịch, không thêm tiền tố) — mục đích là ánh xạ 1-1 khi ETL, đổi tên chỉ gây khó đối chiếu.",
+      "Cột và kiểu dữ liệu lấy đúng theo mô tả/schema hệ nguồn cung cấp. Không tự suy đoán kiểu khi chưa có mô tả rõ (int/varchar/nvarchar khác nhau về khả năng chứa dữ liệu — lệch kiểu là mất dữ liệu).",
+      "PK đặt theo khoá của hệ nguồn, không tự bịa khoá composite trừ khi hệ nguồn xác nhận.",
+      "KHÔNG thêm status/user_id0/user_id2/datetime0/datetime2 trừ khi PM yêu cầu theo dõi lịch sử nạp — nếu cần, đó là quyết định riêng, ghi rõ lý do trong ghi chú UR."
+    ],
+    "verifiedExample": {
+      "database": "DB trung gian DEMO1 (kết nối FBO–Samo, xem data/qlda.json → projects.DEMO1)",
+      "table": "Town",
+      "muc_dich": "Lấy dữ liệu vùng địa lý (Region/State) từ Samo về DB trung gian trước khi FBO đọc.",
+      "columns": [
+        { "name": "Inc", "type": "int", "notNull": true, "pk": true, "nghia": "Khoá chính của bảng (Samo)" },
+        { "name": "State", "type": "int", "nghia": "Trường thông tin của Samo" },
+        { "name": "Region", "type": "int", "nghia": "Trường thông tin của Samo" },
+        { "name": "Alias", "type": "varchar(3)", "nghia": "Trường thông tin của Samo" },
+        { "name": "Name", "type": "nvarchar(24)", "nghia": "Tên vùng địa lý" },
+        { "name": "Iname", "type": "nvarchar(24)", "nghia": "Tên khác" }
+      ],
+      "columnTypeCaveat": "PM cung cấp bảng mô tả ghi Name/Iname là Nvarchar(24) nhưng script tay kèm theo lại viết varchar(24) — CHỌN nvarchar theo bảng mô tả (Name/Iname là tên địa danh, cần Unicode) và đã sửa trong `sql` bên dưới. Xác nhận lại với nguồn Samo nếu varchar mới là đúng.",
+      "sql": [
+        "CREATE TABLE Town (",
+        "  Inc int NOT NULL,",
+        "  State int NULL,",
+        "  Region int NULL,",
+        "  Alias varchar(3) NULL,",
+        "  Name nvarchar(24) NULL,",
+        "  Iname nvarchar(24) NULL,",
+        "  CONSTRAINT PK_Town PRIMARY KEY (Inc)",
+        ")"
+      ],
+      "sqlFixNote": "Script PM đưa thiếu dấu phẩy trước CONSTRAINT (cú pháp T-SQL sai, không chạy được) — đã thêm dấu phẩy ở bản trên."
+    }
+  },
+
+  "chungTu": {
+    "rule": "KHÔNG thiết kế chứng từ từ đầu. Luôn sao chép cấu trúc từ một chứng từ chuẩn cùng dạng nghiệp vụ trong chính chương trình khách, rồi bỏ/thêm cột. Mỗi phân hệ đều có sẵn bảng mẫu — xem `referenceVouchers`.",
+    "tableFamily": {
+      "master": "m<nn>$",
+      "detail": "d<nn>$",
+      "inquiry": "i<nn>$",
+      "config": "c<nn>$",
+      "generalPartition": "$000000",
+      "note": "`<nn>` là số hiệu chứng từ. Bảng gốc không partition tên là `m<nn>$`; bảng dữ liệu thực nằm ở partition, mặc định `m<nn>$000000`. Ví dụ họ bảng của HDA: c81$ / m81$ / d81$ / i81$."
+    },
+    "numberAllocation": {
+      "rule": "Số hiệu chứng từ customize phải là số CHƯA TỪNG xuất hiện trong database App của chính dự án đó.",
+      "howToCheck": "Quét tên bảng trong DB App của dự án: liệt kê mọi bảng khớp `m__$%` / `d__$%` / `i__$%` / `c__$%`, bóc ra tập số đã dùng, chọn số ngoài tập đó. Quét trên DB của CHÍNH dự án — không suy từ dự án khác.",
+      "known": [
+        { "so": "64", "chungTu": "DXA — Đơn hàng bán", "hoBang": ["c64$", "m64$", "d64$", "i64$"], "nguon": "dmct9" },
+        { "so": "71", "chungTu": "PNA — Hóa đơn mua hàng trong nước", "hoBang": ["m71$", "d71$"], "nguon": "chỉ mục controller PVTran/PVDetail", "canXacNhan": true },
+        { "so": "74", "chungTu": "PND — Phiếu nhập kho", "hoBang": ["c74$", "m74$", "d74$", "i74$"], "nguon": "dmct9" },
+        { "so": "76", "chungTu": "Phiếu nhập hàng bán bị trả lại (SRTran)", "nguon": "chỉ mục controller" },
+        { "so": "81", "chungTu": "HDA — Hóa đơn bán hàng", "hoBang": ["c81$", "m81$", "d81$", "i81$"], "nguon": "dmct9" },
+        { "so": "85", "chungTu": "PXB — Phiếu xuất điều chuyển", "hoBang": ["c85$", "m85$", "d85$", "i85$"], "nguon": "dmct9" },
+        { "so": "94", "chungTu": "PO1 — Đơn hàng mua", "hoBang": ["c94$", "m94$", "d94$", "i94$"], "nguon": "dmct9" }
+      ],
+      "howToResolve": "Dùng resolve_vouchercode: `wcommand` (db sys) cho menu_id/bar/sysid, `dmct9` (db app) cho họ bảng. Tra bằng MÃ chứng từ (ma_ct) mới ra dmct9 — tra bằng sysid thường không ra dòng nào.",
+      "knownNote": "Bảng `known` chỉ là mẫu đối chiếu lấy từ corpus FBISP24 — KHÔNG thay thế bước quét DB thật của dự án. Số trống ở chương trình này có thể đã dùng ở chương trình khác."
+    },
+    "partition": {
+      "threshold": {
+        "rule": "Tạo partition khi dự kiến nhập trên 20 phiếu/ngày.",
+        "phieuMoiNgay": 20,
+        "note": "Ước lượng theo ngành nghề của khách và khối lượng nghiệp vụ trong TLKS. Không chắc thì hỏi PM chứ đừng mặc định không partition."
+      },
+      "rangeSource": {
+        "table": "dmstt",
+        "columns": ["ngay_gh1", "ngay_gh2"],
+        "note": "Mốc partition lấy từ khoảng ngày giới hạn của chương trình. Không hardcode ngày trong script."
+      },
+      "naming": "Partition đặt theo `<YYYYMM>`: `m62$000000` là general, `m62$202612` là partition tháng 12/2026."
+    },
+    "scriptTemplate": {
+      "note": "Mẫu để ĐÍNH VÀO GHI CHÚ UR cho lập trình viên. Thay `62` bằng số hiệu thật đã quét. Chạy trên DB App của dự án, sau khi PM xác nhận.",
+      "sql": [
+        "DECLARE @d1 SMALLDATETIME, @d2 SMALLDATETIME",
+        "SELECT @d1 = ngay_gh1, @d2 = ngay_gh2 FROM dmstt",
+        "",
+        "EXEC FastBusiness$App$Dynamic$AddTable 'm62$000000', 'm62$', '', 'Voucher$', 1, @d1, @d2, 1",
+        "EXEC FastBusiness$App$Dynamic$AddTable 'd62$000000', 'd62$', '', 'Voucher$', 1, @d1, @d2, 1",
+        "EXEC FastBusiness$App$Dynamic$AddTable 'i62$000000', 'i62$', '', 'Voucher$', 1, @d1, @d2, 1",
+        "",
+        "IF NOT EXISTS(SELECT 1 FROM sysgendata WHERE basetable = 'm62$000000')",
+        "INSERT INTO sysgendata (basetable,primetable,refprimetable,primefilegroup,type,status) VALUES(N'm62$000000',N'm62$',N'',N'Voucher',1,N'1')",
+        "IF NOT EXISTS(SELECT 1 FROM sysgendata WHERE basetable = 'd62$000000')",
+        "INSERT INTO sysgendata (basetable,primetable,refprimetable,primefilegroup,type,status) VALUES(N'd62$000000',N'd62$',N'',N'Voucher',1,N'1')",
+        "IF NOT EXISTS(SELECT 1 FROM sysgendata WHERE basetable = 'i62$000000')",
+        "INSERT INTO sysgendata (basetable,primetable,refprimetable,primefilegroup,type,status) VALUES(N'i62$000000',N'i62$',N'',N'Voucher',1,N'1')"
+      ]
+    }
+  },
+
+  "themCot": {
+    "rule": "Thêm cột vào bảng có sẵn cũng chỉ là GỢI Ý trong ghi chú UR — viết câu `ALTER TABLE` mẫu để lập trình viên hiểu ý, không chạy.",
+    "checklist": [
+      "Nói rõ bảng nào, partition nào (cột phải thêm cho MỌI partition của họ bảng đó, không chỉ $000000).",
+      "Nêu kiểu dữ liệu lấy theo cột tương đương ở chứng từ tham khảo.",
+      "Nhắc kiểm cột dự phòng sẵn có (s1..s9, fcode*, fdate*, fqty*, fnote*, ma_td*, sl_td*, gc_td*) trước khi thêm cột mới — nhiều yêu cầu chỉ cần trưng dụng slot.",
+      "Nhắc cột dự phòng chỉ được coi là trống sau khi soi hết command SQL trong controller."
+    ]
+  },
+
+  "referenceVouchers": {
+    "note": "Phân hệ → chứng từ chuẩn để sao chép cấu trúc. `syscode`/`sysid`/`aspx` phân giải bằng resolve_vouchercode trên corpus FBISP24 ngày 2026-08-10. Số hiệu bảng phải kiểm lại trên DB của dự án đang làm.",
+    "verifiedOn": "_CORPUS (D:\\Fast Source\\Development\\DevWorkFlow\\FBISP24)",
+    "verifiedAt": "2026-08-10",
+    "items": [
+      {
+        "phanHe": "Tiền",
+        "nghiepVu": "Chứng từ tiền, không post sổ phức tạp",
+        "chungTuThamKhao": "Giấy báo nợ",
+        "syscode": "BN1",
+        "sysid": "CPTran",
+        "aspx": "cactbn1.aspx",
+        "menuBar": "Giấy báo nợ",
+        "verified": true
+      },
+      {
+        "phanHe": "Bán hàng",
+        "nghiepVu": "Chứng từ có duyệt",
+        "chungTuThamKhao": "Đơn hàng bán",
+        "syscode": "DXA",
+        "sysid": "SOTran",
+        "aspx": "soctdxa.aspx",
+        "menuBar": null,
+        "tableFamily": ["c64$", "m64$", "d64$", "i64$"],
+        "verified": true,
+        "note": "syscode DXA do PM xác nhận; họ bảng lấy từ dmct9. Corpus FBISP24 không có dòng wcommand cho DXA nên chưa biết menu_id/bar — tra lại trên chương trình khách nếu cần tên menu."
+      },
+      {
+        "phanHe": "Bán hàng",
+        "nghiepVu": "Chứng từ có post sổ",
+        "chungTuThamKhao": "Hóa đơn bán hàng",
+        "syscode": "HDA",
+        "sysid": "SVTran",
+        "aspx": "socthda.aspx",
+        "menuBar": "Hóa đơn bán hàng (C)",
+        "tableFamily": ["c81$", "m81$", "d81$", "i81$"],
+        "verified": true,
+        "note": "Đây là ví dụ chuẩn nhất cho họ bảng đầy đủ — dmct9 trả về cả bốn bảng."
+      },
+      {
+        "phanHe": "Mua hàng",
+        "nghiepVu": "Chứng từ có duyệt",
+        "chungTuThamKhao": "Đơn hàng mua",
+        "syscode": "PO1",
+        "sysid": "POTran",
+        "aspx": "poctpo1.aspx",
+        "aspx2": "bipoctpo1.aspx",
+        "menuBar": null,
+        "tableFamily": ["c94$", "m94$", "d94$", "i94$"],
+        "verified": true,
+        "note": "syscode PO1 do PM xác nhận; họ bảng và url lấy từ dmct9. dmct9 có thêm url2 = bipoctpo1.aspx (bản BI). Corpus không có dòng wcommand cho PO1 nên chưa biết menu_id/bar."
+      },
+      {
+        "phanHe": "Mua hàng",
+        "nghiepVu": "Hóa đơn mua trong nước, có post sổ",
+        "chungTuThamKhao": "Hóa đơn mua hàng trong nước",
+        "syscode": "PNA",
+        "sysid": "PVTran",
+        "aspx": "poctpna.aspx",
+        "menuBar": "Hóa đơn mua hàng trong nước",
+        "tableFamily": ["m71$000000", "d71$000000"],
+        "verified": true
+      },
+      {
+        "phanHe": "Kho",
+        "nghiepVu": "Phiếu nhập điều chuyển",
+        "chungTuThamKhao": "Phiếu nhập điều chuyển",
+        "syscode": "PNF",
+        "sysid": "IPTran",
+        "aspx": "inctpnf.aspx",
+        "menuBar": "Phiếu nhập điều chuyển",
+        "verified": true
+      },
+      {
+        "phanHe": "Kho",
+        "nghiepVu": "Phiếu xuất điều chuyển",
+        "chungTuThamKhao": "Phiếu xuất điều chuyển",
+        "syscode": "PXB",
+        "sysid": "ITTran",
+        "aspx": "inctpxb.aspx",
+        "menuBar": "Phiếu xuất điều chuyển",
+        "tableFamily": ["c85$", "m85$", "d85$", "i85$"],
+        "verified": true
+      },
+      {
+        "phanHe": "Kho",
+        "nghiepVu": "Phiếu nhập kho",
+        "chungTuThamKhao": "Phiếu nhập kho",
+        "syscode": "PND",
+        "sysid": "IRTran",
+        "aspx": "inctpnd.aspx",
+        "menuBar": "Phiếu nhập kho",
+        "tableFamily": ["c74$", "m74$", "d74$", "i74$"],
+        "verified": true,
+        "note": "Tìm theo tên nghiệp vụ không ra vì title controller rỗng — phải dò cột `bar` trong wcommand. Đây là lý do luôn tra bằng mã chứng từ chứ không bằng tên màn hình."
+      }
+    ]
+  },
+
+  "featureTypes": {
+    "note": "Loại tính năng dùng để ước lượng giờ công. Giờ công KHÔNG suy đoán — gặp loại chưa có số thì hỏi PM rồi ghi vào data/effort-samples.jsonl. Xem `graph-schema.json` node EffortSample.",
+    "items": [
+      { "id": "danh-muc", "ten": "Danh mục" },
+      { "id": "chung-tu", "ten": "Chứng từ" },
+      { "id": "bao-cao", "ten": "Báo cáo" },
+      { "id": "import", "ten": "Import" },
+      { "id": "post-so", "ten": "Post sổ" },
+      { "id": "thong-bao", "ten": "Thông báo", "kenh": ["notify", "mail", "push-device"] },
+      { "id": "duyet", "ten": "Duyệt", "kenh": ["notify", "mail", "push-device"] },
+      { "id": "ket-chuyen", "ten": "Kết chuyển" },
+      { "id": "phan-bo", "ten": "Phân bổ" }
+    ],
+    "onNewFeatureType": "Gặp tính năng không thuộc danh sách trên: hỏi PM tên loại + giờ công cơ sở, thêm vào `items`, ghi mẫu vào effort-samples.jsonl, rồi mới đề xuất."
+  }
+}

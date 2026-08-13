@@ -18,18 +18,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { emitPaths, mcpPath } from '../paths.mjs';
-import { banner, seeAlsoLine, alwaysOnAssets, onDemandAssets } from './common.mjs';
+import { banner, seeAlsoLine, alwaysOnAssets, onDemandAssets, runtimeFiles, bareCommand } from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 import { stableStringify } from '../json.mjs';
 import { HUB } from '../assets.mjs';
-
-// Cây runtime chép vào gói. Giữ NGUYÊN đường dẫn tương đối so với hub: mcp/fbo/lib/tools.mjs
-// import '../../../src/...' và src/database/*.mjs import '../../mcp/fbo/lib/...' — chép cùng
-// layout thì mọi import còn đúng, không phải viết lại đường dẫn.
-const RUNTIME_DIRS = ['mcp/fbo', 'src', 'tools', 'data'];
-
-// *.local.json là cấu hình per-máy, gitignore — không bao giờ đi kèm bản phân phối.
-const RUNTIME_EXCLUDE = /(^|\/)[^/]*\.local\.json$/;
 
 // Plugin là artifact PHÂN PHỐI — không phải cấu hình riêng của máy build. asset.description/
 // asset.body đã bị applyPmTemplate() thay token {PMName}/{PMDept} bằng danh tính PM của máy
@@ -79,24 +71,6 @@ function commandFile(asset) {
   return `${fm}\n${banner(asset)}\n\n${body}`;
 }
 
-/** Liệt kê file runtime cần chép, đường dẫn tương đối so với hub, thứ tự ổn định. */
-function runtimeFiles() {
-  const out = [];
-  for (const dir of RUNTIME_DIRS) {
-    const abs = path.join(HUB, dir);
-    if (!fs.existsSync(abs)) continue;
-    // node:fs.globSync không có `nodir` (đó là option của npm glob) — lọc thư mục bằng dirent.
-    for (const d of fs.globSync('**/*', { cwd: abs, withFileTypes: true })) {
-      if (!d.isFile()) continue;
-      const sub = path.relative(abs, path.join(d.parentPath ?? d.path, d.name));
-      const rel = `${dir}/${sub.replace(/\\/g, '/')}`;
-      if (RUNTIME_EXCLUDE.test(rel)) continue;
-      out.push(rel);
-    }
-  }
-  return out.sort();
-}
-
 /**
  * @returns {{textFiles: [], jsonFiles: [], notes: []}}
  */
@@ -133,7 +107,7 @@ export function emitPlugin({ assets, mcpServers, target }) {
         // dùng nvm hoặc cài Node chỗ khác, đường dẫn cứng của máy dev chắc chắn trượt. Gói đi
         // xa thì phải dựa vào PATH; máy nào PATH tối giản thì `4ai doctor` chỉ ra và người
         // dùng tự ghi đè trong cấu hình MCP của họ.
-        command: pluginCommand(srv.command),
+        command: bareCommand(srv.command),
         args: (srv.args ?? []).map(pluginPath),
         cwd: '${CLAUDE_PLUGIN_ROOT}',
         env: { ...(srv.env ?? {}), FBO_DATA_ROOT: '${CLAUDE_PLUGIN_DATA}' },
@@ -155,17 +129,6 @@ export function emitPlugin({ assets, mcpServers, target }) {
 /** {{HUB}} trong mcp/servers.json trỏ về gốc plugin khi chạy dưới dạng plugin. */
 function pluginPath(v) {
   return typeof v === 'string' ? v.replaceAll('{{HUB}}', '${CLAUDE_PLUGIN_ROOT}').replace(/\\/g, '/') : v;
-}
-
-/**
- * Đường dẫn tuyệt đối tới runtime (node.exe) chỉ đúng trên máy sinh ra gói — đổi thành tên
- * lệnh trần để máy người cài tự phân giải qua PATH. Lệnh đã là tên trần thì giữ nguyên.
- */
-function pluginCommand(cmd) {
-  const s = String(cmd ?? '').trim();
-  if (!/[\\/]/.test(s)) return s;
-  const ten = s.split(/[\\/]/).pop().replace(/\.exe$/i, '');
-  return ten || s;
 }
 
 function pluginName(target) {
