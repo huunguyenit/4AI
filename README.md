@@ -361,28 +361,34 @@ tools/templates/report/
 
 ### Report Workflow — MCP Tool
 
-Tạo báo cáo từ yêu cầu tự nhiên (tiếng Việt) → SQL → kết quả:
+Hai tool MCP `4ai-fbo`, gọi trực tiếp từ agent (Claude, Cursor) — **không phải lệnh CLI**, không
+có `node tools/4ai.mjs plan-report`/`execute-report`. Dùng khi cần một câu hỏi báo cáo tự do,
+khác với `4ai report` (dataset UR **cố định**, xem [Báo cáo Rà Soát Yêu Cầu](#1-báo-cáo-rà-soát-yêu-cầu-ur-review)
+bên dưới — không nhận SQL tự do):
 
-**Bước 1: Plan Report** — phân giải yêu cầu, tạo metadata
-```bash
-node tools/4ai.mjs plan-report "Báo cáo rà soát dự án tháng 8"
+**Bước 1: `plan_report`** — phân giải yêu cầu, tạo metadata. Thuần đọc cấu hình, KHÔNG gọi LLM
+và KHÔNG chạm database:
 ```
-Output:
+plan_report(request: "Báo cáo rà soát dự án tháng 8")
+```
+Tham số khác: `program` (path hoặc `nbdmda.ma_da`), `domain` (`qlda` | `fbo`, ép domain thay vì
+tự nhận), `maxRows` (mặc định 10000). Output:
 - `queryPlan` — bảng và cột cần truy vấn
 - `metadata` — enum, rule kinh doanh
 - `prompt` — hướng dẫn cho agent tự viết SQL
 - `planId` — dùng trong bước tiếp
 
-**Bước 2: Agent Tự Viết SQL** — sử dụng prompt từ bước 1
-Agent (Claude, Cursor) sử dụng `prompt` để tự viết câu SELECT phù hợp
+**Bước 2: Agent tự viết SQL** — dùng `prompt` từ bước 1 để viết câu SELECT phù hợp.
 
-**Bước 3: Execute Report** — validate & chạy SQL
-```bash
-node tools/4ai.mjs execute-report <planId> "SELECT ..."
+**Bước 3: `execute_report`** — SQL bạn viết được đối chiếu lại **đúng** metadata đã chốt ở bước
+plan (bảng, cột, bảng/cột bị cấm) trước khi chạy read-only; sai schema thì trả
+`VALIDATION_FAILED`, không chạm database:
 ```
-Output: dữ liệu được validate lại metadata chốt ở bước Plan
+execute_report(planId: "<planId>", sql: "SELECT ...")
+```
+Tham số khác: `program`, `database` (mặc định lấy từ metadata của plan), `maxRows` (tối đa 10000).
 
-**Bảo mật:** SQL luôn qua lớp validation dựa trên metadata đã chốt — không chạy trực tiếp từ input người dùng.
+**Bảo mật:** SQL luôn qua lớp validation dựa trên metadata đã chốt ở bước plan — không chạy trực tiếp từ input người dùng.
 
 ### Dashboard HTML Ngoại Tuyến
 

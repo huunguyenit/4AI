@@ -5,6 +5,16 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Tài liệu
+
+- **README ghi sai `plan_report`/`execute_report` thành lệnh CLI.** Mục "Report Workflow" chỉ
+  `node tools/4ai.mjs plan-report`/`execute-report` — hai lệnh này KHÔNG tồn tại trong
+  `tools/4ai.mjs` (danh sách lệnh thật: `check|doctor|setup|list|explain|new|targets|graph|
+  report|sync|serve`). Đây là tool MCP `4ai-fbo`, agent gọi trực tiếp, không qua CLI. Sửa lại
+  cú pháp gọi tool đúng tham số (`request`/`program`/`domain`/`maxRows` cho `plan_report`;
+  `planId`/`sql`/`program`/`database`/`maxRows` cho `execute_report`), và ghi rõ khác với
+  `4ai report` (dataset UR cố định, không nhận SQL tự do).
+
 ### Thêm
 
 - **Cursor Plugin — phương ngữ thứ sáu của compiler.** `tools/lib/emit/cursor-plugin.mjs`
