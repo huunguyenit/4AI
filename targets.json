@@ -17,7 +17,7 @@
       "domains": ["core", "fbo-xml", "project-mgmt"],
       "enabled": true,
       "pluginName": "4ai",
-      "pluginVersion": "0.1.0",
+      "pluginVersion": "0.2.0",
       "notes": "Bản đóng gói phân phối qua marketplace trong chính repo này (.claude-plugin/marketplace.json). Output được commit — đây là artifact người khác cài, diff phải nhìn thấy được."
     },
     {
@@ -27,7 +27,7 @@
       "domains": ["core", "fbo-xml", "project-mgmt"],
       "enabled": true,
       "pluginName": "4ai",
-      "pluginVersion": "0.1.0",
+      "pluginVersion": "0.2.0",
       "notes": "Bản đóng gói cho Cursor Plugin (.cursor-plugin/marketplace.json ở gốc repo) — cài qua Team Marketplace (Dashboard → Plugins → Add Marketplace → Import from Repo) hoặc public marketplace review. Thư mục riêng với `plugin` (Claude) vì hai định dạng khác nhau: Cursor có rules/ auto-discover thật, Claude không. Output được commit."
     },
     {

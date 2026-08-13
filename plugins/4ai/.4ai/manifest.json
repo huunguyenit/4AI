@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude-plugin/plugin.json",
-      "sha256": "c9bd6df25fbb5531af5f2c227038dd3ec5406cc88782a1ca809813336f8774fc"
+      "sha256": "8743660874f96a34e11a1123caa786fcd7a9c77ad3359ac045704ed8e55a916a"
     },
     {
       "path": ".mcp.json",
@@ -504,6 +504,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T08:45:27.131Z",
+  "syncedAt": "2026-08-13T08:57:21.081Z",
   "target": "plugin"
 }

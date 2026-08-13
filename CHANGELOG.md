@@ -5,6 +5,11 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+## [v0.2.0] — 2026-08-13
+
+Bản đầu tiên dùng được ở bề mặt chỉ có MCP (chat/Cowork). Cài/cập nhật qua marketplace như cũ —
+`plugin.json` lên `0.2.0` nên client mới thấy có bản update.
+
 ### Thêm
 
 - **Tool MCP `render_review_report` — báo cáo rà soát UR chạy được ở bề mặt không có shell.**
