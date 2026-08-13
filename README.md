@@ -98,9 +98,9 @@ Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.
 
 | Biến môi trường | Tương đương trong `qlda.local.json` | Dùng cho |
 |---|---|---|
-| `QLDA_APP_CONNECTION` | `appConnectionString` | DB nghiệp vụ QLDA (`QLDA_APP`) |
-| `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA (`QLDA_SYS`) |
-| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | Chỉ mục đồ thị năng lực (`GRAPH_4AI`) |
+| `QLDA_APP_CONNECTION` | `appConnectionString` | DB nghiệp vụ QLDA |
+| `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA |
+| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | Chỉ mục đồ thị năng lực |
 
 Đa số máy **không cần khai gì cả** — `Web.config` của QLDA tự phân giải được. Chỉ cần override
 khi máy không truy cập được share chứa QLDA, hoặc muốn trỏ DB khác lúc test.
