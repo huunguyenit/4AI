@@ -316,59 +316,29 @@ function writeReportPlan(plan, dryRun) {
   }
 }
 
-/** Sinh HTML từ dataset cố định — không nhận SQL/payload từ agent. */
+/**
+ * Sinh HTML từ dataset cố định — không nhận SQL/payload từ agent.
+ * Phần dựng nằm ở `lib/review-report.mjs` vì tool MCP `render_review_report` gọi cùng
+ * function đó: hai đường vào, một cách dựng, không có bản báo cáo thứ hai để lệch.
+ */
 async function cmdReportFromDataset(opts) {
-  const { fetchReviewDataset, datasetToPayloads, todayIso } = await import('./lib/review-dataset.mjs');
-  const { buildReportArtifact, buildPortfolioArtifact, duongDanDuAn, duongDanTong } = await import('./lib/report.mjs');
+  const { buildReviewReportFiles } = await import('./lib/review-report.mjs');
   const { writeArtifacts } = await import('./lib/writer.mjs');
 
-  let dataset;
+  let built;
   try {
-    dataset = fetchReviewDataset(HUB, { project: opts.project, pmDept: opts.dept });
+    built = buildReviewReportFiles(HUB, { project: opts.project, pmDept: opts.dept });
   } catch (e) {
     fail(e.message);
   }
-  if (!dataset.yeuCau.length) {
-    fail('không có UR nào trong phạm vi (DD/XN/TH) — không dựng báo cáo.');
-  }
 
-  const pm = dataset.filters.pmName || dataset.filters.pmDept || '';
-  const ngay = todayIso();
-  const { portfolio, byProject } = datasetToPayloads(dataset, { ngay_chay: ngay, pm });
-  const files = [];
-
-  for (const [maDa, payload] of Object.entries(byProject)) {
-    const { artifact, errors } = buildReportArtifact(payload, HUB, { ignoreQuality: true });
-    if (errors.length) {
-      for (const e of errors) process.stderr.write(`  bỏ ${maDa}: ${e}\n`);
-      continue;
-    }
-    files.push(artifact);
-    files.push({
-      relPath: duongDanDuAn(ngay, maDa).replace(/review\.html$/, 'review.payload.json'),
-      content: JSON.stringify(payload, null, 2) + '\n',
-    });
+  for (const b of built.boQua) {
+    const nhan = b.ma_da ? `bỏ ${b.ma_da}` : 'portfolio';
+    for (const e of b.errors) process.stderr.write(`  ${nhan}: ${e}\n`);
   }
+  for (const c of built.canhBao) process.stderr.write(`  cảnh báo: ${c}\n`);
 
-  const nhieuDuAn = !opts.project;
-  if (nhieuDuAn && portfolio.projects.length) {
-    const { artifact, errors } = buildPortfolioArtifact(portfolio, HUB);
-    if (errors.length) {
-      for (const e of errors) process.stderr.write(`  portfolio: ${e}\n`);
-    } else {
-      files.push(artifact);
-      files.push({
-        relPath: duongDanTong(ngay).replace(/tong\.html$/, 'tong.payload.json'),
-        content: JSON.stringify(portfolio, null, 2) + '\n',
-      });
-    }
-  }
-
-  if (!files.length) fail('không dựng được file báo cáo nào — xem lỗi fatal ở trên.');
-  if (dataset.truncated) {
-    process.stderr.write('  cảnh báo: dataset truncated (maxRows) — tăng maxRows hoặc lọc hẹp.\n');
-  }
-  const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files, dryRun: opts.dryRun });
+  const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files: built.files, dryRun: opts.dryRun });
   writeReportPlan(plan, opts.dryRun);
 }
 

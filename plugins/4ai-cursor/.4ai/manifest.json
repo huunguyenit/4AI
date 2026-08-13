@@ -30,9 +30,9 @@
     },
     {
       "path": "agents/pm-deadline-review.md",
-      "sha256": "d92b8ff3d3335a06df7df867af4630bb4c82ba3a6002ae41a30ca16d7e307eae",
+      "sha256": "bc0738d6238e400dbefb0f30ae5988838510741fe1d48ecd4b658accd3268e53",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": "agents/pm-planner.md",
@@ -90,9 +90,9 @@
     },
     {
       "path": "commands/pm-review.md",
-      "sha256": "e540ef7a010b7d7405e24425edd53371d8bbffb38230a2b776f36e8cfe5cf736",
+      "sha256": "8c1b677cfcd0a244e39b619ad2a0acab37ed8257561f3e8f0b0ef9fe2420694f",
       "sourceId": "pm-review",
-      "sourceVersion": 7
+      "sourceVersion": 8
     },
     {
       "path": "commands/pm-status.md",
@@ -166,7 +166,7 @@
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "5ef65d20c6896b9ba2d8d92c0a21be2c5b8884207e13abec31ae998b31c1059f"
+      "sha256": "f701d158fd28201ca45bca383f007a53b16c9b5e465ed600ed6ca17b97971112"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -332,9 +332,9 @@
     },
     {
       "path": "rules/pm-ur-routing.mdc",
-      "sha256": "4a209e13596806d5cbfc73b5d9f2d35a918bc1a4e6f08cc2b03e43333e769531",
+      "sha256": "cd62efdd706d07a331529c71537ae702df7f04a2dfdc30d69a95010325e4bda7",
       "sourceId": "pm-ur-routing",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": "src/database/metadata-resolver.mjs",
@@ -366,11 +366,11 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "6900f48b5cd6548ec2fa54ae2233fac62e0b73e5b4ced8c391ac053943b5633e"
+      "sha256": "b62624a7422cb0b749902af84b0f2a12e348482b27b57f0f5e780faacdfa2c85"
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "7f188da927d1566db4f9ced63c5133b6002e4e0d31d2f0893c026bcca7e28901"
+      "sha256": "71de2d26dabd9355250571caf9025c00c5862295906a21eb1b707f0497e251c8"
     },
     {
       "path": "tools/lib/assignee.mjs",
@@ -453,6 +453,10 @@
       "sha256": "b12c10e50dc5664a200e7003af0e00a337a6da17ef52e410baf21fed540b8cf8"
     },
     {
+      "path": "tools/lib/review-report.mjs",
+      "sha256": "3a4df6990cee967e02c02bd96ef73393fe0cd092c88d3e4dc7d027ba18c6826c"
+    },
+    {
       "path": "tools/lib/schema.mjs",
       "sha256": "fd26da9088718539ec77191e59357b85bafacbd15dd53992b46ce96086d4222f"
     },
@@ -500,6 +504,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T07:05:26.530Z",
+  "syncedAt": "2026-08-13T08:30:55.976Z",
   "target": "plugin-cursor"
 }

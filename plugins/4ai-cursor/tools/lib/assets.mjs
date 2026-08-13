@@ -18,6 +18,10 @@ export function ledgerRoot(hub = HUB) {
   const localCfgPath = path.join(process.env.USERPROFILE ?? '', '.cursor', 'fbo-local.json');
   const local = readJson(localCfgPath, {});
   if (local.mcpDataRoot) return path.join(local.mcpDataRoot, '4ai', 'ledger');
+  // Chạy như plugin: `hub` là gốc GÓI, bị ghi đè mỗi lần update — báo cáo ghi vào đó là mất.
+  // FBO_DATA_ROOT (= ${CLAUDE_PLUGIN_DATA}) là chỗ sống sót, cùng nơi index và qlda.local.json.
+  // Biến này chỉ được đặt trong tiến trình MCP nên nhánh này vô hại với CLI ở hub.
+  if (process.env.FBO_DATA_ROOT) return path.join(process.env.FBO_DATA_ROOT, 'ledger');
   return path.join(hub, 'ledger');
 }
 

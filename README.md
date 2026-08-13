@@ -52,6 +52,13 @@ Xong. Gói đã bao gồm sẵn:
 
 Yêu cầu: **Node.js 22+** (MCP dùng `node:sqlite` built-in). Không cần `npm install` — zero dependency.
 
+> **Bề mặt nào chạy được cái gì.** Claude Code có đủ bốn primitive (skill · agent · command ·
+> MCP). Chat/Cowork **chỉ có skill và MCP**: `/pm-review` không xuất hiện, sub-agent không giao
+> được, `node tools/4ai.mjs` không chạy được. Ở đó đường đúng để có báo cáo rà soát là tool
+> `render_review_report` — cùng code dựng với `4ai report`. Đừng để model tự ghép báo cáo từ
+> `get_review_dataset`: đó là dữ liệu thô, bản tự chế không qua validate payload và không nằm
+> trong ledger.
+
 Cập nhật về sau:
 
 ```bash
@@ -404,11 +411,21 @@ Tạo báo cáo không cần server, không phụ thuộc internet. Dashboard SV
 - Gợi ý DDL → nếu UR nhắc tạo bảng
 - Biểu đồ: hạn theo giai đoạn, phân bố UR theo trạng thái, TLKS coverage
 
-**Cách dùng:**
+**Cách dùng — có shell:**
 ```bash
-node tools/4ai.mjs report payload-ur.json
+node tools/4ai.mjs report
 ```
-Kết quả: `ledger/<ma_da>/review/<ngay>.html` — xem trong browser (offline OK)
+Thêm `--project <MA_DA>` để chỉ dựng một dự án (bỏ trang tổng quan). Lệnh **tự lấy dataset**
+từ bốn câu SQL cố định — không cần và không nhận payload viết tay.
+
+**Cách dùng — không có shell** (chat/Cowork): gọi tool MCP `render_review_report()` (thêm
+`project` nếu chỉ cần một dự án). Cùng code dựng, cùng output, và trả luôn `ddUR[]` — danh sách
+UR trạng thái `DD` kèm nội dung — để phân tích ngay. UR `XN`/`TH` cố ý chỉ trả số đếm và hạn gần
+nhất: chúng đã qua cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại.
+
+Kết quả (cả hai đường): `<ledgerRoot>/review/<yyyyMMdd>/<ma_da>/review.html` + `review.payload.json`
+cạnh nó, và `_tong/tong.html` khi rà soát nhiều dự án. Mở bằng `node tools/4ai.mjs serve /review`
+hoặc mở thẳng file trong browser (offline OK).
 
 ### 2. Dashboard Hiệu Suất Nhân Viên (KPI by Department)
 **Dùng cho:** Quản lý phòng ban theo dõi khối lượng, so sánh hiệu suất

@@ -26,9 +26,9 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "e63805bbcbd57c7897f9185e3bd4ea9f9b280edb6cbe1c3afea22f14bef062fd",
+      "sha256": "07cd5cf9865b8a1cc6b35ca7f7c77c3eef29cac3a1a8715e59d50dddeae2a057",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".agents/agents/pm-planner.md",
@@ -140,9 +140,9 @@
     },
     {
       "path": ".agents/rules/pm-ur-routing.md",
-      "sha256": "5a0d3bab90e7a417d8c6dfe4fac9bdcb0ae8f82a6c0375aded4ac5443722ed67",
+      "sha256": "40d62a9812b0a68134b75f32acc046d85576f4dbfdbd5a8ccc20cb9c691b3267",
       "sourceId": "pm-ur-routing",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/fbo-controller-anatomy/SKILL.md",
@@ -242,9 +242,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "236d15e91cbfc20b23985c40c05043b0de100fc8aa37154408ff8acb4d9c3265",
+      "sha256": "91ec4c16f40f4a7b7eead267ed72d91363f498a9b46b7d24536bc533ff41ae79",
       "sourceId": "pm-review",
-      "sourceVersion": 7
+      "sourceVersion": 8
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -254,7 +254,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "5fc9fd1b367ebf3020d0c5e4f38e9505ad346e36557c3b0218af6b08707079f9"
+      "sha256": "7ddfffcb5f707b0fe488dea85b2a6995769a0c10164c887af1b6beeda182a038"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -282,9 +282,9 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "c55a39d495fc88c01ff5604118a17c359463e997eff85106e812bf67a3165c59",
+      "sha256": "61a31d91d358162e15b14184f3af9dad13df984117d0f4a4314622ffc2d80155",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".claude/agents/pm-planner.md",
@@ -366,9 +366,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "142b01e7013694ca42484d116b29fce998e860ff6eef0a13923e7e4eb406898c",
+      "sha256": "126f03f6b06ea67a5ba7c30a1b9265455e5d6e06f28780282e2180cf31be15fb",
       "sourceId": "pm-review",
-      "sourceVersion": 7
+      "sourceVersion": 8
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -504,9 +504,9 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "f7ade58151855d69f46034148674a59ff8ff9d343252eff643e67e3ad6c133db",
+      "sha256": "9e5ec2afdd976c7193ad461d30a8b9d5857be929010d6faedd797c329c067bc3",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".cursor/agents/pm-planner.md",
@@ -588,9 +588,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "d6301b747158cc4aeb0a5ec1d7548c72047f73ebcbe06065f086481f3b2cb352",
+      "sha256": "bee74e7e2046d74008b2cb7967564bc5cdd16d450301569de7020754f423e2ee",
       "sourceId": "pm-review",
-      "sourceVersion": 7
+      "sourceVersion": 8
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -762,9 +762,9 @@
     },
     {
       "path": ".cursor/rules/pm-ur-routing.mdc",
-      "sha256": "4a209e13596806d5cbfc73b5d9f2d35a918bc1a4e6f08cc2b03e43333e769531",
+      "sha256": "cd62efdd706d07a331529c71537ae702df7f04a2dfdc30d69a95010325e4bda7",
       "sourceId": "pm-ur-routing",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/chatmodes/fbo-change-reviewer.chatmode.md",
@@ -792,9 +792,9 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "5ea6129c33ab80aec3733eedf2235eae2045ad04a1b011109f1daf5af8ebe8c1",
+      "sha256": "742d9d7b548c6139d7e6aed754e1d71c3a771e5817c82d7a4575cf09691c2f93",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".github/chatmodes/pm-planner.chatmode.md",
@@ -822,7 +822,7 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "dd0f14f457b6a686534e8894d94dbf73c2f60c925391a6d2472345a119a4f11e"
+      "sha256": "67c511157e3a2f96b59db6dbeabd74d8d7448843a8944831d7643d4b99b52f36"
     },
     {
       "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
@@ -946,9 +946,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "e3b8e71b1259733e5fe14f5416a1eb416c2c6e8776ba915297ca65e663c53539",
+      "sha256": "a0c2793153d653b61f20996763ac5f4ba68e89aab53bfcfdc566d8f44f195097",
       "sourceId": "pm-review",
-      "sourceVersion": 7
+      "sourceVersion": 8
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T06:44:48.466Z",
+  "syncedAt": "2026-08-13T08:30:55.878Z",
   "target": "4ai"
 }

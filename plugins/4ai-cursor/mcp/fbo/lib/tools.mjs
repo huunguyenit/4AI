@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 10 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 15 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -13,6 +13,9 @@ import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
 import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../../src/database/qlda-metadata.mjs';
 import { fetchReviewDataset } from '../../../tools/lib/review-dataset.mjs';
+import { buildReviewReportFiles, ddChoPhanTich } from '../../../tools/lib/review-report.mjs';
+import { writeArtifacts } from '../../../tools/lib/writer.mjs';
+import { ledgerRoot } from '../../../tools/lib/assets.mjs';
 
 const NOT_FOUND_NOTE =
   'File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó.';
@@ -325,6 +328,29 @@ export const TOOLS = [
         pmDept: { type: 'string', description: 'Lọc yêu cầu theo nbphyc.bp_lt (bộ phận lập trình)' },
         statusUR: { type: 'array', items: { type: 'string' }, description: "Lọc nbphyc.trang_thai. Bỏ trống mặc định ['DD','XN','TH'] (phạm vi PM review)" },
         maxRows: { type: 'integer', default: 5000, maximum: 10000, description: 'Giới hạn dòng THÔ (trước khi gộp đầu mục) — UR có nhiều đầu mục tính nhiều dòng' },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'render_review_report',
+    description:
+      'Dựng BÁO CÁO RÀ SOÁT UR (HTML + payload JSON) vào ledger rồi trả về đúng phần AI được phép phân tích. '
+      + 'Đây là đường DUY NHẤT để có báo cáo: cùng code dựng với CLI `4ai report`, nên chạy được cả ở bề mặt '
+      + 'không có shell (chat/Cowork) lẫn nơi có shell. '
+      + 'KHÔNG BAO GIỜ tự ghép báo cáo từ `get_review_dataset` — dataset là dữ liệu THÔ, không qua validate '
+      + 'payload, không để lại vết trong ledger; báo cáo tự chế là báo cáo không kiểm chứng được. '
+      + 'Trả về: file đã ghi, tổng quan theo dự án, `ddUR[]` (UR trạng thái DD — NGUYÊN nội dung, đây là phạm vi '
+      + 'cổng PM) và `nhanSu` để đề xuất phân việc. UR XN/TH CỐ Ý chỉ có số đếm và hạn gần nhất: chúng đã qua '
+      + 'cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại. '
+      + 'Chỉ ĐỀ XUẤT đổi trạng thái (XN/TA/KL) — không bao giờ tự UPDATE nbphyc.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string', description: 'Mã dự án nbdmda.ma_da — có thì chỉ dựng đúng dự án này (bỏ trang tổng quan)' },
+        pmName: { type: 'string', description: 'Lọc dự án theo nbdmda.ma_lt1/ma_lt2/ma_lt3. Bỏ trống (và không truyền project) thì lấy pm.maNv từ qlda.local.json' },
+        pmDept: { type: 'string', description: 'Lọc yêu cầu theo nbphyc.bp_lt (bộ phận lập trình)' },
+        maxRows: { type: 'integer', maximum: 10000, description: 'Giới hạn dòng THÔ trước khi gộp đầu mục — mặc định 5000' },
       },
       additionalProperties: false,
     },
@@ -875,6 +901,31 @@ export const HANDLERS = {
 
   get_review_dataset(hub, args = {}) {
     return fetchReviewDataset(hub, args);
+  },
+
+  render_review_report(hub, args = {}) {
+    const built = buildReviewReportFiles(hub, {
+      project: args.project,
+      pmName: args.pmName,
+      pmDept: args.pmDept,
+      maxRows: args.maxRows,
+    });
+    // writer.mjs vẫn là nơi duy nhất chạm filesystem output — tool này chỉ đưa mô tả file vào.
+    const destRoot = ledgerRoot(hub);
+    const plan = writeArtifacts({ destRoot, files: built.files });
+
+    return {
+      ngay: built.ngay,
+      pm: built.pm,
+      filters: built.dataset.filters,
+      ledger: destRoot,
+      files: plan.map((p) => ({ action: p.action, path: p.relPath, bytes: p.bytes })),
+      ...ddChoPhanTich(built.dataset),
+      boQua: built.boQua,
+      canhBao: built.canhBao,
+      xem: 'Có shell thì mở bằng `4ai serve /review` (hoặc `/review/<MA_DA>`). Không có shell thì '
+        + 'phân tích thẳng từ `ddUR` ở đây — file HTML đã nằm trong ledger, không cần dựng lại.',
+    };
   },
 
   set_pm_identity(hub, args = {}) {

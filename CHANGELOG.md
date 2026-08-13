@@ -5,6 +5,28 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Thêm
+
+- **Tool MCP `render_review_report` — báo cáo rà soát UR chạy được ở bề mặt không có shell.**
+  Cài plugin rồi dùng trong chat/Cowork thì `/4ai:pm-review` gãy toàn bộ chuỗi: bề mặt đó không
+  nạp `commands/`, không giao được sub-agent, không chạy được `node tools/4ai.mjs report`. Mắt
+  duy nhất còn sống là MCP, nên model tụt xuống `get_review_dataset` rồi **tự ghép một bản báo
+  cáo riêng** — không qua validate payload, không nằm trong ledger, và phân tích cả UR `XN`/`TH`
+  vốn đã qua cổng PM. Cách chặn không phải viết thêm lời dặn mà là làm cho đường đúng chạy được
+  ở mọi bề mặt.
+  - `tools/lib/review-report.mjs` (mới) — `buildReviewReportFiles()` gom phần dựng file mà CLI
+    `4ai report` vẫn làm, trả **mô tả file**, không import `writer.mjs`. `tools/4ai.mjs` và tool
+    MCP cùng gọi nó: hai đường vào, một cách dựng, không có bản báo cáo thứ hai để trôi lệch.
+  - `ddChoPhanTich()` trả `ddUR[]` nguyên nội dung (phạm vi cổng PM) nhưng UR `XN`/`TH` **chỉ
+    còn số đếm và hạn gần nhất**. Doctrine "chỉ phân tích DD" thôi làm lời dặn và thành hình
+    dạng dữ liệu — cái không trả về thì không phân tích nhầm được. Có test canh đúng chỗ đó.
+  - `ledgerRoot()` nhận thêm `FBO_DATA_ROOT` (= `${CLAUDE_PLUGIN_DATA}`) trước khi lùi về
+    `<hub>/ledger`: chạy như plugin thì `hub` là gốc gói, bị ghi đè mỗi lần update — báo cáo ghi
+    vào đó là mất. Biến này chỉ có trong tiến trình MCP nên CLI ở hub không đổi hành vi.
+  - `tests/test-review-report-build.mjs` (mới) — dataset giả, không chạm DB, không chạm đĩa.
+  - `pm-review` (v8), `pm-deadline-review` (v10), `pm-ur-routing` (v2) ghi rõ nhánh không-có-shell
+    và cấm dựng báo cáo tay từ `get_review_dataset`.
+
 ### Tài liệu
 
 - **README ghi sai `plan_report`/`execute_report` thành lệnh CLI.** Mục "Report Workflow" chỉ

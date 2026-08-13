@@ -373,7 +373,7 @@ corpus để sẵn bản đồ file.
 
 ## Route UR questions to pm-ur-analyst
 
-<!-- assets/rules/project-mgmt/pm-ur-routing.md v1 -->
+<!-- assets/rules/project-mgmt/pm-ur-routing.md v2 -->
 ## Vì sao
 
 `pm-ur-analyst` biết sẵn cấu trúc `nbphyc`, giới hạn kiểu từng cột, cách lấy tài liệu từ
@@ -390,6 +390,9 @@ corpus để sẵn bản đồ file.
 - **Không** giao `pm-ur-analyst` khi việc thật là: sửa controller (→ `fbo-customize`),
   điều tra cấu trúc màn hình (→ `fbo-explorer`), soi diff (→ `fbo-review`).
 - Kết quả trả về là **draft**. Không tự chốt phạm vi hay giờ công thay người phụ trách.
+- Việc thật là **báo cáo rà soát/hạn** (không phải hỏi về một UR cụ thể) thì đường đi là
+  `4ai report` khi có shell, `render_review_report` khi không — xem `pm-deadline-review`.
+  `get_review_dataset` là dữ liệu THÔ để soi, **không** phải nguyên liệu để tự dựng báo cáo.
 
 ## Ví dụ
 
@@ -403,9 +406,15 @@ corpus để sẵn bản đồ file.
 
 ## Bẫy
 
-- **Cursor không có primitive sub-agent.** Ở Cursor, `pm-ur-analyst` được emit thành
+- **Không phải bề mặt nào cũng có sub-agent.** Ở Cursor, `pm-ur-analyst` được emit thành
   command `.cursor/commands/pm-ur-analyst.md` và **không bao giờ tự chạy** — người dùng
   phải gõ `/pm-ur-analyst`, hoặc model đọc file đó rồi tự làm theo kịch bản. Đừng hứa với
   người dùng là nó sẽ tự nhảy vào.
+- **Chat/Cowork còn thiếu cả command lẫn shell.** Ở đó chỉ tool MCP là chạy được: không có
+  `/pm-review`, không giao được sub-agent, không chạy được `node tools/4ai.mjs`. Cách đúng
+  là gọi `render_review_report` rồi tự làm Bước 2 của `pm-deadline-review`. Cách SAI — và là
+  cách model hay trượt vào — là gọi `get_review_dataset` rồi tự dựng một bản báo cáo riêng:
+  bản đó không qua validate payload, không nằm trong ledger, và kéo theo việc phân tích cả
+  `XN`/`TH` vốn đã qua cổng PM. Thiếu công cụ thì **nói là thiếu**, không lấp bằng đồ tự chế.
 - Mã trạng thái là `char(2)` — `'DD'` so sánh được nhưng cột khoá khác (`ma_da`,
   `stt_rec`, `syskey`) là `char` dài cố định, thiếu `RTRIM` là ra rỗng.

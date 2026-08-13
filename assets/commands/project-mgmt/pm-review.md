@@ -8,7 +8,7 @@ argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự �
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-capability-graph, fbo-new-table-proposal]
 mode: agent
-version: 7
+version: 8
 ---
 
 ## Việc cần làm
@@ -21,9 +21,16 @@ Giao [pm-deadline-review]. Tham số là mã dự án (`nbdmda.ma_da`).
 
 **Bỏ trống** → `node tools/4ai.mjs report` rồi `serve /review`. Toàn bộ dự án `{PMName}` đứng tên LTQL — không chỉ dự án nói tới gần đây.
 
+**Không có shell** (chat, Cowork — không chạy được `node`) → gọi tool `render_review_report`
+(`project` bỏ trống = toàn bộ). Nó dựng đúng bộ file đó bằng chính code của `4ai report` và trả
+về `ddUR[]` để phân tích ngay tại chỗ. Bề mặt đó cũng không có sub-agent, nên tự làm theo kịch
+bản [pm-deadline-review] thay vì hứa là sẽ giao cho nó.
+
 Sau khi HTML có: **chỉ phân tích UR `trang_thai = DD`** (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL). `XN`/`TH` chỉ xem hạn trên báo cáo.
 
 Không viết SQL danh sách UR, không ghép payload, không dùng `plan_report`.
+**Không bao giờ tự dựng báo cáo từ `get_review_dataset`** — đó là dữ liệu thô: báo cáo tự chế
+bỏ qua validate payload, không nằm trong ledger, và luôn kéo theo việc phân tích cả `XN`/`TH`.
 
 ## Ràng buộc
 

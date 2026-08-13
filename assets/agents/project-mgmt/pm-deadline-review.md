@@ -4,11 +4,11 @@ title: Deadline and TLKS review run
 kind: agent
 domain: project-mgmt
 description: Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái DD — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL. Bỏ trống = TOÀN BỘ dự án.
-tools: [Read, Write, Grep, Glob, Bash, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__get_review_dataset, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__read_source]
+tools: [Read, Write, Grep, Glob, Bash, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__render_review_report, mcp__4ai-fbo__get_review_dataset, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
 see-also: [pm-capability-graph, pm-task-ledger, pm-customer-program-registry, pm-ur-analyst]
-version: 9
+version: 10
 ---
 
 ## Nhiệm vụ
@@ -35,13 +35,22 @@ Rồi mở:
 
 Lệnh tự lấy dataset (bốn câu SQL cố định), dựng HTML từng dự án + trang `_tong` khi không chỉ định mã. **KHÔNG** `Write` payload JSON (lệnh `report` tự ghi), **KHÔNG** `query_sql` danh sách UR, **KHÔNG** import `tools/lib/`. `Write` có trong tools chỉ để Cursor không đánh readonly — đừng dùng nó ghép JSON.
 
+Không chạy được `node` (bề mặt không có shell) thì dùng tool tương đương — cùng code dựng, cùng
+output, chỉ khác đường vào:
+
+    render_review_report()
+    render_review_report({ project: '<MA_DA>' })
+
+Nó trả luôn `ddUR[]` cho Bước 2, nên khỏi gọi thêm gì. Không có shell **không phải** lý do để
+tự ghép báo cáo từ `get_review_dataset`.
+
 Output: `<ledgerRoot>/review/<yyyyMMdd>/`. Báo tóm tắt trong chat kèm đường dẫn. Không tự gửi cho ai khác.
 
 `XN`/`TH` chỉ hiện trên báo cáo để theo dõi hạn — **không** phân tích.
 
 ## Bước 2 — chỉ UR `DD`
 
-Lấy danh sách DD từ payload cạnh HTML (`review.payload.json`) hoặc `get_review_dataset({ statusUR: ['DD'], ... })`. Bỏ mọi UR khác.
+Lấy danh sách DD từ `ddUR[]` mà `render_review_report` trả về, hoặc từ payload cạnh HTML (`review.payload.json`), hoặc `get_review_dataset({ statusUR: ['DD'], ... })`. Bỏ mọi UR khác.
 
 Với **từng** UR DD:
 
