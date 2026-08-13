@@ -5,7 +5,38 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Sửa
+
+- **Mục "Chưa giao lập trình (DD)" không lấy được nhân sự gợi ý.** Từ lúc `4ai report` bỏ
+  payload khai tay, `datasetToPayloads()` không dựng khối `nhanSu` nên mọi dòng đều in
+  "chưa nạp `nhanSu`" — `assignee.mjs` vẫn đúng, chỉ là không ai đưa dữ kiện cho nó.
+  `tools/lib/staffing.mjs` (mới) nạp roster + lịch sử menu + tải trọng và gắn vào dataset.
+- **Dự án nhiều LTQL luôn bị coi là đã phân việc.** `payload.pm` ghép ba mã thành chuỗi
+  `"A, B"` rồi đem so nguyên chuỗi với một `ma_lt1` — không bao giờ khớp, nên UR còn để mặc
+  định tên PM lọt qua hết. `laChuaPhanCong()` nay tách danh sách và so từng mã.
+- **Xếp hạng ứng viên hoà hết trên dữ liệu thật.** Điểm kinh nghiệm chấm theo mốc tuyệt đối
+  3 UR; lịch sử thật đếm hàng chục tới hàng trăm UR mỗi menu nên cả phòng chạm trần. Nay chấm
+  theo tương quan với người dẫn đầu chính menu đó; `baoHoaSoUr` thành SÀN của mẫu số.
+- **Tra người theo chuỗi thô làm một người trượt thành hai.** `nbdmda.ma_lt1` viết hoa thường
+  không thống nhất ('ThanhNM' cạnh 'NV07'); mọi khoá tra trong `assignee.mjs` nay lowercase.
+
 ### Thêm
+
+- **Nhân sự lấy từ `userinfo2` (DB sys), không đoán.** Ứng viên = người CÒN làm và CÒN ở bộ
+  phận (`status='1'`, `ma_bo_phan={PMDept}`). Ai off hoặc chuyển bộ phận thì không được đề
+  xuất nhận việc mới, dù tên vẫn còn trên dự án cũ.
+- **PM của dự án được phân giải, không chép nguyên LTQL.** LTQL trên `nbdmda` là dữ liệu đã
+  nguội: người đã rời phòng vẫn còn tên ở đó. Rơi vào trường hợp này thì PM tính là cấp PP
+  (phó phòng quản lý toàn bộ dự án của phòng), và báo cáo nói rõ `<LTQL cũ> → <PP>` thay vì
+  lặng lẽ đổi tên. Vai PM nhận diện bằng việc đứng tên `nbdmda.ma_lt1/2/3` chứ không bằng
+  chức vụ — mọi PM ở đây đều mang `ma_chv='NV'`.
+- **Báo cáo hiện tên đầy đủ, vai PM/phó phòng và nguồn dữ kiện** ở mục gợi ý phân công; nguồn
+  nào hỏng thì ghi rõ lý do ở đầu mục thay vì trả bảng rỗng.
+- **Tiêu chí 3 (báo cáo đầu ra ưu tiên người đóng góp UR đầu vào) nay có nguồn thật.** Đầu
+  vào/đầu ra không còn đoán qua từ khoá tự do trong `noi_dung` — dùng thẳng đầu mục công việc
+  (`nbctdaumuc.ma_daumuc`, tín hiệu có sẵn trên 97.8% dòng đầu mục của FSD): chứng từ/danh
+  mục/import = đầu vào, báo cáo/mẫu in = đầu ra. Xem `data/qlda.json → enums.dauMucLoai`.
+- `tests/test-staffing.mjs` — 46 khẳng định, `runSql` tiêm giả, không chạm DB.
 
 - **Đóng gói thành Claude Code plugin.** `plugins/4ai/` sinh tự động từ corpus, cài bằng
   `/plugin marketplace add huunguyenit/4AI` rồi `/plugin install 4ai@fast-source-4ai` — không

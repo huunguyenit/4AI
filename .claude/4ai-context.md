@@ -419,11 +419,11 @@ corpus để sẵn bản đồ file.
 | `fbo-customizer` | Sub-agent thi hành một thay đổi ĐÃ DUYỆT trong đúng một program — nói rõ program path và danh sách file trước khi sửa, cấm đụng Include chung nếu chưa duyệt riêng. |
 | `fbo-explorer` | Sub-agent điều tra màn hình FBO read-only — trả về bản đồ file, field, quan hệ, include, kèm mục Chưa chắc chắn bắt buộc. Không bao giờ sửa file. |
 | `fbo-regulatory-rollout` | Quy trình áp một thay đổi pháp lý lên nhiều chương trình khách — chốt diện áp dụng, khảo sát chênh lệch SP, làm mẫu một khách rồi nhân bản, ledger và bàn giao theo mốc hiệu lực. |
-| `pm-deadline-review` | Rà soát yêu cầu theo hạn và TLKS cho dự án PM đứng tên LTQL (mặc định PM01) — tính ngày làm việc, kiểm chốt hẹn, đề xuất XN/TA/KL, gợi ý người tiếp nhận UR chưa giao. Bỏ trống = TOÀN BỘ dự án. |
+| `pm-deadline-review` | Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái DD — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL. Bỏ trống = TOÀN BỘ dự án. |
 | `pm-planner` | Sub-agent biến yêu cầu mơ hồ thành kế hoạch có phạm vi — xác định khách/program/SP, liệt kê controller liên quan, soạn sẵn ledger entry. Chỉ lập kế hoạch, không sửa file. |
 | `pm-release-auditor` | Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá. |
 | `pm-release-handover` | Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì. |
-| `pm-ur-analyst` | Sub-agent read-only cho mọi câu hỏi về yêu cầu/UR — review yêu cầu theo mã UR, trạng thái, dự án hay menu; bóc tài liệu khảo sát thành bảng UR draft kèm độ khó và giờ công. Không sửa file. |
+| `pm-ur-analyst` | Sub-agent read-only cho yêu cầu/UR — lối A mặc định UR trạng thái DD (tài liệu, ảnh hưởng, phân việc); lối B bóc tài liệu thành UR draft. Không sửa file. |
 | `doctor` | Chạy 4AI check và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. |
 | `new-agent` | Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only. |
 | `new-rule` | Tạo rule mới trong hub 4AI — hỏi 3 điều không suy ra được (severity, always/globs, targets), viết file đúng schema, chạy check. |
@@ -434,7 +434,7 @@ corpus để sẵn bản đồ file.
 | `fbo-review` | Soi diff XML hiện tại theo bộ rule FBO — dispatch fbo-change-reviewer, phân loại Blocker / Nên sửa / Góp ý. |
 | `fbo-sql` | Tra cứu SQL đằng sau màn hình FBO qua query_sql — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP. |
 | `pm-new-adr` | Ghi lại một quyết định thành ADR theo template chuẩn — hỏi đủ Bối cảnh/Quyết định/Hệ quả rồi tạo file trong ledger/adr/. |
-| `pm-review` | Chạy rà soát yêu cầu theo hạn và TLKS cho các dự án LTQL PM01. Có tham số → 1 dự án. Bỏ trống → TOÀN BỘ, sinh thêm trang tổng quan portfolio. |
+| `pm-review` | Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái DD. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ. |
 | `pm-status` | Tóm tắt ledger — việc gì đang ở trạng thái nào, theo khách; nêu entry ứ đọng và entry Xong còn thiếu changelog. |
 | `fbo-encoding-and-newlines` | XML nguồn FBO có thể là Windows-1258 + CRLF + BOM — phát hiện trước khi đọc, giữ nguyên y hệt khi ghi; không bao giờ normalize sang UTF-8 LF như tác dụng phụ. |
 | `fbo-entity-resolution-first` | Trước khi sửa controller phải phân giải DTD entity bằng resolve_entities; đụng vào Include phải đếm số controller dùng chung — sửa include là thay đổi toàn hệ thống. |

@@ -21,11 +21,12 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
                                         [--dry-run] [--target T] [--tool X] [--force]
   node tools/4ai.mjs graph check        validate đồ thị JSONL. Không bao giờ ghi
   node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
-  node tools/4ai.mjs report <payload>   dựng báo cáo HTML vào <mcpDataRoot>/4ai/ledger/ [--dry-run]
+  node tools/4ai.mjs report             lấy dataset UR cố định, dựng HTML rà soát vào ledger [--dry-run]
+                                        [--project MA_DA] chỉ một dự án
+                                        [--dept BP] toàn bộ phận (nbphyc.bp_lt, ví dụ FSD)
+                                        bỏ trống cả hai = toàn bộ LTQL của PM máy này
+  node tools/4ai.mjs report <payload>   (tương thích) payload tay: portfolio / performance / kpi
                                         (mcpDataRoot từ %USERPROFILE%\.cursor\fbo-local.json, lùi về <hub>/ledger nếu chưa có)
-                                        payload có "kind":"portfolio" -> tổng quan nhiều dự án
-                                        payload có "kind":"performance" -> hiệu suất theo phòng ban
-                                        payload có "kind":"kpi" -> KPI bộ phận theo LTQL (nhân viên)
   node tools/4ai.mjs serve [path]       mở report qua http://127.0.0.1:<port>, tự mở trình duyệt
                                         [--port N] [--no-open] — Ctrl+C để tắt
                                         path bỏ trống -> tự tìm report mới nhất trong ledger
@@ -283,7 +284,74 @@ async function cmdGraph(sub, opts) {
 
 // ---------------------------------------------------------------- report
 
+function writeReportPlan(plan, dryRun) {
+  for (const p of plan) {
+    const verb = dryRun ? `${p.action} (dry-run)` : p.action;
+    process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);
+  }
+}
+
+/** Sinh HTML từ dataset cố định — không nhận SQL/payload từ agent. */
+async function cmdReportFromDataset(opts) {
+  const { fetchReviewDataset, datasetToPayloads, todayIso } = await import('./lib/review-dataset.mjs');
+  const { buildReportArtifact, buildPortfolioArtifact, duongDanDuAn, duongDanTong } = await import('./lib/report.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+
+  let dataset;
+  try {
+    dataset = fetchReviewDataset(HUB, { project: opts.project, pmDept: opts.dept });
+  } catch (e) {
+    fail(e.message);
+  }
+  if (!dataset.yeuCau.length) {
+    fail('không có UR nào trong phạm vi (DD/XN/TH) — không dựng báo cáo.');
+  }
+
+  const pm = dataset.filters.pmName || dataset.filters.pmDept || '';
+  const ngay = todayIso();
+  const { portfolio, byProject } = datasetToPayloads(dataset, { ngay_chay: ngay, pm });
+  const files = [];
+
+  for (const [maDa, payload] of Object.entries(byProject)) {
+    const { artifact, errors } = buildReportArtifact(payload, HUB, { ignoreQuality: true });
+    if (errors.length) {
+      for (const e of errors) process.stderr.write(`  bỏ ${maDa}: ${e}\n`);
+      continue;
+    }
+    files.push(artifact);
+    files.push({
+      relPath: duongDanDuAn(ngay, maDa).replace(/review\.html$/, 'review.payload.json'),
+      content: JSON.stringify(payload, null, 2) + '\n',
+    });
+  }
+
+  const nhieuDuAn = !opts.project;
+  if (nhieuDuAn && portfolio.projects.length) {
+    const { artifact, errors } = buildPortfolioArtifact(portfolio, HUB);
+    if (errors.length) {
+      for (const e of errors) process.stderr.write(`  portfolio: ${e}\n`);
+    } else {
+      files.push(artifact);
+      files.push({
+        relPath: duongDanTong(ngay).replace(/tong\.html$/, 'tong.payload.json'),
+        content: JSON.stringify(portfolio, null, 2) + '\n',
+      });
+    }
+  }
+
+  if (!files.length) fail('không dựng được file báo cáo nào — xem lỗi fatal ở trên.');
+  if (dataset.truncated) {
+    process.stderr.write('  cảnh báo: dataset truncated (maxRows) — tăng maxRows hoặc lọc hẹp.\n');
+  }
+  const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files, dryRun: opts.dryRun });
+  writeReportPlan(plan, opts.dryRun);
+}
+
 async function cmdReport(payloadPath, opts) {
+  if (!payloadPath) {
+    await cmdReportFromDataset(opts);
+    return;
+  }
   if (!fs.existsSync(payloadPath)) fail(`không tìm thấy payload: ${payloadPath}`);
   let payload;
   try {
@@ -310,10 +378,7 @@ async function cmdReport(payloadPath, opts) {
     fail(`payload thiếu ${errors.length} chỗ — không dựng báo cáo.`);
   }
   const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files: [artifact], dryRun: opts.dryRun });
-  for (const p of plan) {
-    const verb = opts.dryRun ? `${p.action} (dry-run)` : p.action;
-    process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);
-  }
+  writeReportPlan(plan, opts.dryRun);
 }
 
 // ---------------------------------------------------------------- serve
@@ -386,6 +451,8 @@ const { values, positionals } = parseArgs({
     domain: { type: 'string' },
     port: { type: 'string' },
     'no-open': { type: 'boolean', default: false },
+    project: { type: 'string' },
+    dept: { type: 'string' },
     help: { type: 'boolean', default: false },
   },
 });
@@ -414,8 +481,7 @@ switch (cmd) {
   case 'graph':
     await cmdGraph(rest[0] ?? 'build', { ...values, dryRun: values['dry-run'] }); break;
   case 'report':
-    if (!rest[0]) fail('cách dùng: report <payload.json> [--dry-run]');
-    await cmdReport(rest[0], { ...values, dryRun: values['dry-run'] }); break;
+    await cmdReport(rest[0], { ...values, dryRun: values['dry-run'], project: values.project, dept: values.dept }); break;
   case 'sync':
     await cmdSync({ ...values, dryRun: values['dry-run'] }); break;
   case 'serve':

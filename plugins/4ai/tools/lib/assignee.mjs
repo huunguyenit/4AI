@@ -22,9 +22,27 @@ export const TRONG_SO_MAC_DINH = {
   diemDauVao: 60,         // tiêu chí 3 — chỉ áp cho báo cáo đầu ra
   phatMoiUrToiHan: 15,    // tiêu chí 2 — trừ mỗi UR sắp tới hạn đang gánh
   phatToiDa: 60,          // trần điểm phạt, để tải nặng không xoá sạch lợi thế kinh nghiệm
-  baoHoaSoUr: 3,          // làm 3 UR cùng menu là đạt điểm kinh nghiệm tối đa
+  baoHoaSoUr: 3,          // SÀN của mẫu số khi chấm kinh nghiệm — xem diemTuongDoi()
   soGoiY: 3,              // số ứng viên trả về mỗi UR
 };
+
+/**
+ * Điểm kinh nghiệm chấm THEO TƯƠNG QUAN với người giỏi nhất của chính menu đó, không theo
+ * một mốc tuyệt đối.
+ *
+ * Lý do: mốc tuyệt đối `baoHoaSoUr = 3` hợp với payload nhỏ khai tay, nhưng lịch sử thật của
+ * một phòng lập trình đếm bằng hàng chục tới hàng trăm UR mỗi menu — đo trên dữ liệu thật của
+ * menu 15.70.06 thì cả mười người trong roster đều vượt 3, ai cũng chạm trần, xếp hạng sập
+ * thành hoà hết. Chia cho người dẫn đầu thì thang điểm luôn trải ra dù corpus to nhỏ thế nào.
+ *
+ * `baoHoaSoUr` vẫn giữ vai trò SÀN của mẫu số: người duy nhất từng làm menu đó đúng 1 lần
+ * không được ăn trọn điểm chỉ vì không có ai để so.
+ */
+function diemTuongDoi(soUr, soUrCaoNhat, baoHoaSoUr) {
+  const mau = Math.max(soUrCaoNhat, baoHoaSoUr);
+  if (!(mau > 0)) return 0;
+  return Math.min(soUr / mau, 1);
+}
 
 /** Bỏ dấu tiếng Việt để so khớp — cùng quy tắc với chỉ mục không dấu của FBO. */
 export function boDau(s) {
@@ -35,16 +53,49 @@ export function boDau(s) {
     .toLowerCase();
 }
 
-/** Từ khoá nhận diện UR là báo cáo đầu ra khi payload không khai tường minh. */
+/** Từ khoá nhận diện UR là báo cáo đầu ra khi không có tín hiệu chắc chắn hơn. */
 const DAU_RA_RE = /\b(bao cao|report|mau in|in ra|xuat file|xuat excel|thong ke|bang ke|so sach)\b/;
 
 /**
- * UR này có phải báo cáo đầu ra không.
- * @returns {{laDauRa: boolean, nguon: string}} nguon = 'payload' | 'noi_dung' | 'khong'
+ * Mã đầu mục công việc (`nbctdaumuc.ma_daumuc`, xem data/qlda.json → enums.dauMucLoai) phân
+ * loại UR theo đúng quy tắc PM đặt ra: có chạm tới việc LƯU TRỮ dữ liệu không.
+ *   01 Thêm/sửa chứng từ · 03 Kế thừa/lấy dữ liệu · 06 Thêm danh mục · 07 Import
+ *     → ĐẦU VÀO: tạo mới/chỉnh sửa cái được GHI XUỐNG bảng.
+ *   02 Mẫu in · 09 Thêm/sửa báo cáo
+ *     → ĐẦU RA: hiển thị dữ liệu ĐÃ LƯU cho người dùng biết.
+ * Mã 05 (mail), 08 (tính toán đặc thù), 10 (alter/dll hệ thống) cố tình KHÔNG xếp bên nào —
+ * mơ hồ, không đủ chắc để tự kết luận, cứ để rơi xuống nhận diện từ khoá tự do bên dưới.
+ *
+ * Đây là tín hiệu THẬT trên dữ liệu (đo trên FSD: 30976/31660 dòng đầu mục có `ma_lt`), mạnh
+ * hơn hẳn so với đoán qua từ khoá tự do — ưu tiên dùng khi UR có mang theo `maDaumuc`.
+ */
+export const MA_DAUMUC_DAU_VAO = new Set(['01', '03', '06', '07']);
+export const MA_DAUMUC_DAU_RA = new Set(['02', '09']);
+
+/**
+ * UR này có phải báo cáo đầu ra không. Thứ tự ưu tiên: payload khai tường minh > đầu mục
+ * công việc > từ khoá tự do trong nội dung.
+ *
+ * Đầu mục THẮNG TUYỆT ĐỐI khi có ít nhất một mã đã phân loại (đầu vào hoặc đầu ra) — kể cả
+ * kết luận là "không phải đầu ra". Đây là phân loại do BA/PM ghi nhận thật trên `nbctdaumuc`,
+ * đáng tin hơn một từ khoá xuất hiện tình cờ trong câu văn: một UR có đầu mục "01 Thêm/sửa
+ * chứng từ" thôi vẫn có thể nhắc tới chữ "bảng kê" trong lúc mô tả nghiệp vụ (ví dụ: "Bảng kê
+ * thuế đầu ra, đầu vào" là TÊN MÀN HÌNH đang sửa, không phải UR đó tạo báo cáo mới) — quy
+ * tắc cũ (chỉ ưu tiên khi đầu mục nói CÓ) sẽ để lọt trường hợp này. Chỉ rớt xuống từ khoá tự
+ * do khi UR CHƯA có đầu mục đã phân loại — ví dụ UR draft chưa lưu DB.
+ *
+ * @param {Object} u - cần `noi_dung`; `maDaumuc` (mảng mã đầu mục, xem MA_DAUMUC_DAU_VAO/RA)
+ *   và `laBaoCaoDauRa` (boolean) tuỳ chọn.
+ * @returns {{laDauRa: boolean, nguon: string}} nguon = 'payload' | 'daumuc' | 'noi_dung' | 'khong'
  */
 export function nhanDienBaoCaoDauRa(u) {
   if (typeof u?.laBaoCaoDauRa === 'boolean') {
     return { laDauRa: u.laBaoCaoDauRa, nguon: 'payload' };
+  }
+  const maCodes = (u?.maDaumuc ?? []).map((m) => String(m ?? '').trim()).filter(Boolean);
+  const coPhanLoai = maCodes.some((m) => MA_DAUMUC_DAU_VAO.has(m) || MA_DAUMUC_DAU_RA.has(m));
+  if (coPhanLoai) {
+    return { laDauRa: maCodes.some((m) => MA_DAUMUC_DAU_RA.has(m)), nguon: 'daumuc' };
   }
   if (DAU_RA_RE.test(boDau(u?.noi_dung))) {
     return { laDauRa: true, nguon: 'noi_dung' };
@@ -77,6 +128,16 @@ function khopPhanHe(a, b) {
 }
 
 /**
+ * Tách danh sách mã PM. Một dự án có thể có tới ba LTQL (`nbdmda.ma_lt1/2/3`) nên `payload.pm`
+ * có thể là mảng, hoặc chuỗi `"A, B"` — so sánh nguyên chuỗi đó với một `ma_lt1` thì không
+ * bao giờ khớp, và mọi UR mang tên PM sẽ lọt qua như đã phân việc.
+ */
+function danhSachPm(pm) {
+  const raw = Array.isArray(pm) ? pm : String(pm ?? '').split(',');
+  return raw.map(chuan).filter(Boolean);
+}
+
+/**
  * UR này CÓ THẬT SỰ chưa được giao không — tính cả trường hợp `ma_lt1` mang đúng mã PM.
  *
  * Màn hình BA dùng để lên UR mặc định `ma_lt1` = mã PM (PM là người duyệt/tiếp nhận đầu
@@ -88,17 +149,28 @@ function khopPhanHe(a, b) {
  * không", không quyết định "PM có được đề xuất không".
  *
  * @param {string} maLt1
- * @param {string} pmCode - Mã PM đang chạy rà soát (payload.pm hoặc qlda.json → review.pm.maNv)
+ * @param {string|string[]} pmCode - Mã PM của dự án đang xét: một mã, mảng mã, hoặc chuỗi
+ *   ngăn cách bằng dấu phẩy (dự án nhiều LTQL).
  */
 export function laChuaPhanCong(maLt1, pmCode) {
   const nguoi = chuan(maLt1);
   if (!nguoi) return true;
-  return khop(nguoi, pmCode);
+  return danhSachPm(pmCode).some((pm) => khop(nguoi, pm));
 }
 
 /**
+ * Khoá tra người: LUÔN lowercase.
+ *
+ * Bốn nguồn dữ kiện ở đây tới từ ba bảng khác nhau (`userinfo2.name`, `nbdmda.ma_lt1`,
+ * `nbphyc.ma_lt1`) và cách viết hoa thường KHÔNG thống nhất giữa chúng — 'ThanhNM' cạnh
+ * 'NV07' là dữ liệu thật. Tra Map theo chuỗi thô thì một người trượt thành hai, và cái
+ * trượt đó im lặng: ứng viên chỉ đơn giản mất sạch điểm kinh nghiệm.
+ */
+const khoaNguoi = (v) => chuan(v).toLowerCase();
+
+/**
  * Cộng số UR mỗi người đã làm trên đúng phân hệ (menu_id hoặc bar) của UR này.
- * @returns {Map<string, {soUr: number, theo: string}>}
+ * @returns {Map<string, {soUr: number, theo: string, ma_lt1: string}>} khoá lowercase
  */
 function kinhNghiemTheoMenu(u, lichSuMenu = []) {
   const out = new Map();
@@ -109,10 +181,11 @@ function kinhNghiemTheoMenu(u, lichSuMenu = []) {
     const theo = khopPhanHe(row, u);
     if (!theo) continue;
 
-    const cu = out.get(nguoi) ?? { soUr: 0, theo };
+    const khoa = khoaNguoi(nguoi);
+    const cu = out.get(khoa) ?? { soUr: 0, theo, ma_lt1: nguoi };
     cu.soUr += Number(row.so_ur) || 0;
     if (theo === 'menu_id') cu.theo = 'menu_id'; // menu_id luôn thắng nếu có ở dòng nào đó
-    out.set(nguoi, cu);
+    out.set(khoa, cu);
   }
   return out;
 }
@@ -130,28 +203,30 @@ function dongGopDauVaoLienQuan(u, dongGopDauVao = []) {
     const nguoi = chuan(row.ma_lt1);
     if (!nguoi) continue;
 
-    const khoa = chuan(row.nguon);
+    const nguon = chuan(row.nguon);
     // `row.nguon` mang giá trị của một khoá duy nhất (menu_id thường gặp nhất) — thử khớp
     // theo phân hệ trước (đối xứng với tiêu chí 1), rồi mới tới danh sách nguồn khai tay.
     const trung = khopPhanHe({ menu_id: row.nguon, bar: row.bar }, u)
-      || nguonUr.includes(khoa.toLowerCase());
+      || nguonUr.includes(nguon.toLowerCase());
     if (!trung) continue;
 
-    const cu = out.get(nguoi) ?? { soUr: 0, nguon: [] };
+    const khoa = khoaNguoi(nguoi);
+    const cu = out.get(khoa) ?? { soUr: 0, nguon: [], ma_lt1: nguoi };
     cu.soUr += Number(row.so_ur) || 0;
-    if (khoa && !cu.nguon.includes(khoa)) cu.nguon.push(khoa);
-    out.set(nguoi, cu);
+    if (nguon && !cu.nguon.includes(nguon)) cu.nguon.push(nguon);
+    out.set(khoa, cu);
   }
   return out;
 }
 
-/** Tải hiện tại theo người. */
+/** Tải hiện tại theo người. Khoá lowercase — xem khoaNguoi(). */
 function taiTrongTheoNguoi(taiTrong = []) {
   const out = new Map();
   for (const row of taiTrong) {
     const nguoi = chuan(row.ma_lt1);
     if (!nguoi) continue;
-    out.set(nguoi, {
+    out.set(khoaNguoi(nguoi), {
+      ma_lt1: nguoi,
       toiHan: Number(row.so_ur_toi_han) || 0,
       dangMo: Number(row.so_ur_dang_mo) || 0,
     });
@@ -179,17 +254,35 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
 
   // Tập ứng viên: danh sách khai tường minh, hoặc suy từ chính các dữ kiện đã có.
   const khaiTuongMinh = (nhanSu.ungVien ?? []).map((v) => chuan(typeof v === 'string' ? v : v.ma_nv)).filter(Boolean);
-  const tuDuLieu = [...new Set([...kinhNghiem.keys(), ...dauVao.keys(), ...tai.keys()])];
+  const tuDuLieu = [...new Map([...kinhNghiem, ...dauVao, ...tai]
+    .map(([khoa, v]) => [khoa, v.ma_lt1])).values()];
+
+  // Tên và cấp bậc chỉ để HIỂN THỊ — mã nhân viên vẫn là khoá duy nhất trong mọi phép so.
+  const hoSo = new Map();
+  for (const v of nhanSu.ungVien ?? []) {
+    if (typeof v === 'string' || !chuan(v?.ma_nv)) continue;
+    hoSo.set(khoaNguoi(v.ma_nv), { ten: chuan(v.ten) || undefined, ma_chv: chuan(v.ma_chv) || undefined });
+  }
+  const laPm = new Set((nhanSu.pm ?? []).map(khoaNguoi).filter(Boolean));
 
   // PM cũng là nhân viên — LUÔN có mặt trong tập ứng viên, bất kể danh sách khai tường minh
   // (thường lấy từ roster nhân sự lọc theo chức vụ) có bắt đúng PM hay không. Roster lọc
   // `ma_chv = 'NV'` có thể loại PM ra nếu chức vụ HR của PM không ghi đúng là 'NV' — không để
   // một cột chức vụ ở hệ thống KHÁC âm thầm xoá PM khỏi danh sách được xét ở đây.
-  const pm = chuan(pmCode);
+  const pm = danhSachPm(pmCode);
   const tenUngVien = [...new Set([
     ...(khaiTuongMinh.length ? khaiTuongMinh : tuDuLieu),
-    ...(pm ? [pm] : []),
+    ...pm,
   ])];
+
+  // Mốc so sánh của tiêu chí 1 và 3: người dẫn đầu TRONG TẬP ỨNG VIÊN, không phải trong toàn
+  // bộ dữ kiện. Người đã rời phòng vẫn còn trong lịch sử menu — để họ đặt mốc thì cả phòng
+  // bị chấm thấp vì so với một người không còn nhận việc được nữa.
+  const trongTap = new Set(tenUngVien.map(khoaNguoi));
+  const dinhKinhNghiem = Math.max(0,
+    ...[...kinhNghiem].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
+  const dinhDauVao = Math.max(0,
+    ...[...dauVao].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
 
   const thieuDuLieu = [];
   if (!nhanSu.lichSuMenu?.length) thieuDuLieu.push('lichSuMenu (tiêu chí 1 — kinh nghiệm menu)');
@@ -197,17 +290,18 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   if (laDauRa && !nhanSu.dongGopDauVao?.length) thieuDuLieu.push('dongGopDauVao (tiêu chí 3 — báo cáo đầu ra)');
 
   const ungVien = tenUngVien.map((nguoi) => {
-    const kn = kinhNghiem.get(nguoi);
-    const dv = dauVao.get(nguoi);
-    const t = tai.get(nguoi) ?? { toiHan: 0, dangMo: 0 };
+    const khoa = khoaNguoi(nguoi);
+    const kn = kinhNghiem.get(khoa);
+    const dv = dauVao.get(khoa);
+    const t = tai.get(khoa) ?? { toiHan: 0, dangMo: 0 };
 
-    const diemMenu = kn ? Math.min(kn.soUr / w.baoHoaSoUr, 1) * w.diemMenu : 0;
-    const diemDauVao = dv ? Math.min(dv.soUr / w.baoHoaSoUr, 1) * w.diemDauVao : 0;
+    const diemMenu = kn ? diemTuongDoi(kn.soUr, dinhKinhNghiem, w.baoHoaSoUr) * w.diemMenu : 0;
+    const diemDauVao = dv ? diemTuongDoi(dv.soUr, dinhDauVao, w.baoHoaSoUr) * w.diemDauVao : 0;
     const phat = Math.min(t.toiHan * w.phatMoiUrToiHan, w.phatToiDa);
     const diem = Math.round((diemMenu + diemDauVao - phat) * 10) / 10;
 
     const lyDo = [];
-    if (kn) lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'} trong dự án`);
+    if (kn) lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'}`);
     if (dv) lyDo.push(`đóng góp ${dv.soUr} UR đầu vào liên quan (${dv.nguon.join(', ')})`);
     lyDo.push(t.toiHan ? `đang gánh ${t.toiHan} UR sắp tới hạn` : 'không có UR nào sắp tới hạn');
     if (t.dangMo) lyDo.push(`${t.dangMo} UR đang mở`);
@@ -216,8 +310,12 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
     // "đang rảnh" thì vẫn là phỏng đoán yếu.
     const doTinCay = kn ? 'cao' : dv ? 'trung-binh' : 'thap';
 
+    const hs = hoSo.get(khoa) ?? {};
     return {
       ma_lt1: nguoi,
+      ten: hs.ten,
+      ma_chv: hs.ma_chv,
+      laPm: laPm.has(khoa),
       diem,
       doTinCay,
       lyDo,

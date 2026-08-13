@@ -685,27 +685,58 @@ const DO_TIN_CAY = {
   'thap': { nhan: 'tin cậy thấp', cls: 'warn', vi: 'không có bằng chứng kinh nghiệm, chỉ xếp theo tải' },
 };
 
+/** Nhãn ứng viên: mã là khoá, tên chỉ để người đọc khỏi phải tra ai là ai. */
+function nhanUngVien(c) {
+  const vai = [c.ma_chv === 'PP' ? 'phó phòng' : null, c.laPm ? 'PM' : null].filter(Boolean);
+  return `<strong>${esc(c.ma_lt1)}</strong>${c.ten ? ` <span class="muted">${esc(c.ten)}</span>` : ''}`
+    + (vai.length ? ` <span class="pill">${esc(vai.join(' · '))}</span>` : '');
+}
+
+/**
+ * Nói rõ PM của dự án này là ai và vì sao.
+ *
+ * `pmNguon = 'pp-thay-the'` là tình huống có thật và dễ hiểu nhầm: LTQL ghi trên `nbdmda`
+ * không còn trong roster phòng (đã off hoặc chuyển bộ phận) nên người chịu trách nhiệm là
+ * cấp phó phòng. Không nói ra thì PM nhìn thấy một cái tên lạ đứng ở cột PM và không hiểu.
+ */
+function ghiChuPmDuAn(payload) {
+  if (payload?.pmNguon === 'pp-thay-the') {
+    const cu = (payload.pmNgoaiPhong ?? []).map((m) => `<code>${esc(m)}</code>`).join(', ');
+    return `<p class="banner">Lập trình quản lý ghi trên dự án (${cu || 'không rõ'}) không còn trong danh sách nhân sự đang làm việc của bộ phận — đã off hoặc chuyển công tác. Người chịu trách nhiệm ở đây tính là <strong>${esc(payload.pm)}</strong> (phó phòng, quản lý toàn bộ dự án của phòng).</p>`;
+  }
+  if (payload?.pmNguon === 'khong-xac-dinh') {
+    return '<p class="banner">Không xác định được PM của dự án: lập trình quản lý trên <code>nbdmda</code> đã rời bộ phận và roster cũng không có ai ở cấp phó phòng.</p>';
+  }
+  return '';
+}
+
 /** Mục gợi ý người tiếp nhận cho UR ở DD chưa phân công thật sự. */
-function phanCongBlock(canGiao, nhanSu, trongSo, pm) {
+function phanCongBlock(canGiao, payload, trongSo, pm) {
   if (!canGiao.length) return { dem: 0, html: '<p class="empty">Mọi yêu cầu ở DD đều đã phân lập trình thực hiện.</p>' };
 
+  const nhanSu = payload?.nhanSu;
   // Nói rõ vì sao những UR mang tên PM vẫn nằm ở đây — nếu không, PM nhìn cột thấy tên mình
   // mà mục vẫn kêu "chưa giao" thì tưởng báo cáo sai.
   const soMacDinhPm = canGiao.filter((u) => String(u.ma_lt1 ?? '').trim()).length;
-  const ghiChuPm = soMacDinhPm
+  const ghiChuPm = ghiChuPmDuAn(payload) + (soMacDinhPm
     ? `<p class="lead">${soMacDinhPm} yêu cầu đang để <code>ma_lt1 = ${esc(pm)}</code> — đó là giá trị mặc định màn hình BA điền lúc lên yêu cầu, không phải đã phân việc. Nếu thật sự PM tự làm thì bỏ qua, còn lại chọn người theo bảng dưới.</p>`
-    : '';
+    : '');
 
   if (!nhanSu) {
     return {
       dem: canGiao.length,
-      html: `${ghiChuPm}<p class="banner">Có <strong>${canGiao.length}</strong> yêu cầu ở DD chưa phân, nhưng payload không có khối <code>nhanSu</code> nên không chấm điểm được ứng viên. Xem skill <code>pm-deadline-review</code> để lấy ba truy vấn dữ kiện (lịch sử menu · tải sắp tới hạn · đóng góp đầu vào).</p>
+      html: `${ghiChuPm}<p class="banner">Có <strong>${canGiao.length}</strong> yêu cầu ở DD chưa phân, nhưng payload không có khối <code>nhanSu</code> nên không chấm điểm được ứng viên. Payload sinh từ <code>4ai report</code> luôn có khối này (tools/lib/staffing.mjs) — thiếu nghĩa là payload viết tay hoặc từ bản cũ.</p>
 ${urTable(canGiao, [colStt, colNoiDung, colGiaiDoan, colHan, colMaLt1])}`,
     };
   }
 
+  // Nguồn hỏng (không đọc được userinfo2, chưa gán bộ phận…) phải hiện ở đầu mục, không nấp
+  // dưới từng UR: mất roster thì MỌI xếp hạng bên dưới đều yếu đi, không phải chỉ một cái.
+  const hongNguon = nhanSu.thieuDuLieu?.length
+    ? `<p class="banner">Nguồn nhân sự thiếu: ${nhanSu.thieuDuLieu.map(esc).join(' · ')}</p>` : '';
+
   const ketQua = goiYPhanCong(canGiao, nhanSu, trongSo, pm);
-  const html = ghiChuPm + ketQua.map(({ ur, goiY }) => {
+  const html = ghiChuPm + hongNguon + ketQua.map(({ ur, goiY }) => {
     const thieu = goiY.thieuDuLieu.length
       ? `<p class="banner">Thiếu dữ kiện: ${goiY.thieuDuLieu.map(esc).join(' · ')}. Xếp hạng bên dưới yếu đi tương ứng.</p>` : '';
 
@@ -719,7 +750,7 @@ ${goiY.ungVien.map((c, i) => {
         const tc = DO_TIN_CAY[c.doTinCay] ?? DO_TIN_CAY['thap'];
         return `<tr>
   <td class="mono">${i + 1}</td>
-  <td class="mono"><strong>${esc(c.ma_lt1)}</strong></td>
+  <td class="mono">${nhanUngVien(c)}</td>
   <td class="mono">${c.diem}</td>
   <td><span class="${tc.cls}">${tc.nhan}</span></td>
   <td>${c.lyDo.map(esc).join(' · ')}</td>
@@ -755,7 +786,7 @@ export function renderReport(payload, h) {
   const hangHom = isWorkingDay(h, today)
     ? '' : `<p class="banner">Hôm nay <strong>không phải ngày làm việc</strong> theo lịch đã khai.</p>`;
 
-  const phanCong = phanCongBlock(chuaGiao, payload.nhanSu, loadTrongSoPhanCong(), pm);
+  const phanCong = phanCongBlock(chuaGiao, payload, loadTrongSoPhanCong(), pm);
 
   const kpi = kpiRow([
     { n: quaHan.length, nhan: 'quá hạn', muc: 'bad' },
@@ -930,8 +961,25 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
     const tc = DO_TIN_CAY[top.doTinCay] ?? DO_TIN_CAY['thap'];
     const them = u._goiY.ungVien.length > 1
       ? ` <span class="muted">(rồi ${u._goiY.ungVien.slice(1).map((c) => esc(c.ma_lt1)).join(', ')})</span>` : '';
-    return `<strong class="mono">${esc(top.ma_lt1)}</strong> <span class="${tc.cls}">${tc.nhan}</span>${them}`;
+    const ten = top.ten ? ` <span class="muted">${esc(top.ten)}</span>` : '';
+    return `<strong class="mono">${esc(top.ma_lt1)}</strong>${ten} <span class="${tc.cls}">${tc.nhan}</span>${them}`;
   } };
+
+  // Ứng viên lấy từ đâu, và thiếu gì. Không có dòng này thì một bảng xếp hạng rỗng trông y
+  // hệt một bảng xếp hạng "cả phòng đều bận" — hai chuyện hoàn toàn khác nhau.
+  const ns = meta.nhanSu ?? items[0]?.payload?.nhanSu;
+  const ghiChuNhanSu = ns
+    ? `<p class="lead">Ứng viên lấy từ nhân sự đang làm việc của bộ phận <code>${esc(ns.boPhan || '?')}</code> (<code>userinfo2.status=1</code>, <code>ma_bo_phan=${esc(ns.boPhan || '?')}</code>): ${ns.roster?.length ?? 0} người${ns.pm?.length ? `, trong đó ${ns.pm.map((m) => `<code>${esc(m)}</code>`).join(', ')} đang đứng tên lập trình quản lý` : ''}.</p>`
+      + (ns.thieuDuLieu?.length
+        ? `<p class="banner">Nguồn nhân sự thiếu: ${ns.thieuDuLieu.map(esc).join(' · ')}</p>` : '')
+    : '';
+
+  // Dự án mà LTQL trên nbdmda đã off/chuyển phòng — PM tính là cấp phó phòng. Gom một chỗ
+  // để PM biết ngay những dự án nào đang không có người đứng tên thật sự.
+  const ppThayThe = items.filter(({ payload: p }) => p.pmNguon === 'pp-thay-the');
+  const ghiChuPpThayThe = ppThayThe.length
+    ? `<p class="banner">${ppThayThe.length} dự án có lập trình quản lý đã off hoặc chuyển bộ phận — PM tính là cấp phó phòng: ${ppThayThe.map(({ payload: p }) => `<code>${esc(p.ma_da)}</code> (${(p.pmNgoaiPhong ?? []).map(esc).join(', ') || '?'} → ${esc(p.pm)})`).join(', ')}.</p>`
+    : '';
 
   const boBoQua = skipped.length ? `<p class="banner">Bỏ qua ${skipped.length} dự án do payload lỗi nặng: ${skipped.map((s) => `<strong>${esc(s.ma_da ?? '?')}</strong> (${esc(s.errors.join('; '))})`).join(', ')}.</p>` : '';
 
@@ -985,7 +1033,8 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
       urTable(allSapToi.sort((a, b) => a._soNgay - b._soNgay), [colDuAn, colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), tongSapToi),
     section('chua-giao', 'Chưa giao lập trình (DD)',
       'Yêu cầu đã duyệt nhưng chưa có lập trình. Ứng viên xếp theo: đã làm menu đó · đang gánh ít UR sắp tới hạn · báo cáo đầu ra thì ưu tiên người làm nhiều UR đầu vào. ĐỀ XUẤT — PM chốt rồi mới giao.',
-      urTable(allChuaGiao.sort((a, b) => (a._soNgay ?? 99) - (b._soNgay ?? 99)),
+      ghiChuNhanSu + ghiChuPpThayThe
+      + urTable(allChuaGiao.sort((a, b) => (a._soNgay ?? 99) - (b._soNgay ?? 99)),
         [colDuAn, colStt, colNoiDung, colHan, colConLai, colGoiY]), tongChuaGiao),
   ].filter(Boolean).join('\n\n');
 
@@ -1011,8 +1060,11 @@ export const CSS = loadTemplate('report.css');
  * Đọc payload một dự án → trả mô tả file. KHÔNG ghi đĩa.
  * @returns {{artifact: {relPath, content}|null, errors: string[]}}
  */
-export function buildReportArtifact(payload, hub = HUB) {
-  const errors = validatePayload(payload);
+export function buildReportArtifact(payload, hub = HUB, opts = {}) {
+  // ignoreQuality: lần sinh tự động từ dataset (không có deXuat/nhanSu) — quality không
+  // được chặn HTML; trang tổng quan vốn đã chỉ skip khi fatal.
+  const { fatal, quality } = validatePayloadDetailed(payload);
+  const errors = opts.ignoreQuality ? fatal : [...fatal, ...quality];
   if (errors.length) return { artifact: null, errors };
   const h = loadHolidays(hub);
   const config = loadConfig(hub);
@@ -1045,7 +1097,11 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   // Dự án hết việc trong ba trạng thái đó không phải "dự án đang theo dõi" — đưa vào chỉ
   // làm loãng KPI và biểu đồ. Vẫn liệt kê tên ở cuối để không ai tưởng bị mất dự án.
   const rong = [];
-  for (const proj of payload.projects) {
+  for (const projRaw of payload.projects) {
+    // `nhanSu` khai một lần ở cấp portfolio (roster là của cả phòng, không phải của dự án).
+    // Rót xuống từng dự án ở đây để phần dựng bên dưới chỉ cần biết `payload.nhanSu`.
+    const keThua = payload.nhanSu && projRaw && !projRaw.nhanSu;
+    const proj = keThua ? { ...projRaw, nhanSu: payload.nhanSu } : projRaw;
     const { fatal, quality } = validatePayloadDetailed(proj);
     if (fatal.length) { skipped.push({ ma_da: proj?.ma_da ?? null, errors: fatal }); continue; }
     const summary = summarize(proj, h);
@@ -1065,7 +1121,8 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
   return {
     artifact: {
       relPath: duongDanTong(ngay),
-      content: renderPortfolio(items, skipped, warned, { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv, rong }, h),
+      content: renderPortfolio(items, skipped, warned,
+        { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv, rong, nhanSu: payload.nhanSu }, h),
     },
     errors: [],
   };

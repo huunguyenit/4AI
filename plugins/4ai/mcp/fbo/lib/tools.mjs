@@ -12,6 +12,7 @@ import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot } from '
 import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
 import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../../src/database/qlda-metadata.mjs';
+import { fetchReviewDataset } from '../../../tools/lib/review-dataset.mjs';
 
 const NOT_FOUND_NOTE =
   'File không tồn tại trong program này. KHÔNG được tự tạo mới hay suy đoán nội dung của nó.';
@@ -315,7 +316,7 @@ export const TOOLS = [
   {
     name: 'get_review_dataset',
     description:
-      'Trả về MỘT dataset thô đã JOIN sẵn nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA · QLDA_APP) — thay cho việc query rời từng bảng rồi tự ghép bằng tay/script. Mỗi UR là một object, kèm hạn hiệu lực (ngay_ht/xac_nhan_da_hen_yn/giai_doan_noi_dung của đúng dòng MAX ngay_ht theo giai_doan_da) và mảng con daumuc[] (nbctdaumuc, rỗng nếu UR không có đầu mục). Lọc theo project (ma_da), pmName (nbdmda.ma_lt1/2/3), pmDept (nbphyc.bp_lt), statusUR (nbphyc.trang_thai) — mỗi filter tuỳ chọn, kết hợp AND; bỏ trống CẢ BA thì lấy pm.maNv từ data/qlda.local.json (pmDept một mình vẫn có nghĩa là toàn phòng, không tự thêm PM).',
+      'Dataset rà soát UR từ bốn câu SQL cố định (nbphyc, nbctdaumuc, nbcnhanhtda, nbdmda) — không nhận SQL từ caller. Trả projects[] (dự án có UR) và yeuCau[] (mỗi UR kèm daumuc[] + hạn hiệu lực MAX ngay_ht theo giai_doan_da). Lọc project / pmName / pmDept / statusUR, AND; bỏ trống cả ba thì lấy pm.maNv từ qlda.local.json. CLI `4ai report` (không payload) gọi cùng function rồi đổ HTML — đừng ghép payload tay. AI chỉ phân tích UR trang_thai=DD.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -873,144 +874,7 @@ export const HANDLERS = {
   },
 
   get_review_dataset(hub, args = {}) {
-    const { programPath, database } = qldaConnection(hub);
-    const project = trimmed(args.project);
-    let pmName = trimmed(args.pmName);
-    const pmDept = trimmed(args.pmDept);
-    // Chỉ rớt về pm.maNv mặc định khi CẢ BA filter đều bỏ trống — pmDept một mình nghĩa là
-    // "toàn bộ phòng", không phải "phòng của PM này"; tự thêm pmName vào sẽ lọc hẹp sai ý.
-    if (!project && !pmName && !pmDept) {
-      const cfg = loadQldaConfig(hub);
-      const pmCode = trimmed(cfg?.review?.pm?.maNv);
-      pmName = !isPmPlaceholder(pmCode) ? pmCode : '';
-    }
-    if (!project && !pmName && !pmDept) {
-      throw new Error(
-        'Cần ít nhất một trong project / pmName / pmDept — hoặc gán pm.maNv trong data/qlda.local.json.');
-    }
-    const statusList = (Array.isArray(args.statusUR) && args.statusUR.length ? args.statusUR : ['DD', 'XN', 'TH'])
-      .map(trimmed).filter(Boolean);
-    if (statusList.length === 0) {
-      throw new Error('statusUR rỗng sau khi lọc — truyền ít nhất một mã trạng thái.');
-    }
-
-    const where = [];
-    if (project) where.push(`RTRIM(dm.ma_da) = '${sqlLiteral(project)}'`);
-    if (pmName) {
-      const lit = sqlLiteral(pmName);
-      where.push(`(RTRIM(dm.ma_lt1) = '${lit}' OR RTRIM(dm.ma_lt2) = '${lit}' OR RTRIM(dm.ma_lt3) = '${lit}')`);
-    }
-    if (pmDept) where.push(`RTRIM(yc.bp_lt) = '${sqlLiteral(pmDept)}'`);
-    where.push(`RTRIM(yc.trang_thai) IN (${statusList.map((s) => `'${sqlLiteral(s)}'`).join(', ')})`);
-
-    const maxRows = Math.min(args.maxRows ?? 5000, 10000);
-    const sql = `
-SELECT
-  RTRIM(dm.ma_da)        AS ma_da,
-  RTRIM(dm.ten_ngan)     AS ten_ngan,
-  RTRIM(dm.ma_pbsp)      AS ma_pbsp,
-  RTRIM(dm.bp_lt)        AS project_bp_lt,
-  RTRIM(dm.ma_lt1)       AS project_ma_lt1,
-  RTRIM(dm.ma_lt2)       AS project_ma_lt2,
-  RTRIM(dm.ma_lt3)       AS project_ma_lt3,
-  RTRIM(yc.stt_rec)      AS stt_rec,
-  RTRIM(yc.fcode1)       AS fcode1,
-  REPLACE(REPLACE(REPLACE(ISNULL(yc.noi_dung,''),CHAR(13),' '),CHAR(10),' '),CHAR(9),' ') AS noi_dung,
-  LEN(yc.noi_dung)       AS noi_dung_len,
-  RTRIM(yc.giai_doan_da) AS giai_doan_da,
-  RTRIM(yc.trang_thai)   AS trang_thai,
-  RTRIM(yc.menu_id)      AS menu_id,
-  RTRIM(yc.sysid)        AS sysid,
-  yc.tlks_yn             AS tlks_yn,
-  RTRIM(REPLACE(REPLACE(REPLACE(ISNULL(yc.trang_tlks,''),CHAR(13),' '),CHAR(10),' '),CHAR(9),' ')) AS trang_tlks,
-  RTRIM(yc.ma_lt1)       AS ur_ma_lt1,
-  RTRIM(yc.bp_lt)        AS ur_bp_lt,
-  yc.tg_dk_th            AS tg_dk_th,
-  hh.ngay_ht             AS ngay_ht,
-  hh.xac_nhan_da_hen_yn  AS xac_nhan_da_hen_yn,
-  hh.noi_dung            AS giai_doan_noi_dung,
-  RTRIM(dmuc.stt_rec0)   AS daumuc_stt_rec0,
-  RTRIM(dmuc.ma_daumuc)  AS ma_daumuc,
-  REPLACE(REPLACE(REPLACE(ISNULL(dmuc.ten_daumuc,''),CHAR(13),' '),CHAR(10),' '),CHAR(9),' ') AS ten_daumuc,
-  RTRIM(dmuc.ma_lt)      AS daumuc_ma_lt,
-  RTRIM(dmuc.ma_tester)  AS daumuc_ma_tester,
-  dmuc.so_luong          AS daumuc_so_luong,
-  dmuc.stt               AS daumuc_stt
-FROM nbphyc yc
-LEFT JOIN nbdmda dm ON RTRIM(yc.ma_da) = RTRIM(dm.ma_da)
-LEFT JOIN (
-  -- Tự-join vào đúng dòng có ngay_ht = MAX — lấy noi_dung/xac_nhan_da_hen_yn CỦA dòng hạn
-  -- hiện tại, không phải MAX/aggregate gộp cả lịch sử dời hạn (nbcnhanhtda mỗi hạn khác nhau
-  -- là một dòng khác, xem data/qlda.json → capNhatHanHoanThanh.purpose).
-  SELECT RTRIM(h.ma_da) AS ma_da, h.giai_doan_da, h.ngay_ht, h.xac_nhan_da_hen_yn,
-         REPLACE(REPLACE(REPLACE(ISNULL(h.noi_dung,''),CHAR(13),' '),CHAR(10),' '),CHAR(9),' ') AS noi_dung
-  FROM nbcnhanhtda h
-  INNER JOIN (
-    SELECT RTRIM(ma_da) AS ma_da, giai_doan_da, MAX(ngay_ht) AS ngay_ht
-    FROM nbcnhanhtda GROUP BY RTRIM(ma_da), giai_doan_da
-  ) m ON RTRIM(h.ma_da) = m.ma_da AND h.giai_doan_da = m.giai_doan_da AND h.ngay_ht = m.ngay_ht
-) hh ON hh.ma_da = RTRIM(yc.ma_da) AND hh.giai_doan_da = yc.giai_doan_da
-LEFT JOIN nbctdaumuc dmuc ON dmuc.stt_rec = yc.stt_rec
-WHERE ${where.join(' AND ')}
-ORDER BY RTRIM(dm.ma_da), RTRIM(yc.giai_doan_da), RTRIM(yc.stt_rec), RTRIM(dmuc.stt_rec0)`.trim();
-
-    const res = runSql({ programPath, database, dbType: 'app', sql, maxRows });
-
-    // Gộp theo stt_rec ngay ở đây — KHÔNG trả flat rows buộc agent tự JOIN lại bằng tay/script.
-    const byUr = new Map();
-    for (const r of res.rows) {
-      const key = trimmed(r.stt_rec);
-      if (!byUr.has(key)) {
-        byUr.set(key, {
-          ma_da: trimmed(r.ma_da),
-          ten_ngan: trimmed(r.ten_ngan) || undefined,
-          ma_pbsp: trimmed(r.ma_pbsp) || undefined,
-          project_bp_lt: trimmed(r.project_bp_lt) || undefined,
-          project_lt: [r.project_ma_lt1, r.project_ma_lt2, r.project_ma_lt3].map(trimmed).filter(Boolean),
-          stt_rec: key,
-          fcode1: trimmed(r.fcode1) || undefined,
-          noi_dung: r.noi_dung,
-          noi_dung_len: r.noi_dung_len !== undefined ? Number(r.noi_dung_len) : undefined,
-          giai_doan_da: trimmed(r.giai_doan_da) || undefined,
-          trang_thai: trimmed(r.trang_thai),
-          menu_id: trimmed(r.menu_id) || undefined,
-          sysid: trimmed(r.sysid) || undefined,
-          tlks_yn: r.tlks_yn,
-          trang_tlks: trimmed(r.trang_tlks) || undefined,
-          ur_ma_lt1: trimmed(r.ur_ma_lt1) || undefined,
-          ur_bp_lt: trimmed(r.ur_bp_lt) || undefined,
-          tg_dk_th: r.tg_dk_th,
-          ngay_ht: r.ngay_ht || undefined,
-          xac_nhan_da_hen_yn: r.xac_nhan_da_hen_yn,
-          giai_doan_noi_dung: r.giai_doan_noi_dung || undefined,
-          daumuc: [],
-        });
-      }
-      const daumucKey = trimmed(r.daumuc_stt_rec0);
-      if (daumucKey) {
-        byUr.get(key).daumuc.push({
-          stt_rec0: daumucKey,
-          ma_daumuc: trimmed(r.ma_daumuc) || undefined,
-          ten_daumuc: r.ten_daumuc || undefined,
-          ma_lt: trimmed(r.daumuc_ma_lt) || undefined,
-          ma_tester: trimmed(r.daumuc_ma_tester) || undefined,
-          so_luong: r.daumuc_so_luong,
-          stt: r.daumuc_stt,
-        });
-      }
-    }
-
-    return {
-      source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA · QLDA_APP)',
-      filters: { project: project || undefined, pmName: pmName || undefined, pmDept: pmDept || undefined, statusUR: statusList },
-      count: byUr.size,
-      truncated: res.truncated,
-      yeuCau: [...byUr.values()],
-      hint: 'Mỗi phần tử `yeuCau[]` là MỘT UR — không lặp lại theo đầu mục; `daumuc[]` bên trong đã gộp sẵn (rỗng nếu UR không có đầu mục), không cần tự JOIN lại. ' +
-        '`ngay_ht`/`xac_nhan_da_hen_yn` lấy theo (ma_da, giai_doan_da) — dự án nhiều bộ phận cùng giai đoạn có thể gộp hạn của bộ phận khác, giống hành vi tài liệu cũ. ' +
-        '`truncated: true` nghĩa là dòng thô (trước khi gộp) bị cắt ở `maxRows` — UR cuối cùng trong danh sách có thể thiếu vài dòng đầu mục, tăng `maxRows` hoặc lọc hẹp lại (project/pmDept) nếu cần đủ. ' +
-        'noi_dung mất dấu tiếng Việt do codepage sqlcmd — đối chiếu `noi_dung_len` (LEN thật trong DB) trước khi coi nội dung đã lấy đủ, đừng copy nguyên văn vào báo cáo.',
-    };
+    return fetchReviewDataset(hub, args);
   },
 
   set_pm_identity(hub, args = {}) {

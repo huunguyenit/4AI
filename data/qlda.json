@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "note": "Cấu hình dự án QLDA (quản lý dự án — yêu cầu — hạn hoàn thành). KHÔNG BAO GIỜ chứa connection string: ở đây chỉ có TÊN key và THỨ TỰ phân giải. Giá trị thật nằm ở biến môi trường hoặc data/qlda.local.json (đã gitignore). File này bị scanSecrets của `4ai check` soi — cố tình dán chuỗi kết nối vào sẽ fail build.",
   "storage": {
     "mode": "database",
@@ -396,6 +396,31 @@
         { "ma": "KD", "ten": "Không duyệt", "duyetYn": 2 }
       ],
       "flowNote": "Luồng thường gặp: TA/YC → DD → XN → TH → HT → DT → OK → UP. Nhánh dừng: CH, KL, KD (duyet_yn=2)."
+    },
+    "dauMucLoai": {
+      "table": "nbctdaumuc",
+      "column": "ma_daumuc",
+      "type": "char(2)",
+      "note": "Đầu mục công việc — mỗi UR có 0..n dòng, mỗi dòng do một người (ma_lt) làm. Đo trên FSD: 30976/31660 dòng có ma_lt (97.8%) — tín hiệu THẬT, mạnh hơn hẳn đoán qua từ khoá tự do trong noi_dung.",
+      "dauVaoDauRa": {
+        "rule": "Đầu vào = UR tạo mới/chỉnh sửa liên quan tới bảng dữ liệu (phạm vi tác động tới việc LƯU TRỮ dữ liệu). Đầu ra = báo cáo/kết quả trả về HIỂN THỊ cho NSD biết dữ liệu đã lưu. Định nghĩa PM chốt — không suy diễn thêm ngoài hai vế này.",
+        "dauVao": ["01", "03", "06", "07"],
+        "dauRa": ["02", "09"],
+        "khongXep": ["05", "08", "10"],
+        "khongXepLyDo": "05 (mail/thông báo) không lưu trữ cũng không hiển thị số liệu; 08 (tính toán đặc thù) và 10 (alter/dll hệ thống) mơ hồ giữa hai vế — không đủ chắc để tự kết luận, cứ để UR đó rơi xuống nhận diện từ khoá tự do."
+      },
+      "values": [
+        { "ma": "01", "ten": "Thêm/sửa c/từ, thông tin c/từ", "loai": "dauVao" },
+        { "ma": "02", "ten": "Mẫu in", "loai": "dauRa" },
+        { "ma": "03", "ten": "Thêm/chỉnh sửa kế thừa, lấy dữ liệu", "loai": "dauVao" },
+        { "ma": "05", "ten": "Gởi mail/thông báo", "loai": "khongXep" },
+        { "ma": "06", "ten": "Thêm danh mục cho báo cáo/chứng từ", "loai": "dauVao" },
+        { "ma": "07", "ten": "Thêm/chỉnh sửa import", "loai": "dauVao" },
+        { "ma": "08", "ten": "Thêm/sửa xử lý tính toán đặc thù", "loai": "khongXep" },
+        { "ma": "09", "ten": "Thêm/Sửa báo cáo", "loai": "dauRa" },
+        { "ma": "10", "ten": "Xử lý hệ thống (alter, dll, ...)", "loai": "khongXep" }
+      ],
+      "implementedAt": "tools/lib/assignee.mjs → MA_DAUMUC_DAU_VAO/MA_DAUMUC_DAU_RA (dùng cho nhanDienBaoCaoDauRa); tools/lib/staffing.mjs → sqlDongGopDauVao (dùng cho tiêu chí 3 của review.phanCong)."
     }
   },
   "review": {
@@ -435,7 +460,7 @@
     },
 
     "congPm": {
-      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái DD. UR ở XN/TH chỉ theo dõi hạn, không kiểm lại TLKS.",
+      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái DD — đây là phần AI phân tích (tài liệu đầu vào, ảnh hưởng, phân việc). UR ở XN/TH chỉ theo dõi hạn trên báo cáo do code sinh, không kiểm lại TLKS.",
       "tai": "DD",
       "quyetDinh": [
         { "sang": "XN", "khi": "Chấp nhận — yêu cầu nằm trong phạm vi và đã chốt được hạn hoàn thành." },
@@ -459,14 +484,58 @@
 
     "phanCong": {
       "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa phân lập trình (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
-      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = DD — UR đã sang XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình.",
+      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = DD — UR đã sang XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình. Dự án có nhiều LTQL thì payload.pm là danh sách, so khớp từng mã một.",
       "diemMenu": 100,
       "diemDauVao": 60,
       "phatMoiUrToiHan": 15,
       "phatToiDa": 60,
       "baoHoaSoUr": 3,
       "soGoiY": 3,
+      "baoHoaSoUrNote": "SÀN của mẫu số, không phải trần điểm. Điểm kinh nghiệm chấm theo tương quan với người dẫn đầu CHÍNH menu đó trong tập ứng viên: mốc tuyệt đối 3 UR hợp với payload nhỏ khai tay, nhưng lịch sử thật đếm hàng chục tới hàng trăm UR mỗi menu nên cả phòng chạm trần và xếp hạng sập thành hoà hết (đo trên menu 15.70.06 của FSD: cả 10 người đều > 3).",
       "doTinCay": "Đo bằng LOẠI bằng chứng chứ không phải bằng điểm: cao = có lịch sử làm đúng menu; trung-binh = chỉ có đóng góp UR đầu vào; thap = không có bằng chứng kinh nghiệm, chỉ xếp theo tải. Điểm cao nhờ mỗi 'đang rảnh' vẫn là phỏng đoán yếu."
+    },
+
+    "nhanSu": {
+      "note": "Dữ kiện nhân sự cho gợi ý phân công — do tools/lib/staffing.mjs dựng và đi kèm dataset của `4ai report`. KHÔNG phải khối payload khai tay: agent không ghép nhanSu, không viết SQL nhân sự.",
+      "roster": {
+        "bang": "userinfo2",
+        "database": "sys (QLDA_SYS) — KHÁC database nghiệp vụ QLDA_APP của nbphyc/nbdmda",
+        "cot": ["name", "comment", "s1", "ma_bo_phan", "ma_kcv", "ma_chv", "status"],
+        "loc": "ma_bo_phan = {PMDept} AND status = '1'",
+        "rule": "Đây chính là định nghĩa 'chưa off, chưa chuyển công tác'. status='0' là đã nghỉ; ma_bo_phan khác {PMDept} là đã chuyển bộ phận. Ai rớt khỏi câu này thì KHÔNG được đề xuất nhận việc mới, dù tên vẫn còn trên dự án cũ.",
+        "s1": "Mã người quản lý trực tiếp."
+      },
+      "capBac": {
+        "cot": "userinfo2.ma_chv",
+        "thuTu": "PP > NV",
+        "PP": "Phó phòng — quản lý nhân viên và TOÀN BỘ dự án của phòng.",
+        "NV": "Nhân viên."
+      },
+      "pmLaAi": {
+        "rule": "PM không phải một chức vụ trong userinfo2 — mọi PM đều mang ma_chv='NV'. Dấu hiệu duy nhất là ĐỨNG TÊN lập trình quản lý: mã nằm ở nbdmda.ma_lt1/ma_lt2/ma_lt3 của dự án còn UR ở DD/XN/TH.",
+        "viDu": "NV01 và PM01 là PM vì mã của họ nằm trong ma_lt1/2/3 của dự án đang có UR — không phải vì chức vụ HR.",
+        "hệQua": "PM cũng là nhân viên và vẫn trực tiếp lập trình, nên vai PM KHÔNG loại họ khỏi danh sách ứng viên."
+      },
+      "ltqlDaRoiPhong": {
+        "phatHien": "UR có bp_lt = {PMDept} nhưng LTQL của dự án không có trong roster → người đó đã off hoặc chuyển bộ phận. nbdmda là dữ liệu đã nguội, không tự dọn.",
+        "thayThe": "PM của dự án đó tính là cấp PP (phó phòng). Báo cáo hiện rõ dòng 'LTQL đã off/chuyển bộ phận → PM là <PP>' chứ không lặng lẽ đổi tên.",
+        "viSao": "payload.pm quyết định ma_lt1 nào bị coi là 'mặc định BA để lại'. Chép nguyên tên người đã rời phòng thì mọi UR mang tên họ lọt qua như đã phân việc xong."
+      },
+      "lichSuMenu": {
+        "bang": "nbphyc",
+        "loc": "menu_id IN (menu của UR đang ở DD) AND ma_lt1 IN (roster)",
+        "rule": "KHÔNG lọc trang_thai (UR đã UP mới là bằng chứng kinh nghiệm mạnh nhất) và KHÔNG lọc bp_lt (kinh nghiệm theo người, không theo mã phòng ghi trên UR). Hai giới hạn trên là để câu trả lời còn nghĩa: toàn bộ cặp (người × menu) của FSD là hơn 33.000 dòng."
+      },
+      "taiTrong": {
+        "nguon": "Suy từ chính dataset đang rà soát, KHÔNG hỏi SQL riêng.",
+        "rule": "so_ur_toi_han gộp cả quá hạn lẫn sắp tới hạn, đi qua đúng workdays.classifyDeadline mà báo cáo dùng. Hỏi SQL riêng sẽ đẻ ra định nghĩa 'sắp tới hạn' thứ hai và hai chỗ lệch nhau lúc nào không hay."
+      },
+      "dongGopDauVao": {
+        "bang": "nbctdaumuc JOIN nbphyc",
+        "loc": "ma_daumuc IN (mã đầu vào — xem enums.dauMucLoai) AND menu_id IN (menu của UR đang ở DD) AND ma_lt IN (roster)",
+        "rule": "`ma_lt` lấy trên ĐẦU MỤC, không phải ma_lt1 của cả UR — một UR có thể có nhiều đầu mục do nhiều người khác nhau làm, gán theo UR sẽ nhầm công cho người đứng tên UR dù họ không làm đúng phần đầu vào đó. `nguon` trả về là menu_id, khớp bằng khopPhanHe() giống tiêu chí 1.",
+        "implementedAt": "tools/lib/staffing.mjs → sqlDongGopDauVao()"
+      }
     },
 
     "docCache": {
@@ -490,21 +559,20 @@
 
     "baoCao": {
       "lich": { "gio": "08:00", "timezone": "Asia/Ho_Chi_Minh", "ngay": [1, 2, 3, 4, 5] },
+      "lenh": "node tools/4ai.mjs report [--project MA_DA]",
+      "lenhNote": "Không truyền payload. Code lấy dataset (bốn câu SQL cố định trong tools/lib/review-dataset.mjs) rồi đổ HTML. Agent không viết SQL, không ghép JSON.",
       "output": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/<MA_DA>/review.html",
       "outputTong": "<mcpDataRoot>/4ai/ledger/review/<yyyyMMdd>/_tong/tong.html",
-      "outputNote": "Gom theo NGÀY trước, trong ngày mới chia dự án — một lượt rà soát nằm gọn một thư mục. Payload đặt cạnh HTML cùng tên (review.payload.json / tong.payload.json). Đường dẫn do tools/lib/report.mjs quyết định (duongDanTong, duongDanDuAn), đừng tự ghép chuỗi.",
+      "outputNote": "Gom theo NGÀY trước, trong ngày mới chia dự án. Payload đặt cạnh HTML (review.payload.json / tong.payload.json) do chính lệnh report ghi. Đường dẫn do tools/lib/report.mjs quyết định (duongDanTong, duongDanDuAn), đừng tự ghép chuỗi.",
       "format": "HTML tự chứa, xem lại được offline.",
       "phanBaoCao": [
-        "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua.",
-        "Sắp tới hạn — còn <= 3 ngày làm việc.",
-        "Giai đoạn chưa tick chốt đã hẹn — kèm danh sách UR đề xuất về TA.",
-        "UR ở DD chờ cổng PM — kèm kết quả kiểm TLKS.",
-        "UR ngoài TLKS chưa có căn cứ đính kèm.",
-        "Đề xuất KL — kèm node Capability làm căn cứ.",
-        "UR nhắc tạo bảng/thêm cột — kèm gợi ý DDL.",
-        "Biểu đồ: tiến độ theo giai đoạn, phân bố UR trong/ngoài TLKS, đường deadline."
+        "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua (code).",
+        "Sắp tới hạn — còn <= 3 ngày làm việc (code).",
+        "Giai đoạn chưa tick chốt đã hẹn (code).",
+        "Danh sách UR DD chờ cổng PM — AI phân tích sau (tài liệu, ảnh hưởng, phân việc).",
+        "Biểu đồ: tiến độ theo giai đoạn, phân bố UR trong/ngoài TLKS, đường deadline (code)."
       ],
-      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác."
+      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác. Phân tích DD sống ở chat, không nhét deXuat vào lần sinh đầu."
     }
   },
 

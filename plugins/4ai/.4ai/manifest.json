@@ -34,9 +34,9 @@
     },
     {
       "path": "agents/pm-deadline-review.md",
-      "sha256": "aa4ac188d144dd4cc04399b7919577961d9a78ddeedfb5dfed9fa6e88c774f41",
+      "sha256": "1863ee23fb5d9905a2d9e025777ebc7ad959cd741ed2b624b72565eb8bb92c3b",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 7
+      "sourceVersion": 9
     },
     {
       "path": "agents/pm-planner.md",
@@ -58,9 +58,9 @@
     },
     {
       "path": "agents/pm-ur-analyst.md",
-      "sha256": "f9e1c4e77556bb1def89c427391e50c576320b03d8b6df62ab84adf3b0d38c77",
+      "sha256": "d3919a498d8a1722d3af28b0c10b488ac64a0e355c927d18cdd8050c33901678",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": "commands/fbo-customize.md",
@@ -94,9 +94,9 @@
     },
     {
       "path": "commands/pm-review.md",
-      "sha256": "64ce5e9268ec7111223f8021d1c2fa9325ad347a1428183965683f4aa600e4a2",
+      "sha256": "93ccfd5c989fd26076f6779ffb1193585d61dbb1e4b922e89082a195e2ee13fd",
       "sourceId": "pm-review",
-      "sourceVersion": 6
+      "sourceVersion": 7
     },
     {
       "path": "commands/pm-status.md",
@@ -146,7 +146,7 @@
     },
     {
       "path": "data/qlda.json",
-      "sha256": "1b0541ccada4a85b583c3dbaf48a95073c68ddb274c906779fb9bca94e419888"
+      "sha256": "317700e05256e6b54c8f12b0e8e3a1bafed3be077efb1106525b52b913963b49"
     },
     {
       "path": "mcp/fbo/lib/encoding.mjs",
@@ -166,7 +166,7 @@
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "0bd65d04f29e29bb213c6fb6e1cbd17071bead85703c38c1017cc9ad965bbbd3"
+      "sha256": "5ef65d20c6896b9ba2d8d92c0a21be2c5b8884207e13abec31ae998b31c1059f"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -366,7 +366,7 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "46d015f613a200cb7dd61c3d4f105005887d585cd4912b11637be517dd54f5c2"
+      "sha256": "c2100d3f91c02a8ca913588679ad74613505769feff3d795a73dcae226b8fb2b"
     },
     {
       "path": "tools/lib/assets.mjs",
@@ -374,7 +374,7 @@
     },
     {
       "path": "tools/lib/assignee.mjs",
-      "sha256": "a93cfd70ca58c01c52f8f1813a8fca69f911905d3f83e1332897fd56f69aefa5"
+      "sha256": "7e6db4ab7bc2857bde78d524c6140cc5b702d4aaa0654ac1c29063d57f9737d4"
     },
     {
       "path": "tools/lib/ddl.mjs",
@@ -438,7 +438,11 @@
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "3e8778d8157ac24060f0c8f56e71cc8adfd90ea0a5fae400e5b69db9e206d4c8"
+      "sha256": "9e991b365ea1fb77dc588f3de4d4b6bb6805008ed06ff5570b35169debf499a0"
+    },
+    {
+      "path": "tools/lib/review-dataset.mjs",
+      "sha256": "d3306f68f05ad3e81f91ba19cfbf545627db9e1f52078f1491afba122e364196"
     },
     {
       "path": "tools/lib/schema.mjs",
@@ -447,6 +451,10 @@
     {
       "path": "tools/lib/serve.mjs",
       "sha256": "8fd80f22d5eb82d0f9c48bd1630d423526700833739d8a2ec4acee5e9c4a857d"
+    },
+    {
+      "path": "tools/lib/staffing.mjs",
+      "sha256": "a4894fcb261a0a31f0f195a616c4ae6020780c52b7a781858307446b590c8e4f"
     },
     {
       "path": "tools/lib/sync.mjs",
@@ -480,6 +488,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-12T07:18:59.742Z",
+  "syncedAt": "2026-08-13T03:08:29.740Z",
   "target": "plugin"
 }

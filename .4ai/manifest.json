@@ -26,9 +26,9 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "2c0e3d3feed1567070899e2980f5265afa5ff1e3524d66e476c2a4a8e008d3ac",
+      "sha256": "e63805bbcbd57c7897f9185e3bd4ea9f9b280edb6cbe1c3afea22f14bef062fd",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 7
+      "sourceVersion": 9
     },
     {
       "path": ".agents/agents/pm-planner.md",
@@ -50,9 +50,9 @@
     },
     {
       "path": ".agents/agents/pm-ur-analyst.md",
-      "sha256": "1292fa086787b26543eec13c84a4abe2a0bdff812f6514567e68bd87e376e859",
+      "sha256": "3abdb079f8c5ebc91a81b1569739c10c1ac74d3bbe0ad13da3f0ee5dd55f5a6c",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".agents/rules/core-doctrine.md",
@@ -242,9 +242,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "fca9be541ca0446b2c5dfa5836c0b69a871ed62b00aa1cacc260fce8fe8e7705",
+      "sha256": "236d15e91cbfc20b23985c40c05043b0de100fc8aa37154408ff8acb4d9c3265",
       "sourceId": "pm-review",
-      "sourceVersion": 6
+      "sourceVersion": 7
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -254,7 +254,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "5e79b6fd303dc5a0408a3a42b5a3f1a5d683b6a74be671a668b159ce1bbe0df7"
+      "sha256": "33407179ede17b1b779877a25ba3c309e458918fb7aaa9e691b2041bed6a50dc"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -282,9 +282,9 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "a41f00a45e7a755a449bd6fbdbf284b4d2fb5f9088359332d89be5bd110c4a4d",
+      "sha256": "c55a39d495fc88c01ff5604118a17c359463e997eff85106e812bf67a3165c59",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 7
+      "sourceVersion": 9
     },
     {
       "path": ".claude/agents/pm-planner.md",
@@ -306,9 +306,9 @@
     },
     {
       "path": ".claude/agents/pm-ur-analyst.md",
-      "sha256": "f9e1c4e77556bb1def89c427391e50c576320b03d8b6df62ab84adf3b0d38c77",
+      "sha256": "d3919a498d8a1722d3af28b0c10b488ac64a0e355c927d18cdd8050c33901678",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".claude/commands/doctor.md",
@@ -366,9 +366,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "5133de480d38790771a6eb38390936ded73615ce2d279c8aa6363dcf0496c7f1",
+      "sha256": "142b01e7013694ca42484d116b29fce998e860ff6eef0a13923e7e4eb406898c",
       "sourceId": "pm-review",
-      "sourceVersion": 6
+      "sourceVersion": 7
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -504,9 +504,9 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "562f99ccc45ffb15dd98da5984536eb1329a431fcc14b087e6eca69320c0b49e",
+      "sha256": "f7ade58151855d69f46034148674a59ff8ff9d343252eff643e67e3ad6c133db",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 7
+      "sourceVersion": 9
     },
     {
       "path": ".cursor/agents/pm-planner.md",
@@ -528,9 +528,9 @@
     },
     {
       "path": ".cursor/agents/pm-ur-analyst.md",
-      "sha256": "a29c7e911b6883fef7b4fa1ce867e3cd04f7a73c276c168711446e6a81b5bdad",
+      "sha256": "2ae4e5439c54757b0068def928bdadfdfbcf78496f5dd1c3b8764e79fadc2ec5",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".cursor/commands/doctor.md",
@@ -588,9 +588,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "aa792f41de1bd7b2a2da6aee38ffec1fe7bcf5699af44080de99a53d9bd4996f",
+      "sha256": "d6301b747158cc4aeb0a5ec1d7548c72047f73ebcbe06065f086481f3b2cb352",
       "sourceId": "pm-review",
-      "sourceVersion": 6
+      "sourceVersion": 7
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -792,9 +792,9 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "f1c897c2276f99b30ffd867e8da04dfa895640f6db41454e4a4bff4efc9c12a0",
+      "sha256": "5ea6129c33ab80aec3733eedf2235eae2045ad04a1b011109f1daf5af8ebe8c1",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 7
+      "sourceVersion": 9
     },
     {
       "path": ".github/chatmodes/pm-planner.chatmode.md",
@@ -816,9 +816,9 @@
     },
     {
       "path": ".github/chatmodes/pm-ur-analyst.chatmode.md",
-      "sha256": "61c86466d3f66da0a8b8ce53ed0a7b954d9c17566d872e773428f2a9ba42f6bf",
+      "sha256": "1c38be0a5426625bd9c07a95c203498deb17fd7174b1b7aae7518069007d1d99",
       "sourceId": "pm-ur-analyst",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".github/copilot-instructions.md",
@@ -946,9 +946,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "d2afc7ff83acc4d7d8b28eaa11b548166e9ef386105fb2025fd250b7bee0197e",
+      "sha256": "e3b8e71b1259733e5fe14f5416a1eb416c2c6e8776ba915297ca65e663c53539",
       "sourceId": "pm-review",
-      "sourceVersion": 6
+      "sourceVersion": 7
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-12T04:25:31.431Z",
+  "syncedAt": "2026-08-13T01:54:29.663Z",
   "target": "4ai"
 }

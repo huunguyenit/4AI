@@ -40,6 +40,26 @@ ok('payload khai tường minh thắng heuristic',
 ok('Ghi lại nguồn nhận diện',
   nhanDienBaoCaoDauRa({ noi_dung: 'Thêm báo cáo X', laBaoCaoDauRa: true }).nguon === 'payload');
 
+// Đầu mục công việc (nbctdaumuc.ma_daumuc) là tín hiệu THẬT, ưu tiên hơn đoán từ khoá tự do.
+ok('maDaumuc = 09 (Thêm/Sửa báo cáo) -> đầu ra, nguồn = daumuc',
+  nhanDienBaoCaoDauRa({ noi_dung: 'Sửa gì đó không nhắc chữ báo cáo', maDaumuc: ['01', '09'] }).laDauRa === true
+  && nhanDienBaoCaoDauRa({ noi_dung: 'x', maDaumuc: ['09'] }).nguon === 'daumuc');
+ok('maDaumuc = 02 (Mẫu in) -> đầu ra',
+  nhanDienBaoCaoDauRa({ noi_dung: 'x', maDaumuc: ['02'] }).laDauRa === true);
+ok('maDaumuc chỉ có mã đầu vào (01) -> KHÔNG phải đầu ra dù noi_dung mơ hồ',
+  nhanDienBaoCaoDauRa({ noi_dung: 'x', maDaumuc: ['01', '03'] }).laDauRa === false);
+// Trường hợp thật đo được: UR sửa "Bảng kê thuế đầu ra, đầu vào" (TÊN MÀN HÌNH) chỉ có đầu
+// mục 01/06 (chứng từ/danh mục) — từ khoá "bang ke" khớp DAU_RA_RE nhưng đầu mục đã phân
+// loại rõ là đầu vào, phải THẮNG chứ không được để lọt qua từ khoá tự do.
+ok('Đầu mục đã phân loại THẮNG TUYỆT ĐỐI, kể cả khi noi_dung chứa từ khoá đầu ra',
+  nhanDienBaoCaoDauRa({ noi_dung: 'Bảng kê thuế đầu ra, đầu vào — thêm điều kiện lọc', maDaumuc: ['01', '06'] }).laDauRa === false);
+ok('maDaumuc rỗng -> rớt xuống nhận diện từ khoá tự do',
+  nhanDienBaoCaoDauRa({ noi_dung: 'Thêm báo cáo X', maDaumuc: [] }).nguon === 'noi_dung');
+ok('maDaumuc chỉ toàn mã không xếp bên nào (05/08/10) -> rớt xuống từ khoá tự do',
+  nhanDienBaoCaoDauRa({ noi_dung: 'Thêm báo cáo X', maDaumuc: ['08', '10'] }).nguon === 'noi_dung');
+ok('payload khai tường minh vẫn thắng cả maDaumuc',
+  nhanDienBaoCaoDauRa({ noi_dung: 'x', maDaumuc: ['09'], laBaoCaoDauRa: false }).laDauRa === false);
+
 
 process.stdout.write('\n=== 2. TIÊU CHÍ 1 — KINH NGHIỆM MENU THẮNG ===\n');
 // NV02 có 6 UR trên M01 nhưng đang gánh 4 UR tới hạn; NV04 rảnh nhưng chỉ 1 UR.

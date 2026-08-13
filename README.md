@@ -292,7 +292,7 @@ Cấu hình trọng số: `data/qlda.json` → `review.phanCong` ghi đè mặc 
 | `assets/commands/` | Slash command (`/pm-status`, `/fbo-find`, v.v.) |
 | `data/` | Config tham chiếu (khách, chương trình, schema DB) |
 | `mcp/servers.json` | Kết nối tới API, database nội bộ |
-| `tools/lib/` | Library: report, prompt, assignee, template |
+| `tools/lib/` | Library: report, prompt, assignee, staffing, template |
 | `tools/templates/report/` | HTML template, CSS cho báo cáo |
 | `ledger/` | Kho dự án: task, changelog, handover |
 | `docs/` | Hướng dẫn viết asset, kiến trúc |
