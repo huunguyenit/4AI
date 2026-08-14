@@ -116,13 +116,79 @@ Yêu cầu: **Node.js 22+** trên máy chạy Cursor (MCP dùng `node:sqlite` bu
 > — Cursor chưa có biến tương đương được xác nhận, nên `mcp.json` của gói không set
 > `FBO_DATA_ROOT`: index ghi ngay trong thư mục cài (`${PLUGIN_ROOT}/.4ai/index/`). Cập nhật
 > plugin có thể mất index, phải index lại chương trình. Xem ghi chú đầu
-> `tools/lib/emit/cursor-plugin.mjs`.
+> `tools/lib/emit/cursor-plugin.mjs`. **Giấy phép chung số phận** — nó nằm ở
+> `${PLUGIN_ROOT}/data/license.json`, mất thì `license import` lại đúng file cũ (giấy phép gắn
+> theo máy, không phải theo lần cài, nên dùng lại được).
 
 #### Cách B — Clone repo (khi cần sửa asset)
 
 Giống Cách 2 của Claude Code ở trên — xem [Quickstart](#quickstart--sửa-một-điều-gì-đó). Sau
 khi `sync`, Cursor đọc trực tiếp `.cursor/rules/`, `.cursor/agents/`, `.cursor/commands/`,
 `.cursor/mcp.json` trong chính repo.
+
+## 🔑 Giấy phép (chỉ với bản cài từ gói plugin)
+
+Gói plugin mang sẵn **public key**; giấy phép là một file JSON **ký bằng private key của Fast
+Source** và **gắn với đúng một máy**. Không có máy chủ kiểm tra, không gọi mạng — máy khách
+thường không ra được Internet, và một MCP server treo vì chờ HTTP còn tệ hơn không có giấy phép.
+
+### Người dùng — ba bước
+
+```bash
+node tools/4ai.mjs license id
+```
+
+1. **Lấy Device ID** — lệnh trên in đúng một dòng dạng `XBZ3E-SQ33C-K8R5F-0Y1TC`. Không có
+   terminal (chat/Cowork) thì bảo trợ lý gọi tool MCP `license_status`. Device ID là **giá trị
+   băm** từ định danh cài đặt HĐH (MachineGuid trên Windows), không lộ tên máy hay địa chỉ MAC.
+2. **Gửi Device ID cho Fast Source** → nhận lại một file `.json`.
+3. **Kích hoạt**:
+
+```bash
+node tools/4ai.mjs license import duong-dan-file.json
+```
+
+   Không có terminal thì: `license_activate({ license: "<dán nguyên nội dung file>" })`. Giấy
+   phép lưu ở `${CLAUDE_PLUGIN_DATA}/data/license.json` — sống sót qua mỗi lần update plugin.
+   Kích hoạt xong dùng được ngay, **không cần khởi động lại MCP server**.
+
+Xem trạng thái và hạn bất cứ lúc nào: `node tools/4ai.mjs license`.
+
+### Cái gì bị chặn khi chưa kích hoạt
+
+| Bị chặn | Không bị chặn |
+|---|---|
+| Mọi tool MCP tra cứu (`list_programs`, `find_controller`, `query_sql`…) | `license_status`, `license_activate` |
+| `4ai report`, `4ai serve`, `4ai graph` | `4ai check`, `sync`, `list`, `explain`, `targets`, `doctor`, `setup` |
+
+`tools/list` **vẫn** liệt kê đủ tool khi chưa kích hoạt — chặn ở bước gọi chứ không ở lúc khởi
+động, để mỗi lần gọi còn chỗ in ra Device ID và các bước gỡ. Chạy từ **mã nguồn hub** (thư mục
+có `assets/` và `targets.json`) thì không chặn gì: hàng rào này dành cho gói mang đi, ai có repo
+thì đã có toàn bộ mã nguồn.
+
+### Phía Fast Source — cấp giấy phép
+
+```bash
+node tools/4ai.mjs license keygen --kid fs-2026a
+```
+
+Sinh cặp khoá ed25519 một lần. Private key ghi vào `~/.4ai/keys/license-<kid>.pem` (**ngoài
+repo**, quyền 600); lệnh in ra mục public key để dán vào `data/license-public-keys.json` rồi
+`sync` lại để đóng vào gói. Repo **chưa có khoá nào** — gói dựng trước khi dán public key sẽ báo
+"gói thiếu public key" ở mọi máy.
+
+```bash
+node tools/4ai.mjs license issue --device XBZ3E-SQ33C-K8R5F-0Y1TC --to "Công ty ABC" --days 365 --out abc.json
+```
+
+Hạn mặc định **365 ngày**; `--expires YYYY-MM-DD` để chốt ngày, `--forever` để cấp vĩnh viễn —
+phải nói thẳng vì **không thu hồi được** (không có máy chủ kiểm tra). Đổi một chữ trong file đã
+cấp là chữ ký hỏng ngay; nới hạn bằng tay cũng vậy.
+
+> **Đây là hàng rào thương mại, không phải hàng rào an toàn.** Runtime là JavaScript đọc được:
+> ai sửa `mcp/fbo/lib/license.mjs` thì bỏ được kiểm tra. Mục tiêu là "chỉ chạy ở nơi đã được
+> cấp" và để lại vết rõ ràng khi chạy sai chỗ, không phải chống dịch ngược. Mất private key =
+> không cấp thêm được giấy phép cho khoá đó (giấy phép đã cấp vẫn chạy) → sao lưu chỗ an toàn.
 
 ## ⚙️ Cấu hình cục bộ (trước khi dùng `query_sql` / `report`)
 

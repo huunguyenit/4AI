@@ -141,6 +141,10 @@
       "sha256": "b305462e69a38c4b1a89eb395f0b293a77af3180ededcdd06c11263645bca3b3"
     },
     {
+      "path": "data/license-public-keys.json",
+      "sha256": "c0b2f9904223b07516a280104257489c8776673f4ca027979fc545e8b6dd9e90"
+    },
+    {
       "path": "data/qlda.json",
       "sha256": "739b746e2b03970959f488c3dc57f72b98969c3f3cd0a6f9ba19e3f8b2be79be"
     },
@@ -157,6 +161,10 @@
       "sha256": "ca9297b9c95ead09da620bd0ba3ffea54bea0a392f0046c04189798d7a2db050"
     },
     {
+      "path": "mcp/fbo/lib/license.mjs",
+      "sha256": "424aa19187a3bd6e9b6c4fc9690464606ec18f7784ae6f39a047eb57b06143b3"
+    },
+    {
       "path": "mcp/fbo/lib/rpc.mjs",
       "sha256": "2b9de3f9464e6fe5ae95a47937cf0b97798445169f562952d37f719c4529ea56"
     },
@@ -166,7 +174,7 @@
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "3bf12d3e3f04b3c24ddddc20a48afd4b05115b0eddf936139871b56cbcc0f4fa"
+      "sha256": "5d6450c8c7c93a1ab130829a8e81f54ec94938014ae717ff0c0c2324c1567d65"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -174,11 +182,11 @@
     },
     {
       "path": "mcp/fbo/selftest.mjs",
-      "sha256": "42270aee33b867b063da4d33ade4352c5a518f2a83baeb3ae0439850d1fd2ca1"
+      "sha256": "1878a1f120f637930abefd6ff8f2e559993d959045de82d2ebf6f817daa7039b"
     },
     {
       "path": "mcp/fbo/server.mjs",
-      "sha256": "f4f360ba58b9ec5cadd577a7b0507955ce05a9ce9a1de4c6c16cacaef5972bbf"
+      "sha256": "12de91da8ac054c4a58055d238be0047874eaab4205fce4e9982f2d050aa03e9"
     },
     {
       "path": "rules/00-core-doctrine.mdc",
@@ -366,7 +374,7 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "455673b2195e0df46275ddd122651531f7dfaefcf48cbbe171e9fe464a3c9db2"
+      "sha256": "89f30348caec944b75e13d2e0d65250e856a309675994a47eb6fe0925890d351"
     },
     {
       "path": "tools/lib/assets.mjs",
@@ -441,6 +449,10 @@
       "sha256": "9e64eabef2c03c70f583ee7a035b289669e404f1cbca9c62bf4f6a7d0533ef52"
     },
     {
+      "path": "tools/lib/license-cli.mjs",
+      "sha256": "77e19e3eff1e6681929f459a0c6587ffb2571dbab4fdcbeb3f44cee4b1912375"
+    },
+    {
       "path": "tools/lib/paths.mjs",
       "sha256": "cd520ad281c6cdd0fd084dfecc67a61378229b1dd6a5572404e81169255e32ef"
     },
@@ -474,7 +486,7 @@
     },
     {
       "path": "tools/lib/schema.mjs",
-      "sha256": "fd26da9088718539ec77191e59357b85bafacbd15dd53992b46ce96086d4222f"
+      "sha256": "5ca15b072cb8f24bb18ba9720a66b4d2c38dec8630f929b98828c15473dfe555"
     },
     {
       "path": "tools/lib/serve.mjs",
@@ -482,7 +494,7 @@
     },
     {
       "path": "tools/lib/setup.mjs",
-      "sha256": "76ac94edb2ab959e17d2045cd35a067ff32cf27cde828eec1e23779a59e4c51d"
+      "sha256": "d7dc7a8f54192f9b60521c2f54208d13590279c402adae5d280c33a562eb498a"
     },
     {
       "path": "tools/lib/staffing.mjs",
@@ -520,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T00:14:59.061Z",
+  "syncedAt": "2026-08-14T01:57:28.253Z",
   "target": "plugin-cursor"
 }

@@ -1,0 +1,11 @@
+{
+  "note": "Public key phát hành giấy phép 4AI. Đi kèm gói phân phối — công khai, không phải secret. Private key tương ứng nằm ở máy phát hành (xem `4ai license keygen`), không bao giờ ở trong repo này.",
+  "keys": [
+    {
+      "kid": "fs-2026a",
+      "alg": "ed25519",
+      "publicKey": "MCowBQYDK2VwAyEAFa5xrRm7hgY2PY2NvsABM3GWHo8QhZlXZnvN3zJjc1w="
+    }
+  ],
+  "version": 1
+}

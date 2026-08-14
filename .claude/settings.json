@@ -13,7 +13,8 @@
       "mcp__4ai-fbo__search_content",
       "mcp__4ai-fbo__read_source",
       "mcp__4ai-fbo__resolve_vouchercode",
-      "mcp__4ai-fbo__plan_report"
+      "mcp__4ai-fbo__plan_report",
+      "mcp__4ai-fbo__license_status"
     ]
   }
 }
