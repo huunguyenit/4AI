@@ -1,7 +1,7 @@
 // report-performance.mjs — dashboard hiệu suất nhân viên theo phòng ban, dựng thành HTML tự chứa.
 //
 // TRẢ VỀ {relPath, content}; writer.mjs mới ghi. Không gọi DB: dữ liệu vào bằng payload JSON
-// do PM chuẩn bị sẵn (query_sql trên QLDA_APP → scratchpad → lệnh này). Payload chỉ chứa dữ liệu
+// do PM chuẩn bị sẵn (query_sql trên QLDA → scratchpad → lệnh này). Payload chỉ chứa dữ liệu
 // PHẲNG (một dòng = một nhân viên × một kỳ); mọi pivot, xếp hạng, so sánh phòng ban tính ở đây
 // bằng JS — không lặp lại logic PIVOT phức tạp trong T-SQL mỗi lần đổi cách nhìn dữ liệu.
 //
@@ -252,7 +252,7 @@ export function renderPerformance(payload) {
 
   const ky = payload.granularity === 'tuan' ? 'tuần' : 'tháng';
   const title = `Hiệu suất công việc theo ${ky} · ${fmtDate(payload.ngay_chay)}`;
-  const metaLine = `Kỳ báo cáo: ${periods.map((p) => esc(periodLabel(payload.granularity, p))).join(', ')}${ownDept ? ` · phòng bạn: <code>${esc(ownDept)}</code>` : ''} · nguồn: nbphyc + nbctdaumuc (QLDA_APP)`;
+  const metaLine = `Kỳ báo cáo: ${periods.map((p) => esc(periodLabel(payload.granularity, p))).join(', ')}${ownDept ? ` · phòng bạn: <code>${esc(ownDept)}</code>` : ''} · nguồn: nbphyc + nbctdaumuc (DB nghiệp vụ QLDA)`;
   return page(title, metaLine, body);
 }
 

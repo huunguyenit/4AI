@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
 
 // Trỏ data root vào thư mục tạm TRƯỚC khi nạp sql.mjs: máy dev có thể đã khai chuỗi kết nối
 // thật trong data/qlda.local.json, để nguyên thì test đo trạng thái máy chứ không đo code.
@@ -13,9 +13,18 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-conn-'));
 process.env.FBO_DATA_ROOT = tmp;
 const { nguonKetNoi, redact } = await import('../mcp/fbo/lib/sql.mjs');
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const QLDA = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'qlda.json'), 'utf8')).databases.qlda.path;
-const KHACH = String.raw`\\10.0.0.1\CustomerPro\FBI\DEMO1\FBISP2422`;
+// `data/qlda.json` chỉ giữ TOKEN `{QldaProgramPath}` (gói phân phối công khai không mang
+// đường dẫn share nội bộ) — test tự khai đường dẫn giả vào qlda.local.json, đúng như máy
+// thật làm qua `4ai setup`. Nhờ vậy test cũng bao luôn nhánh "chưa khai thì không nhận QLDA".
+const QLDA = String.raw`\\test-share\FastPro$\QLDA\Src-Onl`;
+const KHACH = String.raw`\\test-share\CustomerPro\FBI\DEMO\FBISP2422`;
+
+/** Ghi qlda.local.json cho data root tạm — luôn kèm qldaProgramPath. */
+const ghiLocal = (them = {}) => {
+  fs.mkdirSync(path.join(tmp, 'data'), { recursive: true });
+  fs.writeFileSync(path.join(tmp, 'data', 'qlda.local.json'),
+    JSON.stringify({ qldaProgramPath: QLDA, ...them }));
+};
 
 let failures = 0;
 function ok(label, cond, detail) {
@@ -33,24 +42,28 @@ const donDep = () => {
 delete process.env.QLDA_APP_CONNECTION;
 delete process.env.QLDA_SYS_CONNECTION;
 
-process.stdout.write('=== chưa khai gì: rớt về Web.config (bước cuối resolveOrder) ===\n');
+process.stdout.write('=== chưa khai qldaProgramPath: KHÔNG program nào bị nhận là QLDA ===\n');
+// Token chưa được gán = chưa biết QLDA nằm đâu. Phải rớt về Web.config chứ không được khớp
+// bừa — khớp nhầm là chạy câu SQL của khách trên DB nội bộ công ty.
+ok('Chưa khai -> Web.config', nguonKetNoi(QLDA, 'app') === 'Web.config');
+
+process.stdout.write('\n=== chưa khai kết nối: rớt về Web.config (bước cuối resolveOrder) ===\n');
 // Máy chưa cấu hình — hành vi phải y hệt trước khi có tính năng này.
+ghiLocal();
 ok('QLDA app -> Web.config', nguonKetNoi(QLDA, 'app') === 'Web.config');
 ok('QLDA sys -> Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
 
 process.stdout.write('\n=== khai ở qlda.local.json: đứng giữa env và Web.config ===\n');
-fs.mkdirSync(path.join(tmp, 'data'), { recursive: true });
-fs.writeFileSync(path.join(tmp, 'data', 'qlda.local.json'),
-  JSON.stringify({ appConnectionString: 'Data Source=L;Initial Catalog=QLDA_APP' }));
+ghiLocal({ appConnectionString: 'Data Source=L;Initial Catalog=TEST_APP' });
 ok('Có local, chưa có env -> qlda.local.json', nguonKetNoi(QLDA, 'app') === 'qlda.local.json');
 ok('Khoá chưa khai vẫn rớt về Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
 
 process.stdout.write('\n=== khai env: env THẮNG local ===\n');
-process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=QLDA_APP;Integrated Security=SSPI';
+process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=TEST_APP;Integrated Security=SSPI';
 ok('QLDA app -> env', nguonKetNoi(QLDA, 'app') === 'env');
 ok('Chưa khai env sys thì leg sys KHÔNG ăn theo leg app',
   nguonKetNoi(QLDA, 'sys') === 'Web.config', nguonKetNoi(QLDA, 'sys'));
-process.env.QLDA_SYS_CONNECTION = 'Data Source=X;Initial Catalog=QLDA_SYS;Integrated Security=SSPI';
+process.env.QLDA_SYS_CONNECTION = 'Data Source=X;Initial Catalog=TEST_SYS;Integrated Security=SSPI';
 ok('QLDA sys -> env', nguonKetNoi(QLDA, 'sys') === 'env');
 
 process.stdout.write('\n=== chương trình KHÁCH vẫn phải đọc Web.config ===\n');
@@ -69,7 +82,7 @@ ok('Đường dẫn rỗng KHÔNG bị nhận nhầm là QLDA', nguonKetNoi('', 
 process.stdout.write('\n=== không rò rỉ chuỗi kết nối ===\n');
 const nguon = [nguonKetNoi(QLDA, 'app'), nguonKetNoi(QLDA, 'sys'), nguonKetNoi(KHACH, 'app')].join(' ');
 ok('nguonKetNoi chỉ trả tên nguồn, không trả giá trị',
-  !/Data Source|Integrated Security|QLDA_APP|QLDA_SYS/i.test(nguon), nguon);
+  !/Data Source|Integrated Security|TEST_APP|TEST_SYS/i.test(nguon), nguon);
 ok('redact bịt password', redact('Server=a;User Id=sa;Password=p@ss;').includes('Password=***'));
 ok('redact bịt user + server',
   redact('Data Source=SRV;User Id=sa;').includes('User Id=***')

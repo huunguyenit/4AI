@@ -80,9 +80,15 @@ function readWebConfigText(programPath) {
   return readSource(webConfig).text;
 }
 
-/** FBO để `%Database` khi tên database do runtime quyết định, không nằm trong Web.config. */
+/**
+ * Chưa có tên database thật. Hai nguồn placeholder khác nhau, cùng ý nghĩa "chưa biết":
+ *  - `%Database` — FBO để vậy khi tên do runtime quyết định, không nằm trong Web.config.
+ *  - `{QldaDatabaseName}` — token trong data/qlda.json, chờ máy này gán từ qlda.local.json.
+ *    File đó đi kèm gói phân phối công khai nên không được mang tên hạ tầng nội bộ.
+ */
 function isPlaceholder(database) {
-  return database === '' || /^%/.test(database);
+  const s = String(database ?? '').trim();
+  return s === '' || /^%/.test(s) || /^\{[A-Za-z0-9_]+\}$/.test(s);
 }
 
 /**
@@ -127,10 +133,16 @@ function qldaConfig() {
   return loadQldaConfig()?.databases?.qlda ?? null;
 }
 
-/** Program này có phải chính chương trình QLDA nội bộ không. */
+/**
+ * Program này có phải chính chương trình QLDA nội bộ không.
+ *
+ * `path` còn là token `{QldaProgramPath}` nghĩa là máy này CHƯA khai đường dẫn QLDA — coi như
+ * không phải QLDA, để mọi program rơi về đường Web.config của chính nó. Không so sánh với
+ * token: khớp nhầm thì một chương trình khách sẽ bị lấy kết nối QLDA, sai database mà vẫn chạy.
+ */
 function laQldaProgram(programPath) {
   const khai = qldaConfig()?.path;
-  if (!khai) return false;
+  if (!khai || isPlaceholder(khai)) return false;
   return chuanHoaDuongDan(programPath) === chuanHoaDuongDan(khai);
 }
 
@@ -506,7 +518,7 @@ function execSql(sqlcmd, conn, sql, { maxRows = 100, timeoutMs = 30000 } = {}) {
   };
 }
 
-// ------------------------------------------------- đồ thị 4AI (DB nội bộ GRAPH_4AI)
+// ------------------------------------------------- đồ thị 4AI (DB nội bộ của hub)
 
 /**
  * Kết nối tới DB đồ thị. Nguồn theo `data/qlda.json → databases.graph4ai.resolveOrder`:
@@ -525,7 +537,17 @@ function resolveGraphConn() {
   }
   const conn = connFromString(cs);
   if (!conn.database) {
-    conn.database = loadQldaConfig()?.databases?.graph4ai?.databaseName ?? 'GRAPH_4AI';
+    // Không còn fallback tên DB ghi cứng: qlda.json chỉ giữ token `{Graph4aiDatabaseName}`
+    // (gói phân phối công khai không được mang tên hạ tầng nội bộ). Chưa khai thì BÁO RÕ chứ
+    // đừng âm thầm nối vào một tên đoán được — sai DB mà vẫn chạy là kiểu hỏng khó dò nhất.
+    const khai = loadQldaConfig()?.databases?.graph4ai?.databaseName;
+    if (isPlaceholder(khai)) {
+      throw new Error(
+        'Kết nối DB đồ thị không xác định được tên database — khai `Initial Catalog` trong '
+        + 'GRAPH_4AI_CONNECTION, hoặc `graph4aiDatabaseName` trong data/qlda.local.json '
+        + '(chạy `node tools/4ai.mjs setup`).');
+    }
+    conn.database = khai;
   }
   return conn;
 }

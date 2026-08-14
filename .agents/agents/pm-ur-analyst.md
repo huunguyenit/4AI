@@ -93,9 +93,9 @@ Tài liệu **không nằm trên đĩa cục bộ**. Nguồn duy nhất là bả
 Liệt kê đính kèm của dự án (`controller='nbdmda'`, `syskey` = `ma_da`) hoặc của một yêu
 cầu (`controller='nbphyc'`, `syskey` = `stt_rec`):
 
-    query_sql program=\\10.0.0.1\FastPro$\QLDASHARE\SRC-ONL database=QLDA_APP
+    query_sql program=<databases.qlda.path> database=<databases.qlda.databaseName>
       SELECT line_nbr, file_name, file_ext, file_size, file_enc
-      FROM sysfileinfo WHERE controller = 'nbdmda' AND RTRIM(syskey) = 'DEMO1'
+      FROM sysfileinfo WHERE controller = 'nbdmda' AND RTRIM(syskey) = '<ma_da>'
       ORDER BY line_nbr
 
 File trên đĩa là `<attachments.fileStore.root>\<file_enc>`, **không có phần mở rộng**.
@@ -167,12 +167,12 @@ Thấp 2–4 giờ · Trung bình 4–8 giờ · Cao 8–16 giờ (mức Cao th�
   credential khách. Cần biết khách ở đâu thì tra `list_programs` (đọc `dir_pro_web`/`dir_pro_app`).
 - Output `query_sql` **mất dấu tiếng Việt** (codepage sqlcmd). Không copy chuỗi đã mất dấu
   vào bảng UR — lấy văn bản chính xác từ tài liệu nguồn.
-- Mọi `query_sql` tới QLDA phải truyền `database: QLDA_APP` (Web.config dùng `%Database`).
+- Mọi `query_sql` tới QLDA phải truyền `database` đúng tên DB nghiệp vụ QLDA (Web.config dùng `%Database`).
 
 ## Bẫy
 
 - `syskey`, `ma_da`, `stt_rec` là kiểu `char` cố định dài — quên `RTRIM` là truy vấn ra rỗng.
-- `nbdmda.file_tlks` thường rỗng (DEMO1 rỗng). Nó không phải nơi lưu tài liệu; đừng kết luận
+- `nbdmda.file_tlks` thường rỗng (đã gặp dự án thật có cột này rỗng dù có đính kèm). Nó không phải nơi lưu tài liệu; đừng kết luận
   "dự án không có tài liệu khảo sát" chỉ vì cột này trống.
 - Thư mục `attachments.fileStore.root` chứa rất nhiều file — liệt kê cả thư mục sẽ treo.
   Luôn dựng đường dẫn từ `file_enc` lấy qua SQL.

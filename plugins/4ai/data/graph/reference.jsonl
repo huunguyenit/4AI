@@ -23,11 +23,11 @@
 
 // ---- phiên bản sản phẩm ----
 {"_":"node","kind":"SpVersion","ma_pbsp":"FBISP24","product":"FBI","ghi_chu":"Corpus test cục bộ, dùng để phân giải mã chứng từ chuẩn."}
-{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2421","product":"FBI","ghi_chu":"Acme Three."}
-{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2422","product":"FBI","ghi_chu":"Demo Co, DEMO2."}
-{"_":"node","kind":"SpVersion","ma_pbsp":"SP225","product":"FBO","ghi_chu":"Acme Two."}
-{"_":"node","kind":"SpVersion","ma_pbsp":"SP229","product":"FBO","ghi_chu":"Acme."}
-{"_":"node","kind":"SpVersion","ma_pbsp":"SP22621","product":"FBO","ghi_chu":"Demo Six."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2421","product":"FBI","ghi_chu":"Bản FBI khách dùng."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"FBISP2422","product":"FBI","ghi_chu":"Bản FBI nhiều khách dùng chung."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP225","product":"FBO","ghi_chu":"Bản FBO khách dùng."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP229","product":"FBO","ghi_chu":"Bản FBO khách dùng."}
+{"_":"node","kind":"SpVersion","ma_pbsp":"SP22621","product":"FBO","ghi_chu":"Bản FBO khách dùng."}
 
 // ---- menu (wcommand) ----
 {"_":"node","kind":"Menu","menu_id":"03.01.02","wmenu_id":"06.10.02","bar":"Giấy báo nợ","bar2":"Bank Debit Advice","link":"cactbn1.aspx","syscode":"BN1","sysid":"CPTran"}

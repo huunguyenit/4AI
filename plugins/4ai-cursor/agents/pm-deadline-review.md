@@ -73,7 +73,7 @@ Phân tích sống **trong chat**. Không nhét `deXuat` vào HTML lần sinh đ
 - Dự án: `{PMName}` trong `nbdmda.ma_lt1/2/3`. Không lọc theo bộ phận.
 - Báo cáo (code): `DD`/`XN`/`TH`. Vai PM kết thúc ở `HT`.
 - AI: **chỉ `DD`**.
-- Mọi `query_sql` còn lại (tài liệu) truyền `database: "QLDA_APP"`. Không SELECT `nbdmda.server`/`xuser`/`xpass`/`db_sys`.
+- Mọi `query_sql` còn lại (tài liệu) truyền `database` đúng tên DB nghiệp vụ QLDA (xem `data/qlda.json` → `databases.qlda.databaseName`). Không SELECT `nbdmda.server`/`xuser`/`xpass`/`db_sys`.
 
 ## Bẫy
 

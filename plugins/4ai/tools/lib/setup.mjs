@@ -25,6 +25,28 @@ export const KHOA_BI_MAT = [
   { key: 'graphConnectionString', env: 'GRAPH_4AI_CONNECTION', mo_ta: 'DB đồ thị 4AI (bắt buộc — đồ thị sống ở đây)' },
 ];
 
+/**
+ * Định danh hạ tầng nội bộ — KHÔNG phải credential, nhưng cũng KHÔNG được nằm trong repo:
+ * `data/qlda.json` đi kèm gói phân phối công khai (Cursor Marketplace), nên tên database và
+ * đường dẫn share nội bộ của công ty phải do từng máy tự khai. qlda.json chỉ giữ TOKEN
+ * `{Ten}`; qlda-metadata.mjs gán giá trị thật từ đây lúc chạy.
+ *
+ * Khác KHOA_BI_MAT ở chỗ: không có biến env tương đương, và HIỆN được giá trị lên màn hình
+ * (tên DB không phải secret theo nghĩa credential — chỉ là thứ không nên công khai).
+ */
+export const KHOA_CAU_TRUC = [
+  { key: 'qldaDatabaseName', token: '{QldaDatabaseName}', ref: 'databases.qlda.databaseName',
+    mo_ta: 'Tên DB nghiệp vụ QLDA (nbdmda, nbphyc…)' },
+  { key: 'qldaSysDatabaseName', token: '{QldaSysDatabaseName}', ref: 'databases.qlda.sysDatabaseName',
+    mo_ta: 'Tên DB hệ thống QLDA (userinfo2…)' },
+  { key: 'qldaProgramPath', token: '{QldaProgramPath}', ref: 'databases.qlda.path',
+    mo_ta: 'Đường dẫn program QLDA — dùng để phân biệt QLDA với chương trình khách' },
+  { key: 'graph4aiDatabaseName', token: '{Graph4aiDatabaseName}', ref: 'databases.graph4ai.databaseName',
+    mo_ta: 'Tên DB đồ thị 4AI (bỏ trống nếu chuỗi kết nối đã khai Initial Catalog)' },
+  { key: 'attachmentsFileStoreRoot', token: '{AttachmentsFileStoreRoot}', ref: 'attachments.fileStore.root',
+    mo_ta: 'Share chứa file đính kèm (chỉ cần khi đọc tài liệu khảo sát)' },
+];
+
 /** Đường dẫn file cấu hình cục bộ của LẦN CÀI NÀY — plugin thì nằm ở ${CLAUDE_PLUGIN_DATA}. */
 export function duongDanLocal(hub) {
   return path.join(dataRoot(hub), 'data', 'qlda.local.json');
@@ -58,6 +80,16 @@ export function chanDoan(hub) {
       coEnv: Boolean(String(process.env[k.env] ?? '').trim()),
       coLocal: typeof local[k.key] === 'string' && local[k.key].trim() !== '',
     })),
+    cauTruc: KHOA_CAU_TRUC.map((k) => ({
+      ...k,
+      // Giá trị đã gán (qlda.json + overlay local). Còn nguyên token = chưa khai trên máy này.
+      giaTri: (() => {
+        const v = k.key === 'attachmentsFileStoreRoot'
+          ? cfg?.attachments?.fileStore?.root
+          : k.ref.split('.').reduce((o, seg) => o?.[seg], cfg);
+        return isPmPlaceholder(v) ? '' : String(v).trim();
+      })(),
+    })),
     sqlcmd: findSqlcmd(),
     node: process.version,
     // Trạng thái giấy phép — chỉ Device ID và tình trạng, không bao giờ kèm chữ ký.
@@ -79,6 +111,11 @@ export function inChanDoan(d, write = (s) => process.stdout.write(s)) {
   write('\nDanh tính PM\n');
   write(`  ${dau(Boolean(d.pm.maNv))} maNv          ${d.pm.maNv || '(chưa khai)'}\n`);
   write(`  ${dau(Boolean(d.pm.boPhanLt))} boPhanLt      ${d.pm.boPhanLt || '(chưa khai)'}\n`);
+
+  write('\nĐịnh danh hạ tầng nội bộ  (qlda.json chỉ giữ token — giá trị thật khai ở máy này)\n');
+  for (const k of d.cauTruc) {
+    write(`  ${dau(Boolean(k.giaTri))} ${k.key.padEnd(25)} ${k.giaTri || '(chưa khai — còn token ' + k.token + ')'}\n`);
+  }
 
   write('\nChuỗi kết nối  (chỉ hiện ĐÃ KHAI hay CHƯA — không bao giờ in giá trị)\n');
   for (const k of d.biMat) {
@@ -145,7 +182,7 @@ const hoi = (rl, cauHoi) => new Promise((resolve) => rl.question(cauHoi, resolve
  * Trộn giá trị mới vào file cấu hình rồi ghi. Tách khỏi phần hỏi đáp để test được mà không
  * cần terminal thật — và để chỗ quyết định "bỏ trống thì giữ nguyên" chỉ nằm đúng một nơi.
  *
- * @param {{maNv?: string, boPhanLt?: string, biMat?: Object}} gt - bỏ trống = giữ giá trị cũ
+ * @param {{maNv?: string, boPhanLt?: string, biMat?: Object, cauTruc?: Object}} gt - bỏ trống = giữ giá trị cũ
  * @returns {{file: string, daKhai: string[]}} `daKhai` là TÊN KHOÁ, không kèm giá trị
  */
 export function ghiLocal(hub, gt = {}) {
@@ -161,6 +198,12 @@ export function ghiLocal(hub, gt = {}) {
   const daKhai = [];
   for (const k of KHOA_BI_MAT) {
     const v = String(gt.biMat?.[k.key] ?? '').trim();
+    if (!v) continue;
+    next[k.key] = v;
+    daKhai.push(k.key);
+  }
+  for (const k of KHOA_CAU_TRUC) {
+    const v = String(gt.cauTruc?.[k.key] ?? '').trim();
     if (!v) continue;
     next[k.key] = v;
     daKhai.push(k.key);
@@ -212,11 +255,21 @@ export async function chaySetup(hub, { write = (s) => process.stdout.write(s) } 
       if (v) biMat[k.key] = v;
     }
 
+    write('\nĐịnh danh hạ tầng nội bộ — bỏ trống để giữ nguyên. Hiện rõ trên màn hình (không\n');
+    write('phải credential), nhưng KHÔNG nằm trong repo vì gói plugin là bản phân phối công khai.\n');
+    const cauTruc = {};
+    for (const k of KHOA_CAU_TRUC) {
+      const daCo = d.cauTruc.find((x) => x.key === k.key);
+      const nhan = daCo?.giaTri ? ` [${daCo.giaTri}]` : '';
+      const v = (await hoi(rl, `  ${k.key}${nhan}: `)).trim();
+      if (v) cauTruc[k.key] = v;
+    }
+
     if (maNv && isPmPlaceholder(maNv)) {
       write('\n(!) maNv trông giống token mẫu dạng {Ten} — nhập mã nhân viên thật, không phải placeholder.\n');
     }
 
-    const { file: daGhi } = ghiLocal(hub, { maNv, boPhanLt: boPhan, biMat });
+    const { file: daGhi } = ghiLocal(hub, { maNv, boPhanLt: boPhan, biMat, cauTruc });
     write(`\nĐã ghi ${daGhi}\n`);
     // In lại trạng thái để người dùng thấy kết quả — vẫn chỉ tên khoá, không giá trị.
     inChanDoan(chanDoan(hub), write);

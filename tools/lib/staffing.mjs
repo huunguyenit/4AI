@@ -5,9 +5,9 @@
 //   ai đóng góp UR đầu vào liên quan (chỉ áp cho UR là báo cáo đầu ra).
 //
 // HAI NGUỒN, HAI DATABASE KHÁC NHAU — đừng gộp:
-//   `userinfo2` (DB **sys**, mặc định QLDA_SYS) là danh sách người: còn làm không (`status`),
+//   `userinfo2` (DB **sys**, DB hệ thống QLDA) là danh sách người: còn làm không (`status`),
 //       đang ở phòng nào (`ma_bo_phan`), cấp bậc gì (`ma_chv`), ai quản lý trực tiếp (`s1`).
-//   `nbphyc`/`nbctdaumuc` (DB **app**, mặc định QLDA_APP) là lịch sử: ai đã làm bao nhiêu UR
+//   `nbphyc`/`nbctdaumuc` (DB **app**, DB nghiệp vụ QLDA) là lịch sử: ai đã làm bao nhiêu UR
 //       ở menu nào, và loại đầu mục nào (chứng từ/danh mục/import = đầu vào; báo cáo/mẫu in =
 //       đầu ra — xem MA_DAUMUC_DAU_VAO/MA_DAUMUC_DAU_RA ở assignee.mjs).
 //
@@ -116,9 +116,9 @@ ORDER BY RTRIM(yc.menu_id), COUNT(*) DESC`.trim();
 }
 
 /**
- * Kinh nghiệm trên hiện vật, đọc từ đồ thị (`node_ExperienceFact` trên DB nội bộ GRAPH_4AI).
+ * Kinh nghiệm trên hiện vật, đọc từ đồ thị (`node_ExperienceFact` trên DB đồ thị 4AI).
  *
- * Khác mọi câu SQL còn lại trong file này: chúng đọc QLDA (`QLDA_APP`/`QLDA_SYS`) của công ty, còn
+ * Khác mọi câu SQL còn lại trong file này: chúng đọc QLDA (DB nghiệp vụ và DB hệ thống QLDA) của công ty, còn
  * câu này đọc đồ thị của chính 4AI — nơi kinh nghiệm ĐÃ được rút sẵn từ nội dung UR (xem
  * experience-extract.mjs). Nhờ đã rút sẵn nên user nào mở báo cáo cũng dùng chung kết quả,
  * không phải phân giải lại.

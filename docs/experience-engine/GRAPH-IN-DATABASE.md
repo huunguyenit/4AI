@@ -185,7 +185,7 @@ là `sqlcmd` (qua `mcp/fbo/lib/sql.mjs`), và tool `query_sql` đã có cờ `al
 
 Nghĩa là **kỹ thuật thì ghi được ngay**, không cần thêm dependency. Nhưng phát sinh:
 
-- Mọi user cần quyền ghi trên `GRAPH_4AI` (hiện `graphConnectionString` là tuỳ chọn, nhiều máy
+- Mọi user cần quyền ghi trên DB đồ thị 4AI (hiện `graphConnectionString` là tuỳ chọn, nhiều máy
   chưa khai — `4ai doctor` sẽ phải coi đây là lỗi thay vì cảnh báo).
 - Ghi qua `sqlcmd` là gọi tiến trình ngoài: chậm hơn, và một lần chạy report sẽ sinh nhiều câu.
   Gom thành một batch có `BEGIN TRAN` là bắt buộc, không ghi rời từng dòng.

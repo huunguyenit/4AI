@@ -1,6 +1,6 @@
 // report-kpi.mjs — dashboard KPI bộ phận (LTQL × trạng thái), không liệt kê theo mã UR.
 //
-// Payload do PM chuẩn bị từ query_sql trên QLDA_APP (aggregate GROUP BY ma_lt1).
+// Payload do PM chuẩn bị từ query_sql trên QLDA (aggregate GROUP BY ma_lt1).
 // Phần quá hạn cũng gom theo nhân viên (`quaHanLtql`), không theo fcode1.
 //
 // Thiết kế: Data-Dense Dashboard (ui-ux-pro-max) — Fira Sans/Code, mật độ cao,
@@ -220,7 +220,7 @@ ${duAn.length ? `<section class="panel">
 </section>` : ''}
 
 <footer>
-  <p>Sinh bởi <code>node tools/4ai.mjs report</code> · nguồn QLDA_APP · thiết kế Data-Dense Dashboard</p>
+  <p>Sinh bởi <code>node tools/4ai.mjs report</code> · nguồn QLDA · thiết kế Data-Dense Dashboard</p>
 </footer>`;
 
   return `<!doctype html>

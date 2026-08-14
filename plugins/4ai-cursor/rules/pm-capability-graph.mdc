@@ -30,11 +30,11 @@ Luôn tính lúc truy vấn từ `Phase.deadline`, `Request→Status`, `Request�
 
 ## Nguồn sự thật là file, không phải DB
 
-File JSONL trong repo là nguồn thật. DB `{PMDept}_4AI` chỉ là **chỉ mục dựng lại được** — xoá DB
+File JSONL trong repo là nguồn thật. DB đồ thị 4AI chỉ là **chỉ mục dựng lại được** — xoá DB
 không mất gì. Nhờ vậy mọi thay đổi đồ thị review được bằng `git diff`.
 
     node tools/4ai.mjs graph check        # validate, không bao giờ ghi
-    node tools/4ai.mjs graph build        # sinh .4ai/graph/{PMDept}_4AI.sql
+    node tools/4ai.mjs graph build        # sinh .4ai/graph/graph-4ai.sql
 
 Script sinh ra nạp bằng `sqlcmd` hoặc `query_sql`, và **chỉ sau khi PM xác nhận**. Chiến lược
 nạp là xoá sạch rồi nạp lại (cạnh trước, node sau) nên chạy bao nhiêu lần cũng ra một kết quả.
@@ -49,7 +49,7 @@ Một dòng một object JSON. `_` là `node` hoặc `edge`. Dòng bắt đầu 
 
 `from`/`to` viết dạng `Kind:key`. Prop lạ, kind lạ, cạnh trỏ tới node không tồn tại, hay cặp
 `(kind từ, kind tới)` ngoài `allowedPairs` đều làm `graph check` fail kèm số dòng. Subgraph
-đầy đủ cho một Request tham khảo ở `ledger/DEMO1/graph.jsonl`.
+đầy đủ cho một Request tham khảo ở `ledger/<MA_DA>/graph.jsonl`.
 
 ## Tra năng lực
 
@@ -101,9 +101,9 @@ Không có thì không được đề xuất KL — hỏi PM trước, đừng t
 - Prop kiểu mảng (`ImplementationPlan.columns`, `.constraints`) được JSON-hoá thành chuỗi khi
   sinh SQL — đọc lại phải `JSON.parse`, cột không phải kiểu mảng native của SQL Server graph.
 - Cạnh do máy suy ra phải để `doTinCay` < 1 và chờ PM duyệt trước khi dùng làm căn cứ.
-- Đừng sửa `.4ai/graph/{PMDept}_4AI.sql` bằng tay: nó bị ghi đè ở lần `graph build` sau và không
+- Đừng sửa `.4ai/graph/graph-4ai.sql` bằng tay: nó bị ghi đè ở lần `graph build` sau và không
   được commit.
-- Giá trị kết nối tới `{PMDept}_4AI` nằm ở `data/qlda.local.json` (đã gitignore) hoặc biến môi
+- Giá trị kết nối tới DB đồ thị nằm ở `data/qlda.local.json` (đã gitignore) hoặc biến môi
   trường. KHÔNG BAO GIỜ ghi vào file được commit — `4ai check` sẽ fail.
 
 

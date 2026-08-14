@@ -11,7 +11,7 @@ alwaysApply: false
 ## Vì sao
 
 Program path là căn cước của mọi thay đổi (rule `fbo-customization-scope`). Nguồn sự thật
-là bảng `nbdmda` trong DB QLDA nội bộ (`QLDA_APP`) — hệ thống quản lý dự án dùng chung của cả
+là bảng `nbdmda` trong DB QLDA nội bộ (DB nghiệp vụ QLDA) — hệ thống quản lý dự án dùng chung của cả
 công ty, không phải file riêng của hub 4AI. Tool `list_programs` tra bảng đó trực tiếp nên
 luôn thấy dữ liệu mới nhất; **không có gì để hub này bảo trì hay đồng bộ tay**.
 
@@ -41,9 +41,9 @@ tiếp tục — báo rõ không tìm thấy, hỏi người dùng theo `pm-scop
 
 ## Bẫy
 
-- Mã dự án thật lệch khỏi tên khách rút gọn theo cảm tính rất phổ biến: khách "Acme Two"
-  có `ma_da=ACME2` chứ không phải `MESSER`; khách "Acme Three" bản FBI thật có
-  `ma_da=ACME3_FBO` — dòng `ma_da=ACME3` là một dự án FF **cũ, khác hẳn**. Luôn tra
+- Mã dự án thật lệch khỏi tên khách rút gọn theo cảm tính rất phổ biến: mã hay có hậu tố
+  chi nhánh (`<TEN><CN>`) chứ không phải tên trần; và có khách mà mã trực giác lại trúng một
+  dự án dòng cũ **khác hẳn**, bản mới mang hậu tố sản phẩm (`<TEN>_FBO`). Luôn tra
   bằng `list_programs`, không đoán mã.
 - `query` theo tên công ty ra nhiều dòng không liên quan (nhiều sản phẩm, nhiều chi nhánh,
   dự án cũ còn treo `status='1'`) — đọc `sp`/`programPath` để chọn đúng dòng, đừng chọn

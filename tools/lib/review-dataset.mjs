@@ -318,7 +318,7 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
 }
 
 /**
- * Chạy bốn câu cố định trên QLDA · QLDA_APP.
+ * Chạy bốn câu cố định trên QLDA.
  * `deps.runSql` để test không chạm DB.
  */
 /**
@@ -411,7 +411,7 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
   }
 
   return {
-    source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA · QLDA_APP) — 4 câu SQL cố định'
+    source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA) — 4 câu SQL cố định'
       + ', kèm nhân sự từ userinfo2 (DB sys) và nội dung forum từ frpost',
     filters: {
       project: filters.project || undefined,

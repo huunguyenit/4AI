@@ -26,7 +26,7 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "25a5e1064afa3149a6cf9155ffeafb05bd58f6cba9f1ca7436a9f99f8439b4d6",
+      "sha256": "728e616c835674ca9bdff381a64d17006a1c2b11433b6a2b70d36dcd6ca4c3d8",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -50,7 +50,7 @@
     },
     {
       "path": ".agents/agents/pm-ur-analyst.md",
-      "sha256": "3abdb079f8c5ebc91a81b1569739c10c1ac74d3bbe0ad13da3f0ee5dd55f5a6c",
+      "sha256": "1ec7728400af49e1bd2e13014b02249ffabe0484b2c8ec3792a6a51e61f7cc06",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 4
     },
@@ -62,13 +62,13 @@
     },
     {
       "path": ".agents/rules/fbo-customization-scope.md",
-      "sha256": "8a39385dab1839a759ef71b42fd82b5c06685b0fa8cb5b73787381ae41e4bd74",
+      "sha256": "44bf681e1c8d504e8ec7f340c5be6b43ade7996b7371ccfd3b0508fab5a6e7c2",
       "sourceId": "fbo-customization-scope",
       "sourceVersion": 1
     },
     {
       "path": ".agents/rules/fbo-doctrine.md",
-      "sha256": "389d189ffd7da2b5373bad272e0a012920216fa19e428a68d1166dda38db57cf",
+      "sha256": "1419482928e6aa4a61ba9dac6562a8fe71e321fe5fd7a5003d44c0e33290e8d7",
       "sourceId": "fbo-doctrine",
       "sourceVersion": 1
     },
@@ -86,13 +86,13 @@
     },
     {
       "path": ".agents/rules/fbo-f-vs-xml-pairing.md",
-      "sha256": "e215325a565d456e03c5d39202b1ac23775192a4f21d88f7a82c6444971a2762",
+      "sha256": "77a75a7a0bb1ed4df71e64e85234e7341af7f87cbf0d98c4a91400a6ea8e89f3",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
     {
       "path": ".agents/rules/fbo-lookup-discipline.md",
-      "sha256": "fc06b9836868104c06c26b296c12876c85c82a63d3363f603d6aec5423f408e5",
+      "sha256": "c03c0825c2a2011a138f90d120e109bc77fa7881aee0649dd23dc49c5492cb08",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
     },
@@ -104,7 +104,7 @@
     },
     {
       "path": ".agents/rules/fbo-sql-via-mcp.md",
-      "sha256": "5cf3c5a76483f9cc9f7275c41b748f92f535af0872dcb13bbab1485558c7881f",
+      "sha256": "943b1f3fa862d17ce2c854772a0132ac59fb9fb4276dfdc76bc90f924f9cdec4",
       "sourceId": "fbo-sql-via-mcp",
       "sourceVersion": 1
     },
@@ -116,31 +116,31 @@
     },
     {
       "path": ".agents/rules/pm-ledger-discipline.md",
-      "sha256": "7fd92cedd4c37bea32aa662bddda85d0d9c19f59bc714010ff0932f278609a32",
+      "sha256": "605ca4ca5b9c789c3afacf0a9c7139936a22ca14386ec871042c0aad016d1d31",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".agents/rules/pm-no-secrets-in-notes.md",
-      "sha256": "64e6def83ae588187d723e01f1689b57ea10c08e913bba78a3895ce9d0ccea13",
+      "sha256": "d7221f81baad5f39f3bfa89209ebb9dce3e64103c28aa5c77807dac40e58ffe6",
       "sourceId": "pm-no-secrets-in-notes",
       "sourceVersion": 1
     },
     {
       "path": ".agents/rules/pm-program-from-workspace.md",
-      "sha256": "6c3077a57ddb8bcd81717fa376478f59f56c313315a8ef3e80d9d9edd847357d",
+      "sha256": "0a9c706f5c58c89257cc0641f46cff384de858fac2ff2ee9365e200d01bb3319",
       "sourceId": "pm-program-from-workspace",
       "sourceVersion": 2
     },
     {
       "path": ".agents/rules/pm-scope-question-first.md",
-      "sha256": "a5583a63aabde525edd5ffea18a0f74cf61e9aa7c44adce33e53b2e6a27bd45f",
+      "sha256": "1bb984fc8f590a7ea8d2bcf9910c984c412c126b9f2f14317abf8a0f09b682f7",
       "sourceId": "pm-scope-question-first",
       "sourceVersion": 1
     },
     {
       "path": ".agents/rules/pm-ur-routing.md",
-      "sha256": "40d62a9812b0a68134b75f32acc046d85576f4dbfdbd5a8ccc20cb9c691b3267",
+      "sha256": "4490641feb5abbaf2a424194700acdf75da8ee049bac683a0a8143fabd24eca3",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 2
     },
@@ -164,7 +164,7 @@
     },
     {
       "path": ".agents/skills/fbo-navigation-recipes/SKILL.md",
-      "sha256": "f29ad9ca25f0a6fdbd43ffce2e7c6d65dee4011127dc364773ebc5bf8f06d1a7",
+      "sha256": "ddef6ef24f30805f20ac68cc79f8eea479f79aaf9e63288d3ae262b178aa3f87",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
@@ -176,7 +176,7 @@
     },
     {
       "path": ".agents/skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "8830a0af81caa91073ae3fb5cd42724940fbb4f4559e9a414719e01e40b5cbf0",
+      "sha256": "b80da9c41065b972c8b9b666141f9c332f22936c4c36f6be2ffa8910d4a58c6e",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
@@ -188,25 +188,25 @@
     },
     {
       "path": ".agents/skills/pm-adr/SKILL.md",
-      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
+      "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".agents/skills/pm-capability-graph/SKILL.md",
-      "sha256": "3608c27a80baaecd1dff361205f223b882e9747cfa36d6b0585233b4c8fe1291",
+      "sha256": "6abac3f28e23b1df2e347dfbc5cee5ef3c138673ef9706a9dedb8a20765c42f1",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".agents/skills/pm-customer-program-registry/SKILL.md",
-      "sha256": "ccd238eac83da3c9e579b74d073b5a9d4a49a5c5617fa1bf68f27261d72bce21",
+      "sha256": "1d81a6197783764eebcd4877999e11a3947dd8ada15de5921d63f02aeaeb786f",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
     {
       "path": ".agents/skills/pm-task-ledger/SKILL.md",
-      "sha256": "ab476a9efecb12ae77336ae6baaac140b9de52056e133bb68735c9a22e43c63d",
+      "sha256": "1299379422630aefe068c7d18bcc900f9037aa8349ce98535b85af5b0828a14e",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -254,7 +254,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "7ddfffcb5f707b0fe488dea85b2a6995769a0c10164c887af1b6beeda182a038"
+      "sha256": "eef938f69e6847c8d65c26524ec1f4f79888112289e1a205c48ef947354e3649"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -282,7 +282,7 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "a31989ba18b2b41e84d74320c39adb185d94461b226dfd12d3f95c37c30ddace",
+      "sha256": "fbeb1c50f9bcab9b098b6959bd779c73453d5e413ac4244ab68f5d166997ced5",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -306,7 +306,7 @@
     },
     {
       "path": ".claude/agents/pm-ur-analyst.md",
-      "sha256": "d3919a498d8a1722d3af28b0c10b488ac64a0e355c927d18cdd8050c33901678",
+      "sha256": "9d5109ed2d0a538f684fa68b59bb429dc0d62a8110d30d9f2dd22bbf4fa86132",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 4
     },
@@ -414,7 +414,7 @@
     },
     {
       "path": ".claude/skills/fbo-f-vs-xml-pairing/SKILL.md",
-      "sha256": "c5783b149499c9d5db25fb1f50f49130357ed8590ee8d033e23b2b5fa68af7fc",
+      "sha256": "3c50c274423892332a3401b6362a439a4028e17f74474f01ab0eb11ba4e3cfeb",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
@@ -426,13 +426,13 @@
     },
     {
       "path": ".claude/skills/fbo-lookup-discipline/SKILL.md",
-      "sha256": "9f12f1771890e9e702ad438708574405322ef0c1112d9c5dce9c69702baa504d",
+      "sha256": "0bc9ffd0165684817363ac21b61f8368f79a55cf3373002774b004fb30e299b6",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
     },
     {
       "path": ".claude/skills/fbo-navigation-recipes/SKILL.md",
-      "sha256": "f29ad9ca25f0a6fdbd43ffce2e7c6d65dee4011127dc364773ebc5bf8f06d1a7",
+      "sha256": "ddef6ef24f30805f20ac68cc79f8eea479f79aaf9e63288d3ae262b178aa3f87",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
@@ -444,7 +444,7 @@
     },
     {
       "path": ".claude/skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "8830a0af81caa91073ae3fb5cd42724940fbb4f4559e9a414719e01e40b5cbf0",
+      "sha256": "b80da9c41065b972c8b9b666141f9c332f22936c4c36f6be2ffa8910d4a58c6e",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
@@ -456,25 +456,25 @@
     },
     {
       "path": ".claude/skills/pm-adr/SKILL.md",
-      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
+      "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".claude/skills/pm-capability-graph/SKILL.md",
-      "sha256": "3608c27a80baaecd1dff361205f223b882e9747cfa36d6b0585233b4c8fe1291",
+      "sha256": "6abac3f28e23b1df2e347dfbc5cee5ef3c138673ef9706a9dedb8a20765c42f1",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".claude/skills/pm-customer-program-registry/SKILL.md",
-      "sha256": "ccd238eac83da3c9e579b74d073b5a9d4a49a5c5617fa1bf68f27261d72bce21",
+      "sha256": "1d81a6197783764eebcd4877999e11a3947dd8ada15de5921d63f02aeaeb786f",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
     {
       "path": ".claude/skills/pm-task-ledger/SKILL.md",
-      "sha256": "ab476a9efecb12ae77336ae6baaac140b9de52056e133bb68735c9a22e43c63d",
+      "sha256": "1299379422630aefe068c7d18bcc900f9037aa8349ce98535b85af5b0828a14e",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -504,7 +504,7 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "2153cb6322b811ac742934ea6a95f7ab17d5ed8e8ca87127d30b512e5dd2654f",
+      "sha256": "52d28c51334df5475526c7cc83392766431c3e1df54efb4d87ba1bf14030527b",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -528,7 +528,7 @@
     },
     {
       "path": ".cursor/agents/pm-ur-analyst.md",
-      "sha256": "2ae4e5439c54757b0068def928bdadfdfbcf78496f5dd1c3b8764e79fadc2ec5",
+      "sha256": "65ed2b74e01b12ce5c92a6027b418eb791db7cfa482decaf2db6a038f948ee22",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 4
     },
@@ -612,7 +612,7 @@
     },
     {
       "path": ".cursor/rules/00-fbo-doctrine.mdc",
-      "sha256": "f436ae15da0d43f3ef230f32182e0f179ab1b9fc5d89154b2c30a468a18a21f4",
+      "sha256": "960d43bb26f6af6f0d8bd0b857b400b70ba7a60ff12a27f645916d92c3863038",
       "sourceId": "fbo-doctrine",
       "sourceVersion": 1
     },
@@ -636,7 +636,7 @@
     },
     {
       "path": ".cursor/rules/fbo-customization-scope.mdc",
-      "sha256": "00018e676f148fb33aa92d4edc62070c64a68a86c3f18739a571fd08ab46b014",
+      "sha256": "52bd4e242a84a3218a9fecccbf3ac381d0598102a93be98123c096bbdd196de6",
       "sourceId": "fbo-customization-scope",
       "sourceVersion": 1
     },
@@ -660,7 +660,7 @@
     },
     {
       "path": ".cursor/rules/fbo-f-vs-xml-pairing.mdc",
-      "sha256": "d2dfa250fb58792473aa5dd4621174367b30b1a1428cac4b48b241d2707c7501",
+      "sha256": "68a4e5a1a1427e9d23d5ade7cb9f2e39f5c2dc90af030b4d422ea30f908910fc",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
@@ -672,13 +672,13 @@
     },
     {
       "path": ".cursor/rules/fbo-lookup-discipline.mdc",
-      "sha256": "a6939d15f9a790ea7158c52d12c25d1784e605cc60049fc8340f1c919eaa8ee0",
+      "sha256": "94c8f273ed641c217792c26cc49ff8de9b78346780ddf911378b80af803afb7f",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/rules/fbo-navigation-recipes.mdc",
-      "sha256": "619016053a4a9680bd9424f7701d5f86ac10a0bba7b4de2e4fc6fc1f7c84c114",
+      "sha256": "c1ded15c26b800b139b63ab04ff5c4991e78baee082114fe7c80d92e887d3fdc",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
@@ -696,7 +696,7 @@
     },
     {
       "path": ".cursor/rules/fbo-new-table-proposal.mdc",
-      "sha256": "dceef0fd08faad0914ee9f65fb3177e2ad07d67904203dc9b9adb53de913a645",
+      "sha256": "18b3c5485f8c8c6050435cdd9356a2498f528444c27c38aff02dca6492ece0d4",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
@@ -708,61 +708,61 @@
     },
     {
       "path": ".cursor/rules/fbo-sql-via-mcp.mdc",
-      "sha256": "4a2c71923fa8af7af96225f6b9f1084b4d8d5a83f4e72f5f46861642eaaa3a51",
+      "sha256": "a6d6a83f3edfdfb05e948d1ec950179c559e6487f48424104fdc0f72296b6028",
       "sourceId": "fbo-sql-via-mcp",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-adr.mdc",
-      "sha256": "82af65322c35ba0c24843a4029e4356b2ed5e870406c0a8e830206c910f950ea",
+      "sha256": "e697a2f25f83fb46f83a59771d8056e0134955726f5d48b91e92df61cc230926",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-capability-graph.mdc",
-      "sha256": "14e3cdcb5d7b93bd0bda04ffbf16ec119d6cd6e87f280549ce92bdf91a4551f3",
+      "sha256": "d6783a4df8b7c2ed5d5a2391398c8086cb0823f165c11126c42caf2bc3a635ac",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/rules/pm-customer-program-registry.mdc",
-      "sha256": "e78ee1fb82e79abcc9f886e4d3f577d5ba5a3c35cb4ecde16b7485e1f5372b3d",
+      "sha256": "471404c78feb2fdb010edf2656e2e533356c19cbd865944873afe3d0dbb9497c",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/rules/pm-ledger-discipline.mdc",
-      "sha256": "ca467082faac1dcc089f18c5e409f929defd9c66a858d38efd150ec2e5706fae",
+      "sha256": "35e06a27f0f931e64f868d830257d705e55d583a0dc6b3274019551b92c372f1",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-no-secrets-in-notes.mdc",
-      "sha256": "a9b97c4e7c88cb4c88254ad559d843442e5f1728a32b77ccaf69cba95da04381",
+      "sha256": "cb55911b3faa6c5e1b7742bda34b61a652c6e80afcab8cf86d95f16b14b5f405",
       "sourceId": "pm-no-secrets-in-notes",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-program-from-workspace.mdc",
-      "sha256": "519d75f1c5a37a8a45734c684b4c5d435155f61972f4fe9a562899111db4c845",
+      "sha256": "23429286d4a98dd80b845bd3908a7f8a09bf5fb920b1bbf6e36e32beac044e0f",
       "sourceId": "pm-program-from-workspace",
       "sourceVersion": 2
     },
     {
       "path": ".cursor/rules/pm-scope-question-first.mdc",
-      "sha256": "224ec2f61ee54851e8f8ef8f7c499b576623ec31891b44465eaba472bcae9532",
+      "sha256": "332eb8b5531ccfff0a820f211fd3b800db8c3cd07757263c2c9b043c2d32bc03",
       "sourceId": "pm-scope-question-first",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-task-ledger.mdc",
-      "sha256": "212d7f892f774cf74b70f4283be1c3846e4d4b2cf6def782658570347814b4d1",
+      "sha256": "731545b1bab83b8ca57848a024a51671f1b989c7afe6bfc122cd0ce19b0a1e73",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/pm-ur-routing.mdc",
-      "sha256": "cd62efdd706d07a331529c71537ae702df7f04a2dfdc30d69a95010325e4bda7",
+      "sha256": "18950bfbcad7b34916fe7cb04c69ca2295d5b6b93d91ff6a5f35575e007cfeb9",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 2
     },
@@ -792,7 +792,7 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "7990e498baac5a429e6fbf2c43b7cdfa9bd209b699ac0e9232a0e71e644b9bb4",
+      "sha256": "e72626f0131732db566893f0fc29f44d6bdd67ad1cbb07830f28af8cd0ddc906",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -816,13 +816,13 @@
     },
     {
       "path": ".github/chatmodes/pm-ur-analyst.chatmode.md",
-      "sha256": "1c38be0a5426625bd9c07a95c203498deb17fd7174b1b7aae7518069007d1d99",
+      "sha256": "bbc8db318759e6c5db61b0b1ce382a737584169ba4aee4821a725d04babc8cdb",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 4
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "67c511157e3a2f96b59db6dbeabd74d8d7448843a8944831d7643d4b99b52f36"
+      "sha256": "3adc232f67812ac111e692e3f2b543fd7e21691da1a63305fcabd439eecc2dec"
     },
     {
       "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
@@ -850,7 +850,7 @@
     },
     {
       "path": ".github/instructions/fbo-f-vs-xml-pairing.instructions.md",
-      "sha256": "645ad92f663f373a2cda54d41256237a075b3fdf4f2ff34fd2b030893d6fd58e",
+      "sha256": "8dacac45558f0ca643f564ee4f4a064ab904246e9c1cb874bd7b26280ad863b5",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
@@ -862,13 +862,13 @@
     },
     {
       "path": ".github/instructions/fbo-lookup-discipline.instructions.md",
-      "sha256": "551ea23dac5d0c008daccd29a7b9ebe5e7cb72c44906b6e82c98861a610990ba",
+      "sha256": "a434e6f193ac19052d10206268352231cfa759e3e08a9564e78352204b0af587",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
     },
     {
       "path": ".github/instructions/fbo-navigation-recipes.instructions.md",
-      "sha256": "f4d0cb3f059e2e6247458112ee56f38bf2cf582464496bffc0fafee604b5860e",
+      "sha256": "98031663f82342b920ed7ec0f9646002eceb632d0da6469bb096b02fcd26d2ea",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
@@ -880,7 +880,7 @@
     },
     {
       "path": ".github/instructions/fbo-new-table-proposal.instructions.md",
-      "sha256": "75380222d166586233fa73acd9eb03932d07303e944e0f905b2d75b7cd299ce8",
+      "sha256": "1f2b5f23b98846a4e94693f665467ba54d8f90419670b73a4797502f2ff14970",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
@@ -892,25 +892,25 @@
     },
     {
       "path": ".github/instructions/pm-adr.instructions.md",
-      "sha256": "e3a4a683196c3461567b19c744163ebf0f279674f8b7aede0f656d6a273dfb33",
+      "sha256": "f555f8dbc87e4dd42f9e2acad3b27695ea6a4de8a73d62099e62fb4efbeb2bf7",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": ".github/instructions/pm-capability-graph.instructions.md",
-      "sha256": "019ef5b4da38ff3d69843fa8ea53aed15277bfa9413fa38b4f365c6f54dc6b67",
+      "sha256": "91d851cb03667bb9f256896d245ae1d30741efa1813333ddc153c584d2dca742",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": ".github/instructions/pm-customer-program-registry.instructions.md",
-      "sha256": "810adea9f03ef59ffb5e09b10ef3975bbff94fdb593907ca0c4b4df4467db465",
+      "sha256": "bb97589e3e9c7733a6bd56d2ad6034c353e56cddc299fc797d23af9f51b0981d",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
     {
       "path": ".github/instructions/pm-task-ledger.instructions.md",
-      "sha256": "f442679a199d222227bb53aff81d611216226edc8822bb510b8403faa15cb8e6",
+      "sha256": "04fa805b70b8fa829465c307923661a26b0df75f712136509788342678d43a45",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T01:57:28.079Z",
+  "syncedAt": "2026-08-14T03:03:47.455Z",
   "target": "4ai"
 }

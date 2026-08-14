@@ -34,7 +34,7 @@
     },
     {
       "path": "agents/pm-deadline-review.md",
-      "sha256": "b10eed5dbb9972f9e8eca509916f33acfcc318b5dadffcb95e95ba3d7f575457",
+      "sha256": "f15bb73f54f8ec9e8dc48ea67c1236e99dc25e21a323e09706b194091ec9ffd1",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -58,7 +58,7 @@
     },
     {
       "path": "agents/pm-ur-analyst.md",
-      "sha256": "d3919a498d8a1722d3af28b0c10b488ac64a0e355c927d18cdd8050c33901678",
+      "sha256": "9d5109ed2d0a538f684fa68b59bb429dc0d62a8110d30d9f2dd22bbf4fa86132",
       "sourceId": "pm-ur-analyst",
       "sourceVersion": 4
     },
@@ -110,11 +110,11 @@
     },
     {
       "path": "data/fbo-database.json",
-      "sha256": "b4aefc695cbab14ced0206f9aa61c06ae32d73efe4d393233d7e81c645bdcd5a"
+      "sha256": "c4c3da27bfe533f108abc2cb27f29f2834d416b4cceb26a018182f31d968a9bf"
     },
     {
       "path": "data/fbo-ddl.json",
-      "sha256": "55b821a749e4f9e41b40b25149fc0ab62439bc020e9a74b154989c533726684c"
+      "sha256": "8ae8d553b03484b7555581b31068af6cf5fdfbd57bc67bdf5b4b8d6b07e53ff3"
     },
     {
       "path": "data/fbo-folders.json",
@@ -122,11 +122,11 @@
     },
     {
       "path": "data/graph-schema.json",
-      "sha256": "2d975cd3c17c63579e233ed183b01ddbb11587c41faf0c1d6a892809ed04cd6c"
+      "sha256": "59081a603b69a2386ac298a65d650a945b5ee5e2b37728074b16720f4db5c5a6"
     },
     {
       "path": "data/graph/capability.jsonl",
-      "sha256": "86fad3e8b79f85cb6a9a1f4fccaf46db5f2b04a1c2abd589af2865e848f1b193"
+      "sha256": "8e5b225934bd17b083c8a7e4fda5e0da40dc65d00963bcdebde50cf23904d5a1"
     },
     {
       "path": "data/graph/edges.jsonl",
@@ -134,11 +134,11 @@
     },
     {
       "path": "data/graph/effort-samples.jsonl",
-      "sha256": "fab0d36f083d6d5a6be6cc76a62409016b4d1b50768129e4adc8a234606754ad"
+      "sha256": "5076a0dcd6663f0a15c28f19355c706769d9a45876dc28f6e12b62d7f6b312de"
     },
     {
       "path": "data/graph/reference.jsonl",
-      "sha256": "4c3bf8498511b82ce79c54eab8a5b2e6338812160ffa4d431d7bd2cdb50913ad"
+      "sha256": "ea54d09872a32da486b610a0bbdc174b1bb9dec19da4db001be67125de64420c"
     },
     {
       "path": "data/holidays-vn.json",
@@ -150,7 +150,7 @@
     },
     {
       "path": "data/qlda.json",
-      "sha256": "739b746e2b03970959f488c3dc57f72b98969c3f3cd0a6f9ba19e3f8b2be79be"
+      "sha256": "76c1c2fd05d8532826638f3bebd4272892f4a6ca8410c031a994701d98d1f571"
     },
     {
       "path": "mcp/fbo/lib/encoding.mjs",
@@ -170,11 +170,11 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "651f1f3214e19b76f379185823d849545e4cca49926144cd3bf824b217c98ad1"
+      "sha256": "75b35713c71cd9d92899228aec40d2733009b8ff244a7a3cc41fa5e6fc4a26ef"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "5d6450c8c7c93a1ab130829a8e81f54ec94938014ae717ff0c0c2324c1567d65"
+      "sha256": "52f7c98b617ffbeae363b29e0352f79003db31334978e09c5dd0c9a87327330d"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -202,7 +202,7 @@
     },
     {
       "path": "skills/fbo-customization-scope/SKILL.md",
-      "sha256": "71c2cba00c83a81bc924158e3778ccc6ddc626101ba581a6b748c937ac2ee89d",
+      "sha256": "2844211f052cd29e695c6b8dbcc42d96fb4edd60515e270f967483f1d3e30f5d",
       "sourceId": "fbo-customization-scope",
       "sourceVersion": 1
     },
@@ -214,7 +214,7 @@
     },
     {
       "path": "skills/fbo-doctrine/SKILL.md",
-      "sha256": "90086d204b714a904d4fed5759a93f4e7285792b4b042603f7b518b496aaf3b6",
+      "sha256": "89189995257f86608a97e7e29e7fc8c9ef1623bf19c288627e6e7b680a0e7163",
       "sourceId": "fbo-doctrine",
       "sourceVersion": 1
     },
@@ -232,7 +232,7 @@
     },
     {
       "path": "skills/fbo-f-vs-xml-pairing/SKILL.md",
-      "sha256": "c5783b149499c9d5db25fb1f50f49130357ed8590ee8d033e23b2b5fa68af7fc",
+      "sha256": "3c50c274423892332a3401b6362a439a4028e17f74474f01ab0eb11ba4e3cfeb",
       "sourceId": "fbo-f-vs-xml-pairing",
       "sourceVersion": 1
     },
@@ -244,13 +244,13 @@
     },
     {
       "path": "skills/fbo-lookup-discipline/SKILL.md",
-      "sha256": "9f12f1771890e9e702ad438708574405322ef0c1112d9c5dce9c69702baa504d",
+      "sha256": "0bc9ffd0165684817363ac21b61f8368f79a55cf3373002774b004fb30e299b6",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
     },
     {
       "path": "skills/fbo-navigation-recipes/SKILL.md",
-      "sha256": "f29ad9ca25f0a6fdbd43ffce2e7c6d65dee4011127dc364773ebc5bf8f06d1a7",
+      "sha256": "ddef6ef24f30805f20ac68cc79f8eea479f79aaf9e63288d3ae262b178aa3f87",
       "sourceId": "fbo-navigation-recipes",
       "sourceVersion": 1
     },
@@ -268,7 +268,7 @@
     },
     {
       "path": "skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "8830a0af81caa91073ae3fb5cd42724940fbb4f4559e9a414719e01e40b5cbf0",
+      "sha256": "b80da9c41065b972c8b9b666141f9c332f22936c4c36f6be2ffa8910d4a58c6e",
       "sourceId": "fbo-new-table-proposal",
       "sourceVersion": 4
     },
@@ -280,25 +280,25 @@
     },
     {
       "path": "skills/fbo-sql-via-mcp/SKILL.md",
-      "sha256": "aaf782d12347565bbe2b46895c9bc8bc5d97a3627a954a3c9c265f060499bdfa",
+      "sha256": "adaf5aa0d736576672eab59e8cc05974e75e291cc7449b1b802eec9b3f3f38af",
       "sourceId": "fbo-sql-via-mcp",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-adr/SKILL.md",
-      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
+      "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-capability-graph/SKILL.md",
-      "sha256": "686d80081e4e4afd3273a44a890a974930c673e7f83dd7379bca73f2687c4581",
+      "sha256": "6abac3f28e23b1df2e347dfbc5cee5ef3c138673ef9706a9dedb8a20765c42f1",
       "sourceId": "pm-capability-graph",
       "sourceVersion": 2
     },
     {
       "path": "skills/pm-customer-program-registry/SKILL.md",
-      "sha256": "ccd238eac83da3c9e579b74d073b5a9d4a49a5c5617fa1bf68f27261d72bce21",
+      "sha256": "1d81a6197783764eebcd4877999e11a3947dd8ada15de5921d63f02aeaeb786f",
       "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
@@ -310,51 +310,51 @@
     },
     {
       "path": "skills/pm-ledger-discipline/SKILL.md",
-      "sha256": "831d609514cb4ddacc39413cdbbc315fd1726167b01a35c652ad64ff3291d671",
+      "sha256": "b2971d35cb7434403bb6478e327418510d85bcfe5bc4063019ec83b9b8c20f72",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-no-secrets-in-notes/SKILL.md",
-      "sha256": "41e0f1455a8e15211540dfbb84f4ca72b9524a218b6f3e9a4380824d42d34c5b",
+      "sha256": "d134d722e87214a5d4b1b08a2d8f98a90c959c1e88a37ef8a4eee47db81b56e0",
       "sourceId": "pm-no-secrets-in-notes",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-program-from-workspace/SKILL.md",
-      "sha256": "8889ddc175d26fae21cb2816c3f63754635859d8e13f4b28c72082e63f04d713",
+      "sha256": "01559796437ebe96f7b2abe48457cfcf3998a284f8c1cafcc244ef43dbeb6d04",
       "sourceId": "pm-program-from-workspace",
       "sourceVersion": 2
     },
     {
       "path": "skills/pm-scope-question-first/SKILL.md",
-      "sha256": "1d335c6d0a2eba4a20f16a1daf7d0ff8d63b092b0855b1e28a910ff0dcced93b",
+      "sha256": "6da87f5b21508ce42503ca7ba965c14a4ebc5e98b32b7660573f25040e8bb11c",
       "sourceId": "pm-scope-question-first",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-task-ledger/SKILL.md",
-      "sha256": "ab476a9efecb12ae77336ae6baaac140b9de52056e133bb68735c9a22e43c63d",
+      "sha256": "1299379422630aefe068c7d18bcc900f9037aa8349ce98535b85af5b0828a14e",
       "sourceId": "pm-task-ledger",
       "sourceVersion": 1
     },
     {
       "path": "skills/pm-ur-routing/SKILL.md",
-      "sha256": "728f240f280b95f6e1d3fe3f38226f28371ba48525b27ba7e361d5e4a17deca9",
+      "sha256": "6d2423ee3a3a9241cce91254664ddf2a86a9328fbfeebd7363969872623581b8",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 2
     },
     {
       "path": "src/database/metadata-resolver.mjs",
-      "sha256": "79739514e92a05a2736a6a932c1f4754f2c7cff5336a295e55ee03d4fc9398ba"
+      "sha256": "4809ddd4016edc514b807ad378e71b7e6f5f9586075f27204a2e9804a6c25edb"
     },
     {
       "path": "src/database/qlda-metadata.mjs",
-      "sha256": "d0a8d862f69fbef43c3eed7ab215124be81f6efc85da1fddab5ceb6fd32dafda"
+      "sha256": "58bad3827b462e30097ea45ae10cce40f1bf6912883a35b6aa2d5bcc6616b5de"
     },
     {
       "path": "src/database/query-executor.mjs",
-      "sha256": "849beb3a758889bfa84edf2f60696acc8ad463436aa2fed51de70df3d57f1526"
+      "sha256": "63037b1742e6e51a2b7ad6300671fa5b0b993895970eb8d9b15f5477d832d7e9"
     },
     {
       "path": "src/database/query-plan.mjs",
@@ -378,11 +378,11 @@
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "71de2d26dabd9355250571caf9025c00c5862295906a21eb1b707f0497e251c8"
+      "sha256": "385d22140dfb5d74a2da1df8b697c265e38cd5a6d157beeb3244eaadb07290c3"
     },
     {
       "path": "tools/lib/assignee.mjs",
-      "sha256": "d1b51059d8026d3e672af837fbe94325c0907e4511948a2cee3b5242c12fa369"
+      "sha256": "6a354f0dca62c09806345acbcfeb344e77f9e42931c08dfc410626df5d812423"
     },
     {
       "path": "tools/lib/ddl.mjs",
@@ -438,7 +438,7 @@
     },
     {
       "path": "tools/lib/graph.mjs",
-      "sha256": "2f89f1549ce237eccf3dcb92599cfb82cd79e958249b6c170f4bd73862de8479"
+      "sha256": "07324bb2075eeaad3a001798bc533f2bc66b3aaa9b9eab4f255f6fe3945b39e0"
     },
     {
       "path": "tools/lib/json.mjs",
@@ -462,23 +462,23 @@
     },
     {
       "path": "tools/lib/recommendation-log.mjs",
-      "sha256": "484704d56b94df9a3f67d5313bc506f88633000e73922052c19256446ac00e04"
+      "sha256": "62f2c1f6e7788b7c8bf786defcbf6f8bff98cb450ab7e55c28bc3a1b06a0fbb3"
     },
     {
       "path": "tools/lib/report-kpi.mjs",
-      "sha256": "6c81840400ff4262cc064b0405cc53a84b2847e321cd4bd30e8d4a4262e3187a"
+      "sha256": "fe3afe01db8aac947a08700dc904fc00f916021158e8b43e209cfaa9ef229443"
     },
     {
       "path": "tools/lib/report-performance.mjs",
-      "sha256": "3d98472a427b29941b1de44ac7fb052e231cc279c1e131a3cfdc87eca4fe9538"
+      "sha256": "567bf5ca39246c7f5dbc0bd99a451dd921b16ce166ecd03acbce0c7da8848883"
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "fd3335648b0e85ad1b9b96804fc96f68b70e24e418d03779f03f6907cb420e52"
+      "sha256": "ea853ac2602192f23b32163256c295a8e8f62172afefbc2b33eb8744fc68d18a"
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "1668fb08bdea2b962da5f55675b2352d9c17fa5e00e4674ea08f4074dc22c345"
+      "sha256": "bd6f13536a68e96af22113f6d6dd94ad2f9bc2332b375057efe69a392acb04c6"
     },
     {
       "path": "tools/lib/review-report.mjs",
@@ -494,11 +494,11 @@
     },
     {
       "path": "tools/lib/setup.mjs",
-      "sha256": "d7dc7a8f54192f9b60521c2f54208d13590279c402adae5d280c33a562eb498a"
+      "sha256": "1038ea4d4881e898bb7b0cdc00ef93ba808bdbb1adcea222ed55e3af709ef49e"
     },
     {
       "path": "tools/lib/staffing.mjs",
-      "sha256": "fe196138d2b46f53794bf93a7e5b10a536fa582893dacc0de2e69384b6123ab9"
+      "sha256": "35f8e021c68440dcb95c6cd08706b11922bdd0c4f9f1db5be106580fd44f01ae"
     },
     {
       "path": "tools/lib/sync.mjs",
@@ -532,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T01:57:28.166Z",
+  "syncedAt": "2026-08-14T03:03:47.519Z",
   "target": "plugin"
 }

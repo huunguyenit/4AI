@@ -7,6 +7,27 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ### Bảo mật
 
+- **Dọn định danh hạ tầng nội bộ khỏi repo — chuẩn bị publish Cursor Marketplace công khai.**
+  Cursor yêu cầu plugin **open source** và review thủ công cả repo, nên mọi thứ trong này là
+  nội dung công khai.
+  - **Tên database và đường dẫn share thành TOKEN.** `data/qlda.json` và `data/graph-schema.json`
+    giờ giữ `{QldaDatabaseName}`, `{QldaSysDatabaseName}`, `{QldaProgramPath}`,
+    `{Graph4aiDatabaseName}`, `{AttachmentsFileStoreRoot}`; giá trị thật do TỪNG MÁY khai vào
+    `data/qlda.local.json` (đã gitignore) qua `4ai setup` — cùng cơ chế overlay mà `{PMName}`/
+    `{PMDept}` vốn dùng, thêm ở `qlda-metadata.mjs`.
+  - **Bỏ fallback tên DB ghi cứng trong `sql.mjs`.** Chưa khai thì **báo lỗi có chỉ dẫn**, không
+    âm thầm nối vào một tên đoán được — sai DB mà vẫn chạy là kiểu hỏng khó dò nhất. `laQldaProgram()`
+    cũng không so đường dẫn khi token chưa gán: khớp nhầm là chạy SQL của khách trên DB nội bộ.
+  - **Tên khách, mã nhân viên, IP share nội bộ** trong asset/test/docs/comment đổi sang ví dụ
+    trung tính (`ACME`, `DEMO1`, `PM01`/`NV01`, `10.0.0.1`). Ví dụ minh hoạ lấy từ khách thật —
+    không phải hư cấu như vẻ ngoài.
+  - **`ledger/` bị gỡ khỏi git tracking** — 14 file báo cáo rà soát của khách thật (tên khách,
+    nội dung UR, mã nhân viên) vẫn bị track dù `.gitignore` đã có dòng `ledger/`: gitignore
+    không có tác dụng với file ĐÃ track. Cùng lớp lỗi với `.4ai/scratch/` bên dưới.
+  - **`.4ai/graph/{PMDept}_4AI.sql` → `.4ai/graph/graph-4ai.sql`** — tên file script sinh ra
+    không còn suy từ mã bộ phận (chính đường này làm tên DB thật rò vào bản build `.claude/`,
+    `.cursor/`, `.github/`, `.agents/`).
+
 - **Gỡ `.4ai/scratch/` khỏi git tracking — thư mục này chứa dữ liệu khách THẬT** (tên khách,
   mã nhân viên, nội dung UR chi tiết) từ một lần chạy `render_review_report`/
   `get_review_dataset` bị `git add` nhầm ở commit `a713fdd`. Repo `huunguyenit/4AI` public
@@ -98,7 +119,7 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
   rà soát — thứ báo cáo VỐN ĐÃ đọc từ QLDA — thành node Project/Phase/Request và cạnh
   BELONGS_TO/IN_PHASE/HAS_STATUS, `scope` = mã dự án. Không tốn thêm truy vấn nào. Nhờ vậy
   user A chạy N1-N3, user B chạy N4-N6, quản lý C mở N1-N6 là **đọc ngay** phần A và B đã
-  tổng kết. Đã chạy thật: push DEMO1 (6 Request) rồi push TFR — DEMO1 còn nguyên, hai scope cùng
+  tổng kết. Đã chạy thật: push một dự án (6 Request) rồi push dự án thứ hai — dự án đầu còn nguyên, hai scope cùng
   tồn tại.
   - Phân tầng theo GIÁ: tầng rẻ (Project/Phase/Request/trạng thái) đẩy lại mỗi lần chạy; tầng
     đắt (phân giải menu→controller→table, `ExperienceFact`) KHÔNG làm ở đây — chạy riêng và

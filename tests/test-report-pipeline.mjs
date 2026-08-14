@@ -1,9 +1,30 @@
 #!/usr/bin/env node
 // test-report-pipeline.mjs — Test suite cho luồng báo cáo: phân giải domain → prompt → validate → chạy.
+//
+// `data/qlda.json` chỉ giữ TOKEN `{QldaDatabaseName}`/`{QldaProgramPath}` — gói phân phối
+// công khai không mang tên hạ tầng nội bộ. Test dựng một data root TẠM với qlda.local.json
+// giả để vừa có giá trị cụ thể mà khẳng định, vừa kiểm luôn cơ chế overlay token→giá trị.
 
-import { validateSql } from '../src/database/query-validator.mjs';
-import { resolveDomain, resolveMetadata } from '../src/database/metadata-resolver.mjs';
-import { planReport, executeReport } from '../src/workflows/report-workflow.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-report-pipeline-'));
+process.env.FBO_DATA_ROOT = tmp;
+const DB_APP = 'TEST_APP';
+const PROGRAM_QLDA = String.raw`\\test-share\FastPro$\QLDA\Src-Onl`;
+/** Program của một khách bất kỳ — KHÁC PROGRAM_QLDA, để kiểm nhánh "không phải QLDA". */
+const PROGRAM_KHACH = String.raw`\\test-share\CustomerPro\FBI\DEMO\FBISP2422`;
+fs.mkdirSync(path.join(tmp, 'data'), { recursive: true });
+fs.writeFileSync(path.join(tmp, 'data', 'qlda.local.json'), JSON.stringify({
+  qldaProgramPath: PROGRAM_QLDA,
+  qldaDatabaseName: DB_APP,
+  qldaSysDatabaseName: 'TEST_SYS',
+}), 'utf8');
+
+const { validateSql } = await import('../src/database/query-validator.mjs');
+const { resolveDomain, resolveMetadata } = await import('../src/database/metadata-resolver.mjs');
+const { planReport, executeReport } = await import('../src/workflows/report-workflow.mjs');
 
 let failures = 0;
 
@@ -16,7 +37,7 @@ const FSD_REQUEST = 'Báo cáo các số lượng yêu cầu đã hoàn thành t
 
 async function runTests() {
   process.stdout.write('=== 1. PHÂN GIẢI DOMAIN (QLDA vs FBO) ===\n');
-  // Câu hỏi về yêu cầu/UR thuộc DB nội bộ QLDA_APP, KHÔNG thuộc chương trình khách nào.
+  // Câu hỏi về yêu cầu/UR thuộc DB nội bộ QLDA, KHÔNG thuộc chương trình khách nào.
   const fsdDomain = resolveDomain({}, { userRequest: FSD_REQUEST });
   ok('Yêu cầu phòng FSD -> domain qlda', fsdDomain.name === 'qlda', fsdDomain.reason);
 
@@ -27,7 +48,7 @@ async function runTests() {
   // Lỗi gốc: truyền program của khách nhưng hỏi chuyện QLDA thì vẫn phải ra QLDA.
   const mismatched = resolveDomain({}, {
     userRequest: FSD_REQUEST,
-    programPath: '\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422',
+    programPath: PROGRAM_KHACH,
   });
   ok('Truyền nhầm program khách -> vẫn ra domain qlda', mismatched.name === 'qlda', mismatched.reason);
 
@@ -54,7 +75,7 @@ async function runTests() {
     fsdMeta.fields.some(f => f.table === 'nbphyc' && f.name === 'ngay_ht'));
   ok('Có enum trạng thái để khỏi đoán nghĩa mã HT',
     fsdMeta.enums?.trangThaiYeuCau?.values?.some(v => v.ma === 'HT'));
-  ok('Chỉ đúng DB nội bộ QLDA_APP', fsdMeta.connection?.database === 'QLDA_APP', `database=${fsdMeta.connection?.database}`);
+  ok('Chỉ đúng DB nội bộ QLDA (gán từ qlda.local.json, không phải token)', fsdMeta.connection?.database === DB_APP, `database=${fsdMeta.connection?.database}`);
   ok('Metadata chứa quy tắc ưu tiên ma_lt > ma_nv > ma_bp lt > ma_bp nv',
     fsdMeta.businessRules?.some(r => r.includes('ma_lt > ma_nv > ma_bp lt > ma_bp nv')));
 
@@ -205,8 +226,8 @@ async function runTests() {
   ok('runSql nhận object có programPath (không phải tham số vị trí)',
     typeof seen?.programPath === 'string' && seen.programPath.length > 0, `programPath=${seen?.programPath}`);
   ok('Chạy trên chương trình QLDA, không phải program khách',
-    seen?.programPath.includes('SRC-ONL'), seen?.programPath);
-  ok('Ép đúng database QLDA_APP', seen?.database === 'QLDA_APP', `database=${seen?.database}`);
+    seen?.programPath === PROGRAM_QLDA, seen?.programPath);
+  ok('Ép đúng database QLDA', seen?.database === DB_APP, `database=${seen?.database}`);
   ok('Dùng key dbType (không phải db)', seen?.dbType === 'app', `dbType=${seen?.dbType}`);
   ok('Bóc đúng rows từ kết quả runSql',
     exec.result?.success === true && exec.result.rows[0]?.sl === 7, JSON.stringify(exec.result?.rows));
@@ -216,10 +237,10 @@ async function runTests() {
   seen = null;
   await executeReport(plan.planId, realSql, {
     runSql: fakeRunner,
-    programPath: '\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422',
+    programPath: PROGRAM_KHACH,
   });
   ok('Truyền nhầm program khách -> vẫn chạy trên QLDA',
-    seen?.programPath.includes('SRC-ONL'), seen?.programPath);
+    seen?.programPath === PROGRAM_QLDA, seen?.programPath);
 
   // Không có program thì phải báo lỗi, TUYỆT ĐỐI không trả số liệu bịa.
   const noProgramPlan = await planReport('Tạo báo cáo doanh thu theo tháng năm 2026');

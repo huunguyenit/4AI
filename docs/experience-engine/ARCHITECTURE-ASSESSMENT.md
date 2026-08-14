@@ -16,8 +16,8 @@ Khuyến nghị ở cuối tài liệu: **mở rộng hệ đang có**, không d
 
 - **Bản chất**: compiler (`node tools/4ai.mjs check|sync`) sinh config cho 4 dialect trợ lý AI, cộng thêm bộ CLI/MCP hỗ trợ PM rà soát yêu cầu FBO. Không phải web app, không có process chạy nền, không có DB schema riêng cho nghiệp vụ.
 - **Zero dependency**: `TextDecoder('windows-1258')`, `node:util.parseArgs`, `node:fs.globSync`, `node:crypto.createHash` — không package.json, không npm install.
-- **Không có database Member/Project/WorkItem của 4AI**. "Project" = `nbdmda` (ERP), "WorkItem/Request" = `nbphyc`/`nbctdaumuc` (ERP), "Member" = `userinfo2` (ERP, DB `sys`/QLDA_SYS). 4AI chỉ **đọc** các bảng này qua `runSql`/`query_sql`, không bao giờ ghi (`Không có đường nào từ đây tới UPDATE nbphyc` — nguyên văn comment trong `assignee.mjs`).
-- **Nguồn thật riêng của 4AI** là file JSONL versioned trong git (`data/graph/*.jsonl`, `ledger/<ma_da>/graph.jsonl`) — không phải bảng SQL. SQL Server graph (`GRAPH_4AI` db) chỉ là **chỉ mục dựng lại được**, xoá không mất gì. Đây là nguyên tắc auditability đã có sẵn, đúng tinh thần §38-39 của bản yêu cầu.
+- **Không có database Member/Project/WorkItem của 4AI**. "Project" = `nbdmda` (ERP), "WorkItem/Request" = `nbphyc`/`nbctdaumuc` (ERP), "Member" = `userinfo2` (ERP, DB hệ thống QLDA). 4AI chỉ **đọc** các bảng này qua `runSql`/`query_sql`, không bao giờ ghi (`Không có đường nào từ đây tới UPDATE nbphyc` — nguyên văn comment trong `assignee.mjs`).
+- **Nguồn thật riêng của 4AI** là file JSONL versioned trong git (`data/graph/*.jsonl`, `ledger/<ma_da>/graph.jsonl`) — không phải bảng SQL. SQL Server graph (DB đồ thị 4AI) chỉ là **chỉ mục dựng lại được**, xoá không mất gì. Đây là nguyên tắc auditability đã có sẵn, đúng tinh thần §38-39 của bản yêu cầu.
 - **`writer.mjs`** là nơi duy nhất ghi file; **`schema.mjs`** là nơi duy nhất khai tên field. Không có REST API nào trong repo — bề mặt gọi vào là CLI (`tools/4ai.mjs`) và MCP tool (`mcp/fbo/server.mjs`).
 
 ## 2. Thành phần tái sử dụng được (map thẳng vào các mục trong yêu cầu)
@@ -46,7 +46,7 @@ Khuyến nghị ở cuối tài liệu: **mở rộng hệ đang có**, không d
 ## 4. Integration point nếu mở rộng
 
 - Sửa trọng số/thêm tiêu chí chấm điểm → `tools/lib/assignee.mjs`, hàm thuần, không chạm DB — an toàn để mở rộng.
-- Thêm nguồn bằng chứng mới (vd lịch sử code review, PR) → `tools/lib/staffing.mjs`, nhưng **mọi nguồn mới là một câu SQL mới trên DB ERP sống** (`QLDA_APP`/`QLDA_SYS`), phải qua `runSql`/MCP `query_sql`, **read-only tuyệt đối** — không có ngoại lệ.
+- Thêm nguồn bằng chứng mới (vd lịch sử code review, PR) → `tools/lib/staffing.mjs`, nhưng **mọi nguồn mới là một câu SQL mới trên DB ERP sống** (DB nghiệp vụ và DB hệ thống QLDA), phải qua `runSql`/MCP `query_sql`, **read-only tuyệt đối** — không có ngoại lệ.
 - Ghi lại PM feedback/outcome → theo đúng pattern đã có ở `data/graph/effort-samples.jsonl`: **chỉ ghi khi PM xác nhận**, dạng JSONL append-only, git-diffable — không tự động suy luận rồi ghi.
 - Team-level staffing (nhiều work item cùng lúc) → file mới cùng tầng với `staffing.mjs`, gọi lặp `goiYNguoiTiepNhan()` cho từng UR rồi tổng hợp — không cần kiến trúc mới.
 - AI/LLM layer (nếu cần trích xuất WorkProfile từ văn bản yêu cầu tự do) → đã có pattern `tools/lib/prompt.mjs` (sinh prompt từ payload) làm điểm khởi đầu; core scoring vẫn đứng ngoài, đúng §26.
@@ -56,7 +56,7 @@ Khuyến nghị ở cuối tài liệu: **mở rộng hệ đang có**, không d
 - **Vi phạm zero-dependency**: bất kỳ vector DB, ML framework, web framework nào đều cần bàn trước (`CLAUDE.md` hard rule) — và chính §41 của yêu cầu cũng tự cấm điều này ("đừng thêm vector database chỉ vì có AI").
 - **Không có REST server**: §23 giả định `POST /recommendations/work-items/{id}` — repo không có app server nào để gắn route vào. Map đúng phải là MCP tool hoặc CLI subcommand, theo đúng pattern `render_review_report`/`4ai report` đã có.
 - **Bảng Member/Project/WorkItem generic sẽ trùng lặp ba thứ cùng lúc**: bảng ERP sống (`nbdmda`/`nbphyc`/`userinfo2`), và capability graph đã có (`data/graph-schema.json`). Đây là vi phạm trực tiếp nguyên tắc §1 mà chính yêu cầu đặt ra đầu tiên.
-- **`customer-program` target không bao giờ được ghi** — không liên quan trực tiếp vì recommendation chỉ đọc, nhưng nhắc lại vì bất kỳ thiết kế "lưu profile" nào cũng phải nằm trong DB riêng của 4AI (`GRAPH_4AI`) hoặc JSONL, tuyệt đối không phải DB khách.
+- **`customer-program` target không bao giờ được ghi** — không liên quan trực tiếp vì recommendation chỉ đọc, nhưng nhắc lại vì bất kỳ thiết kế "lưu profile" nào cũng phải nằm trong DB riêng của 4AI (DB đồ thị 4AI) hoặc JSONL, tuyệt đối không phải DB khách.
 
 ## 6. Khuyến nghị hướng đi
 

@@ -62,7 +62,7 @@ tạo chứng từ mới — `Hóa đơn dịch vụ` (HD1/ARTran) đã chạy s
 đừng `AddTable`. Cái cần chốt là luồng dữ liệu, khai bằng `luongDuLieu`:
 
     "luongDuLieu": {
-      "nguon": ["DEMO1_Mid.Cost (bảng trung gian Chi phí)", "Danh sách hóa đơn đầu vào"],
+      "nguon": ["<KhachMid>.Cost (bảng trung gian Chi phí)", "Danh sách hóa đơn đầu vào"],
       "dich": { "manHinh": "Hóa đơn mua dịch vụ", "syscode": "PN1", "sysid": "APTran", "bang": "m31$" },
       "ghiChu": "TLKS mục 4.4 …"
     }
@@ -89,7 +89,7 @@ Tìm hết cách vẫn không có thì mới ghi rõ "CHƯA ĐỦ DỮ KIỆN" �
 **Bảng trung gian** — dùng khi yêu cầu là "lấy dữ liệu từ hệ thống ngoài (Samo, đối tác...) về
 phần mềm", KHÔNG phải danh mục hay chứng từ của FBO. Không áp `zc`, không ép 5 cột audit — bảng
 chỉ cần mirror đúng cấu trúc hệ nguồn để ETL không mất dữ liệu. Ví dụ đã xác nhận: bảng `Town`
-(vùng địa lý từ Samo về DB trung gian của DEMO1) — xem `fbo-ddl.json` → `bangTrungGian.verifiedExample`.
+(vùng địa lý từ Samo về DB trung gian của khách) — xem `fbo-ddl.json` → `bangTrungGian.verifiedExample`.
 
 ## Danh mục
 

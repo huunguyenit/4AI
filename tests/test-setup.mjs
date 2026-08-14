@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+
 import { scanSecrets } from '../tools/lib/assets.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -52,12 +52,12 @@ ok('Đối tượng chẩn đoán cũng không mang giá trị',
   !JSON.stringify(d1).includes('MatKhauSieuBiMat123'));
 
 process.stdout.write('\n=== env thắng local, và báo đúng nguồn ===\n');
-process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=QLDA_APP';
+process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=DEMO_APP';
 const d2 = chanDoan(ROOT);
 ok('Khai ở env thì báo nguồn env', d2.biMat.find((k) => k.key === 'appConnectionString')?.coEnv === true);
 let inRa2 = '';
 inChanDoan(d2, (s) => { inRa2 += s; });
-ok('Vẫn không in giá trị env', !inRa2.includes('Initial Catalog=QLDA_APP'));
+ok('Vẫn không in giá trị env', !inRa2.includes('Initial Catalog=DEMO_APP'));
 delete process.env.QLDA_APP_CONNECTION;
 
 process.stdout.write('\n=== ghi cấu hình: bỏ trống = GIỮ NGUYÊN, không xoá ===\n');

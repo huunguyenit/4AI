@@ -23,25 +23,30 @@ const NOT_FOUND_NOTE =
 
 // ---------------------------------------------------------------- program resolution
 //
-// Nguồn sự thật là bảng nbdmda trong DB QLDA nội bộ (QLDA_APP) — KHÔNG còn data/customers.json.
-// Mỗi dòng nbdmda là MỘT dự án (một khách có thể có nhiều dòng, mã ma_da không phải lúc nào
-// cũng trùng tên thân thiện của khách — ví dụ khách "Acme Two" có ma_da='ACME2', khách
-// "Acme Three" bản FBI có ma_da='ACME3_FBO' chứ không phải 'ACME3'). `program` truyền vào
-// tool phải là ĐÚNG nbdmda.ma_da hoặc đường dẫn program trực tiếp — dùng list_programs để tra
+// Nguồn sự thật là bảng nbdmda trong DB QLDA nội bộ — KHÔNG còn data/customers.json.
+// Mỗi dòng nbdmda là MỘT dự án (một khách có thể có nhiều dòng, và ma_da không phải lúc nào
+// cũng trùng tên thân thiện của khách — mã hay mang hậu tố chi nhánh hoặc hậu tố dòng sản
+// phẩm, có trường hợp mã trần lại là một dự án dòng cũ khác hẳn). `program` truyền vào tool
+// phải là ĐÚNG nbdmda.ma_da hoặc đường dẫn program trực tiếp — dùng list_programs để tra
 // ma_da đúng trước khi đoán.
 
 const NBDMDA_COLUMNS =
   'ma_da, ten_da, ten_ngan, status, ma_pbsp, sProjectFolder, dir_pro_app, dir_src_app, ' +
   'dir_pro_web, dir_src_web, bp_tk, bp_lt, ma_lt1, ma_lt2, ma_lt3';
 
-/** Kết nối tới DB QLDA (QLDA_APP) — phân giải qua Web.config của chính chương trình QLDA. */
+/** Kết nối tới DB QLDA (DB nghiệp vụ QLDA) — phân giải qua Web.config của chính chương trình QLDA. */
 function qldaConnection(hub) {
   const cfg = loadQldaConfig(hub);
   const qlda = cfg?.databases?.qlda;
-  if (!qlda?.path || !qlda?.databaseName) {
+  // Token `{...}` = máy này chưa khai. data/qlda.json đi kèm gói phân phối công khai nên nó
+  // chỉ giữ token; giá trị thật nằm ở data/qlda.local.json (gitignore) do `4ai setup` ghi.
+  const chuaKhai = (v) => !v || /^\{[A-Za-z0-9_]+\}$/.test(String(v).trim());
+  if (chuaKhai(qlda?.path) || chuaKhai(qlda?.databaseName)) {
     throw new Error(
-      'Không đọc được cấu hình kết nối QLDA (data/qlda.json → databases.qlda.path/databaseName) — ' +
-      'cần cấu hình này để tra nbdmda.');
+      'Chưa khai định danh QLDA trên máy này (`qldaProgramPath` và `qldaDatabaseName`). '
+      + 'Cách chữa: chạy `node tools/4ai.mjs setup` trong terminal, hoặc điền thẳng hai khoá đó '
+      + 'vào data/qlda.local.json ở data root của bản cài. data/qlda.json chỉ chứa token — '
+      + 'gói phân phối không mang tên database nội bộ.');
   }
   return { programPath: qlda.path, database: qlda.databaseName };
 }
@@ -127,7 +132,7 @@ export const TOOLS = [
   {
     name: 'list_programs',
     description:
-      'Tra dự án FBO/FBI/HRM/FF… trong nbdmda (DB QLDA nội bộ QLDA_APP) theo mã dự án (ma_da), tên, hoặc đường dẫn program — trả về ma_da, tên, phiên bản (ma_pbsp), program path, bộ phận lập trình, trạng thái index cục bộ. Bỏ trống `query` → liệt kê dự án đang hoạt động đứng tên bạn (nbdmda.ma_lt1/2/3, theo data/qlda.local.json → pm.maNv, ghi đè token {PMName} trong data/qlda.json → review.pm). Dùng đầu tiên khi chưa biết program path/ma_da, hoặc để suy ma_da từ thư mục workspace đang đứng (truyền thư mục đó làm `query`).',
+      'Tra dự án FBO/FBI/HRM/FF… trong nbdmda (DB QLDA nội bộ) theo mã dự án (ma_da), tên, hoặc đường dẫn program — trả về ma_da, tên, phiên bản (ma_pbsp), program path, bộ phận lập trình, trạng thái index cục bộ. Bỏ trống `query` → liệt kê dự án đang hoạt động đứng tên bạn (nbdmda.ma_lt1/2/3, theo data/qlda.local.json → pm.maNv, ghi đè token {PMName} trong data/qlda.json → review.pm). Dùng đầu tiên khi chưa biết program path/ma_da, hoặc để suy ma_da từ thư mục workspace đang đứng (truyền thư mục đó làm `query`).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -287,7 +292,7 @@ export const TOOLS = [
   {
     name: 'plan_report',
     description:
-      'Phân giải một yêu cầu báo cáo thành metadata + QueryPlan + prompt hoàn chỉnh để BẠN tự viết SQL. Thuần đọc cấu hình, KHÔNG gọi LLM và KHÔNG chạm database. Tự nhận domain: câu hỏi về dự án/yêu cầu (UR)/hạn hoàn thành lấy schema QLDA từ data/qlda.json (DB nội bộ QLDA_APP) kể cả khi truyền program của khách; câu hỏi nghiệp vụ lấy schema từ chỉ mục program. Viết SQL xong thì gọi execute_report.',
+      'Phân giải một yêu cầu báo cáo thành metadata + QueryPlan + prompt hoàn chỉnh để BẠN tự viết SQL. Thuần đọc cấu hình, KHÔNG gọi LLM và KHÔNG chạm database. Tự nhận domain: câu hỏi về dự án/yêu cầu (UR)/hạn hoàn thành lấy schema QLDA từ data/qlda.json (DB nghiệp vụ QLDA nội bộ) kể cả khi truyền program của khách; câu hỏi nghiệp vụ lấy schema từ chỉ mục program. Viết SQL xong thì gọi execute_report.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -457,7 +462,7 @@ export const HANDLERS = {
     });
 
     return {
-      source: 'nbdmda (QLDA · QLDA_APP)',
+      source: 'nbdmda (QLDA)',
       scope,
       count: rows.length,
       truncated: res.truncated,

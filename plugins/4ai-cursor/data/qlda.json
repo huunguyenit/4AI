@@ -3,15 +3,15 @@
   "note": "Cấu hình dự án QLDA (quản lý dự án — yêu cầu — hạn hoàn thành). KHÔNG BAO GIỜ chứa connection string: ở đây chỉ có TÊN key và THỨ TỰ phân giải. Giá trị thật nằm ở biến môi trường hoặc data/qlda.local.json (đã gitignore). File này bị scanSecrets của `4ai check` soi — cố tình dán chuỗi kết nối vào sẽ fail build.",
   "storage": {
     "mode": "database",
-    "note": "Không còn mirror tài liệu cục bộ. Dev và release đọc CÙNG một nguồn: DB QLDA_APP + kho file attachments.fileStore. Không có khái niệm documentsRoot nữa, không có bước đồng bộ, nên không có nguy cơ đọc nhầm bản cũ.",
+    "note": "Không còn mirror tài liệu cục bộ. Dev và release đọc CÙNG một nguồn: DB nghiệp vụ QLDA nội bộ (xem `databases.qlda.databaseName`) + kho file attachments.fileStore. Không có khái niệm documentsRoot nữa, không có bước đồng bộ, nên không có nguy cơ đọc nhầm bản cũ.",
     "decidedAt": "2026-08-08",
     "supersedes": "environments.dev.storage=filesystem với documentsRoot=.management (bỏ ngày 2026-08-08)."
   },
   "documents": {
-    "note": "Tài liệu khảo sát, biên bản, email đính kèm KHÔNG nằm trên đĩa cục bộ. Nguồn duy nhất là bảng sysfileinfo — xem mục `attachments`. Cột text trên form (nbdmda.file_tlks, nbdmda.sProjectFolder, nbphyc.file_kem) KHÔNG phải nơi lưu file và không tin cậy: file_tlks của DEMO1 rỗng.",
+    "note": "Tài liệu khảo sát, biên bản, email đính kèm KHÔNG nằm trên đĩa cục bộ. Nguồn duy nhất là bảng sysfileinfo — xem mục `attachments`. Cột text trên form (nbdmda.file_tlks, nbdmda.sProjectFolder, nbphyc.file_kem) KHÔNG phải nơi lưu file và không tin cậy: đã đo được dự án có file_tlks rỗng dù có đính kèm thật.",
     "howToFetch": [
       "1. Xác định khoá cha: ma_da (tài liệu cấp dự án) hoặc stt_rec (đính kèm của một UR).",
-      "2. query_sql database=QLDA_APP: SELECT line_nbr, file_name, file_ext, file_size, file_enc FROM sysfileinfo WHERE controller=<'nbdmda'|'nbphyc'> AND RTRIM(syskey)=<khoá> ORDER BY line_nbr",
+      "2. query_sql database=<databases.qlda.databaseName>: SELECT line_nbr, file_name, file_ext, file_size, file_enc FROM sysfileinfo WHERE controller=<'nbdmda'|'nbphyc'> AND RTRIM(syskey)=<khoá> ORDER BY line_nbr",
       "3. Đường dẫn đọc = attachments.fileStore.root + '\\' + file_enc (không có phần mở rộng).",
       "4. Copy sang scratchpad và đặt lại tên theo file_name trước khi mở. Đối chiếu số byte với file_size để chắc đúng file.",
       "5. KHÔNG ghi/đổi tên/xoá gì trong fileStore, KHÔNG copy tài liệu khách vào repo."
@@ -27,26 +27,26 @@
     }
   },
   "projects": {
-    "note": "Dự án đang làm việc, khoá theo nbdmda.ma_da. Đây chỉ là bản ghi chú điều hướng — nguồn sự thật vẫn là bảng nbdmda.",
+    "note": "Dự án đang làm việc, khoá theo nbdmda.ma_da. Đây chỉ là bản ghi chú điều hướng — nguồn sự thật vẫn là bảng nbdmda. Mục dưới đây là VÍ DỤ minh hoạ cấu trúc bản ghi, không phải dự án đang mở.",
     "items": [
       {
-        "maDa": "DEMO1",
-        "tenNgan": "DEMO CO",
-        "sProjectFolder": "DEMO1_FBISP2422",
+        "maDa": "ACME_FBI",
+        "tenNgan": "ACME DEMO",
+        "sProjectFolder": "ACME_FBISP2422",
         "maPbsp": "FBISP2422",
         "bpTk": "TK1",
         "bpLt": "FSD",
-        "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\DEMO1\\FBISP2422",
+        "programPath": "\\\\10.0.0.1\\CustomerPro\\FBI\\ACME_FBI\\FBISP2422",
         "registeredInQlda": true,
-        "attachments": { "controller": "nbdmda", "syskey": "DEMO1", "count": 2 },
-        "note": "Hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo."
+        "attachments": { "controller": "nbdmda", "syskey": "ACME_FBI", "count": 2 },
+        "note": "VÍ DỤ — hai đính kèm cấp dự án: TLKS Kế toán và TLKS Kết nối FBO–Samo."
       }
     ]
   },
   "attachments": {
     "note": "Tài liệu khảo sát, biên bản, mail đính kèm đều đi qua tab tệp đính kèm, lưu metadata ở bảng dùng chung sysfileinfo. Không tìm file qua cột text trên form.",
     "table": "sysfileinfo",
-    "database": "QLDA_APP",
+    "database": "DB nghiệp vụ QLDA — xem `databases.qlda.databaseName`",
     "primaryKey": ["controller", "syskey", "line_nbr"],
     "lookupBy": {
       "duAn": "controller='nbdmda' AND syskey=<ma_da>",
@@ -72,12 +72,12 @@
       { "name": "user_id2", "type": "int", "audit": true }
     ],
     "fileStore": {
-      "root": "\\\\10.0.0.1\\FastPro$\\QLDASHARE\\RUN-ONL\\NB\\Files\\QLDA_APP",
+      "root": "{AttachmentsFileStoreRoot}",
       "pathPattern": "<root>\\<file_enc>",
       "extensionOnDisk": false,
-      "verified": "2026-08-08 — hai file của DEMO1 tồn tại đúng mẫu này, kích thước khớp file_size từng byte.",
+      "verified": "2026-08-08 — hai file thật đã đối chiếu đúng mẫu này, kích thước khớp file_size từng byte.",
       "note": "File trên đĩa KHÔNG có phần mở rộng: tên đúng bằng file_enc, không nối thêm .docx. Muốn mở thì copy ra nơi khác rồi đặt lại tên theo file_name. Thư mục root chứa rất nhiều file — ĐỪNG liệt kê cả thư mục (ls treo trên 2 phút), luôn dựng đường dẫn từ file_enc lấy qua SQL.",
-      "rootDiffersFromProgram": "Chú ý share này là RUN-ONL (bản chạy), khác với databases.qlda.path là SRC-ONL (bản source)."
+      "rootDiffersFromProgram": "Chú ý share tệp đính kèm này KHÁC với `databases.qlda.path` — một là bản chạy (nơi lưu file thật), một là bản source (nơi cài chương trình QLDA). Xem giá trị thật trong data/qlda.local.json trên từng máy."
     },
     "readOnly": "Chỉ đọc metadata và copy file ra ngoài. KHÔNG ghi, đổi tên hay xoá gì trong thư mục này — đó là kho tài liệu đang chạy.",
     "workingCopy": "Cần mở file thì copy sang scratchpad của phiên làm việc rồi đặt lại tên theo file_name. Không copy tài liệu khách vào repo 4AI dưới bất kỳ dạng nào."
@@ -87,10 +87,10 @@
       "alias": "qlda-app",
       "connectionKey": "appConnectionString",
       "provider": "sqlserver",
-      "path": "\\\\10.0.0.1\\FastPro$\\QLDASHARE\\SRC-ONL",
+      "path": "{QldaProgramPath}",
       "pathKind": "fbo-program-root",
-      "databaseName": "QLDA_APP",
-      "sysDatabaseName": "QLDA_SYS",
+      "databaseName": "{QldaDatabaseName}",
+      "sysDatabaseName": "{QldaSysDatabaseName}",
       "resolveOrder": [
         { "kind": "env", "name": "QLDA_APP_CONNECTION", "type": "appConnectionString" },
         { "kind": "env", "name": "QLDA_SYS_CONNECTION", "type": "sysConnectionString" },
@@ -99,7 +99,8 @@
         { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "appConnectionString" },
         { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "sysConnectionString" }
       ],
-      "note": "DB NỘI BỘ của công ty, KHÔNG phải DB nghiệp vụ của khách. Kết nối phân giải theo đúng `resolveOrder` dưới đây: env trước, rồi data/qlda.local.json, Web.config chỉ là chốt cuối. Cưỡng chế ở mcp/fbo/lib/sql.mjs — `programPath` khớp `path` thì đi đường QLDA, khác thì là chương trình khách và đọc Web.config của chính nó.",
+      "pathNote": "`path`/`databaseName`/`sysDatabaseName` ở trên là TOKEN `{...}` — giá trị thật do từng máy tự khai qua `node tools/4ai.mjs setup` (ghi `qldaProgramPath`/`qldaDatabaseName`/`qldaSysDatabaseName` vào data/qlda.local.json, gitignore). File này chỉ chứa tên key, không chứa giá trị thật của công ty.",
+      "note": "DB NỘI BỘ của công ty, KHÔNG phải DB nghiệp vụ của khách. Kết nối phân giải theo đúng `resolveOrder` dưới đây: env trước, rồi data/qlda.local.json, Web.config chỉ là chốt cuối. Cưỡng chế ở mcp/fbo/lib/sql.mjs — `programPath` khớp `path` (sau khi gán từ local) thì đi đường QLDA, khác thì là chương trình khách và đọc Web.config của chính nó.",
       "databaseNote": "Khai kết nối bằng env/local (có `Initial Catalog`, hoặc để trống thì lấy `databaseName`/`sysDatabaseName` ở đây) thì KHÔNG phải truyền `database` mỗi lệnh nữa. Chỉ khi rớt xuống Web.config mới cần, vì Web.config của QLDA để placeholder %Database.",
       "indexedAt": "2026-08-08",
       "indexStats": { "files": 3310, "parsed": 823, "controllers": "Grid:1137 Filter:893 Report:479 Dir:459 Include:181" }
@@ -108,17 +109,16 @@
       "alias": "graph-4ai",
       "connectionKey": "graphConnectionString",
       "provider": "sqlserver",
-      "databaseName": "GRAPH_4AI",
-      "serverAlias": "fsd-sql2016",
+      "databaseName": "{Graph4aiDatabaseName}",
       "resolveOrder": [
         { "kind": "env", "name": "GRAPH_4AI_CONNECTION" },
         { "kind": "localFile", "path": "data/qlda.local.json", "key": "graphConnectionString" }
       ],
-      "note": "DB nội bộ chứa CHỈ MỤC đồ thị năng lực FBO và mạng phụ thuộc UR. Nguồn sự thật là file JSONL trong repo — xem data/graph-schema.json. Không chứa dữ liệu nghiệp vụ của khách. Giá trị kết nối do PM tự điền vào qlda.local.json (đã gitignore) hoặc biến môi trường; KHÔNG BAO GIỜ ghi vào file này."
+      "note": "DB nội bộ chứa CHỈ MỤC đồ thị năng lực FBO và mạng phụ thuộc UR. Nguồn sự thật là file JSONL trong repo — xem data/graph-schema.json. Không chứa dữ liệu nghiệp vụ của khách. Giá trị kết nối do PM tự điền vào qlda.local.json (đã gitignore) hoặc biến môi trường; KHÔNG BAO GIỜ ghi vào file này. `databaseName` ở trên là TOKEN — tên thật tự khai qua `graph4aiDatabaseName` trong qlda.local.json nếu chuỗi kết nối không tự khai `Initial Catalog`."
     }
   },
   "schemaSource": {
-    "method": "INFORMATION_SCHEMA.COLUMNS + sys.indexes trên QLDA_APP, đối chiếu nhãn field từ describe_controller",
+    "method": "INFORMATION_SCHEMA.COLUMNS + sys.indexes trên DB nghiệp vụ QLDA nội bộ (`databases.qlda.databaseName`), đối chiếu nhãn field từ describe_controller",
     "verifiedAgainstDatabase": true,
     "verifiedAt": "2026-08-08",
     "conventions": {
@@ -128,8 +128,8 @@
       "spareSlots": "FBO cấp sẵn cột dự phòng đặt tên theo mẫu (s1..s9, fcode*, fdate*, fqty*, fnote*, ma_td*, sl_td*, gc_td*). Một số đã bị trưng dụng và có label. Cột dự phòng còn trống KHÔNG được coi là tự do cho tới khi soi hết command SQL trong controller."
     },
     "queryCaveats": [
-      "Web.config dùng %Database — mọi query_sql phải truyền database: \"QLDA_APP\".",
-      "Output query_sql MẤT DẤU tiếng Việt (sqlcmd codepage): nbdmda.ten_da của DEMO1 trả về 'CONG TY C? PH?N DEMO CO VI?T NAM'. Dữ liệu trong DB vẫn đúng — đừng copy chuỗi đã mất dấu vào UR, ledger hay tài liệu bàn giao. Cần văn bản chính xác thì đọc từ tài liệu nguồn hoặc từ màn hình.",
+      "Web.config dùng %Database — mọi query_sql phải truyền database: \"<databases.qlda.databaseName>\".",
+      "Output query_sql MẤT DẤU tiếng Việt (sqlcmd codepage): nbdmda.ten_da của một dự án thật trả về dạng 'CONG TY C? PH?N ...' (dấu hỏi thay cho ký tự có dấu). Dữ liệu trong DB vẫn đúng — đừng copy chuỗi đã mất dấu vào UR, ledger hay tài liệu bàn giao. Cần văn bản chính xác thì đọc từ tài liệu nguồn hoặc từ màn hình.",
       "Cột khoá là char cố định dài (ma_da char(32), stt_rec char(13), syskey char(32)) — luôn RTRIM khi so sánh hoặc join.",
       "nbcnhanhtda.ma_da là varchar(33) trong khi nbdmda.ma_da là char(32) — join hai bảng này bắt buộc RTRIM cả hai vế."
     ]
@@ -485,7 +485,7 @@
       "apDung": "CHỈ UR ở trang_thai = DD. Đó là cổng PM — chỗ duy nhất cần đủ dữ kiện để quyết định. UR đã sang XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng báo cáo.",
       "nguon": {
         "bang": "frpost",
-        "database": "app (QLDA_APP) — bản sao diễn đàn: 76.151 bài / 17.533 topic, url_goc giữ link gốc",
+        "database": "app (`databases.qlda.databaseName`) — bản sao diễn đàn: 76.151 bài / 17.533 topic, url_goc giữ link gốc",
         "cot": ["topic_id", "thu_tu", "post_id", "nguoi_viet", "ngay_viet", "noi_dung"],
         "khongGoiHttp": "KHÔNG gọi HTTP ra forum — đã có bản sao trong DB, vừa không cần mạng vừa không phụ thuộc phiên đăng nhập.",
         "vsFrPostsearch": "Proc dbo.fr_postsearch là công cụ TÌM KIẾM theo từ khoá. Ở đây đã có sẵn topic_id lấy từ chính link nên tra thẳng frpost là đường ngắn và chắc hơn — khớp đúng topic, không phụ thuộc thuật toán xếp hạng từ khoá."
@@ -528,7 +528,7 @@
       "note": "Dữ kiện nhân sự cho gợi ý phân công — do tools/lib/staffing.mjs dựng và đi kèm dataset của `4ai report`. KHÔNG phải khối payload khai tay: agent không ghép nhanSu, không viết SQL nhân sự.",
       "roster": {
         "bang": "userinfo2",
-        "database": "sys (QLDA_SYS) — KHÁC database nghiệp vụ QLDA_APP của nbphyc/nbdmda",
+        "database": "sys (`databases.qlda.sysDatabaseName`) — KHÁC database nghiệp vụ (`databases.qlda.databaseName`) của nbphyc/nbdmda",
         "cot": ["name", "comment", "s1", "ma_bo_phan", "ma_kcv", "ma_chv", "status"],
         "loc": "ma_bo_phan = {PMDept} AND status = '1'",
         "rule": "Đây chính là định nghĩa 'chưa off, chưa chuyển công tác'. status='0' là đã nghỉ; ma_bo_phan khác {PMDept} là đã chuyển bộ phận. Ai rớt khỏi câu này thì KHÔNG được đề xuất nhận việc mới, dù tên vẫn còn trên dự án cũ.",

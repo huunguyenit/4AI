@@ -108,9 +108,22 @@ thư mục `skills/`: 4AI hiện gộp skill-kind asset vào rule cho Cursor, gi
 
 Yêu cầu: **Node.js 22+** trên máy chạy Cursor (MCP dùng `node:sqlite` built-in).
 
-> **Chưa publish public marketplace.** Plugin hiện chỉ cài được qua Team Marketplace nội bộ
-> (Import from Repo). Đưa lên `cursor.com/marketplace/publish` (public, cần review của đội
-> Cursor) là quyết định công khai thêm — hỏi trước khi làm, không tự động theo bước này.
+#### Cách A2 — Public Marketplace (`cursor.com/marketplace/publish`)
+
+Cursor **review thủ công từng plugin và từng bản cập nhật**, và yêu cầu plugin **mã nguồn mở** —
+nghĩa là toàn bộ repo này là nội dung công khai, không riêng thư mục `plugins/4ai-cursor/`.
+
+Vì vậy repo **không chứa** tên database nội bộ, đường dẫn share, tên khách hay mã nhân viên:
+tất cả đã chuyển thành token `{...}` khai ở `data/qlda.local.json` (xem
+[Định danh hạ tầng nội bộ](#3-định-danh-hạ-tầng-nội-bộ--bắt-buộc-setup-hỏi-ngay)). Trước mỗi
+lần nộp bản cập nhật, quét lại:
+
+```bash
+git ls-files | xargs grep -lE "<tên DB nội bộ>|<IP share>|<mã khách>" 2>/dev/null
+```
+
+Nộp tại `cursor.com/marketplace/publish` bằng tài khoản Cursor của tổ chức, trỏ vào repo
+GitHub. Repo phải **public** tại thời điểm review.
 
 > **Index SQLite chưa xác nhận sống sót qua update** như bên Claude Code (`${CLAUDE_PLUGIN_DATA}`)
 > — Cursor chưa có biến tương đương được xác nhận, nên `mcp.json` của gói không set
@@ -243,7 +256,25 @@ hub; plugin: `${CLAUDE_PLUGIN_DATA}` — sống sót qua update). Các tool khá
 `get_review_dataset`, `report`) đọc lại giá trị này ngay lần gọi tiếp theo, không cần khởi động
 lại MCP server. Nhập nhầm dạng token mẫu (`{PMName}`) sẽ bị tool từ chối, không âm thầm nuốt.
 
-### 3. Chuỗi kết nối DB — env hoặc `qlda.local.json`
+### 3. Định danh hạ tầng nội bộ — **bắt buộc**, `setup` hỏi ngay
+
+Repo này là **mã nguồn mở** (yêu cầu của Cursor Marketplace), nên `data/qlda.json` **không**
+chứa tên database hay đường dẫn share của công ty bạn — nó chỉ giữ token `{...}`. Giá trị thật
+do từng máy khai vào `data/qlda.local.json` (đã gitignore):
+
+| Khoá trong `qlda.local.json` | Token trong `qlda.json` | Dùng cho |
+|---|---|---|
+| `qldaProgramPath` | `{QldaProgramPath}` | Đường dẫn program QLDA — dấu hiệu phân biệt QLDA với chương trình khách |
+| `qldaDatabaseName` | `{QldaDatabaseName}` | Tên DB nghiệp vụ QLDA (`nbdmda`, `nbphyc`…) |
+| `qldaSysDatabaseName` | `{QldaSysDatabaseName}` | Tên DB hệ thống QLDA (`userinfo2`…) |
+| `graph4aiDatabaseName` | `{Graph4aiDatabaseName}` | Tên DB đồ thị — bỏ trống nếu chuỗi kết nối đã khai `Initial Catalog` |
+| `attachmentsFileStoreRoot` | `{AttachmentsFileStoreRoot}` | Share chứa tệp đính kèm — chỉ cần khi đọc tài liệu khảo sát |
+
+Chưa khai thì `list_programs` và mọi tool tra QLDA **báo lỗi kèm chỉ dẫn**, chứ không âm thầm
+đoán một cái tên rồi chạy nhầm database. Đây không phải credential (nên `doctor` hiện giá trị
+ra màn hình), chỉ là thứ không nên nằm trong một repo công khai.
+
+### 4. Chuỗi kết nối DB — env hoặc `qlda.local.json`
 
 Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.json` sau, cuối cùng mới dò
 `Web.config` của chương trình QLDA**:
@@ -252,7 +283,7 @@ Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.
 |---|---|---|
 | `QLDA_APP_CONNECTION` | `appConnectionString` | DB nghiệp vụ QLDA |
 | `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA |
-| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | DB đồ thị nội bộ `GRAPH_4AI` — kinh nghiệm, gợi ý phân công |
+| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | DB đồ thị nội bộ của hub — kinh nghiệm, gợi ý phân công |
 
 `appConnectionString`/`sysConnectionString` đa số máy **không cần khai gì cả** —
 `Web.config` của QLDA tự phân giải được. Chỉ cần override khi máy không truy cập được share
@@ -287,7 +318,7 @@ Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.git
 **Không bao giờ** dán chuỗi kết nối vào `data/qlda.json` (file commit) — `4ai check` chạy
 `scanSecrets` và sẽ fail build.
 
-### 4. Override target theo máy — `targets.local.json` (tuỳ chọn, chỉ Cách 2)
+### 5. Override target theo máy — `targets.local.json` (tuỳ chọn, chỉ Cách 2)
 
 Chỉ cần khi đường dẫn trong `targets.json` không đúng trên máy bạn (ví dụ hub sync ra ổ đĩa
 khác). Tạo `targets.local.json` ở gốc repo (đã gitignore), merge theo `name` vào `targets.json`
@@ -299,7 +330,7 @@ lúc `sync` chạy:
 
 Không cần tạo nếu máy bạn dùng đúng path mặc định trong `targets.json`.
 
-### 5. `.cursor/mcp.json` — không tạo tay
+### 6. `.cursor/mcp.json` — không tạo tay
 
 Sinh tự động bởi `sync` (đã gitignore) — đừng chỉnh tay, chỉnh xong `sync` sẽ ghi đè.
 
@@ -543,10 +574,10 @@ thật sự tồn tại trong cây menu của chính chương trình đó). Thay
 ```bash
 node tools/4ai.mjs graph push                  # nạp hạt giống (Menu/Controller/Table/SpVersion)
 node tools/4ai.mjs graph experience --dept FSD  # quét UR đã xong (HT/DT/OK/UP) → kinh nghiệm hiện vật
-node tools/4ai.mjs report --project DEMO1        # gợi ý phân công tự chấm theo kinh nghiệm vừa quét
+node tools/4ai.mjs report --project <MA_DA>        # gợi ý phân công tự chấm theo kinh nghiệm vừa quét
 ```
 
-Đồ thị sống trong DB nội bộ `GRAPH_4AI` (SQL Server graph), không phải file — hub dùng cho nhiều
+Đồ thị sống trong DB nội bộ của hub (SQL Server graph), không phải file — hub dùng cho nhiều
 người nên một user chạy báo cáo phải **đọc ngay** phần user khác đã quét, không dựng lại. Mỗi
 node mang `scope` (mã dự án, hoặc `system` cho thiết kế FBO chuẩn); nạp lại là `MERGE` theo
 phạm vi, không xoá dữ liệu của dự án khác.

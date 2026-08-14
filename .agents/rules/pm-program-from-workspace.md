@@ -37,20 +37,20 @@ của người khác.
 
 ## Ví dụ
 
-Workspace `\\10.0.0.1\CustomerPro\FBI\DEMO1\FBISP2422` → `list_programs { query:
-"DEMO1\\FBISP2422" }` trả đúng một dòng `ma_da=DEMO1`, `programPath` trùng khít → Crystal
-Bay, FBI, SP FBISP2422. Không hỏi gì thêm, `index_program` rồi làm.
+Workspace `\\<share>\CustomerPro\FBI\<MA_DA>\FBISP2422` → `list_programs { query:
+"<MA_DA>\\FBISP2422" }` trả đúng một dòng `ma_da=<MA_DA>`, `programPath` trùng khít → đúng
+khách đó, FBI, SP FBISP2422. Không hỏi gì thêm, `index_program` rồi làm.
 
-Workspace `\\10.0.0.1\CustomerPro\FBO\Acme2-SP225\SP225\App_Data\Controllers` →
-`query: "Acme2-SP225"` trả `ma_da=ACME2`, `programPath` là tiền tố của workspace →
-vẫn khớp, dùng `ACME2` — **không phải** `MESSER` (mã đó không tồn tại trong `nbdmda`).
+Workspace `\\<share>\CustomerPro\FBO\<TenThuMuc>-SP225\SP225\App_Data\Controllers` →
+`query: "<TenThuMuc>-SP225"` trả về một `ma_da` **khác** tên thư mục, `programPath` là tiền
+tố của workspace → vẫn khớp, dùng `ma_da` mà tool trả về chứ không phải tên thư mục.
 
 ## Bẫy
 
-- Cắt tên thư mục ra mã dự án sai ở nhiều dự án đang có thật: `Acme2-SP225` ≠ mã trực
-  giác `MESSER` (đúng là `ACME2`); `ACME3` (đúng `ma_da`) lại là một dự án FF **cũ**
-  khác hẳn, bản FBI thật của Acme Three là `ma_da=ACME3_FBO`. Luôn tra `list_programs`,
-  không suy theo cảm tính.
+- Cắt tên thư mục ra mã dự án sai ở nhiều dự án đang có thật: mã trực giác suy từ tên thư
+  mục (bỏ hậu tố SP, cắt ngắn tên công ty) thường KHÔNG tồn tại trong `nbdmda`; và có
+  trường hợp mã trực giác lại trúng một dự án **cũ, khác hẳn** — bản mới của cùng khách
+  mang mã có hậu tố (dạng `<MA>_FBO`). Luôn tra `list_programs`, không suy theo cảm tính.
 - Một khách có thể có NHIỀU dòng `nbdmda` (nhiều sản phẩm/chi nhánh/dự án cũ còn treo) —
   `query` theo tên công ty có thể ra nhiều `ma_da` không liên quan tới workspace đang đứng.
   Luôn đối chiếu `programPath` trả về với workspace thật, đừng chọn dòng đầu tiên.

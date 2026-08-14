@@ -25,7 +25,7 @@ export async function executeQuery(validatedQuery, context = {}) {
   }
 
   // Metadata thắng context khi nó tự khai nơi chạy: SQL sinh từ metadata QLDA chỉ chạy được
-  // trên DB nội bộ QLDA_APP, chạy nhầm vào chương trình khách là tra sai bảng — hoặc tệ hơn,
+  // trên DB nghiệp vụ QLDA nội bộ, chạy nhầm vào chương trình khách là tra sai bảng — hoặc tệ hơn,
   // trúng một bảng trùng tên bên DB khách.
   const connection = validatedQuery.metadata?.connection || {};
   const program = connection.program || context.programPath || context.program;

@@ -43,6 +43,18 @@ function loadLocalPm(root) {
   }
 }
 
+/** Đọc thẳng data/qlda.local.json ở data root — dùng cho overlay cấu trúc QLDA bên dưới. */
+function loadLocalFile(root) {
+  const file = path.join(dataRoot(root), LOCAL_REL);
+  if (!fs.existsSync(file)) return {};
+  try {
+    const local = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return local && typeof local === 'object' ? local : {};
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Gán review.pm từ qlda.local.json khi qlda.json còn placeholder hoặc local có giá trị.
  * Không mutate object trong cache — trả bản shallow-clone phần `review.pm`.
@@ -64,6 +76,50 @@ function overlayPmFromLocal(json, root) {
       ...json.review,
       pm: { ...base, maNv, boPhanLt },
     },
+  };
+}
+
+/**
+ * Gán giá trị cấu trúc QLDA (đường dẫn program, tên database) từ qlda.local.json khi
+ * qlda.json còn giữ TOKEN `{...}` — cùng cơ chế với `overlayPmFromLocal`, áp cho các field
+ * mà `mcp/fbo/lib/sql.mjs` đọc để định tuyến kết nối. `data/qlda.json` đi kèm gói phân phối
+ * công khai nên KHÔNG BAO GIỜ chứa giá trị thật; giá trị thật chỉ nằm ở qlda.local.json
+ * (gitignore) hoặc do `4ai setup` ghi vào.
+ */
+function overlayQldaStructureFromLocal(json, root) {
+  if (!json?.databases?.qlda) return json;
+  const local = loadLocalFile(root);
+
+  const pick = (tokenValue, localValue) =>
+    (!isPmPlaceholder(localValue) ? String(localValue).trim() : tokenValue);
+
+  const qlda = json.databases.qlda;
+  const graph4ai = json.databases?.graph4ai;
+  const attachments = json.attachments;
+
+  return {
+    ...json,
+    databases: {
+      ...json.databases,
+      qlda: {
+        ...qlda,
+        path: pick(qlda.path, local.qldaProgramPath),
+        databaseName: pick(qlda.databaseName, local.qldaDatabaseName),
+        sysDatabaseName: pick(qlda.sysDatabaseName, local.qldaSysDatabaseName),
+      },
+      ...(graph4ai ? {
+        graph4ai: { ...graph4ai, databaseName: pick(graph4ai.databaseName, local.graph4aiDatabaseName) },
+      } : {}),
+    },
+    ...(attachments ? {
+      attachments: {
+        ...attachments,
+        fileStore: attachments.fileStore ? {
+          ...attachments.fileStore,
+          root: pick(attachments.fileStore.root, local.attachmentsFileStoreRoot),
+        } : attachments.fileStore,
+      },
+    } : {}),
   };
 }
 
@@ -90,7 +146,7 @@ export function loadQldaConfig(hub) {
         })();
 
     // Overlay local mỗi lần gọi (local có thể đổi mà qlda.json không) — không cache bản đã gán.
-    return overlayPmFromLocal(base, root);
+    return overlayQldaStructureFromLocal(overlayPmFromLocal(base, root), root);
   }
   return null;
 }

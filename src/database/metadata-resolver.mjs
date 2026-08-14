@@ -2,7 +2,7 @@
 //
 // Hai domain, hai nguồn metadata khác nhau:
 //   - `qlda` — dự án / yêu cầu (UR) / hạn hoàn thành. Nguồn là data/qlda.json, dữ liệu nằm ở
-//     DB nội bộ QLDA_APP, KHÔNG nằm trong chương trình của khách nào.
+//     DB nghiệp vụ QLDA nội bộ, KHÔNG nằm trong chương trình của khách nào.
 //   - `fbo`  — nghiệp vụ trong một chương trình khách. Nguồn là chỉ mục SQLite của program.
 // Chọn nhầm domain là ra sai bảng ngay từ bước đầu, nên bước phân giải này đứng trước tất cả.
 

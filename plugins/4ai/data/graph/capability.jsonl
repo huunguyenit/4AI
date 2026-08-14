@@ -15,7 +15,7 @@
 // verdict="workaround" thì đính kèm ImplementationPlan ở ledger/<ma_da>/graph.jsonl của
 // dự án đang cần workaround đó, nối bằng HAS_IMPLEMENTATION_PLAN từ Request tương ứng.
 
-// ---- ví dụ thật, PM xác nhận 2026-08-10 — dùng làm căn cứ cho UR-03 của DEMO1 ----
+// ---- ví dụ thật, PM xác nhận 2026-08-10 — dùng làm căn cứ cho một UR đã chốt ----
 // Báo cáo công nợ theo tuổi nợ là báo cáo chuẩn của FBO (không phải customize).
 {"_":"node","kind":"Capability","id":"sales-aging-report","menuBar":"Báo cáo công nợ","sysid":"","phanHe":"Bán hàng","nghiepVu":"Báo cáo tuổi nợ theo nhiều mức tuổi nợ"}
 {"_":"node","kind":"CapabilityVerdict","id":"sales-aging-report|FBISP2422","capabilityId":"sales-aging-report","ma_pbsp":"FBISP2422","verdict":"co","source":"PM xác nhận 2026-08-10","note":"Báo cáo chuẩn hỗ trợ cấu hình số mức tuổi nợ, không cần customize."}

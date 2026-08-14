@@ -31,12 +31,12 @@ alwaysApply: true
 ## Ví dụ
 
 "Review yêu cầu trạng thái DD" khi đang đứng ở
-`\\10.0.0.1\CustomerPro\FBI\DEMO1\FBISP2422`:
+`\\10.0.0.1\CustomerPro\FBI\<MA_DA>\FBISP2422`:
 
-1. Khớp workspace → `DEMO1`, FBI, FBISP2422.
+1. Khớp workspace → `<MA_DA>`, FBI, FBISP2422.
 2. `DD` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
    **"Đã duyệt"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
-3. Giao `pm-ur-analyst` với: `ma_da=DEMO1`, lọc `trang_thai='DD'`.
+3. Giao `pm-ur-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='DD'`.
 
 ## Bẫy
 

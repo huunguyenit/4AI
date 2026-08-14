@@ -12,4 +12,4 @@
 // các mẫu này, không đặt hệ số cứng.
 //
 // Mẫu một dòng (xoá dấu // để dùng):
-// {"_":"node","kind":"EffortSample","id":"cbvn-zcdmtdtt","featureType":"danh-muc","doKho":"trung-binh","trongTlks":true,"menu_id":"","sysid":"","gioCong":8,"ur_stt_rec":"","ma_da":"DEMO1","duyetBoi":"PM01","duyetVaoSp":"FBISP2422","ghiChu":"..."}
+// {"_":"node","kind":"EffortSample","id":"vidu-zcdmtdtt","featureType":"danh-muc","doKho":"trung-binh","trongTlks":true,"menu_id":"","sysid":"","gioCong":8,"ur_stt_rec":"","ma_da":"<MA_DA>","duyetBoi":"<MA_NV>","duyetVaoSp":"FBISP2422","ghiChu":"..."}

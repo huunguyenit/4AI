@@ -50,9 +50,8 @@
 
   "database": {
     "provider": "sqlserver",
-    "databaseName": "GRAPH_4AI",
-    "serverAlias": "fsd-sql2016",
-    "note": "DB nội bộ của 4AI, tách khỏi DB nghiệp vụ (QLDA_APP) và khỏi DB của khách. Chỉ chứa chỉ mục đồ thị — không chứa dữ liệu nghiệp vụ, không chứa tài liệu khách.",
+    "databaseName": "{Graph4aiDatabaseName}",
+    "note": "DB nội bộ của 4AI, tách khỏi DB nghiệp vụ QLDA và khỏi DB của khách. Chỉ chứa chỉ mục đồ thị — không chứa dữ liệu nghiệp vụ, không chứa tài liệu khách.",
     "connectionKey": "graphConnectionString",
     "resolveOrder": [
       { "kind": "env", "name": "GRAPH_4AI_CONNECTION" },
@@ -66,10 +65,10 @@
     "steps": [
       "1. `node tools/4ai.mjs graph build` đọc mọi file JSONL theo `sourceOfTruth.layout`.",
       "2. Validate: node trùng key, prop lạ, cạnh trỏ tới node không tồn tại, edgeType không hợp lệ (tra cả `edgeTypes` lẫn `reviewEdgeTypes`), cặp (from,to) không nằm trong `allowedPairs` → báo lỗi, không sinh file.",
-      "3. Sinh `.4ai/graph/GRAPH_4AI.sql`: CREATE TABLE ... AS NODE / AS EDGE (nếu chưa có) + nạp toàn bộ dữ liệu. Script idempotent — chạy hai lần cho cùng kết quả.",
+      "3. Sinh `.4ai/graph/graph-4ai.sql`: CREATE TABLE ... AS NODE / AS EDGE (nếu chưa có) + nạp toàn bộ dữ liệu. Script idempotent — chạy hai lần cho cùng kết quả.",
       "4. Nạp bằng sqlcmd hoặc query_sql. Bước này CẦN PM xác nhận, hub không tự chạy."
     ],
-    "outputPath": ".4ai/graph/GRAPH_4AI.sql",
+    "outputPath": ".4ai/graph/graph-4ai.sql",
     "outputIgnored": true
   },
 
