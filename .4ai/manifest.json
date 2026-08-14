@@ -26,7 +26,7 @@
     },
     {
       "path": ".agents/agents/pm-deadline-review.md",
-      "sha256": "728e616c835674ca9bdff381a64d17006a1c2b11433b6a2b70d36dcd6ca4c3d8",
+      "sha256": "ec4bd22d5fe674f867637956e00706034cff55fb4497decfee208a589d1c657d",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -242,7 +242,7 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "2a432f4dee1d55eb93ae9763989e03d86a1537f7c741c7de234b7e04c69543e9",
+      "sha256": "efc075de1d53f8d25869fd069c58a95fcab6a9607711a5f02ca6f8aa0b15a389",
       "sourceId": "pm-review",
       "sourceVersion": 9
     },
@@ -282,7 +282,7 @@
     },
     {
       "path": ".claude/agents/pm-deadline-review.md",
-      "sha256": "fbeb1c50f9bcab9b098b6959bd779c73453d5e413ac4244ab68f5d166997ced5",
+      "sha256": "356244280b93121a8ad629431964694540e26e050a88e2df18909230df157da0",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -366,7 +366,7 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "cbee2629cf2f13742d8d744e5e32463f98dcc5a03deba62ed9c075bd88c5f33c",
+      "sha256": "873bd991de2cc4023e1d63c38c6678ce2cce10dfb77c82c48ad83322ef0d8365",
       "sourceId": "pm-review",
       "sourceVersion": 9
     },
@@ -504,7 +504,7 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "52d28c51334df5475526c7cc83392766431c3e1df54efb4d87ba1bf14030527b",
+      "sha256": "f49a719336f921838dc438e344b4871ae6099355ce55669d1c4822a017d8897a",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -588,7 +588,7 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "803a28b0a70281704da4b88b52dea2f46c432528caf8be6981d9a5391204efba",
+      "sha256": "677f69e88070069d90d09244a67ebef1c32f18185018c235b9f40446a999b5b7",
       "sourceId": "pm-review",
       "sourceVersion": 9
     },
@@ -792,7 +792,7 @@
     },
     {
       "path": ".github/chatmodes/pm-deadline-review.chatmode.md",
-      "sha256": "e72626f0131732db566893f0fc29f44d6bdd67ad1cbb07830f28af8cd0ddc906",
+      "sha256": "e005dbcd42ea374cbcf783429f3de44165da8e96da2d2e2c3d19499efbcb6273",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -946,7 +946,7 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "26327100232d6feae049ccaf1bd68c743f0a3b30bc4256ad4d4c7aba792bfc2d",
+      "sha256": "c2cc0e1df65ce07727bb95c0850644fe0c9c31b1d5c243d29f9dfd19c9755c43",
       "sourceId": "pm-review",
       "sourceVersion": 9
     },
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T03:03:47.455Z",
+  "syncedAt": "2026-08-14T03:17:23.625Z",
   "target": "4ai"
 }

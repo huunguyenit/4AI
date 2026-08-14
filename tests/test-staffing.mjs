@@ -21,10 +21,10 @@ const H = loadHolidays();
 
 // Roster giả, dựng theo đúng hình dạng userinfo2 của FSD: một PP, phần còn lại NV.
 const ROSTER_ROWS = [
-  { ma_nv: 'NV07', ten: 'Nguyễn Minh Thành', quan_ly: '', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'PP' },
-  { ma_nv: 'NV01', ten: 'Nguyễn Linh Vũ Huy', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
-  { ma_nv: 'PM01', ten: 'Trần Dung Hữu Nguyên', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
-  { ma_nv: 'NV08', ten: 'Nguyễn Ngọc Thanh', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
+  { ma_nv: 'NV07', ten: 'Nhân viên Bảy', quan_ly: '', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'PP' },
+  { ma_nv: 'NV01', ten: 'Nhân viên Một', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
+  { ma_nv: 'PM01', ten: 'Nhân viên PM', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
+  { ma_nv: 'NV08', ten: 'Nhân viên Tám', quan_ly: 'NV07', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV' },
 ];
 const roster = normalizeRoster(ROSTER_ROWS);
 
@@ -59,15 +59,15 @@ ok('phoPhong roster không có PP -> rỗng',
 process.stdout.write('\n=== ai là PM ===\n');
 const projects = [
   { ma_da: 'DEMO1', ltql: ['PM01'] },
-  { ma_da: 'NEWPEARL', ltql: ['ThanhNM'] },          // nbdmda viết hoa thường không thống nhất
+  { ma_da: 'NEWPEARL', ltql: ['nv07'] },          // nbdmda viết hoa thường không thống nhất
   { ma_da: 'TFR', ltql: ['TUANLH'] },                // đã chuyển bộ phận
   { ma_da: 'CNBT', ltql: ['NV01', 'PM01'] },
 ];
 const pmSet = xacDinhPm(roster, projects);
 ok('PM = người trong roster có tên ở ma_ltql123',
-  [...pmSet].sort().join(',') === 'NV01,PM01,NV07', [...pmSet].sort().join(','));
+  [...pmSet].sort().join(',') === 'NV01,NV07,PM01', [...pmSet].sort().join(','));
 ok('Người đã rời phòng KHÔNG được tính là PM', !pmSet.has('TUANLH'));
-ok('Hoa thường lệch không đẻ ra PM thứ hai', !pmSet.has('ThanhNM'));
+ok('Hoa thường lệch không đẻ ra PM thứ hai', !pmSet.has('nv07'));
 
 process.stdout.write('\n=== PM của dự án khi LTQL đã off / chuyển phòng ===\n');
 const pmCbvn = pmCuaDuAn(['PM01'], roster, 'NV07');

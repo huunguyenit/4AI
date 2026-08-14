@@ -19,7 +19,7 @@ Giao [pm-deadline-review]. Tham số là mã dự án (`nbdmda.ma_da`).
 
 **Có mã dự án** → `node tools/4ai.mjs report --project $ARGUMENTS` rồi `serve /review/<MA_DA>`.
 
-**Bỏ trống** → `node tools/4ai.mjs report` rồi `serve /review`. Toàn bộ dự án `{PMName}` đứng tên LTQL — không chỉ dự án nói tới gần đây.
+**Bỏ trống** → `node tools/4ai.mjs report` rồi `serve /review`. Toàn bộ dự án **bạn** đứng tên LTQL (mã PM lấy từ `pm.maNv` trong `data/qlda.local.json`) — không chỉ dự án nói tới gần đây.
 
 **Không có shell** (chat, Cowork — không chạy được `node`) → gọi tool `render_review_report`
 (`project` bỏ trống = toàn bộ). Nó dựng đúng bộ file đó bằng chính code của `4ai report` và trả
