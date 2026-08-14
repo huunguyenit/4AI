@@ -5,6 +5,8 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+## [v0.4.0] — 2026-08-14
+
 ### Sửa lỗi — trạng thái mất theo phiên Cowork
 
 - **`stateRoot()` tách khỏi `dataRoot()`.** `${CLAUDE_PLUGIN_DATA}` không bền như tên gọi: trong

@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".cursor-plugin/plugin.json",
-      "sha256": "f6e8a370c2904df8fa886799758ecdcd4a210211719900ae2fdd40751da6f3b6"
+      "sha256": "77968932502bc460829fe7c1f34394dd026b31da5df1398cd4ce3f986f3ee454"
     },
     {
       "path": "agents/fbo-change-reviewer.md",
@@ -532,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T08:01:48.969Z",
+  "syncedAt": "2026-08-14T08:13:54.892Z",
   "target": "plugin-cursor"
 }
