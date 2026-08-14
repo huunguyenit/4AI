@@ -242,9 +242,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "efc075de1d53f8d25869fd069c58a95fcab6a9607711a5f02ca6f8aa0b15a389",
+      "sha256": "2235460fd35689b6ab793e3cd834b7a439da1026a7955a203948a908c34a8798",
       "sourceId": "pm-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -366,9 +366,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "873bd991de2cc4023e1d63c38c6678ce2cce10dfb77c82c48ad83322ef0d8365",
+      "sha256": "c6cd0dc33fc5cb07d18d9e08a48c0f4f92173f391ad17028425090b2d7ecb621",
       "sourceId": "pm-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -588,9 +588,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "677f69e88070069d90d09244a67ebef1c32f18185018c235b9f40446a999b5b7",
+      "sha256": "f98317d91d9866fa42f2d667dbfaa788d67e86bc03147bf4d9b00be485045376",
       "sourceId": "pm-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -946,9 +946,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "c2cc0e1df65ce07727bb95c0850644fe0c9c31b1d5c243d29f9dfd19c9755c43",
+      "sha256": "7d9fdd02bd286a273fe11f3b8ea5637a2ec3992f3f8375914b0ae95b084c37f5",
       "sourceId": "pm-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T03:17:23.625Z",
+  "syncedAt": "2026-08-14T07:12:09.837Z",
   "target": "4ai"
 }

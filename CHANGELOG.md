@@ -5,6 +5,38 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Sửa lỗi — bề mặt không có shell (chat/Cowork)
+
+Rút từ một phiên `/4ai:pm-review` chạy thật trên Cowork: báo cáo cuối cùng ra được, nhưng mất
+bốn lượt hỏi-đáp và ba lần "retry" mù cho những thứ lẽ ra tool phải tự nói.
+
+- **Tool MCP `doctor` (mới).** `4ai doctor` trước giờ chỉ sống ở CLI — mà bề mặt hay hỏng cấu
+  hình nhất lại đúng là bề mặt không có shell. Không có nó thì khi một tool báo "chưa khai kết
+  nối", cả PM lẫn trợ lý đều không phân biệt được: khai nhầm file, đặt biến môi trường sau khi
+  tiến trình đã chạy, hay gõ sai tên khoá — nên chỉ còn cách thử lại và đoán. Tool trả về data
+  root đang dùng, **đường dẫn thật** của `qlda.local.json` được đọc, **tên** khoá đã khai (không
+  bao giờ giá trị), nguồn kết nối app/sys/đồ thị, danh tính PM, giấy phép, sqlcmd, thư mục
+  ledger, kèm `goiY[]` là các bước sửa cụ thể. Chạy được **khi chưa có giấy phép** — cùng nhóm
+  với `license_status`/`license_activate`, vì chẩn đoán mà bị chặn thì vô dụng đúng lúc cần nhất.
+  Hàm `nguonKetNoiGraph()` viết cho `doctor` từ trước nhưng chưa ai gọi, giờ mới thật sự có lối ra.
+- **Thông báo lỗi thiếu kết nối giờ chỉ đúng file phải sửa.** `resolveGraphConn()` từng bảo
+  "chạy `node tools/4ai.mjs setup`" — vô nghĩa ở nơi không có `node` — và nhắc `data/qlda.local.json`
+  bằng đường dẫn tương đối, trong khi trên máy có tới ba bản sao cùng tên mà chỉ bản trong data
+  root được đọc. Giờ in **đường dẫn tuyệt đối** của bản có tác dụng, nói rõ sửa file thì ăn ngay
+  còn đổi biến môi trường thì phải khởi động lại host, và trỏ sang `doctor`. Cùng cách chữa cho
+  lỗi thiếu `Initial Catalog` và lỗi chuỗi kết nối QLDA không có `Data Source`.
+  `duongDanQldaLocal()` tách ra từ `localConnString()` để một chỗ tính đường dẫn, mọi nơi dùng lại.
+- **`render_review_report` trả `trangChinh`** — đường dẫn **tuyệt đối** của `tong.html`
+  (hoặc `review.html` khi có `project`). Trước chỉ có `relPath` trong `files[]`, nên ở Cowork —
+  nơi ledger nằm ngoài mọi thư mục người dùng mở được — không ai chỉ tới được file vừa dựng.
+  Trường `xem` cũng thôi khuyên "mở HTML" ở bề mặt không mở được: nói thẳng là đừng thử `Read`
+  nó, phân tích từ `ddUR`, và muốn file cầm được thì ghi bản phân tích ra thư mục phiên.
+- **`/pm-review` (v9 → v10) chọn bề mặt TRƯỚC.** Bản v9 mở đầu bằng "Giao [pm-deadline-review]"
+  rồi mới nêu nhánh không-shell ở dưới, nên trên Cowork trợ lý vẫn spawn sub-agent — mà sub-agent
+  ở đó không được cấp Bash, nên nó dừng lại xin quyền và mất trắng một lượt. Giờ câu hỏi "bề mặt
+  này có chạy được `node` không" đứng đầu, hai nhánh nằm sau nó, và có thêm mục xử lý tình huống
+  "báo thiếu cấu hình mà người dùng nói đã khai rồi" → gọi `doctor` một lần thay vì bảo thử lại.
+
 ### Bảo mật
 
 - **Dọn định danh hạ tầng nội bộ khỏi repo — chuẩn bị publish Cursor Marketplace công khai.**

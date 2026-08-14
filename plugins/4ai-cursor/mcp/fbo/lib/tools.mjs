@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 17 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 18 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -9,12 +9,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { readSource, stripAccents } from './encoding.mjs';
 import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot } from './index.mjs';
-import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
+import {
+  runSql, objectSql, sqlLiteral, redact,
+  duongDanQldaLocal, nguonKetNoi, nguonKetNoiGraph, findSqlcmd,
+} from './sql.mjs';
 import { licenseStatus, saveLicense } from './license.mjs';
 import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../../src/database/qlda-metadata.mjs';
 import { fetchReviewDataset } from '../../../tools/lib/review-dataset.mjs';
 import { buildReviewReportFiles, ddChoPhanTich } from '../../../tools/lib/review-report.mjs';
+import { duongDanDuAn, duongDanTong } from '../../../tools/lib/report.mjs';
 import { writeArtifacts } from '../../../tools/lib/writer.mjs';
 import { ledgerRoot } from '../../../tools/lib/assets.mjs';
 
@@ -397,14 +401,27 @@ export const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: 'doctor',
+    description:
+      'Chẩn đoán BẢN CÀI NÀY: data root đang dùng, đường dẫn file qlda.local.json thật sự được đọc, '
+      + 'khoá nào đã khai (chỉ TÊN khoá và có/không — không bao giờ trả giá trị), danh tính PM, nguồn '
+      + 'kết nối app/sys/đồ thị (env | qlda.local.json | Web.config | chưa khai), giấy phép, sqlcmd, thư mục ledger. '
+      + 'Gọi tool này NGAY khi một tool khác báo thiếu cấu hình mà người dùng khẳng định "đã khai rồi" — '
+      + 'gần như luôn là khai nhầm chỗ (một máy có nhiều bản sao qlda.local.json: trong hub, trong thư mục gói '
+      + 'plugin, trong data root; CHỈ bản trong data root được đọc) hoặc đặt biến môi trường sau khi tiến trình '
+      + 'MCP đã khởi động. Đừng đoán, đừng bảo người dùng thử lại nhiều lần — hỏi tool này. '
+      + 'Chạy được cả khi chưa có giấy phép.',
+    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+  },
 ];
 
 /**
- * Hai tool giấy phép phải chạy được KHI CHƯA CÓ giấy phép — nếu không thì người dùng không
- * có đường nào đọc Device ID hay kích hoạt ở bề mặt không có shell. server.mjs đọc danh sách
+ * Các tool phải chạy được KHI CHƯA CÓ giấy phép — nếu không thì người dùng không có đường nào
+ * đọc Device ID, kích hoạt, hay chẩn đoán ở bề mặt không có shell. server.mjs đọc danh sách
  * này để quyết định chặn hay không.
  */
-export const TOOLS_KHONG_CAN_LICENSE = new Set(['license_status', 'license_activate']);
+export const TOOLS_KHONG_CAN_LICENSE = new Set(['license_status', 'license_activate', 'doctor']);
 
 // ---------------------------------------------------------------- handlers
 
@@ -952,17 +969,27 @@ export const HANDLERS = {
     const destRoot = ledgerRoot(hub);
     const plan = writeArtifacts({ destRoot, files: built.files });
 
+    // Đường dẫn TUYỆT ĐỐI của trang chính. Trả relPath không thôi là chưa đủ: ở Cowork ledger
+    // nằm ngoài mọi thư mục người dùng mở được, nên nếu không nói ra đường dẫn đầy đủ thì cả
+    // model lẫn PM đều không có cách nào chỉ tới file vừa dựng.
+    const trangChinh = path.join(destRoot,
+      args.project ? duongDanDuAn(built.ngay, args.project) : duongDanTong(built.ngay));
+
     return {
       ngay: built.ngay,
       pm: built.pm,
       filters: built.dataset.filters,
       ledger: destRoot,
+      trangChinh,
       files: plan.map((p) => ({ action: p.action, path: p.relPath, bytes: p.bytes })),
       ...ddChoPhanTich(built.dataset),
       boQua: built.boQua,
       canhBao: built.canhBao,
-      xem: 'Có shell thì mở bằng `4ai serve /review` (hoặc `/review/<MA_DA>`). Không có shell thì '
-        + 'phân tích thẳng từ `ddUR` ở đây — file HTML đã nằm trong ledger, không cần dựng lại.',
+      xem: `Trang chính: ${trangChinh}. Có shell thì mở bằng \`4ai serve /review\` (hoặc `
+        + '`/review/<MA_DA>`). KHÔNG có shell (chat/Cowork): ledger nằm ngoài thư mục người dùng '
+        + 'mở được, nên đừng hứa "mở file HTML ra xem" và đừng thử Read nó — phân tích thẳng từ '
+        + '`ddUR` ở đây. Người dùng muốn một file cầm được thì ghi bản tóm tắt của bạn ra thư mục '
+        + 'làm việc của phiên, đừng dựng lại báo cáo từ dữ liệu thô.',
     };
   },
 
@@ -1030,6 +1057,95 @@ export const HANDLERS = {
       license: kq.license,
       ...(kq.conLai != null ? { conLaiNgay: kq.conLai } : {}),
       note: 'Đã kích hoạt. Các tool khác dùng được ngay lần gọi tiếp theo — không cần khởi động lại MCP server.',
+    };
+  },
+
+  /**
+   * Bản MCP của `4ai doctor`.
+   *
+   * Có tool này vì `doctor` cũ chỉ sống ở CLI, mà bề mặt hay hỏng cấu hình nhất (chat/Cowork)
+   * lại đúng là bề mặt không có shell. Không có nó thì khi một tool báo "chưa khai kết nối",
+   * cả người dùng lẫn model đều không phân biệt được ba khả năng: khai nhầm file, đặt biến
+   * môi trường sau khi tiến trình đã chạy, hay gõ sai tên khoá — nên chỉ còn cách thử lại
+   * nhiều lần và đoán.
+   *
+   * Hợp đồng bảo mật: trả TÊN nguồn và TÊN khoá, không bao giờ trả giá trị. Đường dẫn file
+   * thì có — đó chính là thứ cần nói ra, và nó không phải bí mật.
+   */
+  doctor(hub) {
+    const fileCauHinh = duongDanQldaLocal();
+    const tonTai = fs.existsSync(fileCauHinh);
+
+    // Chỉ liệt kê khoá nào ĐÃ có giá trị không rỗng. Giá trị không rời khỏi tiến trình này.
+    let khoaDaKhai = [];
+    let doiCuPhap = false;
+    if (tonTai) {
+      try {
+        const j = JSON.parse(fs.readFileSync(fileCauHinh, 'utf8'));
+        khoaDaKhai = Object.entries(j)
+          .filter(([, v]) => (typeof v === 'string' ? v.trim() !== '' : v != null))
+          .map(([k]) => k)
+          .sort();
+      } catch {
+        doiCuPhap = true; // JSON hỏng bị mọi nơi nuốt im lặng — đây là chỗ duy nhất nói ra
+      }
+    }
+
+    const cfg = loadQldaConfig(hub);
+    const qldaPath = cfg?.databases?.qlda?.path ?? '';
+    const pmCode = trimmed(cfg?.review?.pm?.maNv);
+    const pmDept = trimmed(cfg?.review?.pm?.boPhanLt);
+    const pmDaKhai = !!pmCode && !isPmPlaceholder(pmCode);
+
+    const st = licenseStatus(hub);
+    const nguonGraph = nguonKetNoiGraph();
+
+    const goiY = [];
+    if (doiCuPhap) {
+      goiY.push(`\`${fileCauHinh}\` sai cú pháp JSON — mọi khoá trong đó đang bị bỏ qua im lặng. Sửa cú pháp trước, rồi mới kết luận thiếu cấu hình.`);
+    }
+    if (!pmDaKhai) {
+      goiY.push('Chưa gán PM — gọi `set_pm_identity({ maNv, boPhanLt })`. Hỏi người dùng đúng hai giá trị đó, không đoán.');
+    }
+    if (nguonGraph === 'chưa khai') {
+      goiY.push(`Đồ thị năng lực chưa dùng được: thêm khoá \`graphConnectionString\` vào ĐÚNG file \`${fileCauHinh}\`. `
+        + 'Bản sao `qlda.local.json` nằm trong hub hay trong thư mục gói plugin KHÔNG được đọc — đây là kiểu khai nhầm chỗ hay gặp nhất.');
+    }
+    if (nguonGraph === 'env') {
+      goiY.push('Kết nối đồ thị đang lấy từ biến môi trường. Biến này được chụp lúc tiến trình MCP khởi động: '
+        + 'đổi giá trị mà không khởi động lại ứng dụng host thì tiến trình vẫn dùng giá trị cũ.');
+    }
+    if (!st.ok) goiY.push(st.message);
+    if (!findSqlcmd()) {
+      goiY.push('Không tìm thấy `sqlcmd` trên máy này — mọi tool phải truy vấn SQL sẽ hỏng, kể cả khi cấu hình kết nối đã đúng.');
+    }
+
+    return {
+      caiDat: {
+        hub,
+        dataRoot: dataRoot(hub),
+        fileCauHinh,
+        tonTai,
+        ...(doiCuPhap ? { loi: 'JSON sai cú pháp — file bị bỏ qua hoàn toàn' } : {}),
+        khoaDaKhai,
+        ledger: ledgerRoot(hub),
+      },
+      pm: pmDaKhai ? { maNv: pmCode, boPhanLt: pmDept } : null,
+      // Chỉ TÊN nguồn — xem docstring nguonKetNoi()/nguonKetNoiGraph().
+      nguonKetNoi: {
+        qldaApp: qldaPath ? nguonKetNoi(qldaPath, 'app') : 'chưa khai đường dẫn QLDA',
+        qldaSys: qldaPath ? nguonKetNoi(qldaPath, 'sys') : 'chưa khai đường dẫn QLDA',
+        graph: nguonGraph,
+      },
+      sqlcmd: findSqlcmd() ? 'có' : 'không tìm thấy',
+      giayPhep: {
+        deviceId: st.deviceId,
+        state: st.state,
+        ok: st.ok,
+        ...(st.conLai != null ? { conLaiNgay: st.conLai } : {}),
+      },
+      goiY,
+      note: 'Tool này không bao giờ trả connection string, user hay password — chỉ tên nguồn và tên khoá.',
     };
   },
 };

@@ -94,9 +94,9 @@
     },
     {
       "path": "commands/pm-review.md",
-      "sha256": "873bd991de2cc4023e1d63c38c6678ce2cce10dfb77c82c48ad83322ef0d8365",
+      "sha256": "c6cd0dc33fc5cb07d18d9e08a48c0f4f92173f391ad17028425090b2d7ecb621",
       "sourceId": "pm-review",
-      "sourceVersion": 9
+      "sourceVersion": 10
     },
     {
       "path": "commands/pm-status.md",
@@ -170,11 +170,11 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "cb7ead7230b08927559c829a8360603df3db6e0982435f339706dbcdb4704437"
+      "sha256": "dc236ed2c7a8567c1b5fe29930483c7874e812149a7e92406f2050756cfcbc98"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "52f7c98b617ffbeae363b29e0352f79003db31334978e09c5dd0c9a87327330d"
+      "sha256": "a75b0021ab4e77a86786b273f8e3e0ea5720572141792008d700b7e9fa78210b"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -532,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T03:17:23.677Z",
+  "syncedAt": "2026-08-14T07:12:09.915Z",
   "target": "plugin"
 }

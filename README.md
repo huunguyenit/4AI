@@ -171,7 +171,7 @@ Xem trạng thái và hạn bất cứ lúc nào: `node tools/4ai.mjs license`.
 
 | Bị chặn | Không bị chặn |
 |---|---|
-| Mọi tool MCP tra cứu (`list_programs`, `find_controller`, `query_sql`…) | `license_status`, `license_activate` |
+| Mọi tool MCP tra cứu (`list_programs`, `find_controller`, `query_sql`…) | `license_status`, `license_activate`, `doctor` |
 | `4ai report`, `4ai serve`, `4ai graph` | `4ai check`, `sync`, `list`, `explain`, `targets`, `doctor`, `setup` |
 
 `tools/list` **vẫn** liệt kê đủ tool khi chưa kích hoạt — chặn ở bước gọi chứ không ở lúc khởi
@@ -303,6 +303,23 @@ thì lấy `databaseName`/`sysDatabaseName` trong `data/qlda.json`); chỉ khi r
 mới cần, vì Web.config của QLDA để placeholder `%Database`. Muốn kiểm kết nối đang lấy từ đâu
 mà không phải in chuỗi bí mật ra màn hình thì dùng `nguonKetNoi(programPath, dbType)` trong
 `mcp/fbo/lib/sql.mjs` — nó chỉ trả về tên nguồn (`env` / `qlda.local.json` / `Web.config`).
+
+#### ⚠️ Khai rồi mà vẫn báo chưa khai — hai cái bẫy
+
+**Bẫy 1 — sửa nhầm bản `qlda.local.json`.** Một máy thường có nhiều bản: trong hub, trong thư
+mục **gói plugin đã cài**, và trong data root. Chỉ **một** bản được đọc: `${CLAUDE_PLUGIN_DATA}/data/qlda.local.json`
+khi chạy như plugin, gốc hub khi chạy dev. Copy file cấu hình của hub vào thư mục gói plugin
+là công cốc — không ai đọc nó, và lỗi trông y hệt như chưa sửa gì.
+
+**Bẫy 2 — đặt biến môi trường sau khi tiến trình đã chạy.** Tiến trình MCP giữ **bản chụp** môi
+trường lúc khởi động. `setx` hay sửa trong System Properties xong mà chưa thoát hẳn ứng dụng
+host (Claude Desktop/Cowork) thì tiến trình đang chạy vẫn dùng giá trị cũ. Sửa file
+`qlda.local.json` thì ngược lại — có hiệu lực **ngay lần gọi tool tiếp theo**.
+
+Không có shell để chạy `doctor` (chat, Cowork) thì gọi **tool MCP `doctor`**: nó trả về data
+root đang dùng, **đường dẫn thật** của file cấu hình được đọc, danh sách **tên khoá** đã khai,
+nguồn kết nối app/sys/đồ thị, giấy phép, sqlcmd — không bao giờ trả giá trị chuỗi kết nối. Một
+lần gọi tool này thay cho việc thử lại nhiều lần rồi đoán.
 
 Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.gitignore`):
 

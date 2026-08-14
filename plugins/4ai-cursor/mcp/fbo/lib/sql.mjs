@@ -154,15 +154,26 @@ function laQldaProgram(programPath) {
  * connection string không rời khỏi module này, nên nó cũng không được đi vào một module khác
  * chỉ để quay lại đây.
  */
+/**
+ * ĐÚNG MỘT vị trí file cấu hình cục bộ của bản cài này — plugin đặt
+ * `FBO_DATA_ROOT=${CLAUDE_PLUGIN_DATA}`, dev thì là gốc hub. Trùng khớp với chỗ
+ * `set_pm_identity` và `4ai setup` GHI ra, nên đọc và ghi không bao giờ lệch nhau.
+ *
+ * Cố tình KHÔNG dò thêm cwd hay các gốc khác: thêm vị trí dự phòng nghe thì an toàn, nhưng
+ * biến kết quả thành "tuỳ chạy từ thư mục nào" — thứ vừa khó dò khi hỏng, vừa làm test phụ
+ * thuộc trạng thái máy đang chạy.
+ *
+ * Export ra ngoài vì thông báo lỗi và `doctor` phải nói được ĐÚNG file cần sửa: trên một máy
+ * thường có nhiều bản sao `qlda.local.json` (hub, thư mục gói plugin, data root) mà chỉ một
+ * bản được đọc. Không in đường dẫn ra thì người dùng sửa nhầm bản không ai đọc, và lỗi trông
+ * y hệt như chưa sửa gì.
+ */
+export function duongDanQldaLocal() {
+  return path.join(dataRoot(MODULE_HUB_ROOT), 'data', 'qlda.local.json');
+}
+
 function localConnString(key) {
-  // ĐÚNG MỘT vị trí: data root của bản cài này — plugin đặt FBO_DATA_ROOT=${CLAUDE_PLUGIN_DATA},
-  // dev thì là gốc hub. Trùng khớp với chỗ `set_pm_identity` và `4ai setup` GHI ra, nên đọc và
-  // ghi không bao giờ lệch nhau.
-  //
-  // Cố tình KHÔNG dò thêm cwd hay các gốc khác: thêm vị trí dự phòng nghe thì an toàn, nhưng
-  // biến kết quả thành "tuỳ chạy từ thư mục nào" — thứ vừa khó dò khi hỏng, vừa làm test phụ
-  // thuộc trạng thái máy đang chạy.
-  const file = path.join(dataRoot(MODULE_HUB_ROOT), 'data', 'qlda.local.json');
+  const file = duongDanQldaLocal();
   if (!fs.existsSync(file)) return '';
   try {
     const v = JSON.parse(fs.readFileSync(file, 'utf8'))?.[key];
@@ -205,7 +216,7 @@ function qldaConn(dbType) {
   if (!conn.server) {
     throw new Error(
       `Chuỗi kết nối QLDA (${laSys ? 'sys' : 'app'}) không có \`Data Source\`/\`Server\` — kiểm lại `
-      + `biến env ${laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'} hoặc data/qlda.local.json.`);
+      + `biến env ${laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'} hoặc ${duongDanQldaLocal()}.`);
   }
   // Chuỗi kết nối không khai Initial Catalog thì lấy tên DB đã khai sẵn trong qlda.json —
   // nhờ vậy không phải truyền `database` ở mọi lệnh như thời còn đọc Web.config (%Database).
@@ -531,9 +542,15 @@ function resolveGraphConn() {
   const cs = String(process.env.GRAPH_4AI_CONNECTION ?? '').trim() || localConnString('graphConnectionString');
   if (!cs) {
     throw new Error(
-      'Chưa khai kết nối DB đồ thị 4AI. Đặt biến môi trường GRAPH_4AI_CONNECTION, '
-      + 'hoặc chạy `node tools/4ai.mjs setup` để ghi `graphConnectionString` vào data/qlda.local.json. '
-      + 'Từ lược đồ v3, đồ thị sống trong DB nên đây là cấu hình BẮT BUỘC, không còn là tuỳ chọn.');
+      'Chưa khai kết nối DB đồ thị 4AI. Từ lược đồ v3, đồ thị sống trong DB nên đây là cấu hình '
+      + 'BẮT BUỘC, không còn là tuỳ chọn. Hai đường, theo đúng thứ tự ưu tiên:\n'
+      + `  1. khoá \`graphConnectionString\` trong ${duongDanQldaLocal()}\n`
+      + '     (có shell thì `node tools/4ai.mjs setup` ghi hộ) — có hiệu lực NGAY ở lần gọi tool sau.\n'
+      + '  2. biến môi trường GRAPH_4AI_CONNECTION — thắng đường 1, nhưng KHÔNG có hiệu lực với '
+      + 'tiến trình MCP đang chạy: nó giữ bản chụp môi trường lúc khởi động, nên vừa đặt biến xong '
+      + 'mà chưa khởi động lại ứng dụng host thì vẫn thấy đúng lỗi này.\n'
+      + 'Sửa đúng file ở đường dẫn trên là cách chắc ăn nhất — bản sao `qlda.local.json` nằm trong hub '
+      + 'hay trong thư mục gói plugin KHÔNG được đọc. Gọi tool `doctor` để xem máy này đang đọc ở đâu.');
   }
   const conn = connFromString(cs);
   if (!conn.database) {
@@ -544,8 +561,8 @@ function resolveGraphConn() {
     if (isPlaceholder(khai)) {
       throw new Error(
         'Kết nối DB đồ thị không xác định được tên database — khai `Initial Catalog` trong '
-        + 'GRAPH_4AI_CONNECTION, hoặc `graph4aiDatabaseName` trong data/qlda.local.json '
-        + '(chạy `node tools/4ai.mjs setup`).');
+        + `GRAPH_4AI_CONNECTION, hoặc \`graph4aiDatabaseName\` trong ${duongDanQldaLocal()} `
+        + '(có shell thì `node tools/4ai.mjs setup`).');
     }
     conn.database = khai;
   }
