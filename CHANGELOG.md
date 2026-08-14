@@ -43,6 +43,13 @@ bốn lượt hỏi-đáp và ba lần "retry" mù cho những thứ lẽ ra too
   ledger, kèm `goiY[]` là các bước sửa cụ thể. Chạy được **khi chưa có giấy phép** — cùng nhóm
   với `license_status`/`license_activate`, vì chẩn đoán mà bị chặn thì vô dụng đúng lúc cần nhất.
   Hàm `nguonKetNoiGraph()` viết cho `doctor` từ trước nhưng chưa ai gọi, giờ mới thật sự có lối ra.
+- **`doctor` phân biệt "đã khai" với "dùng được".** Một chuỗi kết nối đồ thị có `Data Source`
+  nhưng thiếu `Initial Catalog`, trong khi `graph4aiDatabaseName` cũng chưa khai, vẫn hiện là
+  nguồn `env` — nhìn thì ổn, mà mọi truy vấn đồ thị đều ném lỗi. Đây đúng là ca đã xảy ra: PM
+  khai đủ biến môi trường, `app`/`sys` chạy ngon (chuỗi của chúng có `Initial Catalog`), riêng
+  `graph` hỏng, và không có gì chỉ ra tại sao. Giờ `doctor` chạy đúng bước phân giải (KHÔNG mở
+  kết nối) qua `kiemTraKetNoiGraph()`, trả thêm `nguonKetNoi.graphSanSang` và đẩy nguyên thông
+  báo lỗi có chỉ dẫn vào `goiY`.
 - **Thông báo lỗi thiếu kết nối giờ chỉ đúng file phải sửa.** `resolveGraphConn()` từng bảo
   "chạy `node tools/4ai.mjs setup`" — vô nghĩa ở nơi không có `node` — và nhắc `data/qlda.local.json`
   bằng đường dẫn tương đối, trong khi trên máy có tới ba bản sao cùng tên mà chỉ bản trong data

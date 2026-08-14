@@ -11,7 +11,7 @@ import { readSource, stripAccents } from './encoding.mjs';
 import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot, stateRoot } from './index.mjs';
 import {
   runSql, objectSql, sqlLiteral, redact,
-  duongDanQldaLocal, nguonKetNoi, nguonKetNoiGraph, findSqlcmd,
+  duongDanQldaLocal, nguonKetNoi, nguonKetNoiGraph, kiemTraKetNoiGraph, findSqlcmd,
 } from './sql.mjs';
 import { licenseStatus, saveLicense } from './license.mjs';
 import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
@@ -1099,6 +1099,7 @@ export const HANDLERS = {
 
     const st = licenseStatus(hub);
     const nguonGraph = nguonKetNoiGraph();
+    const graph = kiemTraKetNoiGraph();
 
     const goiY = [];
     if (doiCuPhap) {
@@ -1115,6 +1116,9 @@ export const HANDLERS = {
       goiY.push('Kết nối đồ thị đang lấy từ biến môi trường. Biến này được chụp lúc tiến trình MCP khởi động: '
         + 'đổi giá trị mà không khởi động lại ứng dụng host thì tiến trình vẫn dùng giá trị cũ.');
     }
+    // Đã khai ≠ dùng được. Không có nhánh này thì doctor báo "graph: env" trong khi mọi truy vấn
+    // đồ thị vẫn ném lỗi — đúng kiểu chẩn đoán nói "ổn" ngay lúc hỏng.
+    if (nguonGraph !== 'chưa khai' && !graph.ok) goiY.push(graph.loi);
     if (!st.ok) goiY.push(st.message);
     if (!findSqlcmd()) {
       goiY.push('Không tìm thấy `sqlcmd` trên máy này — mọi tool phải truy vấn SQL sẽ hỏng, kể cả khi cấu hình kết nối đã đúng.');
@@ -1140,6 +1144,9 @@ export const HANDLERS = {
         qldaApp: qldaPath ? nguonKetNoi(qldaPath, 'app') : 'chưa khai đường dẫn QLDA',
         qldaSys: qldaPath ? nguonKetNoi(qldaPath, 'sys') : 'chưa khai đường dẫn QLDA',
         graph: nguonGraph,
+        // Khai rồi mà phân giải vẫn hỏng (hay gặp: chuỗi thiếu `Initial Catalog` và cũng chưa
+        // khai `graph4aiDatabaseName`) — lý do nằm ở `goiY`.
+        graphSanSang: graph.ok,
       },
       sqlcmd: findSqlcmd() ? 'có' : 'không tìm thấy',
       giayPhep: {

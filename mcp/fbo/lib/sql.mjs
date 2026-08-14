@@ -569,6 +569,24 @@ function resolveGraphConn() {
   return conn;
 }
 
+/**
+ * Kết nối đồ thị có phân giải nổi không — KHÔNG mở kết nối, chỉ chạy đúng bước resolve.
+ *
+ * "Đã khai" và "dùng được" là hai chuyện khác nhau: một chuỗi có `Data Source` nhưng thiếu
+ * `Initial Catalog`, trong khi `graph4aiDatabaseName` cũng chưa khai, vẫn hiện là nguồn `env`
+ * mà mọi truy vấn đồ thị đều ném lỗi. `doctor` mà chỉ in tên nguồn thì bảo "ổn" đúng lúc hỏng.
+ *
+ * @returns {{ok: boolean, loi?: string}} — `loi` là thông báo có chỉ dẫn, không bao giờ chứa giá trị.
+ */
+export function kiemTraKetNoiGraph() {
+  try {
+    resolveGraphConn();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, loi: e.message };
+  }
+}
+
 /** Nguồn kết nối đồ thị — chỉ TÊN nguồn, không bao giờ giá trị. Dùng cho `4ai doctor`. */
 export function nguonKetNoiGraph() {
   if (String(process.env.GRAPH_4AI_CONNECTION ?? '').trim()) return 'env';

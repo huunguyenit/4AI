@@ -170,11 +170,11 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "7cc237bb1e4b0adf2e07d3a8c6bfef9dce928dbb59a7d8715c01a225787d4549"
+      "sha256": "b29e42ddef1a24be42a1e7452c8c0de098d4ca9377561466437aac8959b92431"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "30a7763817ec61d1ff7492cd00ca395a4b63bf25afc0c3a6c4d4c09234e368c0"
+      "sha256": "0027f015500203c9ddf43541bf84aeabb170139f5d7c681ff07244fcde87d470"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -532,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T07:59:36.267Z",
+  "syncedAt": "2026-08-14T08:01:48.969Z",
   "target": "plugin-cursor"
 }
