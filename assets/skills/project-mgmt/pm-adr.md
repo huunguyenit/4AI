@@ -19,9 +19,24 @@ Viết khi quyết định (1) khó đảo ngược, (2) ảnh hưởng nhiều 
 tranh luận và sẽ bị hỏi lại. Ví dụ: "customize đặt ở controller riêng thay vì include chung",
 "khách X không nâng SP trong năm nay". KHÔNG viết ADR cho lựa chọn hiển nhiên hoặc dễ đổi.
 
+## Đặt ở đâu — phân biệt phạm vi TRƯỚC khi viết
+
+`ledger/` của hub bị gitignore toàn bộ (dữ liệu rà soát khách — không bao giờ commit). Một ADR
+về quyết định của chính hub 4AI (kiến trúc compiler, lược đồ đồ thị, quy ước code) mà đặt trong
+`ledger/adr/` sẽ **không bao giờ được commit**, im lặng biến mất khỏi git — đã xảy ra thật với
+ADR-0001, phải dọn lại sau khi phát hiện lúc chuẩn bị commit.
+
+- **ADR về chính hub 4AI** (không nhắc tên khách nào) → `docs/adr/ADR-<số>-<slug>.md`. Thư mục
+  `docs/` được commit bình thường — đúng ý "quyết định phải sống lâu hơn phiên làm việc".
+- **ADR về MỘT khách cụ thể** (vd "ACME không nâng SP năm nay") → giữ nguyên
+  `ledger/adr/ADR-<số>-<slug>.md`, CỐ Ý gitignore — tên khách và quyết định riêng của họ không
+  được lên một repo public.
+
+Hai dãy số ADR-000x là ĐỘC LẬP theo từng thư mục — không dùng chung một bộ đếm.
+
 ## Template
 
-Đặt tại `ledger/adr/ADR-<số 4 chữ số>-<slug>.md`:
+Nội dung giống nhau dù đặt ở đâu:
 
     # ADR-0001: <Tiêu đề quyết định>
 

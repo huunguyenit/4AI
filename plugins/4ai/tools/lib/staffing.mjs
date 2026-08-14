@@ -17,7 +17,7 @@
 //
 // Không có đường nào từ file này tới `UPDATE nbphyc`. Toàn bộ là dữ kiện để ĐỀ XUẤT.
 
-import { runSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
+import { runSql, runGraphSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig } from '../../src/database/qlda-metadata.mjs';
 import { loadHolidays, classifyDeadline } from './workdays.mjs';
 import { MA_DAUMUC_DAU_VAO } from './assignee.mjs';
@@ -113,6 +113,29 @@ WHERE RTRIM(dmuc.ma_daumuc) IN (${maDaumuc})
   AND RTRIM(dmuc.ma_lt) IN (${nguoi})
 GROUP BY RTRIM(dmuc.ma_lt), RTRIM(yc.menu_id)
 ORDER BY RTRIM(yc.menu_id), COUNT(*) DESC`.trim();
+}
+
+/**
+ * Kinh nghiệm trên hiện vật, đọc từ đồ thị (`node_ExperienceFact` trên DB nội bộ GRAPH_4AI).
+ *
+ * Khác mọi câu SQL còn lại trong file này: chúng đọc QLDA (`QLDA_APP`/`QLDA_SYS`) của công ty, còn
+ * câu này đọc đồ thị của chính 4AI — nơi kinh nghiệm ĐÃ được rút sẵn từ nội dung UR (xem
+ * experience-extract.mjs). Nhờ đã rút sẵn nên user nào mở báo cáo cũng dùng chung kết quả,
+ * không phải phân giải lại.
+ *
+ * Lọc theo `khoaHienVat` chứ không theo dự án: kinh nghiệm sửa `SVTran` ở dự án A vẫn là kinh
+ * nghiệm dùng được khi giao việc `SVTran` ở dự án B.
+ */
+export function sqlKinhNghiemHienVat(sysids = [], maNvs = []) {
+  const hv = sysids.map((s) => `'${sqlLiteral(s)}'`).join(', ');
+  const nguoi = maNvs.map((m) => `'${sqlLiteral(m)}'`).join(', ');
+  return `
+SELECT RTRIM(ma_lt1) AS ma_lt1, RTRIM(khoaHienVat) AS khoaHienVat,
+       MIN(RTRIM(tenHienVat)) AS tenHienVat, COUNT(DISTINCT RTRIM(stt_rec)) AS so_ur
+FROM dbo.node_ExperienceFact
+WHERE RTRIM(khoaHienVat) IN (${hv}) AND RTRIM(ma_lt1) IN (${nguoi})
+GROUP BY RTRIM(ma_lt1), RTRIM(khoaHienVat)
+ORDER BY COUNT(DISTINCT RTRIM(stt_rec)) DESC`.trim();
 }
 
 /** Chuẩn hoá dòng roster thô. */
@@ -343,9 +366,35 @@ export function buildNhanSu(hub, args = {}, deps = {}) {
   const taiTrong = buildTaiTrong(yeuCau, h, args.ngayChay)
     .map((r) => ({ ...r, ma_lt1: chuanHoaTai(r.ma_lt1) || r.ma_lt1 }));
 
+  // Kinh nghiệm hiện vật: cần biết UR đang chờ giao đụng vào hiện vật NÀO, rồi mới hỏi ai đã
+  // làm những hiện vật đó. Hiện vật do caller rút sẵn và gắn vào `u.hienVat` (cần từ điển
+  // `wcommand` của từng chương trình — không lấy được ở đây vì file này chỉ biết QLDA).
+  let kinhNghiemHienVat = [];
+  const sysidCan = [...new Set(
+    yeuCau.filter((u) => chuan(u.trang_thai) === 'DD').flatMap((u) => u.hienVat ?? []).map(chuan).filter(Boolean),
+  )].sort();
+  if (sysidCan.length && roster.length) {
+    try {
+      const sqlGraph = deps.runGraphSql ?? runGraphSql;
+      const res = sqlGraph({ sql: sqlKinhNghiemHienVat(sysidCan, roster.map((n) => n.ma_nv)), maxRows: 5000 });
+      const chuanHoa = tenChinhTac(roster);
+      kinhNghiemHienVat = (res.rows ?? [])
+        .map((r) => ({
+          ma_lt1: chuanHoa(r.ma_lt1),
+          khoaHienVat: chuan(r.khoaHienVat),
+          tenHienVat: chuan(r.tenHienVat) || undefined,
+          so_ur: Number(r.so_ur) || 0,
+        }))
+        .filter((r) => r.ma_lt1 && r.khoaHienVat);
+    } catch (e) {
+      thieuDuLieu.push(`Không đọc được kinh nghiệm hiện vật từ đồ thị (node_ExperienceFact): ${e.message}`);
+    }
+  }
+
   const pmSet = xacDinhPm(roster, args.projects ?? []);
   return {
     boPhan,
+    kinhNghiemHienVat,
     nguon: 'userinfo2 (DB sys) + nbphyc + nbctdaumuc (DB app) — tải trọng suy từ chính dataset này',
     roster,
     // `ungVien` là hợp đồng mà assignee.mjs đọc; roster giữ nguyên để báo cáo hiển thị tên.

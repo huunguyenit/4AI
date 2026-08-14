@@ -3,7 +3,7 @@
 // dataset tới mục "Chưa giao lập trình (DD)". KHÔNG chạm DB: runSql được tiêm giả.
 
 import {
-  sqlRoster, sqlLichSuMenu, sqlDongGopDauVao, normalizeRoster, phoPhong, xacDinhPm, pmCuaDuAn,
+  sqlRoster, sqlLichSuMenu, sqlDongGopDauVao, sqlKinhNghiemHienVat, normalizeRoster, phoPhong, xacDinhPm, pmCuaDuAn,
   buildTaiTrong, menuCanGoiY, buildNhanSu,
 } from '../tools/lib/staffing.mjs';
 import { loadHolidays } from '../tools/lib/workdays.mjs';
@@ -165,6 +165,53 @@ ok('nbctdaumuc lỗi -> ghi rõ lý do, không đánh sập roster/lịch sử m
   nhanSuDaumucHong.thieuDuLieu.some((m) => m.includes('nbctdaumuc'))
   && nhanSuDaumucHong.roster.length === 4 && nhanSuDaumucHong.lichSuMenu.length > 0,
   nhanSuDaumucHong.thieuDuLieu.join(' | '));
+
+process.stdout.write('\n=== kinh nghiệm hiện vật đọc từ đồ thị ===\n');
+ok('SQL đọc node_ExperienceFact của DB đồ thị, không phải QLDA',
+  sqlKinhNghiemHienVat(['SVTran'], ['NV01']).includes('FROM dbo.node_ExperienceFact'));
+ok('Đếm theo UR duy nhất, không đếm trùng khi một UR sinh nhiều dòng cùng hiện vật',
+  sqlKinhNghiemHienVat(['SVTran'], ['NV01']).includes('COUNT(DISTINCT RTRIM(stt_rec))'));
+ok('KHÔNG lọc theo dự án — kinh nghiệm SVTran ở dự án khác vẫn dùng được',
+  !/ma_da/.test(sqlKinhNghiemHienVat(['SVTran'], ['NV01'])));
+
+// UR ở DD đã mang sẵn `hienVat` -> buildNhanSu phải đi hỏi đồ thị.
+const yeuCauCoHienVat = yeuCau.map((u) =>
+  u.stt_rec === 'A5' ? { ...u, hienVat: ['SVTran', 'ARTran'] } : u);
+let sqlGraphDaGoi = null;
+const nhanSuHv = buildNhanSu(undefined,
+  { pmDept: 'FSD', yeuCau: yeuCauCoHienVat, projects, ngayChay: NGAY },
+  {
+    runSql: runSqlGia,
+    holidays: H,
+    runGraphSql: ({ sql }) => {
+      sqlGraphDaGoi = sql;
+      return { rows: [{ ma_lt1: 'nv01', khoaHienVat: 'SVTran', tenHienVat: 'Hóa đơn bán hàng', so_ur: '6' }] };
+    },
+  });
+
+ok('Hỏi đồ thị đúng các hiện vật của UR đang chờ giao',
+  sqlGraphDaGoi?.includes("'ARTran', 'SVTran'"), sqlGraphDaGoi?.split('\n')[3]);
+ok('Nạp được kinh nghiệm hiện vật', nhanSuHv.kinhNghiemHienVat.length === 1);
+ok('Chuẩn hoá mã người về đúng cách viết trong roster (DB trả hoa/thường lung tung)',
+  nhanSuHv.kinhNghiemHienVat[0].ma_lt1 === 'NV01', nhanSuHv.kinhNghiemHienVat[0].ma_lt1);
+
+// Không UR nào rút được hiện vật -> không hỏi đồ thị, không báo thiếu vô cớ.
+let daGoi = false;
+const nhanSuKhongHv = buildNhanSu(undefined,
+  { pmDept: 'FSD', yeuCau, projects, ngayChay: NGAY },
+  { runSql: runSqlGia, holidays: H, runGraphSql: () => { daGoi = true; return { rows: [] }; } });
+ok('Không có hiện vật nào -> KHÔNG gọi đồ thị', daGoi === false);
+ok('Và cũng không báo thiếu dữ liệu vô cớ', nhanSuKhongHv.thieuDuLieu.length === 0,
+  nhanSuKhongHv.thieuDuLieu.join(' | '));
+
+// Đồ thị chết -> ghi rõ lý do, các nguồn khác vẫn còn.
+const nhanSuGraphHong = buildNhanSu(undefined,
+  { pmDept: 'FSD', yeuCau: yeuCauCoHienVat, projects, ngayChay: NGAY },
+  { runSql: runSqlGia, holidays: H, runGraphSql: () => { throw new Error('DB đồ thị không với tới'); } });
+ok('Đồ thị chết -> nói rõ, không đánh sập roster/tải trọng',
+  nhanSuGraphHong.thieuDuLieu.some((m) => m.includes('node_ExperienceFact'))
+  && nhanSuGraphHong.roster.length === 4 && nhanSuGraphHong.taiTrong.length > 0,
+  nhanSuGraphHong.thieuDuLieu.join(' | '));
 
 process.stdout.write('\n=== chấm điểm trên corpus thật (không được hoà hết) ===\n');
 const urDd = { stt_rec: 'A5', trang_thai: 'DD', ma_lt1: '', menu_id: '07.00.00', noi_dung: 'Them cot' };

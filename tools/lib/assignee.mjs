@@ -16,9 +16,23 @@
 //
 // Kết quả là ĐỀ XUẤT. Không có đường nào từ đây tới `UPDATE nbphyc`.
 
+import { createHash } from 'node:crypto';
+import { canonical } from './json.mjs';
+
+/**
+ * Mã 8 hex ổn định của một bộ trọng số — đổi trọng số (`data/qlda.json → review.phanCong`)
+ * thì đổi mã, không cần một bảng version thủ công riêng. Gắn vào `RecommendationFeedback`
+ * (xem skill `pm-recommendation-feedback`) lúc PM xác nhận, để trả lời "sao gợi ý hôm đó
+ * khác hôm nay" khi trọng số đã đổi giữa hai lần chạy.
+ */
+export function policyVersion(trongSo) {
+  return createHash('sha256').update(canonical(trongSo), 'utf8').digest('hex').slice(0, 8);
+}
+
 /** Trọng số mặc định. Ghi đè bằng data/qlda.json → review.phanCong. */
 export const TRONG_SO_MAC_DINH = {
-  diemMenu: 100,          // tiêu chí 1 — chiếm ưu thế khi có lịch sử
+  diemHienVat: 100,       // tiêu chí 1 THẬT — kinh nghiệm trên đúng hiện vật (sysid)
+  diemMenu: 100,          // tiêu chí 1 dự phòng — khi chưa rút được hiện vật
   diemDauVao: 60,         // tiêu chí 3 — chỉ áp cho báo cáo đầu ra
   phatMoiUrToiHan: 15,    // tiêu chí 2 — trừ mỗi UR sắp tới hạn đang gánh
   phatToiDa: 60,          // trần điểm phạt, để tải nặng không xoá sạch lợi thế kinh nghiệm
@@ -219,6 +233,42 @@ function dongGopDauVaoLienQuan(u, dongGopDauVao = []) {
   return out;
 }
 
+/**
+ * Kinh nghiệm trên ĐÚNG hiện vật mà UR này đụng tới — tiêu chí 1 thật sự.
+ *
+ * Thay cho phép đếm theo `menu_id`, vốn đo sai đơn vị: đo trên DVDKB_FBO, chỉ 1/25 giá trị
+ * `menu_id` trong `nbphyc` tồn tại trong cây menu thật của chương trình đó. Một UR ghi
+ * `menu_id = 07.00.00` (menu cha, không phân giải được) nhưng nội dung sửa 7 chứng từ cụ thể
+ * thì kinh nghiệm nằm ở 7 chứng từ đó — xem experience-extract.mjs.
+ *
+ * `u.hienVat` là danh sách `sysid` đã rút từ nội dung UR. Ứng viên được tính theo SỐ UR đã làm
+ * trên các hiện vật đó, và ghi lại phủ được bao nhiêu phần của yêu cầu.
+ *
+ * @param {Object} u - cần `hienVat: string[]`
+ * @param {Array} kinhNghiemHienVat - [{ma_lt1, khoaHienVat, tenHienVat, so_ur}]
+ * @returns {Map<string, {soUr: number, phu: Set<string>, ten: string[], ma_lt1: string}>}
+ */
+function kinhNghiemTheoHienVat(u, kinhNghiemHienVat = []) {
+  const can = new Set((u?.hienVat ?? []).map((s) => chuan(s).toLowerCase()).filter(Boolean));
+  const out = new Map();
+  if (!can.size) return out;
+
+  for (const row of kinhNghiemHienVat) {
+    const nguoi = chuan(row.ma_lt1);
+    const hv = chuan(row.khoaHienVat);
+    if (!nguoi || !hv || !can.has(hv.toLowerCase())) continue;
+
+    const khoa = khoaNguoi(nguoi);
+    const cu = out.get(khoa) ?? { soUr: 0, phu: new Set(), ten: [], ma_lt1: nguoi };
+    cu.soUr += Number(row.so_ur) || 0;
+    cu.phu.add(hv);
+    const ten = chuan(row.tenHienVat) || hv;
+    if (!cu.ten.includes(ten)) cu.ten.push(ten);
+    out.set(khoa, cu);
+  }
+  return out;
+}
+
 /** Tải hiện tại theo người. Khoá lowercase — xem khoaNguoi(). */
 function taiTrongTheoNguoi(taiTrong = []) {
   const out = new Map();
@@ -249,8 +299,15 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   const { laDauRa, nguon: nhanDienTu } = nhanDienBaoCaoDauRa(u);
 
   const kinhNghiem = kinhNghiemTheoMenu(u, nhanSu.lichSuMenu);
+  const hienVat = kinhNghiemTheoHienVat(u, nhanSu.kinhNghiemHienVat);
   const tai = taiTrongTheoNguoi(nhanSu.taiTrong);
   const dauVao = laDauRa ? dongGopDauVaoLienQuan(u, nhanSu.dongGopDauVao) : new Map();
+
+  // Hiện vật và menu ĐO CÙNG MỘT THỨ ở hai độ chính xác khác nhau, nên chỉ dùng MỘT. Cộng cả
+  // hai là đếm hai lần cùng một bằng chứng: người từng sửa `SVTran` trong UR mang menu_id
+  // `07.10.06` sẽ vừa ăn điểm hiện vật vừa ăn điểm menu cho đúng một việc đã làm.
+  // Ưu tiên hiện vật vì nó phân giải được về màn hình thật; menu chỉ là khoá gộp mờ.
+  const dungHienVat = hienVat.size > 0;
 
   // Tập ứng viên: danh sách khai tường minh, hoặc suy từ chính các dữ kiện đã có.
   const khaiTuongMinh = (nhanSu.ungVien ?? []).map((v) => chuan(typeof v === 'string' ? v : v.ma_nv)).filter(Boolean);
@@ -281,34 +338,55 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   const trongTap = new Set(tenUngVien.map(khoaNguoi));
   const dinhKinhNghiem = Math.max(0,
     ...[...kinhNghiem].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
+  const dinhHienVat = Math.max(0,
+    ...[...hienVat].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
   const dinhDauVao = Math.max(0,
     ...[...dauVao].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
 
+  const soHienVatCan = (u?.hienVat ?? []).length;
+
   const thieuDuLieu = [];
-  if (!nhanSu.lichSuMenu?.length) thieuDuLieu.push('lichSuMenu (tiêu chí 1 — kinh nghiệm menu)');
+  if (!soHienVatCan) {
+    thieuDuLieu.push('hienVat của UR (chưa rút được hiện vật từ nội dung — rơi về đếm theo menu_id, '
+      + 'vốn chỉ là khoá gộp mờ: đo trên dữ liệu thật chỉ 1/25 menu_id phân giải được về màn hình)');
+  } else if (!nhanSu.kinhNghiemHienVat?.length) {
+    thieuDuLieu.push('kinhNghiemHienVat (tiêu chí 1 — kinh nghiệm trên đúng hiện vật)');
+  }
+  if (!dungHienVat && !nhanSu.lichSuMenu?.length) thieuDuLieu.push('lichSuMenu (tiêu chí 1 dự phòng — kinh nghiệm menu)');
   if (!nhanSu.taiTrong?.length) thieuDuLieu.push('taiTrong (tiêu chí 2 — tải sắp tới hạn)');
   if (laDauRa && !nhanSu.dongGopDauVao?.length) thieuDuLieu.push('dongGopDauVao (tiêu chí 3 — báo cáo đầu ra)');
 
   const ungVien = tenUngVien.map((nguoi) => {
     const khoa = khoaNguoi(nguoi);
     const kn = kinhNghiem.get(khoa);
+    const hv = hienVat.get(khoa);
     const dv = dauVao.get(khoa);
     const t = tai.get(khoa) ?? { toiHan: 0, dangMo: 0 };
 
-    const diemMenu = kn ? diemTuongDoi(kn.soUr, dinhKinhNghiem, w.baoHoaSoUr) * w.diemMenu : 0;
+    // Đúng MỘT trong hai nhánh được tính — xem chú thích ở `dungHienVat`.
+    const diemHienVat = dungHienVat && hv
+      ? diemTuongDoi(hv.soUr, dinhHienVat, w.baoHoaSoUr) * w.diemHienVat : 0;
+    const diemMenu = !dungHienVat && kn
+      ? diemTuongDoi(kn.soUr, dinhKinhNghiem, w.baoHoaSoUr) * w.diemMenu : 0;
     const diemDauVao = dv ? diemTuongDoi(dv.soUr, dinhDauVao, w.baoHoaSoUr) * w.diemDauVao : 0;
     const phat = Math.min(t.toiHan * w.phatMoiUrToiHan, w.phatToiDa);
-    const diem = Math.round((diemMenu + diemDauVao - phat) * 10) / 10;
+    const diem = Math.round((diemHienVat + diemMenu + diemDauVao - phat) * 10) / 10;
 
     const lyDo = [];
-    if (kn) lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'}`);
+    if (dungHienVat && hv) {
+      const phu = soHienVatCan ? ` (phủ ${hv.phu.size}/${soHienVatCan} hiện vật của yêu cầu)` : '';
+      lyDo.push(`đã làm ${hv.soUr} UR trên đúng ${hv.ten.slice(0, 3).join(', ')}${phu}`);
+    } else if (kn) {
+      lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'}`);
+    }
     if (dv) lyDo.push(`đóng góp ${dv.soUr} UR đầu vào liên quan (${dv.nguon.join(', ')})`);
     lyDo.push(t.toiHan ? `đang gánh ${t.toiHan} UR sắp tới hạn` : 'không có UR nào sắp tới hạn');
     if (t.dangMo) lyDo.push(`${t.dangMo} UR đang mở`);
 
     // Độ tin cậy đo bằng LOẠI bằng chứng, không phải bằng điểm — điểm cao nhờ mỗi
-    // "đang rảnh" thì vẫn là phỏng đoán yếu.
-    const doTinCay = kn ? 'cao' : dv ? 'trung-binh' : 'thap';
+    // "đang rảnh" thì vẫn là phỏng đoán yếu. Hiện vật là bằng chứng mạnh nhất vì nó phân giải
+    // được về màn hình thật; menu chỉ là khoá gộp nên tụt xuống một bậc.
+    const doTinCay = (dungHienVat && hv) ? 'cao' : kn ? 'trung-binh' : dv ? 'trung-binh' : 'thap';
 
     const hs = hoSo.get(khoa) ?? {};
     return {
@@ -320,9 +398,13 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
       doTinCay,
       lyDo,
       chiTiet: {
+        diemHienVat: Math.round(diemHienVat * 10) / 10,
         diemMenu: Math.round(diemMenu * 10) / 10,
         diemDauVao: Math.round(diemDauVao * 10) / 10,
         phatTaiTrong: -phat,
+        soUrTrenHienVat: hv?.soUr ?? 0,
+        hienVatDaLam: hv ? [...hv.phu] : [],
+        soHienVatCan,
         soUrCungMenu: kn?.soUr ?? 0,
         soUrDauVao: dv?.soUr ?? 0,
         soUrToiHan: t.toiHan,
@@ -340,7 +422,11 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
     ungVien: ungVien.slice(0, w.soGoiY),
     laBaoCaoDauRa: laDauRa,
     nhanDienTu,
+    // Nói rõ điểm được chấm bằng bằng chứng nào — hai thang khác hẳn nhau về độ tin cậy,
+    // đọc bảng xếp hạng mà không biết nó dựa trên cái gì thì dễ tin nhầm.
+    chamTheo: dungHienVat ? 'hien-vat' : 'menu_id',
     thieuDuLieu,
+    policyVersion: policyVersion(w),
   };
 }
 

@@ -1047,6 +1047,26 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
     ? `<p class="banner">${ppThayThe.length} dự án có lập trình quản lý đã off hoặc chuyển bộ phận — PM tính là cấp phó phòng: ${ppThayThe.map(({ payload: p }) => `<code>${esc(p.ma_da)}</code> (${(p.pmNgoaiPhong ?? []).map(esc).join(', ') || '?'} → ${esc(p.pm)})`).join(', ')}.</p>`
     : '';
 
+  // Gợi ý của những lần chạy TRƯỚC có khớp với người PM thật sự giao không. Dữ liệu quan sát
+  // từ `nbphyc`, không ai phải xác nhận — xem tools/lib/recommendation-log.mjs.
+  const hq = meta.hieuQuaGoiY;
+  const soanHieuQua = () => {
+    if (!hq || !hq.soGoiY) return '';
+    const dong = [];
+    if (hq.tiLeTrung === null) {
+      dong.push(`<p class="lead">Đã ghi nhận ${hq.soGoiY} lượt gợi ý, chưa lượt nào được giao — chưa đo được độ chính xác.</p>`);
+    } else {
+      dong.push(`<p class="lead">Trong ${hq.soDaQuyet} UR đã giao sau khi có gợi ý, PM chọn đúng người đứng đầu <strong>${hq.soTrung}</strong> lần — <strong>${hq.tiLeTrung}%</strong>.${hq.soChuaGiao ? ` Còn ${hq.soChuaGiao} UR chưa giao, không tính vào tỉ lệ.` : ''}</p>`);
+    }
+    if (hq.thayThe?.length) {
+      dong.push(`<p class="lead">Người PM hay chọn thay: ${hq.thayThe.slice(0, 5).map((t) => `<code>${esc(t.ma_lt1)}</code> ${t.soLan} lần${t.trongGoiY ? ` (${t.trongGoiY} lần có trong danh sách gợi ý nhưng không đứng đầu)` : ' (không nằm trong gợi ý)'}`).join(' · ')}.</p>`);
+    }
+    dong.push('<p class="lead muted">Lý do PM đổi người không được ghi nhận — dữ liệu này chỉ quan sát <code>nbphyc.ma_lt1</code>, không suy đoán động cơ.</p>');
+    return section('hieu-qua-goi-y', 'Gợi ý có trúng không',
+      'Đối chiếu gợi ý các lần chạy trước với người PM thật sự giao trên QLDA.',
+      dong.join('\n'), hq.soDaQuyet);
+  };
+
   const boBoQua = skipped.length ? `<p class="banner">Bỏ qua ${skipped.length} dự án do payload lỗi nặng: ${skipped.map((s) => `<strong>${esc(s.ma_da ?? '?')}</strong> (${esc(s.errors.join('; '))})`).join(', ')}.</p>` : '';
 
   const canhBaoChatLuong = warned.length ? `<div class="banner">
@@ -1102,6 +1122,7 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
       ghiChuNhanSu + ghiChuPpThayThe
       + urTable(allChuaGiao.sort((a, b) => (a._soNgay ?? 99) - (b._soNgay ?? 99)),
         [colDuAn, colStt, colNoiDung, colHan, colConLai, colGoiY]), tongChuaGiao),
+    soanHieuQua(),
   ].filter(Boolean).join('\n\n');
 
   const title = `Tổng quan rà soát PM · ${fmtDate(meta.ngay_chay)}`;
@@ -1188,7 +1209,8 @@ export function buildPortfolioArtifact(payload, hub = HUB) {
     artifact: {
       relPath: duongDanTong(ngay),
       content: renderPortfolio(items, skipped, warned,
-        { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv, rong, nhanSu: payload.nhanSu }, h),
+        { ngay_chay: ngay, pm: payload.pm ?? config.pm.maNv, rong, nhanSu: payload.nhanSu,
+          hieuQuaGoiY: payload.hieuQuaGoiY }, h),
     },
     errors: [],
   };

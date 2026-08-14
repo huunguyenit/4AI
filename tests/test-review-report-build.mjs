@@ -7,6 +7,7 @@
 // model bỏ qua được, dữ liệu vắng mặt thì không.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildReviewReportFiles, ddChoPhanTich } from '../tools/lib/review-report.mjs';
@@ -120,6 +121,62 @@ const src = fs.readFileSync(path.join(ROOT, 'tools', 'lib', 'review-report.mjs')
 ok('review-report.mjs KHÔNG import writer — nó trả mô tả file, caller ghi',
   !/writer\.mjs/.test(src.replace(/^\/\/.*$/gm, '')));
 ok('Không có fs.writeFileSync trong module', !/writeFileSync|mkdirSync/.test(src));
+
+process.stdout.write('\n=== vòng học: gợi ý hôm nay → PM giao trên QLDA → lần sau tự đối chiếu ===\n');
+// Runner nhận biết theo nội dung SQL, để thứ tự câu hỏi đổi cũng không làm test giòn.
+const ROSTER = [
+  { ma_nv: 'NV02', ten: 'A', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV', quan_ly: '' },
+  { ma_nv: 'NV04', ten: 'B', ma_bo_phan: 'FSD', ma_kcv: 'LT', ma_chv: 'NV', quan_ly: '' },
+];
+function runnerCoNhanSu(yeuCauRows) {
+  return ({ sql }) => {
+    if (/FROM userinfo2/.test(sql)) return { rows: ROSTER };
+    if (/FROM nbctdaumuc dmuc/.test(sql)) return { rows: [] };
+    if (/FROM nbphyc\b[\s\S]*GROUP BY/.test(sql)) {
+      return { rows: [{ ma_lt1: 'NV02', menu_id: '09.30.03', so_ur: '7' }] };
+    }
+    if (/FROM nbphyc/.test(sql)) return { rows: yeuCauRows };
+    if (/ma_daumuc/.test(sql)) return { rows: DAUMUC_ROWS };
+    if (/ngay_ht/.test(sql)) return { rows: HAN_ROWS };
+    if (/nbdmda/.test(sql)) return { rows: DUAN_ROWS };
+    return { rows: [] };
+  };
+}
+
+// Đồ thị đóng vai kho log dùng chung: lần chạy sau đọc lại đúng node mà lần trước sinh ra.
+// Đây là điểm khác cốt lõi so với bản ghi ra file cục bộ — user khác cũng đọc được kho này.
+let khoDoThi = [];
+const chayReport = (yeuCauRows, ngay) => buildReviewReportFiles(ROOT, { ngayChay: ngay }, {
+  runSql: runnerCoNhanSu(yeuCauRows),
+  runGraphSql: () => ({ rows: khoDoThi }),
+});
+
+// Lần 1: UR001 ở DD chưa giao — sinh gợi ý, nộp vào đồ thị.
+const lan1 = chayReport(YEUCAU_ROWS, '2026-08-13');
+const logNodes = lan1.doThi.nodes.filter((n) => n.kind === 'RecommendationLog');
+ok('Lần chạy đầu sinh node RecommendationLog trong đồ thị, KHÔNG sinh file',
+  logNodes.length > 0 && !lan1.files.some((f) => f.relPath.endsWith('.jsonl')),
+  lan1.files.map((f) => f.relPath).join(' '));
+ok('Log gắn đúng UR đang chờ giao', logNodes.some((n) => n.stt_rec === 'UR001'));
+ok('Có cạnh HAS_RECOMMENDATION nối về Request',
+  lan1.doThi.edges.some((e) => e.type === 'HAS_RECOMMENDATION' && e.from === 'Request:UR001'));
+ok('Chưa có lịch sử -> chưa hiện tỉ lệ, không bịa 0%',
+  !lan1.files.find((f) => f.relPath.includes('_tong/tong.html'))?.content.includes('Gợi ý có trúng không'));
+
+// Đồ thị đã nhận node (mô phỏng — thật thì `dayDoThi` ở 4ai.mjs nạp qua sqlcmd).
+khoDoThi = logNodes.map((n) => ({ ...n, daGoiY: JSON.stringify(n.daGoiY) }));
+
+// Lần 2: PM đã giao UR001 cho NV04 trên web QLDA — không ai báo cho 4AI biết.
+const sauKhiGiao = YEUCAU_ROWS.map((u) =>
+  u.stt_rec === 'UR001' ? { ...u, trang_thai: 'TH', ur_ma_lt1: 'NV04' } : u);
+const lan2 = chayReport(sauKhiGiao, '2026-08-14');
+const tongLan2 = lan2.files.find((f) => f.relPath.includes('_tong/tong.html'))?.content ?? '';
+
+ok('Lần sau tự nhận ra PM đã giao, hiện mục hiệu quả gợi ý',
+  tongLan2.includes('Gợi ý có trúng không'));
+ok('Nêu rõ người PM chọn thay', tongLan2.includes('NV04'));
+ok('Nói thẳng là không biết lý do PM đổi người, không suy diễn',
+  tongLan2.includes('không suy đoán động cơ'));
 
 process.stdout.write('\n=== phạm vi rỗng ===\n');
 let loi = null;

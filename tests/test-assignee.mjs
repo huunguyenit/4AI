@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // test-assignee.mjs — Test gợi ý người tiếp nhận UR ở DD chưa có ma_lt1.
 
-import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa, laChuaPhanCong } from '../tools/lib/assignee.mjs';
+import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa, laChuaPhanCong, policyVersion, TRONG_SO_MAC_DINH } from '../tools/lib/assignee.mjs';
 import { validatePayload, renderReport, buildPortfolioArtifact } from '../tools/lib/report.mjs';
 import { loadHolidays } from '../tools/lib/workdays.mjs';
 
@@ -68,7 +68,13 @@ const urSuaManHinh = { trang_thai: 'DD', menu_id: 'M01', noi_dung: 'Sửa màn h
 const g1 = goiYNguoiTiepNhan(urSuaManHinh, NHAN_SU);
 ok('Người đã làm menu đó xếp trên', g1.ungVien[0].ma_lt1 === 'NV02',
   g1.ungVien.map(c => `${c.ma_lt1}:${c.diem}`).join(' '));
-ok('Độ tin cậy cao khi có lịch sử menu', g1.ungVien[0].doTinCay === 'cao');
+// Kinh nghiệm theo menu_id chỉ còn là bằng chứng HẠNG HAI. Đo trên dữ liệu thật (DVDKB_FBO):
+// 1/25 giá trị menu_id trong nbphyc tồn tại trong cây menu thật của chương trình — nó là khoá
+// gộp mờ, không phân giải được về màn hình. Bằng chứng hạng nhất là kinh nghiệm trên đúng
+// hiện vật (sysid) rút từ nội dung UR; xem mục 9 bên dưới.
+ok('Chỉ có lịch sử menu -> độ tin cậy TRUNG BÌNH, không phải cao',
+  g1.ungVien[0].doTinCay === 'trung-binh', g1.ungVien[0].doTinCay);
+ok('Nói rõ điểm chấm theo thang nào', g1.chamTheo === 'menu_id', g1.chamTheo);
 ok('Lý do nêu rõ số UR cùng menu',
   g1.ungVien[0].lyDo.some(r => r.includes('6 UR cùng menu')), g1.ungVien[0].lyDo.join(' · '));
 ok('Có ghi điểm phạt tải trong chi tiết',
@@ -108,7 +114,8 @@ const gCungPhanHe = goiYNguoiTiepNhan(urCungPhanHe, nhanSuKhachHang);
 const datnhCungPhanHe = gCungPhanHe.ungVien.find(c => c.ma_lt1 === 'DATNH');
 ok('menu_id khác nhưng CÙNG bar -> vẫn tính là kinh nghiệm', datnhCungPhanHe?.chiTiet.diemMenu > 0,
   JSON.stringify(datnhCungPhanHe?.chiTiet));
-ok('Độ tin cậy cao khi khớp theo bar', datnhCungPhanHe?.doTinCay === 'cao');
+ok('Khớp theo bar cũng chỉ là bằng chứng hạng hai', datnhCungPhanHe?.doTinCay === 'trung-binh',
+  datnhCungPhanHe?.doTinCay);
 ok('Lý do gọi đúng tên "phân hệ (bar)", không phải "controller"',
   datnhCungPhanHe?.lyDo.some(r => r.includes('phân hệ (bar)')), datnhCungPhanHe?.lyDo.join(' · '));
 
@@ -353,6 +360,70 @@ ok('Portfolio vẫn hiện tên người đã giao ở bảng quá hạn/sắp t
 const { nhanSu: _bo, ...khongNs } = payload;
 ok('Portfolio thiếu nhanSu -> báo "chưa nạp", không bỏ trống',
   dungPortfolio([khongNs]).includes('chưa nạp'));
+
+process.stdout.write('\n=== 8b. CHẤM THEO HIỆN VẬT — THẮNG THANG menu_id ===\n');
+// Ca thật đã đo: UR ghi menu_id `07.00.00` (menu cha, KHÔNG tồn tại trong cây menu của khách)
+// nhưng nội dung sửa 7 chứng từ. Người từng làm đúng các chứng từ đó phải thắng người chỉ
+// trùng menu_id — thang cũ không phân biệt được hai người này.
+const NHAN_SU_HV = {
+  // TUANLH trùng menu_id nhưng chưa từng đụng hiện vật nào của yêu cầu.
+  lichSuMenu: [{ menu_id: '07.00.00', ma_lt1: 'TUANLH', so_ur: 30 }],
+  kinhNghiemHienVat: [
+    { ma_lt1: 'NV01', khoaHienVat: 'SVTran', tenHienVat: 'Hóa đơn bán hàng', so_ur: 6 },
+    { ma_lt1: 'NV01', khoaHienVat: 'ARTran', tenHienVat: 'Hóa đơn dịch vụ', so_ur: 4 },
+    { ma_lt1: 'DATNH', khoaHienVat: 'SVTran', tenHienVat: 'Hóa đơn bán hàng', so_ur: 1 },
+    { ma_lt1: 'HOATV', khoaHienVat: 'PDTran', tenHienVat: 'Phiếu nhập mua hàng', so_ur: 99 },
+  ],
+  taiTrong: [
+    { ma_lt1: 'NV01', so_ur_toi_han: 0, so_ur_dang_mo: 2 },
+    { ma_lt1: 'TUANLH', so_ur_toi_han: 0, so_ur_dang_mo: 2 },
+    { ma_lt1: 'DATNH', so_ur_toi_han: 0, so_ur_dang_mo: 2 },
+    { ma_lt1: 'HOATV', so_ur_toi_han: 0, so_ur_dang_mo: 2 },
+  ],
+};
+const urHv = {
+  trang_thai: 'DD', menu_id: '07.00.00', noi_dung: 'Thêm trường Loại kê khai ở Tab Khác',
+  hienVat: ['SVTran', 'ARTran'],
+};
+const gHv = goiYNguoiTiepNhan(urHv, NHAN_SU_HV);
+
+ok('Chấm theo hiện vật khi UR rút được hiện vật', gHv.chamTheo === 'hien-vat', gHv.chamTheo);
+ok('Người từng làm đúng hiện vật xếp trên người chỉ trùng menu_id',
+  gHv.ungVien[0].ma_lt1 === 'NV01', gHv.ungVien.map((c) => `${c.ma_lt1}:${c.diem}`).join(' '));
+// TUANLH rơi khỏi top-3 vì hết điểm — lấy danh sách đầy đủ mới soi được chi tiết của họ.
+const gHvDay = goiYNguoiTiepNhan(urHv, NHAN_SU_HV, { soGoiY: 10 });
+const tuanlh = gHvDay.ungVien.find((c) => c.ma_lt1 === 'TUANLH');
+ok('Người chỉ trùng menu_id KHÔNG được cộng điểm kinh nghiệm nữa (tránh đếm hai lần)',
+  tuanlh?.chiTiet.diemMenu === 0 && tuanlh?.chiTiet.diemHienVat === 0, JSON.stringify(tuanlh?.chiTiet));
+ok('Người 30 UR cùng menu nhưng chưa đụng hiện vật nào -> rớt khỏi top gợi ý',
+  !gHv.ungVien.some((c) => c.ma_lt1 === 'TUANLH'), gHv.ungVien.map((c) => c.ma_lt1).join(','));
+ok('Người làm nhiều nhưng SAI hiện vật không ăn điểm (99 UR trên PDTran)',
+  (gHv.ungVien.find((c) => c.ma_lt1 === 'HOATV')?.chiTiet.diemHienVat ?? 0) === 0);
+ok('Phủ nhiều hiện vật hơn thì hơn người phủ ít',
+  gHv.ungVien.find((c) => c.ma_lt1 === 'NV01').chiTiet.hienVatDaLam.length === 2
+  && gHv.ungVien.find((c) => c.ma_lt1 === 'DATNH').chiTiet.hienVatDaLam.length === 1);
+ok('Lý do nêu tên hiện vật thật và độ phủ, không nêu mã menu',
+  /Hóa đơn bán hàng/.test(gHv.ungVien[0].lyDo[0]) && /phủ 2\/2/.test(gHv.ungVien[0].lyDo[0]),
+  gHv.ungVien[0].lyDo[0]);
+ok('Có bằng chứng hiện vật -> độ tin cậy CAO', gHv.ungVien[0].doTinCay === 'cao');
+
+// UR không rút được hiện vật -> rơi về thang menu, và NÓI RÕ vì sao.
+const gRoiVe = goiYNguoiTiepNhan({ ...urHv, hienVat: [] }, NHAN_SU_HV);
+ok('Không rút được hiện vật -> rơi về menu_id', gRoiVe.chamTheo === 'menu_id');
+ok('Nói rõ đang dùng thang yếu hơn và vì sao',
+  gRoiVe.thieuDuLieu.some((m) => m.includes('hienVat') && m.includes('1/25')),
+  gRoiVe.thieuDuLieu.join(' | '));
+ok('Rơi về menu thì người trùng menu_id lại ăn điểm',
+  gRoiVe.ungVien[0].ma_lt1 === 'TUANLH', gRoiVe.ungVien.map((c) => c.ma_lt1).join(','));
+
+process.stdout.write('\n=== 9. POLICY VERSION (cho RecommendationFeedback) ===\n');
+ok('Cùng trọng số -> cùng mã', policyVersion({ a: 1, b: 2 }) === policyVersion({ a: 1, b: 2 }));
+ok('Thứ tự key khác nhau vẫn ra cùng mã (canonical, không phụ thuộc thứ tự)',
+  policyVersion({ b: 2, a: 1 }) === policyVersion({ a: 1, b: 2 }));
+ok('Đổi một trọng số -> đổi mã', policyVersion({ a: 1, b: 2 }) !== policyVersion({ a: 1, b: 3 }));
+ok('Mã dài đúng 8 hex', /^[0-9a-f]{8}$/.test(policyVersion({ a: 1 })));
+ok('goiYNguoiTiepNhan trả kèm policyVersion khớp đúng trọng số đang dùng (mặc định)',
+  g1.policyVersion === policyVersion(TRONG_SO_MAC_DINH));
 
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures === 0 ? 'TẤT CẢ PASS' : 'CÓ LỖI'} (${failures} thất bại) ===\n`);
 process.exit(failures === 0 ? 0 : 1);

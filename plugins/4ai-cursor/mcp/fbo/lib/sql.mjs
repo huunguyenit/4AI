@@ -506,6 +506,111 @@ function execSql(sqlcmd, conn, sql, { maxRows = 100, timeoutMs = 30000 } = {}) {
   };
 }
 
+// ------------------------------------------------- đồ thị 4AI (DB nội bộ GRAPH_4AI)
+
+/**
+ * Kết nối tới DB đồ thị. Nguồn theo `data/qlda.json → databases.graph4ai.resolveOrder`:
+ * env `GRAPH_4AI_CONNECTION` trước, rồi `data/qlda.local.json → graphConnectionString`.
+ *
+ * Tách khỏi `resolveSysConn`/`resolveAppConn` vì đây KHÔNG phải DB nghiệp vụ: nó là DB nội bộ
+ * của 4AI, không bao giờ phân giải qua Web.config của chương trình khách.
+ */
+function resolveGraphConn() {
+  const cs = String(process.env.GRAPH_4AI_CONNECTION ?? '').trim() || localConnString('graphConnectionString');
+  if (!cs) {
+    throw new Error(
+      'Chưa khai kết nối DB đồ thị 4AI. Đặt biến môi trường GRAPH_4AI_CONNECTION, '
+      + 'hoặc chạy `node tools/4ai.mjs setup` để ghi `graphConnectionString` vào data/qlda.local.json. '
+      + 'Từ lược đồ v3, đồ thị sống trong DB nên đây là cấu hình BẮT BUỘC, không còn là tuỳ chọn.');
+  }
+  const conn = connFromString(cs);
+  if (!conn.database) {
+    conn.database = loadQldaConfig()?.databases?.graph4ai?.databaseName ?? 'GRAPH_4AI';
+  }
+  return conn;
+}
+
+/** Nguồn kết nối đồ thị — chỉ TÊN nguồn, không bao giờ giá trị. Dùng cho `4ai doctor`. */
+export function nguonKetNoiGraph() {
+  if (String(process.env.GRAPH_4AI_CONNECTION ?? '').trim()) return 'env';
+  if (localConnString('graphConnectionString')) return 'qlda.local.json';
+  return 'chưa khai';
+}
+
+/**
+ * ĐỌC từ DB đồ thị 4AI — trả về dòng đã parse, khác `runGraphScript` (chạy script, trả text).
+ *
+ * Câu lệnh ghi không bị chặn ở đây vì đây là DB nội bộ của chính 4AI, không phải DB nghiệp vụ
+ * hay DB khách; nhưng mọi chỗ gọi hiện tại đều là SELECT, và đường ghi chính thức vẫn là
+ * `runGraphScript` với script sinh từ `graph.mjs`.
+ */
+export function runGraphSql({ sql, maxRows = 5000, timeoutMs = 60000 }) {
+  const sqlcmd = findSqlcmd();
+  if (!sqlcmd) throw new Error('Không tìm thấy sqlcmd — xem hướng dẫn ở runSql().');
+  return execSql(sqlcmd, resolveGraphConn(), sql, { maxRows, timeoutMs });
+}
+
+/**
+ * Chạy một SCRIPT (nhiều batch ngăn bằng `GO`) trên DB đồ thị 4AI.
+ *
+ * Phải đi qua `sqlcmd -i <file>` chứ không phải `-Q`: `GO` là chỉ thị của sqlcmd, không phải
+ * cú pháp T-SQL, và script nạp đồ thị bắt buộc có `GO` để tách phần `CREATE TABLE ... AS NODE`
+ * khỏi phần nạp dữ liệu.
+ *
+ * Đây là đường GHI duy nhất tới DB đồ thị. Nó KHÔNG dùng cho DB nghiệp vụ hay DB khách —
+ * `runSql` vẫn là đường đọc, và tool `query_sql` vẫn chặn câu lệnh ghi như cũ.
+ *
+ * @param {{scriptPath: string, timeoutMs?: number}} args
+ * @returns {{database: string, output: string}}
+ */
+export function runGraphScript({ scriptPath, timeoutMs = 300000 }) {
+  const sqlcmd = findSqlcmd();
+  if (!sqlcmd) throw new Error('Không tìm thấy sqlcmd — xem hướng dẫn ở runSql().');
+  if (!fs.existsSync(scriptPath)) throw new Error(`Không tìm thấy script: ${scriptPath}`);
+
+  const conn = resolveGraphConn();
+  const outFile = path.join(os.tmpdir(), `4ai-graph-push-${process.pid}-${outFileSeq++}.txt`);
+  const args = [
+    '-S', conn.server,
+    '-d', conn.database,
+    // `i:65001` BẮT BUỘC ở đây, khác hẳn execSql. execSql đưa câu lệnh qua `-Q` (tham số dòng
+    // lệnh, Windows đã giải mã sẵn) nên chỉ cần đặt codepage đầu ra; còn đường này đưa qua
+    // `-i <file>` — sqlcmd tự đọc file, và mặc định nó đọc theo codepage ANSI của máy chứ
+    // không phải UTF-8. Script do writer.mjs ghi ra là UTF-8 không BOM, nên thiếu `i:65001`
+    // thì mỗi ký tự tiếng Việt bị đọc thành hai ký tự Latin-1 rồi GHI THẲNG vào DB:
+    // "Giấy báo nợ" thành "Giáº¥y bÃ¡o ná»£". Hỏng âm thầm — sqlcmd trả exit 0, chỉ lộ ra khi
+    // có người nhìn vào dữ liệu.
+    '-f', 'i:65001,o:65001', '-o', outFile,
+    // `-b` dừng ngay khi có lỗi: script bọc trong BEGIN TRAN, chạy tiếp sau lỗi là để lại
+    // transaction treo. `-r 1` đẩy message lỗi sang stderr để -o không nuốt mất.
+    '-b', '-r', '1',
+    '-l', String(Math.ceil(timeoutMs / 1000)),
+    '-i', scriptPath,
+  ];
+  if (conn.trusted || conn.user === '') args.push('-E');
+  else args.push('-U', conn.user, '-P', conn.password);
+
+  let res;
+  try {
+    res = spawnSync(sqlcmd, args, { timeout: timeoutMs, encoding: 'buffer', windowsHide: true });
+  } finally {
+    // Dọn trước khi ném: file tạm có thể chứa mẩu dữ liệu đồ thị.
+  }
+  let out = '';
+  try {
+    if (fs.existsSync(outFile)) out = fs.readFileSync(outFile, 'utf8');
+  } finally {
+    try { fs.rmSync(outFile, { force: true }); } catch { /* dọn được thì tốt, không thì thôi */ }
+  }
+
+  const stderr = scrub(res.stderr ? decodeSource(res.stderr).text : '', conn).trim();
+  if (res.error) throw new Error(`Không chạy được sqlcmd: ${res.error.message}`);
+  if (res.status !== 0) {
+    throw new Error(`Nạp đồ thị lỗi (exit ${res.status}): ${stderr || scrub(out, conn).slice(0, 800)}`);
+  }
+  return { database: conn.database, output: scrub(out, conn) };
+}
+
 /** Escape literal string trước khi nhét vào SQL text. */
 export function sqlLiteral(s) {
   return String(s).replace(/'/g, "''");

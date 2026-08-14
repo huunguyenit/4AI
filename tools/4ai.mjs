@@ -22,8 +22,10 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
   node tools/4ai.mjs targets            liệt kê target: path, tools, reachable
   node tools/4ai.mjs sync               chiếu asset + MCP vào các target đang bật
                                         [--dry-run] [--target T] [--tool X] [--force]
-  node tools/4ai.mjs graph check        validate đồ thị JSONL. Không bao giờ ghi
+  node tools/4ai.mjs graph check        validate đồ thị. Không bao giờ ghi
   node tools/4ai.mjs graph build        sinh script nạp .4ai/graph/*.sql [--dry-run]
+  node tools/4ai.mjs graph push         sinh RỒI nạp thẳng vào DB đồ thị [--dry-run]
+  node tools/4ai.mjs graph experience   quét UR đã xong (HT/DT/OK/UP) → kinh nghiệm hiện vật
   node tools/4ai.mjs report             lấy dataset UR cố định, dựng HTML rà soát vào ledger [--dry-run]
                                         [--project MA_DA] chỉ một dự án
                                         [--dept BP] toàn bộ phận (nbphyc.bp_lt, ví dụ FSD)
@@ -271,8 +273,67 @@ function cmdTargets(opts) {
 
 // ---------------------------------------------------------------- graph
 
+/**
+ * `graph experience` — quét UR ĐÃ XONG, rút kinh nghiệm ở mức hiện vật, đẩy vào đồ thị.
+ *
+ * Không gộp vào `report` được: báo cáo chỉ đọc UR ở DD/XN/TH còn kinh nghiệm lấy từ
+ * HT/DT/OK/UP — hai tập rời nhau. Xem experience-build.mjs.
+ */
+async function cmdGraphExperience(opts) {
+  const { buildKinhNghiem } = await import('./lib/experience-build.mjs');
+  const { loadSchema, graphTuObject, validateGraph, emitSql } = await import('./lib/graph.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+  const { pmIdentity } = await import('./lib/assets.mjs');
+
+  const pm = pmIdentity(HUB);
+  let ket;
+  try {
+    ket = buildKinhNghiem(HUB, {
+      boPhan: opts.dept || pm.boPhanLt, maDa: opts.project, boi: pm.maNv, maxRows: opts.maxRows,
+    });
+  } catch (e) {
+    fail(e.message);
+  }
+
+  process.stdout.write(`${ket.thongKe.duAn}/${ket.tongDuAnTimThay} dự án nạp được · `
+    + `${ket.thongKe.soUr} UR đã xong · ${ket.thongKe.soFact} kinh nghiệm\n`);
+  const raDuoc = ket.thongKe.soUr - ket.thongKe.urKhongRaHienVat;
+  if (ket.thongKe.soUr) {
+    process.stdout.write(`  rút được hiện vật: ${raDuoc}/${ket.thongKe.soUr} UR `
+      + `(${(raDuoc / ket.thongKe.soUr * 100).toFixed(1)}%) · `
+      + `menu_id phân giải được: ${ket.thongKe.menuIdPhanGiaiDuoc}\n`);
+  }
+  for (const b of ket.boQua) process.stderr.write(`  bỏ qua: ${b}\n`);
+  if (!ket.nodes.length) { process.stdout.write('Không có gì để nạp.\n'); return; }
+
+  const schema = loadSchema(HUB);
+  const g = graphTuObject(schema, ket);
+  const loi = [...g.errors, ...validateGraph(schema, g)];
+  if (loi.length) {
+    for (const e of loi.slice(0, 10)) process.stderr.write(`  ${e.message}\n`);
+    fail(`${loi.length} lỗi đồ thị — không nạp.`);
+  }
+
+  const rel = path.join('.4ai', 'graph', 'experience.sql');
+  writeArtifacts({ destRoot: HUB, files: [{ relPath: rel, content: emitSql(schema, g, { scopes: ket.scopes }) }] });
+  if (opts.dryRun) {
+    process.stdout.write(`DRY RUN — chưa nạp. Script ở ${rel}\n`);
+    return;
+  }
+  const { runGraphScript } = await import('../mcp/fbo/lib/sql.mjs');
+  try {
+    const r = runGraphScript({ scriptPath: path.join(HUB, rel) });
+    process.stdout.write(`Đã nạp vào ${r.database} — scope ${ket.scopes.join(', ')}\n`);
+  } catch (e) {
+    fail(e.message);
+  }
+}
+
 async function cmdGraph(sub, opts) {
-  if (sub && !['build', 'check'].includes(sub)) fail(`graph: lệnh con không rõ: ${sub} (build | check)`);
+  if (sub === 'experience') return cmdGraphExperience(opts);
+  if (sub && !['build', 'check', 'push'].includes(sub)) {
+    fail(`graph: lệnh con không rõ: ${sub} (build | check | push | experience)`);
+  }
   const { buildGraphArtifact } = await import('./lib/graph.mjs');
   const { writeArtifacts } = await import('./lib/writer.mjs');
 
@@ -304,7 +365,29 @@ async function cmdGraph(sub, opts) {
     const verb = opts.dryRun ? `${p.action} (dry-run)` : p.action;
     process.stdout.write(`  ${verb.padEnd(20)} ${p.relPath}  ${p.bytes} byte\n`);
   }
-  process.stdout.write('Nạp bằng sqlcmd hoặc query_sql — CHỈ sau khi PM xác nhận.\n');
+
+  if (sub !== 'push') {
+    process.stdout.write('Nạp vào DB bằng `node tools/4ai.mjs graph push`.\n');
+    return;
+  }
+
+  // push: build xong thì nạp luôn. Script là upsert theo scope nên chạy lại vô hại —
+  // nhưng vẫn là thao tác GHI lên DB dùng chung, nên --dry-run phải dừng ở đây.
+  const scriptPath = path.join(HUB, artifact.relPath);
+  if (opts.dryRun) {
+    process.stdout.write(`DRY RUN — chưa nạp. Script đã sẵn ở ${artifact.relPath}\n`);
+    return;
+  }
+  const { runGraphScript } = await import('../mcp/fbo/lib/sql.mjs');
+  let ketQua;
+  try {
+    ketQua = runGraphScript({ scriptPath });
+  } catch (e) {
+    fail(e.message);
+  }
+  process.stdout.write(`Đã nạp vào ${ketQua.database}.\n`);
+  const out = ketQua.output.trim();
+  if (out) process.stdout.write(`${out.split('\n').slice(-5).join('\n')}\n`);
 }
 
 // ---------------------------------------------------------------- report
@@ -340,6 +423,48 @@ async function cmdReportFromDataset(opts) {
 
   const plan = writeArtifacts({ destRoot: ledgerRoot(HUB), files: built.files, dryRun: opts.dryRun });
   writeReportPlan(plan, opts.dryRun);
+  await dayDoThi(built.doThi, opts);
+}
+
+/**
+ * Đẩy tầng dự án của lần chạy này lên đồ thị.
+ *
+ * Đây là thứ làm cho quản lý C mở báo cáo N1-N6 thấy ngay phần user A (N1-N3) và user B
+ * (N4-N6) đã tổng kết: mỗi lần chạy tự nộp phần của mình, `scope` = mã dự án nên không ai
+ * ghi đè phạm vi của ai.
+ *
+ * KHÔNG được làm hỏng báo cáo. Chưa khai kết nối, hay DB chết, thì báo một dòng rồi thôi —
+ * báo cáo HTML mới là thứ PM cần sáng nay, đồ thị là phần cộng thêm.
+ */
+async function dayDoThi(doThi, opts) {
+  if (!doThi?.nodes?.length) return;
+  if (opts.dryRun) {
+    process.stdout.write(`  đồ thị (dry-run)     ${doThi.nodes.length} node · ${doThi.edges.length} cạnh · scope ${doThi.scopes.join(', ')}\n`);
+    return;
+  }
+  try {
+    const { loadSchema, graphTuObject, validateGraph, emitSql } = await import('./lib/graph.mjs');
+    const { runGraphScript } = await import('../mcp/fbo/lib/sql.mjs');
+    const { writeArtifacts } = await import('./lib/writer.mjs');
+
+    const schema = loadSchema(HUB);
+    const g = graphTuObject(schema, doThi);
+    // `Status` là lookup tĩnh đã nạp sẵn trong DB từ hạt giống — cạnh HAS_STATUS trỏ ra ngoài
+    // lô là đúng thiết kế, không phải cạnh treo. Không khai kind nào khác: mọi tham chiếu
+    // còn lại vẫn phải nằm trong chính lô này.
+    const loi = [...g.errors, ...validateGraph(schema, g, { kindNgoai: ['Status'] })];
+    if (loi.length) {
+      process.stderr.write(`  đồ thị: bỏ qua, ${loi.length} lỗi — ${loi[0].message}\n`);
+      return;
+    }
+    // Script đi qua writer như mọi artifact khác, rồi mới nạp — có file để soi khi cần dò lỗi.
+    const rel = path.join('.4ai', 'graph', 'review-sync.sql');
+    writeArtifacts({ destRoot: HUB, files: [{ relPath: rel, content: emitSql(schema, g, { scopes: doThi.scopes }) }] });
+    runGraphScript({ scriptPath: path.join(HUB, rel) });
+    process.stdout.write(`  đồ thị               ${g.nodes.size} node · ${g.edges.length} cạnh · scope ${doThi.scopes.join(', ')}\n`);
+  } catch (e) {
+    process.stderr.write(`  đồ thị: không đẩy được — ${e.message.split('\n')[0]}\n`);
+  }
 }
 
 async function cmdReport(payloadPath, opts) {

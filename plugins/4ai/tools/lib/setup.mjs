@@ -19,7 +19,9 @@ import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadat
 export const KHOA_BI_MAT = [
   { key: 'appConnectionString', env: 'QLDA_APP_CONNECTION', mo_ta: 'DB nghiệp vụ QLDA (nbdmda, nbphyc…)' },
   { key: 'sysConnectionString', env: 'QLDA_SYS_CONNECTION', mo_ta: 'DB hệ thống QLDA (userinfo2…)' },
-  { key: 'graphConnectionString', env: 'GRAPH_4AI_CONNECTION', mo_ta: 'Chỉ mục đồ thị năng lực (tuỳ chọn)' },
+  // Từ lược đồ v3, đồ thị SỐNG trong DB (không còn là chỉ mục dựng lại được từ JSONL) nên
+  // đây không còn là tuỳ chọn — thiếu nó thì `graph push` và mọi tra cứu đồ thị đều không chạy.
+  { key: 'graphConnectionString', env: 'GRAPH_4AI_CONNECTION', mo_ta: 'DB đồ thị 4AI (bắt buộc — đồ thị sống ở đây)' },
 ];
 
 /** Đường dẫn file cấu hình cục bộ của LẦN CÀI NÀY — plugin thì nằm ở ${CLAUDE_PLUGIN_DATA}. */

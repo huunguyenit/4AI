@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "note": "Lược đồ đồ thị dùng chung cho kho năng lực FBO và mạng phụ thuộc/rà soát yêu cầu. MỘT đồ thị duy nhất, nhiều loại node — vì câu hỏi hữu ích nhất luôn đi xuyên loại: 'đổi màn hình này thì Request nào chết', 'yêu cầu này FBO đã làm được từ SP nào', 'PM Review nào dựa trên CapabilityVerdict nào'.",
 
   "layers": {
@@ -9,8 +9,8 @@
       "kinds": ["Project", "Phase", "Status", "Request", "ScopeEvidence", "Menu", "Controller", "Table", "SpVersion"]
     },
     "decision": {
-      "nghia": "Suy luận/đánh giá do PM hoặc quy trình rà soát tạo ra.",
-      "kinds": ["PMReview", "CapabilityVerdict", "Capability"]
+      "nghia": "Suy luận/đánh giá do PM hoặc quy trình rà soát tạo ra. `ExperienceFact` và `RecommendationLog` thuộc tầng này chứ không phải `fact`: chúng là kết quả SUY từ nội dung UR (rút hiện vật, chấm điểm), luôn mang `doTinCay`/thang chấm, không phải dữ liệu chép nguyên từ QLDA.",
+      "kinds": ["PMReview", "CapabilityVerdict", "Capability", "ExperienceFact", "RecommendationLog"]
     },
     "plan": {
       "nghia": "Thực thi — cái sẽ làm hoặc đã làm.",
@@ -23,16 +23,29 @@
   },
 
   "sourceOfTruth": {
-    "kind": "files",
-    "note": "Node và cạnh nằm ở file JSONL versioned trong repo. Database chỉ là CHỈ MỤC dựng lại được — xoá DB không mất dữ liệu. Nhờ vậy mọi thay đổi đồ thị đều review được bằng git diff.",
-    "layout": [
-      { "path": "data/graph/reference.jsonl", "chua": "node cấu trúc kỹ thuật đã xác minh từ FBO: Menu, Controller, Table, SpVersion, và Status (lookup tĩnh từ nbdmttyc, dùng chung mọi dự án)" },
-      { "path": "data/graph/capability.jsonl", "chua": "node Capability và CapabilityVerdict — FBO làm được / chưa được, do PM xác nhận, theo từng phiên bản SP" },
-      { "path": "data/graph/effort-samples.jsonl", "chua": "node EffortSample — mẫu giờ công PM đã duyệt" },
-      { "path": "data/graph/edges.jsonl", "chua": "cạnh giữa các node dùng chung (tầng kỹ thuật + tầng năng lực)" },
-      { "path": "ledger/<ma_da>/graph.jsonl", "chua": "node Project (một dòng, gốc của file), Phase, Request, ScopeEvidence, PMReview, ImplementationPlan và cạnh riêng của một dự án" }
+    "kind": "database",
+    "note": "DATABASE là nguồn thật, không phải file. Đổi từ v2 (`kind: files`) vì hub được nhiều người dùng: user A chạy báo cáo N1-N3, user B chạy N4-N6, quản lý C chạy cả sáu và phải ĐỌC NGAY phần A và B đã tổng kết chứ không dựng lại. File cục bộ không chia sẻ được; git thì chia sẻ nhưng cần commit/push/pull, không ai làm giữa hai lần chạy báo cáo. Đánh đổi đã chấp nhận: mất khả năng review thay đổi bằng `git diff`.",
+    "seed": {
+      "note": "JSONL chỉ còn vai trò HẠT GIỐNG cho lần nạp đầu tiên. Nạp xong thì DB là nguồn thật và file có thể bỏ — KHÔNG xoá file trước khi nạp thành công.",
+      "layout": [
+        { "path": "data/graph/reference.jsonl", "chua": "node cấu trúc kỹ thuật đã xác minh từ FBO: Menu, Controller, Table, SpVersion, và Status" },
+        { "path": "data/graph/capability.jsonl", "chua": "node Capability và CapabilityVerdict" },
+        { "path": "data/graph/effort-samples.jsonl", "chua": "node EffortSample — mẫu giờ công PM đã duyệt" },
+        { "path": "data/graph/edges.jsonl", "chua": "cạnh giữa các node dùng chung" }
+      ],
+      "format": "Mỗi dòng một object JSON. Object có `_` = 'node' hoặc 'edge'."
+    }
+  },
+
+  "scope": {
+    "note": "MỌI node mang `scope` — đây là thứ giữ cho nhiều người ghi chung một DB mà không đạp lên nhau, và là chỗ phân biệt System với Customize.",
+    "values": [
+      { "ma": "system", "nghia": "Thiết kế FBO chuẩn như được build — giống hệt nhau với mọi khách, mọi user. Đổi khi có SP mới." },
+      { "ma": "<ma_da>", "nghia": "Phần riêng của MỘT dự án: customize đè lên bản chuẩn, hoặc dữ liệu vận hành (Request, PMReview, ExperienceFact) của dự án đó." }
     ],
-    "format": "Mỗi dòng một object JSON. Object có `_` = 'node' hoặc 'edge'. Một dòng một thực thể để git diff gọn và merge được."
+    "keyRule": "Node kind có `scoped: true` thì khoá thật là `<scope>|<khoá tự nhiên>`. Ví dụ Controller `CDTran` bản chuẩn là `system|CDTran`, bản customize của ACME là `ACME|CDTran` — hai node KHÁC NHAU, không đè lên nhau. Đúng mô hình `.f` vs `.xml` mà runtime FBO vốn dùng.",
+    "lookupRule": "Tra cứu luôn hỏi hai lần: có node `<ma_da>|<khoá>` không, không có mới rơi về `system|<khoá>`.",
+    "seedDefault": "Tham chiếu không ghi scope (`Controller:CDTran`) được hiểu là `system` — để dữ liệu hạt giống cũ nạp được không phải sửa tay."
   },
 
   "database": {
@@ -87,13 +100,29 @@
       "columns": "NVARCHAR(MAX)",
       "constraints": "NVARCHAR(MAX)",
       "reviewedAt": "SMALLDATETIME",
-      "duyetVaoSp": "NVARCHAR(64)"
+      "duyetVaoSp": "NVARCHAR(64)",
+      "scope": "NVARCHAR(64)",
+      "capNhatLuc": "DATETIME2(0)",
+      "capNhatBoi": "NVARCHAR(64)",
+      "hienVat": "NVARCHAR(MAX)",
+      "hanhDong": "NVARCHAR(400)",
+      "viTri": "NVARCHAR(400)",
+      "truong": "NVARCHAR(MAX)",
+      "ngayHoanThanh": "SMALLDATETIME",
+      "duyetBoiPm": "BIT",
+      "daGoiY": "NVARCHAR(MAX)"
     },
-    "arrayProps": ["columns", "constraints"],
+    "auditColumns": {
+      "note": "Ba cột này KHÔNG khai trong `props` của từng nodeKind — emitter tự thêm vào mọi bảng node. Chúng trả lời 'dòng này của scope nào, ai ghi, lúc nào' — bắt buộc khi nhiều người ghi chung.",
+      "items": ["scope", "capNhatLuc", "capNhatBoi"]
+    },
+    "arrayProps": ["columns", "constraints", "hienVat", "truong", "daGoiY"],
     "arrayPropsNote": "Các prop này nhận mảng trong JSONL (vd `\"columns\": [\"ma_ct\",\"ten_ct\"]`). Emitter tự JSON.stringify khi sinh literal SQL — cột lưu chuỗi JSON trong NVARCHAR(MAX), không có kiểu mảng native trong SQL Server graph node.",
     "reloadStrategy": {
-      "kind": "full",
-      "note": "Xoá sạch rồi nạp lại toàn bộ, cạnh trước node sau. Hợp lệ vì DB chỉ là chỉ mục — nguồn thật là JSONL. Đổi lại script luôn idempotent và không cần MERGE phức tạp."
+      "kind": "upsert-scoped",
+      "note": "MERGE theo khoá, GIỚI HẠN trong các `scope` mà lần chạy này sở hữu. Đổi từ v2 (`full`: DELETE sạch rồi INSERT lại) vì full reload với nhiều người dùng là MẤT DỮ LIỆU: user B chạy lúc 9h sẽ xoá sạch phần user A ghi lúc 8h. Nay user chạy N1,N2,N3 chỉ đụng `scope IN ('N1','N2','N3')` — không thấy và không xoá được N4,N5,N6.",
+      "deleteRule": "DELETE chỉ trong scope đang ghi, và chỉ cho node/cạnh không còn ở nguồn của lần chạy đó. Không bao giờ DELETE toàn bảng.",
+      "idempotencyNote": "Idempotent theo TRẠNG THÁI DB (chạy hai lần cho cùng trạng thái cuối), không còn theo kiểu 'sinh ra file giống hệt từng byte' như v2."
     }
   },
 
@@ -134,18 +163,23 @@
     },
     "Menu": {
       "key": "menu_id",
-      "keyNote": "Ưu tiên số 1 khi tra năng lực — tên menu (bar) là thứ PM và khách cùng gọi tên.",
+      "scoped": true,
+      "keyNote": "Ưu tiên số 1 khi tra năng lực — tên menu (bar) là thứ PM và khách cùng gọi tên. Có scope vì khách customize được cây menu.",
       "props": ["menu_id", "wmenu_id", "bar", "bar2", "link", "syscode", "sysid"],
+      "laMenuCha": "menu_id kết thúc bằng `.00.00` là menu CHA, không phải màn hình cụ thể. Đo trên FSD 2026-08-13: 7.477/74.826 UR ở HT/UP (10%) trỏ menu cha — nghĩa là `menu_id` của UR KHÔNG đủ để biết việc thật sự đụng vào đâu. Xem ExperienceFact.",
       "sqlTable": "node_Menu"
     },
     "Controller": {
       "key": "sysid",
+      "scoped": true,
+      "keyNote": "Có scope vì đây đúng chỗ System/Customize tách đôi: `system|CDTran` là bản chuẩn (.f), `ACME|CDTran` là bản customize (.xml) đè lên. Trước v3 hai bản này đè lên nhau vì chung khoá `sysid` trần — ai ghi sau thắng.",
       "props": ["sysid", "title", "type", "table", "entry", "customized"],
       "sqlTable": "node_Controller"
     },
     "Table": {
       "key": "name",
-      "keyNote": "Tên bảng vật lý, gồm cả partition khi cần (m81$000000).",
+      "scoped": true,
+      "keyNote": "Tên bảng vật lý, gồm cả partition khi cần (m81$000000). Có scope vì khách thêm bảng/cột riêng.",
       "props": ["name", "family", "so_hieu", "role"],
       "roleValues": ["master", "detail", "inquiry", "config", "danh-muc"],
       "sqlTable": "node_Table"
@@ -198,6 +232,34 @@
       "doKhoNote": "Thang độ khó CHƯA CHỐT — hỏi PM khi gặp trường hợp mới, ghi lại giá trị PM dùng rồi chuẩn hoá sau.",
       "trongTlksNote": "true = yêu cầu nằm trong TLKS; false = ngoài TLKS, thường cộng thêm giờ. Mức cộng lấy từ chính các mẫu này chứ không đặt hệ số cứng.",
       "sqlTable": "node_EffortSample"
+    },
+    "ExperienceFact": {
+      "key": "id",
+      "scoped": true,
+      "keyNote": "Ghép `stt_rec|loaiHienVat|khoaHienVat` — MỘT dòng cho MỖI hiện vật mà một người thật sự đụng vào trong một UR. Một UR sinh ra NHIỀU dòng.",
+      "whyNote": "Đây là chỗ sửa sai lớn nhất của mô hình kinh nghiệm cũ. Cũ: `COUNT(nbphyc) GROUP BY (ma_lt1, menu_id)` — một UR = một đơn vị kinh nghiệm, gắn vào `menu_id` GHI TRÊN UR. Ca thật đo được (A000571322YC1, DVDKB_FBO, NV01): `menu_id` = `07.00.00` (menu CHA 'Phải thu') nhưng nội dung là thêm trường 'Loại kê khai' vào 7 chứng từ (Hóa đơn bán hàng, Hóa đơn dịch vụ, Hóa đơn điều chỉnh giá hàng bán/dịch vụ, Hóa đơn giảm giá, Phiếu nhập hàng bán trả lại, Hóa đơn dịch vụ trả lại) CỘNG báo cáo 'Bảng kê thuế đầu ra, đầu vào'. Cách cũ ghi nhận 1 UR trên menu 07.00.00 — sai địa chỉ hoàn toàn. Cách mới ghi 8 dòng trên 8 hiện vật thật.",
+      "props": ["id", "stt_rec", "ma_da", "ma_lt1", "loaiHienVat", "khoaHienVat", "tenHienVat", "hanhDong", "viTri", "truong", "ngayHoanThanh", "trangThaiNguon", "nguon", "doTinCay", "duyetBoiPm"],
+      "loaiHienVatValues": ["chung-tu", "bao-cao", "menu", "controller", "table", "danh-muc"],
+      "congThucNguon": {
+        "note": "Thiết kế LAI — phần chắc chắn và phần suy đoán tách bạch, không trộn.",
+        "tuDien": "`khoaHienVat`/`tenHienVat` khớp bằng TỪ ĐIỂN, không cần LLM: tên hiện vật FBO là từ vựng ĐÓNG. Từ điển `menu_id ↔ bar` rút từ chính lịch sử UR con — ví dụ A000571449→07.10.06 'Hóa đơn bán hàng', A000571448→07.10.08 'Hóa đơn dịch vụ' cùng khối việc với UR cha 07.00.00 ở trên. DB tự cung cấp từ điển, không phải xây tay.",
+        "llm": "`hanhDong`/`viTri`/`truong` do LLM đọc `noi_dung` rút ra — văn xuôi tự do nhưng có khuôn lặp lại ('Thêm trường X', 'Ẩn trường Y', 'Ở Tab Khác', 'bên tab đơn vị', có ca ghi cả kiểu dữ liệu 'NVARCHAR(4000)'). LUÔN ghi `doTinCay < 1` và `duyetBoiPm = 0` cho tới khi PM duyệt. Core scoring KHÔNG phụ thuộc phần này.",
+        "kiemChungCheo": "`nbctdaumuc.ma_daumuc` dùng để kiểm chứng chéo (đầu vào/đầu ra), không phải nguồn duy nhất."
+      },
+      "trangThaiNguonValues": ["HT", "DT", "OK", "UP"],
+      "trangThaiNguonNote": "CHỈ tính kinh nghiệm từ UR đã làm xong. Luồng là TH→HT→DT→OK→UP. Đo trên FSD 2026-08-13: UP 72.937 · OK 12.780 · HT 1.889 · DT 30 — tổng 87.636/91.973 (95%). Cố ý gồm cả `OK` ('Test OK', đã xác nhận chạy được) và `DT`: lọc đúng chữ 'HT,UP' sẽ nhận 1.889 UR ở HT ('Hoàn thành, CHỜ test' — bằng chứng yếu nhất nhóm) mà vứt 12.780 UR ở OK mạnh hơn hẳn. Không lấy TA/YC/KL/CH/KD (yêu cầu tạm, không làm, chờ).",
+      "nguonValues": ["tu-dien", "llm", "daumuc", "pm-nhap"],
+      "sqlTable": "node_ExperienceFact"
+    },
+    "RecommendationLog": {
+      "key": "id",
+      "scoped": true,
+      "keyNote": "Ghép `stt_rec|ngayGoiY` — một node cho mỗi LẦN hệ thống đưa ra gợi ý phân công cho một UR. Chạy báo cáo hai lần trong ngày không đẻ hai node.",
+      "whyNote": "Đo xem gợi ý có trúng không, bằng QUAN SÁT chứ không hỏi PM: PM duyệt trên web QLDA, không mở repo, nên mọi cơ chế đòi PM xác nhận sẽ vĩnh viễn rỗng. Lần chạy sau đọc lại `nbphyc.ma_lt1` và tự suy ra PM đã giao cho ai. Trước v3 khối này nằm ở file JSONL cục bộ (`ledgerRoot()/recommendations.jsonl`) — không chia sẻ được giữa nhiều user, nên chuyển hẳn vào DB theo scope dự án.",
+      "props": ["id", "stt_rec", "ma_da", "menu_id", "ngayGoiY", "policyVersion", "chamTheo", "goiYTop1", "daGoiY"],
+      "propsNote": "`daGoiY` là snapshot thứ hạng TẠI LÚC GỢI Ý (mảng `{ma_lt1, diem, doTinCay}`) — không chấm lại về sau, vì trọng số có thể đã đổi. `chamTheo` = 'hien-vat' | 'menu_id', cho biết thứ hạng đó dựa trên thang nào. KHÔNG lưu kết cục (PM đã giao ai): nó được suy lúc truy vấn bằng cách đối chiếu với `ma_lt1` hiện tại, giống cách lược đồ này xử lý nhãn 'Quá hạn' — lưu lại sẽ tạo một bản sao có thể lệch với sự thật ở QLDA.",
+      "khongLuuLyDo": "Vì sao PM đổi người thì KHÔNG quan sát được từ nbphyc, nên không có trường nào cho nó. Bịa một lý do nghe hợp lý còn tệ hơn để trống.",
+      "sqlTable": "node_RecommendationLog"
     }
   },
 
@@ -253,7 +315,7 @@
 
   "reviewEdgeTypes": {
     "domain": "Tầng rà soát/quyết định — khung của một Request tại một thời điểm: dự án nào, giai đoạn nào, trạng thái nào, có bằng chứng gì, PM đã xét ra sao, khớp năng lực nào, kế hoạch thực thi ra sao. Tách RIÊNG khỏi `edgeTypes` vì đây là quan hệ có cấu trúc cố định 1-1 hoặc 1-nhiều rất khác về hình dạng so với đồ thị phụ thuộc tự do ở trên — nhập chung sẽ làm loãng cả hai.",
-    "note": "10 loại, cũng không tự thêm — bổ sung loại mới thì sửa file này trước, đừng lách bằng RELATED_TO của bộ trên.",
+    "note": "13 loại, cũng không tự thêm — bổ sung loại mới thì sửa file này trước, đừng lách bằng RELATED_TO của bộ trên.",
     "items": [
       { "type": "BELONGS_TO", "cauHoi": "Yêu cầu thuộc dự án nào?", "allowedPairs": [["Request", "Project"]] },
       { "type": "IN_PHASE", "cauHoi": "Yêu cầu phát sinh ở giai đoạn nào?", "allowedPairs": [["Request", "Phase"]] },
@@ -264,7 +326,10 @@
       { "type": "MATCHES", "cauHoi": "Yêu cầu này khớp năng lực nào?", "allowedPairs": [["Request", "Capability"]] },
       { "type": "HAS_VERDICT", "cauHoi": "Năng lực này đã có kết luận nào?", "allowedPairs": [["Capability", "CapabilityVerdict"]] },
       { "type": "HAS_EFFORT_SAMPLE", "cauHoi": "Năng lực này có mẫu giờ công nào?", "allowedPairs": [["Capability", "EffortSample"]] },
-      { "type": "HAS_IMPLEMENTATION_PLAN", "cauHoi": "Kế hoạch thực thi là gì?", "allowedPairs": [["Request", "ImplementationPlan"]] }
+      { "type": "HAS_IMPLEMENTATION_PLAN", "cauHoi": "Kế hoạch thực thi là gì?", "allowedPairs": [["Request", "ImplementationPlan"]] },
+      { "type": "PRODUCED_EXPERIENCE", "cauHoi": "UR này để lại kinh nghiệm thật nào?", "allowedPairs": [["Request", "ExperienceFact"]] },
+      { "type": "EXPERIENCE_ON", "cauHoi": "Kinh nghiệm này nằm trên hiện vật nào?", "allowedPairs": [["ExperienceFact", "Menu"], ["ExperienceFact", "Controller"], ["ExperienceFact", "Table"]] },
+      { "type": "HAS_RECOMMENDATION", "cauHoi": "Hệ thống đã gợi ý ai cho yêu cầu này, và theo thang nào?", "allowedPairs": [["Request", "RecommendationLog"]] }
     ],
     "edgeProps": ["ghi_chu", "nguon", "taoTuUr", "doTinCay"]
   },
@@ -279,6 +344,9 @@
       "Những gì FBO chưa đáp ứng tính tới SP hiện tại? — CapabilityVerdict verdict='khong' có ma_pbsp <= SP đang chạy.",
       "PM đang chờ xét gì? — Request HAS_STATUS Status{code:'DD'}, chưa có HAS_PM_REVIEW mới hơn ngày hôm nay.",
       "Đề xuất KL nào có căn cứ hợp lệ? — PMReview{verdict:'KL'} BASED_ON CapabilityVerdict{verdict:'khong'}.",
+      "Ai đã từng sửa đúng chứng từ này? — ExperienceFact lọc loaiHienVat='chung-tu' + khoaHienVat, GROUP BY ma_lt1. Đây là câu mà mô hình cũ (đếm theo menu_id của UR) trả lời SAI khi UR trỏ menu cha.",
+      "Ai đã từng thêm trường vào Tab Khác của hóa đơn? — ExperienceFact lọc hanhDong/viTri, nhưng nhớ rằng hai cột đó do LLM rút nên phải lọc thêm duyetBoiPm=1 nếu cần chắc chắn.",
+      "Khách này customize những controller nào so với bản chuẩn? — node_Controller lọc scope=<ma_da>, đối chiếu với scope='system'.",
       "SELECT r.fcode1, r.noi_dung, rev.verdict, rev.reason, cv.verdict AS capability_verdict FROM node_Request r, HAS_PM_REVIEW hpr, node_PMReview rev, BASED_ON bo, node_CapabilityVerdict cv WHERE MATCH(r-(hpr)->rev-(bo)->cv) AND rev.verdict = 'TA';"
     ]
   }

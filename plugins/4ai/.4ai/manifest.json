@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude-plugin/plugin.json",
-      "sha256": "8743660874f96a34e11a1123caa786fcd7a9c77ad3359ac045704ed8e55a916a"
+      "sha256": "74463be3efcc664520f656d01b8e81cb570d81514bd2f1766676cf6ed5f4be6c"
     },
     {
       "path": ".mcp.json",
@@ -122,7 +122,7 @@
     },
     {
       "path": "data/graph-schema.json",
-      "sha256": "c506bee9d8cc4419fbb3102bd47a89185e9d308711e755bcbabe52922a011595"
+      "sha256": "2d975cd3c17c63579e233ed183b01ddbb11587c41faf0c1d6a892809ed04cd6c"
     },
     {
       "path": "data/graph/capability.jsonl",
@@ -162,7 +162,7 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "9ab0305cde832f959a09d577d84ef708b25f4248c83fad3c579b136c65e74cb9"
+      "sha256": "651f1f3214e19b76f379185823d849545e4cca49926144cd3bf824b217c98ad1"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
@@ -278,7 +278,7 @@
     },
     {
       "path": "skills/pm-adr/SKILL.md",
-      "sha256": "5a2e8c647e323118d48ff0cb32d1c7b1877a32dc36d4c0ebab2545e6e275f3c5",
+      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
@@ -366,7 +366,7 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "b62624a7422cb0b749902af84b0f2a12e348482b27b57f0f5e780faacdfa2c85"
+      "sha256": "455673b2195e0df46275ddd122651531f7dfaefcf48cbbe171e9fe464a3c9db2"
     },
     {
       "path": "tools/lib/assets.mjs",
@@ -374,7 +374,7 @@
     },
     {
       "path": "tools/lib/assignee.mjs",
-      "sha256": "7e6db4ab7bc2857bde78d524c6140cc5b702d4aaa0654ac1c29063d57f9737d4"
+      "sha256": "d1b51059d8026d3e672af837fbe94325c0907e4511948a2cee3b5242c12fa369"
     },
     {
       "path": "tools/lib/ddl.mjs",
@@ -409,6 +409,14 @@
       "sha256": "8b2b178bc81220dd4419d773d818351638fbaffa7db5d8a6ed9c436234d8d33a"
     },
     {
+      "path": "tools/lib/experience-build.mjs",
+      "sha256": "0792770d86b9b50a2799f8ab11fd9c17e44292544e4166b02aaac6fae5e99bae"
+    },
+    {
+      "path": "tools/lib/experience-extract.mjs",
+      "sha256": "f946ed6849f8f3fddba59fad74b417ec8c6bdbebb737df5f9496dbbd7502df04"
+    },
+    {
       "path": "tools/lib/fm.mjs",
       "sha256": "0c09f1b7fdc104ca86c1822d691f565a3db3c80dea86db0774752fe7f6cf4ebe"
     },
@@ -417,8 +425,12 @@
       "sha256": "159e19a1e518204d3e1b445aea58797527b17b059dba7ace5579b455d5b52f06"
     },
     {
+      "path": "tools/lib/graph-sync.mjs",
+      "sha256": "435767df27cad056564a905b2c4b86ced868763aad44b9c4cda88d47b2bc112b"
+    },
+    {
       "path": "tools/lib/graph.mjs",
-      "sha256": "4d74c50971f0563c29aa4d58c9a437c30ec8cf367309973c1b7eabdcecd77753"
+      "sha256": "2f89f1549ce237eccf3dcb92599cfb82cd79e958249b6c170f4bd73862de8479"
     },
     {
       "path": "tools/lib/json.mjs",
@@ -437,6 +449,10 @@
       "sha256": "b7bab1060ea9d78c2096de509b9556b2285fdab9a6772bd61d3f362015f38aeb"
     },
     {
+      "path": "tools/lib/recommendation-log.mjs",
+      "sha256": "484704d56b94df9a3f67d5313bc506f88633000e73922052c19256446ac00e04"
+    },
+    {
       "path": "tools/lib/report-kpi.mjs",
       "sha256": "6c81840400ff4262cc064b0405cc53a84b2847e321cd4bd30e8d4a4262e3187a"
     },
@@ -446,15 +462,15 @@
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "3f09615ef6c4b4e922f6031d81920e1b30e6a438b4fbe9c6edacc5b6c52d7c17"
+      "sha256": "fd3335648b0e85ad1b9b96804fc96f68b70e24e418d03779f03f6907cb420e52"
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "9bc359eb04d097bf13c1f78bf4f7a04acc68e2f889e6097394271268904e3e23"
+      "sha256": "1668fb08bdea2b962da5f55675b2352d9c17fa5e00e4674ea08f4074dc22c345"
     },
     {
       "path": "tools/lib/review-report.mjs",
-      "sha256": "3a4df6990cee967e02c02bd96ef73393fe0cd092c88d3e4dc7d027ba18c6826c"
+      "sha256": "70b3d5b093d5ef7c48692469cdd32771189ef5a4d3c0e11a17f7fb73fc8c81a0"
     },
     {
       "path": "tools/lib/schema.mjs",
@@ -466,11 +482,11 @@
     },
     {
       "path": "tools/lib/setup.mjs",
-      "sha256": "9d6d4b101afa2b32ab83a79f5cc37a91168f1dbb90fcb4276f60676a36bc8a59"
+      "sha256": "76ac94edb2ab959e17d2045cd35a067ff32cf27cde828eec1e23779a59e4c51d"
     },
     {
       "path": "tools/lib/staffing.mjs",
-      "sha256": "a4894fcb261a0a31f0f195a616c4ae6020780c52b7a781858307446b590c8e4f"
+      "sha256": "fe196138d2b46f53794bf93a7e5b10a536fa582893dacc0de2e69384b6123ab9"
     },
     {
       "path": "tools/lib/sync.mjs",
@@ -504,6 +520,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T08:57:21.081Z",
+  "syncedAt": "2026-08-14T00:14:59.004Z",
   "target": "plugin"
 }

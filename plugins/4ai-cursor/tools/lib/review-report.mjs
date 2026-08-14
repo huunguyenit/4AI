@@ -15,20 +15,62 @@
 
 import { fetchReviewDataset, datasetToPayloads, todayIso, trimmed } from './review-dataset.mjs';
 import { buildReportArtifact, buildPortfolioArtifact, duongDanDuAn, duongDanTong } from './report.mjs';
-import { HUB } from './assets.mjs';
+import { HUB, pmIdentity } from './assets.mjs';
+import { runGraphSql } from '../../mcp/fbo/lib/sql.mjs';
+import { datasetToGraph } from './graph-sync.mjs';
+import { goiYPhanCong } from './assignee.mjs';
+import { snapshotGoiY, toGraphNodes, docLog, doiChieu, tongHop } from './recommendation-log.mjs';
 
 /** Trạng thái PM chỉ theo dõi hạn, không phân tích — xem `pm-deadline-review`. */
 const CHI_THEO_DOI = ['XN', 'TH'];
 
 /**
- * Dataset cố định → danh sách file báo cáo (HTML + payload JSON cạnh nó).
+ * Đối chiếu gợi ý cũ với thực tế, rồi snapshot gợi ý lần này.
+ *
+ * Tách riêng vì đây là thứ DUY NHẤT trong pipeline báo cáo có trí nhớ giữa các lần chạy —
+ * mọi phần khác đều thuần từ dataset. Hỏng ở đây không được phép làm mất báo cáo: log là dữ
+ * liệu phụ trợ, còn báo cáo mới là thứ PM cần sáng nay.
+ *
+ * @returns {{hieuQuaGoiY: object|null, banGhi: Array}}
+ */
+function vongHocGoiY(dataset, byProject, ngay, deps = {}) {
+  try {
+    const maDas = Object.keys(byProject);
+    const pmTheoDuAn = new Map(Object.entries(byProject).map(([maDa, p]) => [maDa, p.pm ?? '']));
+
+    // Log của MỌI user, không riêng máy này — đó là điểm khác so với bản ghi ra file cục bộ.
+    const doc = { runGraphSql: deps.runGraphSql ?? runGraphSql };
+    const daDoiChieu = doiChieu(docLog(doc, maDas), dataset.yeuCau ?? [], pmTheoDuAn);
+
+    // Gợi ý của lần chạy này — đúng hàm mà báo cáo dùng để hiển thị, không chấm lại kiểu khác.
+    const banGhi = [];
+    for (const [maDa, payload] of Object.entries(byProject)) {
+      if (!payload.nhanSu) continue;
+      const goiYs = goiYPhanCong(payload.yeuCau ?? [], payload.nhanSu, {}, payload.pm ?? '');
+      banGhi.push(...snapshotGoiY(goiYs.map(({ ur, goiY }) => ({ ur: { ...ur, ma_da: maDa }, goiY })),
+        { ngayChay: ngay }));
+    }
+
+    const tong = tongHop(daDoiChieu);
+    return {
+      // Chưa có lần chạy nào trước thì chưa có gì để nói — đừng hiện một thẻ rỗng 0%.
+      hieuQuaGoiY: tong.soGoiY ? { ...tong, chiTiet: daDoiChieu } : null,
+      banGhi,
+    };
+  } catch {
+    return { hieuQuaGoiY: null, banGhi: [] };
+  }
+}
+
+/**
+ * Dataset cố định → danh sách file báo cáo (HTML + payload JSON cạnh nó) + mô hình đồ thị.
  *
  * @param {string} hub
  * @param {{project?: string, pmName?: string, pmDept?: string, maxRows?: number, ngayChay?: string}} args
- * @param {object} deps  chuyển tiếp cho fetchReviewDataset (test không chạm DB)
+ * @param {object} deps  chuyển tiếp cho fetchReviewDataset; `runGraphSql` để test không chạm đồ thị
  * @returns {{files: Array<{relPath: string, content: string}>, ngay: string, pm: string,
  *            dataset: object, boQua: Array<{ma_da: string|null, errors: string[]}>,
- *            canhBao: string[]}}
+ *            canhBao: string[], doThi: {nodes: Array, edges: Array, scopes: string[]}}}
  * @throws {Error} khi phạm vi không có UR nào, hoặc không dựng được file nào
  */
 export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
@@ -44,6 +86,23 @@ export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
   const files = [];
   const boQua = [];
   const canhBao = [];
+
+  // Vòng học: đối chiếu gợi ý các lần chạy TRƯỚC với việc PM đã thật sự giao cho ai (đọc từ
+  // chính dataset này), rồi ghi lại gợi ý của lần chạy NÀY để lần sau đối chiếu tiếp. PM không
+  // phải xác nhận gì — họ duyệt trên web QLDA, hệ thống chỉ quan sát kết quả.
+  const { hieuQuaGoiY, banGhi } = vongHocGoiY(dataset, byProject, ngay, deps);
+  if (hieuQuaGoiY) portfolio.hieuQuaGoiY = hieuQuaGoiY;
+
+  // Tầng dự án cho đồ thị: dựng ở đây vì dataset đã nằm sẵn trong tay, nhưng KHÔNG đẩy lên DB
+  // ở đây — module này trả mô tả, caller quyết định ghi. Cùng kỷ luật với `files`.
+  const boi = pmIdentity(hub).maNv;
+  const doThi = datasetToGraph(dataset, { boi });
+
+  // Log gợi ý đi CHUNG một lần đẩy với tầng dự án: cạnh HAS_RECOMMENDATION bám vào node
+  // Request do chính lần đẩy đó dựng, tách ra hai lần ghi thì có lúc cạnh trỏ vào chỗ trống.
+  const logGoiY = toGraphNodes(banGhi, { boi });
+  doThi.nodes.push(...logGoiY.nodes);
+  doThi.edges.push(...logGoiY.edges);
 
   for (const [maDa, payload] of Object.entries(byProject)) {
     // ignoreQuality: lần sinh tự động từ dataset chưa có deXuat/nhanSu do người viết —
@@ -82,7 +141,8 @@ export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
     canhBao.push('dataset bị cắt ở maxRows — tăng maxRows hoặc lọc hẹp lại phạm vi.');
   }
 
-  return { files, ngay, pm, dataset, boQua, canhBao };
+  if (doThi.boQua.length) canhBao.push(...doThi.boQua);
+  return { files, ngay, pm, dataset, boQua, canhBao, doThi };
 }
 
 /**

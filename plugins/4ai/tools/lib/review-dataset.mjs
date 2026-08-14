@@ -14,6 +14,7 @@ import { runSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadata.mjs';
 import { buildNhanSu, pmCuaDuAn } from './staffing.mjs';
 import { fetchForum } from './forum.mjs';
+import { sqlTuDien, buildTuDien, rutHienVat } from './experience-extract.mjs';
 
 export const STATUS_MAC_DINH = ['DD', 'XN', 'TH'];
 
@@ -206,7 +207,11 @@ SELECT DISTINCT
   RTRIM(dm.bp_lt)    AS bp_lt,
   RTRIM(dm.ma_lt1)   AS ma_lt1,
   RTRIM(dm.ma_lt2)   AS ma_lt2,
-  RTRIM(dm.ma_lt3)   AS ma_lt3
+  RTRIM(dm.ma_lt3)   AS ma_lt3,
+  -- Đường dẫn chương trình khách: cần để mở wcommand của chính họ làm từ điển màn hình.
+  -- Ưu tiên web rồi mới app, giống programPathFromRow() của tool list_programs.
+  RTRIM(dm.dir_pro_web) AS dir_pro_web,
+  RTRIM(dm.dir_pro_app) AS dir_pro_app
 FROM nbphyc yc
 LEFT JOIN nbdmda dm ON RTRIM(yc.ma_da) = RTRIM(dm.ma_da)
 WHERE ${where}
@@ -271,6 +276,7 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
       ma_pbsp: trimmed(r.ma_pbsp) || undefined,
       bp_lt: trimmed(r.bp_lt) || undefined,
       ltql: [r.ma_lt1, r.ma_lt2, r.ma_lt3].map(trimmed).filter(Boolean),
+      programPath: (trimmed(r.dir_pro_web) || trimmed(r.dir_pro_app)).replace(/[\\/]+$/, '') || undefined,
     });
   }
 
@@ -315,6 +321,52 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
  * Chạy bốn câu cố định trên QLDA · QLDA_APP.
  * `deps.runSql` để test không chạm DB.
  */
+/**
+ * Gắn `hienVat` (danh sách sysid) cho UR ở DD, rút từ nội dung bằng từ điển màn hình.
+ *
+ * Từ điển là `wcommand` của CHÍNH chương trình khách — mỗi khách một cây menu, dùng từ điển
+ * của khách khác sẽ phân giải ra `sysid` không tồn tại bên này. Nên phải hỏi từng program một.
+ *
+ * Chương trình nào không với tới được (share mạng chưa nối) thì UR của dự án đó không có
+ * `hienVat` và rơi về thang menu_id — kém hơn nhưng vẫn chạy. Không ném lỗi: một khách mất
+ * kết nối không được phép làm hỏng báo cáo của các khách còn lại.
+ */
+function ganHienVat(hub, merged, deps = {}) {
+  const sqlFn = deps.runSql ?? runSql;
+  const theoDuAn = new Map();
+  for (const u of merged.yeuCau) {
+    const maDa = trimmed(u.ma_da);
+    if (!maDa) continue;
+    if (!theoDuAn.has(maDa)) theoDuAn.set(maDa, []);
+    theoDuAn.get(maDa).push(u);
+  }
+  if (!theoDuAn.size) return;
+
+  const duongDan = new Map((merged.projects ?? [])
+    .map((p) => [trimmed(p.ma_da), trimmed(p.programPath)]).filter(([, v]) => v));
+
+  // Giữ lại từ điển để `datasetToGraph` dựng ExperienceFact mà không phải hỏi `wcommand`
+  // lần thứ hai — cùng một chương trình, cùng một cây menu.
+  merged.tuDienTheoDuAn = new Map();
+
+  for (const [maDa, urs] of theoDuAn) {
+    const programPath = duongDan.get(maDa);
+    if (!programPath) continue;
+    try {
+      const res = sqlFn({ programPath, dbType: 'sys', sql: sqlTuDien(), maxRows: 5000 });
+      const tuDien = buildTuDien(res.rows ?? []);
+      if (!tuDien.size) continue;
+      merged.tuDienTheoDuAn.set(maDa, tuDien);
+      // Gắn `hienVat` cho MỌI UR, không riêng DD: UR ở DD cần nó để chấm điểm ứng viên, còn
+      // UR đã xong cần nó để rút kinh nghiệm. Cùng một phép rút, chạy một lần.
+      for (const u of urs) {
+        const { hienVat } = rutHienVat(u, tuDien);
+        if (hienVat.length) u.hienVat = hienVat.map((h) => h.sysid);
+      }
+    } catch { /* không với tới chương trình khách — rơi về thang menu_id, xem chú thích trên */ }
+  }
+}
+
 export function fetchReviewDataset(hub, args = {}, deps = {}) {
   const sqlFn = deps.runSql ?? runSql;
   const filters = resolveReviewFilters(hub, args);
@@ -334,6 +386,11 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
     hanRows: hanRes.rows ?? [],
     duAnRows: duAnRes.rows ?? [],
   });
+
+  // Rút hiện vật cho UR ở DD TRƯỚC khi dựng nhân sự: `buildNhanSu` hỏi đồ thị "ai đã làm các
+  // hiện vật này", nên phải biết hiện vật trước. Không có bước này thì `u.hienVat` luôn rỗng
+  // và mọi UR rơi về thang menu_id — thang mà đo trên dữ liệu thật chỉ phân giải được 1/25.
+  ganHienVat(hub, merged, deps);
 
   // Nhân sự đi kèm dataset chứ không phải tuỳ chọn khai tay: `4ai report` không nhận payload
   // từ agent nữa, nên nếu chỗ này không dựng thì KHÔNG CÒN đường nào để mục gợi ý phân công

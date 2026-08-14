@@ -186,10 +186,16 @@ Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.
 |---|---|---|
 | `QLDA_APP_CONNECTION` | `appConnectionString` | DB nghiệp vụ QLDA |
 | `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA |
-| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | Chỉ mục đồ thị năng lực |
+| `GRAPH_4AI_CONNECTION` | `graphConnectionString` | DB đồ thị nội bộ `GRAPH_4AI` — kinh nghiệm, gợi ý phân công |
 
-Đa số máy **không cần khai gì cả** — `Web.config` của QLDA tự phân giải được. Chỉ cần override
-khi máy không truy cập được share chứa QLDA, hoặc muốn trỏ DB khác lúc test.
+`appConnectionString`/`sysConnectionString` đa số máy **không cần khai gì cả** —
+`Web.config` của QLDA tự phân giải được. Chỉ cần override khi máy không truy cập được share
+chứa QLDA, hoặc muốn trỏ DB khác lúc test.
+
+`graphConnectionString` thì **bắt buộc** nếu muốn dùng `node tools/4ai.mjs graph push`/
+`graph experience` hoặc muốn gợi ý phân công chấm theo kinh nghiệm hiện vật (xem
+[Kho kinh nghiệm & đồ thị](#-kho-kinh-nghiệm--đồ-thị) bên dưới) — đồ thị sống hẳn trong DB này,
+không còn là chỉ mục tuỳ chọn dựng lại được từ file.
 
 Thứ tự này **chỉ áp cho DB nội bộ QLDA**. Chương trình của **khách** (đường dẫn lấy từ
 `nbdmda`) luôn đọc `Web.config` của chính nó — mỗi khách một server/database riêng, không có
@@ -448,9 +454,8 @@ Kết quả: `ledger/_performance/<thang|tuan>-<ngay>.html` — xem trong browse
 - Convert sang JSON (bảng phẳng, không PIVOT)
 - Tool xử lý pivot, xếp hạng, render chart tự động
 
-## 🔧 Tính Năng Mới — Prompt Tool & Assignee
+## 🔧 Prompt Tool
 
-### Prompt Tool
 Tạo **prompt tự động** từ schema UR cho agent, giảm thời gian suy nghĩ:
 ```bash
 # Xem `tools/lib/prompt.mjs`
@@ -462,20 +467,33 @@ promptCuaUr(urRecord) → prompt hoàn chỉnh cho agent tự viết DDL/SQL
 - Agent không phải suy diễn schema
 - Đảm bảo tính nhất quán
 
-### Assignee Tweaks
-Gợi ý phân công UR dựa trên **trọng số, lịch sử, năng lực**:
+## 🕸️ Kho kinh nghiệm & đồ thị
+
+`4ai report` tự gợi ý người tiếp nhận cho UR ở DD, dựa trên kinh nghiệm THẬT chứ không phải
+đoán qua tên menu — `nbphyc.menu_id` đo được là không đáng tin (1/25 giá trị trên một dự án
+thật sự tồn tại trong cây menu của chính chương trình đó). Thay vào đó hệ thống rút HIỆN VẬT
+(chứng từ/báo cáo/controller cụ thể) từ nội dung UR, đối chiếu với `wcommand` của từng khách:
+
 ```bash
-# Xem `tools/lib/assignee.mjs`
-goiYPhanCong(urList, staff) → danh sách gợi ý phân công cân bằng
+node tools/4ai.mjs graph push                  # nạp hạt giống (Menu/Controller/Table/SpVersion)
+node tools/4ai.mjs graph experience --dept FSD  # quét UR đã xong (HT/DT/OK/UP) → kinh nghiệm hiện vật
+node tools/4ai.mjs report --project DEMO1        # gợi ý phân công tự chấm theo kinh nghiệm vừa quét
 ```
 
-**Chỉ số xem xét:**
-- Khối lượng hiện tại (không quá tải)
-- Chuyên môn (lịch sử commit)
-- Thời gian rảnh (progress UR)
-- Mức độ ưu tiên (hạn, dependency)
+Đồ thị sống trong DB nội bộ `GRAPH_4AI` (SQL Server graph), không phải file — hub dùng cho nhiều
+người nên một user chạy báo cáo phải **đọc ngay** phần user khác đã quét, không dựng lại. Mỗi
+node mang `scope` (mã dự án, hoặc `system` cho thiết kế FBO chuẩn); nạp lại là `MERGE` theo
+phạm vi, không xoá dữ liệu của dự án khác.
 
-Cấu hình trọng số: `data/qlda.json` → `review.phanCong` ghi đè mặc định
+Gợi ý phân công cũng tự đối chiếu với thực tế: mỗi lần chạy report, hệ thống ghi lại đã gợi ý
+ai, rồi lần chạy SAU đọc `nbphyc.ma_lt1` để tự biết PM có giao đúng người hay không — không
+đòi PM xác nhận gì (PM duyệt trên web QLDA, không mở repo). Xem mục "Gợi ý có trúng không"
+trên trang tổng quan.
+
+Cấu hình trọng số chấm điểm: `data/qlda.json` → `review.phanCong` ghi đè mặc định
+(`tools/lib/assignee.mjs`). Thiết kế đầy đủ, số đo trên dữ liệu thật, và các quyết định đã đảo
+ngược giữa chừng: [`docs/experience-engine/`](docs/experience-engine/) và
+[`docs/adr/ADR-0001`](docs/adr/ADR-0001-experience-engine-scope.md).
 
 ## 📁 Cấu trúc Thư mục
 
@@ -554,6 +572,8 @@ Xem chi tiết: [docs/ASSET-FORMAT.md](docs/ASSET-FORMAT.md)
 |---|---|
 | [ASSET-FORMAT.md](docs/ASSET-FORMAT.md) | Cách viết rule, skill, agent, command |
 | [TARGET-MATRIX.md](docs/TARGET-MATRIX.md) | Asset nào emit ra file nào trên từng platform |
+| [docs/experience-engine/](docs/experience-engine/) | Đồ thị kinh nghiệm: assessment, domain model, thuật toán, thiết kế đồ thị trong DB |
+| [docs/adr/](docs/adr/) | Quyết định kiến trúc đã chốt về chính hub (ADR — khác `ledger/adr/` gitignore dành cho ADR riêng từng khách) |
 
 ## 🤝 Cộng tác
 

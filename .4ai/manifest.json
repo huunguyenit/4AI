@@ -188,7 +188,7 @@
     },
     {
       "path": ".agents/skills/pm-adr/SKILL.md",
-      "sha256": "5a2e8c647e323118d48ff0cb32d1c7b1877a32dc36d4c0ebab2545e6e275f3c5",
+      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
@@ -456,7 +456,7 @@
     },
     {
       "path": ".claude/skills/pm-adr/SKILL.md",
-      "sha256": "5a2e8c647e323118d48ff0cb32d1c7b1877a32dc36d4c0ebab2545e6e275f3c5",
+      "sha256": "f0a3326502c11fad03c91d28da1ea5b1400ffac602f49a844e53b15c514b3c84",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
@@ -714,7 +714,7 @@
     },
     {
       "path": ".cursor/rules/pm-adr.mdc",
-      "sha256": "62e9ff232b92790203895243c74b8e6f7e823abf91614ea2c09e8ff065881102",
+      "sha256": "82af65322c35ba0c24843a4029e4356b2ed5e870406c0a8e830206c910f950ea",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
@@ -892,7 +892,7 @@
     },
     {
       "path": ".github/instructions/pm-adr.instructions.md",
-      "sha256": "355af52c15bd235a48d7fdbdac8a0615ca8b3cfe76da46517a8485644da26415",
+      "sha256": "e3a4a683196c3461567b19c744163ebf0f279674f8b7aede0f656d6a273dfb33",
       "sourceId": "pm-adr",
       "sourceVersion": 1
     },
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-13T08:57:21.038Z",
+  "syncedAt": "2026-08-14T00:14:58.940Z",
   "target": "4ai"
 }

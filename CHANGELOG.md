@@ -5,6 +5,180 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+## [v0.3.0] — 2026-08-14
+
+### Thay đổi phá vỡ
+
+- **Đồ thị chuyển vào database — lược đồ v3.** `sourceOfTruth.kind` đổi từ `files` sang
+  `database`; JSONL trong `data/graph/` chỉ còn là **hạt giống** cho lần nạp đầu. Lý do: hub
+  được nhiều người dùng — user A chạy báo cáo N1-N3, user B chạy N4-N6, quản lý C chạy cả sáu
+  và phải ĐỌC NGAY phần A/B đã tổng kết chứ không dựng lại. File cục bộ không chia sẻ được;
+  git thì chia sẻ nhưng cần commit/push/pull, không ai làm giữa hai lần chạy báo cáo. Đánh đổi
+  đã chấp nhận: mất khả năng review thay đổi đồ thị bằng `git diff`.
+  - **`scope` trên mọi node** (`system` = thiết kế FBO chuẩn · `<ma_da>` = phần riêng một dự
+    án). Node cấu trúc (Menu/Controller/Table) khai `scoped: true` nên khoá thật là
+    `<scope>|<khoá>`. Trước v3, bản chuẩn `CDTran` và bản customize của từng khách **đè lên
+    nhau** vì chung khoá `sysid` trần — ai ghi sau thắng. Nay `system|CDTran` và
+    `ACME|CDTran` là hai node, đúng mô hình `.f` vs `.xml` runtime FBO vốn dùng.
+  - **Bỏ full reload, chuyển sang upsert theo phạm vi.** `DELETE` sạch rồi `INSERT` lại là hợp
+    lệ khi DB chỉ là chỉ mục của một người; với nhiều người nó là **mất dữ liệu** — user B chạy
+    lúc 9h xoá sạch phần user A ghi lúc 8h. Nay `MERGE` theo khoá và mọi phép xoá đều kèm
+    `WHERE scope IN (…)`.
+  - **Chỉ xoá loại cạnh mà lần chạy đó thật sự dựng lại được.** Đo trên DB thật: nạp hạt giống
+    chỉ có `DEPENDS_ON`/`USES`/`HAS_VERDICT`, nếu xoá mọi loại thì `BELONGS_TO`, `IN_PHASE`,
+    `HAS_PM_REVIEW`… của tầng dự án bị xoá sạch và không nguồn nào dựng lại.
+  - **Di trú giữ nguyên `$node_id`**: đổi khoá bằng `UPDATE` tại chỗ chứ không xoá-rồi-chèn —
+    xoá rồi chèn sinh `$node_id` mới và bỏ lại một đống cạnh trỏ vào hư không. Idempotent nhờ
+    `WHERE scope IS NULL`. Đã chạy thật: 57 node hạt giống + toàn bộ tầng dự án (Project,
+    Phase, Request, PMReview, ScopeEvidence và 7 loại cạnh) còn nguyên sau ba lần push.
+  - **`node tools/4ai.mjs graph push`** (mới) — sinh rồi nạp thẳng vào DB qua `sqlcmd -i`
+    (`-i` chứ không `-Q`: `GO` là chỉ thị của sqlcmd, không phải cú pháp T-SQL).
+    `runGraphScript()` trong `sql.mjs` là đường ghi duy nhất; `query_sql` vẫn chặn câu lệnh ghi
+    như cũ. `--dry-run` dừng trước khi ghi.
+  - `graphConnectionString` từ **tuỳ chọn** thành **bắt buộc** — đồ thị sống ở đó.
+  - Chia lô 1000 dòng mỗi `INSERT … VALUES` (giới hạn table value constructor của SQL Server)
+    và MERGE qua bảng tạm, để `ExperienceFact` đếm bằng chục nghìn vẫn nạp được.
+  - **Codepage đầu vào của `sqlcmd -i`**: đường ghi mới ban đầu chỉ đặt `-f o:65001` (đầu ra),
+    copy theo `execSql`. Nhưng `execSql` đưa câu lệnh qua `-Q` (tham số dòng lệnh, Windows đã
+    giải mã sẵn) còn đường này qua `-i <file>` — sqlcmd tự đọc file theo codepage ANSI của máy.
+    Kết quả: "Giấy báo nợ" vào DB thành "Giáº¥y bÃ¡o ná»£", **exit 0, hỏng hoàn toàn im lặng**.
+    Đã đổi sang `-f i:65001,o:65001`; MERGE tự ghi đè bản hỏng ở lần push sau. Quét lại 131 cột
+    text của 15 bảng node: 0 dòng mojibake.
+  - `tests/test-graph-scope.mjs` (mới, 26 khẳng định) — soi chuỗi SQL sinh ra, không chạm DB.
+
+- **Chạy báo cáo tự nộp tầng dự án lên đồ thị.** `tools/lib/graph-sync.mjs` (mới) biến dataset
+  rà soát — thứ báo cáo VỐN ĐÃ đọc từ QLDA — thành node Project/Phase/Request và cạnh
+  BELONGS_TO/IN_PHASE/HAS_STATUS, `scope` = mã dự án. Không tốn thêm truy vấn nào. Nhờ vậy
+  user A chạy N1-N3, user B chạy N4-N6, quản lý C mở N1-N6 là **đọc ngay** phần A và B đã
+  tổng kết. Đã chạy thật: push DEMO1 (6 Request) rồi push TFR — DEMO1 còn nguyên, hai scope cùng
+  tồn tại.
+  - Phân tầng theo GIÁ: tầng rẻ (Project/Phase/Request/trạng thái) đẩy lại mỗi lần chạy; tầng
+    đắt (phân giải menu→controller→table, `ExperienceFact`) KHÔNG làm ở đây — chạy riêng và
+    nằm lại trong DB để lần sau đọc thẳng.
+  - `trang_thai` vào đồ thị dưới dạng **quan hệ** `HAS_STATUS` tới lookup Status dùng chung,
+    không phải property lặp trên từng Request — đúng `propsNote` của lược đồ.
+  - `graphTuObject()` + `nhanDoiTuong()` tách ra từ `loadGraph()`: JSONL hạt giống và object
+    dựng trong bộ nhớ đi qua **đúng một** bộ luật validate. Nhân đôi luật là cách chắc chắn
+    nhất để hai đường rẽ nhau lúc nào không biết.
+  - `validateGraph` nhận `kindNgoai`: cạnh trỏ tới node đã nạp sẵn trong DB (Status) là hợp lệ,
+    nhưng **mặc định vẫn nghiêm ngặt** — không khai thì cạnh treo vẫn báo lỗi, để `graph check`
+    tiếp tục bắt được khoá gõ nhầm thay vì cho nó núp dưới danh nghĩa "tham chiếu ngoài".
+  - `emitSql` lấy kind/khoá từ chính tham chiếu thay vì đòi node phải có trong lô — trước đó
+    nó **sập** (`Cannot read properties of undefined`) khi gặp cạnh trỏ sang tầng khác.
+  - Đẩy đồ thị hỏng KHÔNG làm mất báo cáo: bọc try/catch, báo một dòng rồi thôi.
+  - `tests/test-graph-sync.mjs` (mới, 22 khẳng định) — dựng SQL từ dataset giả, không chạm DB.
+
+- **Log gợi ý chuyển từ file cục bộ vào đồ thị** (`node_RecommendationLog`, scope = mã dự án).
+  Bản đầu ghi `ledgerRoot()/recommendations.jsonl` — chạy được với một người, nhưng user A
+  không đọc được file trên máy user B, nên quản lý C mở báo cáo chung chỉ thấy phần mình từng
+  chạy. Cùng lý do đã chuyển cả đồ thị vào DB.
+  - Khoá `<stt_rec>|<ngày>` nên chạy report hai lần trong ngày **ghi đè chính nó** thay vì đẻ
+    node thứ hai — `MERGE` lo phần chống trùng, không cần lọc ở tầng ứng dụng nữa.
+  - Cạnh `HAS_RECOMMENDATION` (Request → RecommendationLog) đi **chung một lần đẩy** với tầng
+    dự án; tách ra hai lần ghi thì có lúc cạnh trỏ vào node Request chưa tồn tại.
+  - Lưu thêm `chamTheo` cạnh thứ hạng: so hai lần gợi ý mà không biết cái nào chấm theo hiện
+    vật, cái nào rơi về `menu_id`, thì mọi kết luận "gợi ý tốt lên hay xấu đi" đều vô nghĩa.
+  - Vẫn **không lưu kết cục** (PM giao ai) — suy lúc truy vấn từ `ma_lt1` hiện tại, giống cách
+    lược đồ xử lý nhãn "Quá hạn". Lưu lại sẽ tạo bản sao có thể lệch với sự thật ở QLDA.
+  - Đã chạy thật trên ITG_FBI: 3 node log, `MATCH(Request→HAS_RECOMMENDATION→RecommendationLog)`
+    duyệt được; file `recommendations.jsonl` cũ đã xoá.
+  - Lược đồ bump `version` 2 → **3** (trước đó chú thích khắp nơi ghi v3 nhưng trường vẫn là 2),
+    và `layers.decision` khai thêm `ExperienceFact`/`RecommendationLog` — chúng là kết quả SUY
+    từ nội dung UR, không phải dữ liệu chép nguyên từ QLDA.
+
+- **Gợi ý phân công chấm trên HIỆN VẬT thay vì `menu_id`.** `assignee.mjs` nhận thêm
+  `nhanSu.kinhNghiemHienVat` (đọc `node_ExperienceFact` từ đồ thị) và `u.hienVat` (hiện vật rút
+  từ nội dung chính UR đang chờ giao). Có hiện vật thì chấm theo hiện vật, không thì rơi về
+  `menu_id` như cũ — và `goiY.chamTheo` nói rõ đang dùng thang nào.
+  - **Hai thang KHÔNG cộng dồn.** Chúng đo cùng một thứ ở hai độ chính xác; cộng cả hai là đếm
+    hai lần cùng một bằng chứng — người từng sửa `SVTran` trong UR mang `menu_id` `07.10.06` sẽ
+    vừa ăn điểm hiện vật vừa ăn điểm menu cho đúng một việc đã làm.
+  - **Độ tin cậy hạ bậc cho thang menu**: `cao` giờ chỉ dành cho bằng chứng hiện vật; trùng
+    `menu_id`/`bar` xuống `trung-binh`. Hai test cũ mã hoá giả định "menu = bằng chứng mạnh
+    nhất" đã sửa theo thực tế đo được.
+  - Đo trên dữ liệu giả lập ca thật: người 30 UR cùng `menu_id` nhưng chưa đụng hiện vật nào
+    **rớt khỏi top gợi ý**, nhường cho người đã làm đúng 2/2 hiện vật của yêu cầu.
+  - `staffing.mjs` thêm `sqlKinhNghiemHienVat()` — đọc `node_ExperienceFact`, đếm theo UR duy
+    nhất, **không lọc theo dự án**: kinh nghiệm sửa `SVTran` ở dự án A vẫn dùng được ở dự án B.
+  - `review-dataset.mjs` gắn `hienVat` cho UR bằng từ điển `wcommand` của CHÍNH chương trình
+    khách; khách nào không với tới được thì rơi về thang menu_id chứ không làm hỏng báo cáo của
+    khách khác. `projects[]` nay mang `programPath` (`nbdmda.dir_pro_web`/`dir_pro_app`).
+
+- **`node tools/4ai.mjs graph experience`** — quét UR đã xong, rút kinh nghiệm, nạp vào đồ thị.
+  Tách khỏi `report` vì **phạm vi dữ liệu rời nhau**: báo cáo chỉ đọc UR ở DD/XN/TH (cổng PM),
+  kinh nghiệm chỉ lấy từ HT/DT/OK/UP. Bản nháp có nối extraction vào đường báo cáo — mã trông
+  như đang chạy nhưng vĩnh viễn cho ra rỗng vì hai tập không giao nhau; đã gỡ và ghi rõ lý do
+  tại chỗ. Chạy thật trên DVDKB_FBO: 39 UR → 39 kinh nghiệm, 5 người, 25 hiện vật;
+  `MATCH(Request→PRODUCED_EXPERIENCE→ExperienceFact)` ra đúng 7 cho ca chuẩn `A000571322YC1`.
+
+- **`nbphyc.menu_id` KHÔNG phải khoá tới màn hình — đo được, không phải phỏng đoán.** Đối chiếu
+  25 giá trị `menu_id` của dự án DVDKB_FBO với `wcommand` (cây menu THẬT của chính chương trình
+  đó): **đúng 1 cái tồn tại (4%)**. `07.00.00`, `07.10.06`, `07.10.08`… không có trong cây menu
+  của khách. Nhưng TÊN thì khớp chính xác — cùng UR `A000571322YC1`, nội dung liệt kê 7 chứng
+  từ, tra `wcommand` theo tên ra đủ 7, ở menu_id hoàn toàn khác (`Hóa đơn bán hàng` →
+  `06.01.04`/`SVTran`, không phải `07.10.06`).
+  - Điều này bác bỏ giả định trong bản thiết kế trước ("ánh xạ menu_id ↔ bar rút từ lịch sử UR
+    con") — menu_id của chính các UR con cũng không phân giải được. Từ điển phải lấy từ
+    `wcommand`, và khoá là **tên**, không phải menu_id.
+  - `tools/lib/experience-extract.mjs` (mới): từ điển tên → `sysid` dựng từ `wcommand` của
+    từng chương trình; dò tên trong `noi_dung` theo kiểu **khớp dài trước, không chồng lấn**;
+    tên ngắn dưới 10 ký tự bị loại để không khớp bừa trong văn xuôi; cùng tên thì ưu tiên màn
+    hình nhập chứ không phải mẫu in, và ghi lại chỗ nhập nhằng thay vì vứt im lặng.
+  - `menu_id` chỉ dùng khi nó THẬT SỰ phân giải được, và `menuIdPhanGiaiDuoc` báo ra khi không.
+    Không phân giải được mà nội dung cũng không nêu tên nào thì **không sinh kinh nghiệm** —
+    không bịa một hiện vật mang chính chuỗi menu_id.
+  - Đo trên dữ liệu thật (DVDKB_FBO, 39 UR ở HT/DT/OK/UP): 61,5% UR rút được hiện vật, trung
+    bình 1,63 hiện vật/UR. Ca chuẩn `A000571322YC1` ra **đúng 7 hiện vật**, hành động
+    `them-truong`, vị trí `tab khac` — khớp chính xác nội dung UR.
+  - `tests/test-experience-extract.mjs` (mới, 26 khẳng định) — từ điển chép nguyên từ `wcommand`
+    thật, không chạm DB.
+
+- **`ExperienceFact` — kinh nghiệm đo ở mức HIỆN VẬT, không ở mức UR.** Mô hình cũ
+  (`COUNT(nbphyc) GROUP BY (ma_lt1, menu_id)`) gắn kinh nghiệm vào `menu_id` **ghi trên UR** —
+  và `menu_id` nói dối. Đo trên FSD: **7.477/74.826 UR (10%)** ở trạng thái đã xong trỏ vào
+  menu CHA (`xx.00.00`), không phải màn hình cụ thể. Ca thật `A000571322YC1` (DVDKB_FBO,
+  NV01): `menu_id` = `07.00.00` "Phải thu" nhưng nội dung là thêm trường "Loại kê khai" vào
+  **7 chứng từ** cộng báo cáo "Bảng kê thuế đầu ra, đầu vào" — cách cũ ghi nhận 1 UR trên
+  07.00.00, sai địa chỉ hoàn toàn. Cách mới ghi 8 dòng trên 8 hiện vật thật.
+  - Nguồn lai: tên hiện vật khớp bằng **từ điển** (từ vựng FBO là tập đóng; ánh xạ
+    `menu_id ↔ bar` rút từ chính lịch sử UR con — DB tự cung cấp từ điển). `hanhDong`/`viTri`/
+    `truong` do **LLM** đọc `noi_dung`, luôn mang `doTinCay < 1` và `duyetBoiPm = 0` cho tới
+    khi PM duyệt. Core scoring không phụ thuộc phần LLM.
+  - **Cổng trạng thái `HT, DT, OK, UP`** — chỉ tính việc đã làm xong. Cố ý gồm `OK` và `DT`:
+    luồng là `TH→HT→DT→OK→UP`, và `OK` ("Test OK", 12.780 UR) là bằng chứng **mạnh hơn** `HT`
+    ("Hoàn thành, *chờ test*", 1.889 UR). Lọc đúng chữ "HT,UP" sẽ nhận bằng chứng yếu và vứt
+    bằng chứng mạnh gấp 6,8 lần.
+
+### Thêm
+
+- **Đo gợi ý phân công có trúng không — bằng quan sát, không hỏi PM.** Mục "Gợi ý người tiếp
+  nhận" chạy từ lâu nhưng không ai biết nó đúng hay sai: hệ thống đưa đề xuất rồi quên ngay.
+  Bản nháp đầu định để PM tự ghi nhận xác nhận/override vào JSONL rồi commit — sai từ tiền đề,
+  vì PM duyệt trên web QLDA, không mở repo, không chạy script; một cơ chế đòi hành động không ai
+  làm sẽ vĩnh viễn rỗng. Sự thật về việc phân công vốn đã nằm ở `nbphyc.ma_lt1`, và `4ai report`
+  vốn đã đọc bảng đó mỗi lần chạy — nên chỉ cần **quan sát**, không cần hỏi.
+  - `tools/lib/recommendation-log.mjs` (mới) — snapshot gợi ý mỗi lần chạy report; lần chạy sau
+    đối chiếu với `ma_lt1` hiện tại để tự suy ra PM đã giao cho ai (`trung`/`khac`/`chua-giao`).
+    Không tự ghi đĩa: trả **mô tả file**, `writer.mjs` ghi, đúng luật chung của hub.
+  - Nối trong `buildReviewReportFiles()` nên **cả `4ai report` lẫn `render_review_report`** đều
+    có, không đẻ bề mặt riêng. Hỏng ở vòng này không làm mất báo cáo — log là dữ liệu phụ trợ.
+  - Trang tổng quan thêm mục "Gợi ý có trúng không": tỉ lệ trúng Top-1 và người PM hay chọn
+    thay. UR chưa giao không vào mẫu số (báo cáo chạy sớm không phải gợi ý sai); chưa có gì đã
+    quyết thì `tiLeTrung = null` chứ không phải `0` — 0 nghĩa là trượt sạch.
+  - **Không ghi nhận lý do PM đổi người.** Động cơ nằm trong đầu PM, không nằm trong `nbphyc`;
+    dashboard nói thẳng "không suy đoán động cơ" thay vì bịa một lý do nghe hợp lý.
+  - Lưu ở `ledgerRoot()/recommendations.jsonl` — cùng nơi report HTML, ngoài git, ngoài SQL
+    Server. Cố ý KHÔNG vào `data/graph/*.jsonl`: đồ thị git-tracked là kiến thức đã xác minh
+    đáng review bằng `git diff`, không phải nơi nhận dữ liệu sinh mỗi ngày.
+  - `assignee.mjs` thêm `policyVersion()` — hash 8 hex của bộ trọng số, để biết một thứ hạng đã
+    lưu sinh ra từ cấu hình nào khi `review.phanCong` đổi về sau.
+  - `tests/test-recommendation-log.mjs` (mới, 22 khẳng định) và một mục trong
+    `tests/test-review-report-build.mjs` mô phỏng hai lần chạy cách nhau một ngày, PM giao người
+    khác ở giữa.
+  - `docs/experience-engine/` (mới) — assessment, domain model, thuật toán, kế hoạch; kèm
+    `docs/adr/ADR-0001` chốt hướng mở rộng hệ đang chạy thay vì dựng nền tảng recommendation
+    tổng quát mới.
+
 ## [v0.2.0] — 2026-08-13
 
 Bản đầu tiên dùng được ở bề mặt chỉ có MCP (chat/Cowork). Cài/cập nhật qua marketplace như cũ —
