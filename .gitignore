@@ -11,6 +11,11 @@ ledger/
 # Script nạp đồ thị do `graph build` sinh ra — dựng lại được từ JSONL, không commit.
 .4ai/graph/
 
+# Output tạm của render_review_report/get_review_dataset — CHỨA DỮ LIỆU KHÁCH THẬT (tên
+# khách, mã nhân viên, nội dung UR). Từng bị git add nhầm (commit a713fdd) và lộ ra repo
+# public — xem CHANGELOG. Không bao giờ commit.
+.4ai/scratch/
+
 # Không bao giờ dùng npm — dòng này là phòng thủ, không phải dự kiến.
 node_modules/
 package-lock.json

@@ -5,6 +5,19 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Bảo mật
+
+- **Gỡ `.4ai/scratch/` khỏi git tracking — thư mục này chứa dữ liệu khách THẬT** (tên khách,
+  mã nhân viên, nội dung UR chi tiết) từ một lần chạy `render_review_report`/
+  `get_review_dataset` bị `git add` nhầm ở commit `a713fdd`. Repo `huunguyenit/4AI` public
+  trên GitHub tại thời điểm đó nên dữ liệu đã bị lộ ra ngoài — đã chuyển repo về **private**
+  ngay khi phát hiện. Thêm `.4ai/scratch/` vào `.gitignore` (cùng nhóm với `.4ai/cache|ledger|
+  index|graph` vốn đã bị chặn — thư mục tạm này lẽ ra phải nằm trong danh sách đó từ đầu).
+  - File đã gỡ khỏi tracking **tại HEAD**, KHÔNG rewrite lịch sử git — dữ liệu vẫn còn trong
+    các commit cũ, ai có bản clone/fork từ trước vẫn đọc được qua `git log`. Rewrite lịch sử
+    (force-push) là quyết định riêng, cần xác nhận thêm trước khi làm.
+  - Không ảnh hưởng dữ liệu trên máy — file vẫn còn nguyên trên đĩa, chỉ không còn track.
+
 ### Thêm
 
 - **Giấy phép offline cho gói phân phối.** Public key đi kèm gói
