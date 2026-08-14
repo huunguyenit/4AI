@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 15 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 17 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -10,6 +10,7 @@ import path from 'node:path';
 import { readSource, stripAccents } from './encoding.mjs';
 import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot } from './index.mjs';
 import { runSql, objectSql, sqlLiteral, redact } from './sql.mjs';
+import { licenseStatus, saveLicense } from './license.mjs';
 import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../../src/database/qlda-metadata.mjs';
 import { fetchReviewDataset } from '../../../tools/lib/review-dataset.mjs';
@@ -372,7 +373,33 @@ export const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: 'license_status',
+    description:
+      'Trạng thái giấy phép của bản cài này + Device ID của máy. Gọi khi tool khác báo CHƯA KÍCH HOẠT, hoặc khi người dùng hỏi "device id của tôi là gì" / "còn hạn bao lâu". Device ID là chuỗi XXXXX-XXXXX-XXXXX-XXXXX băm từ định danh máy — đưa NGUYÊN VĂN cho người dùng gửi Fast Source. Tool này chạy được cả khi chưa có giấy phép.',
+    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+  },
+  {
+    name: 'license_activate',
+    description:
+      'Lưu giấy phép Fast Source cấp (nội dung JSON có `payload` và `signature`) vào đúng nơi cài đặt — chạy như plugin thì ghi ${CLAUDE_PLUGIN_DATA}/data/license.json, đường dẫn này người dùng không sửa tay được nên đây là đường kích hoạt DUY NHẤT ở bề mặt không có shell. Verify chữ ký + Device ID + hạn TRƯỚC khi ghi: không hợp lệ thì không lưu gì cả. Dán nguyên nội dung file khách nhận được, không sửa, không format lại. Tool này chạy được cả khi chưa có giấy phép.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        license: { type: 'string', description: 'Nguyên văn nội dung file .json Fast Source cấp' },
+      },
+      required: ['license'],
+      additionalProperties: false,
+    },
+  },
 ];
+
+/**
+ * Hai tool giấy phép phải chạy được KHI CHƯA CÓ giấy phép — nếu không thì người dùng không
+ * có đường nào đọc Device ID hay kích hoạt ở bề mặt không có shell. server.mjs đọc danh sách
+ * này để quyết định chặn hay không.
+ */
+export const TOOLS_KHONG_CAN_LICENSE = new Set(['license_status', 'license_activate']);
 
 // ---------------------------------------------------------------- handlers
 
@@ -967,6 +994,37 @@ export const HANDLERS = {
       file,
       pm: { maNv, boPhanLt },
       note: 'Đã ghi. Các tool khác (list_programs, get_review_dataset, report...) đọc lại giá trị này ngay lần gọi tiếp theo — không cần khởi động lại MCP server.',
+    };
+  },
+
+  license_status(hub) {
+    const st = licenseStatus(hub);
+    return {
+      deviceId: st.deviceId,
+      state: st.state,
+      ok: st.ok,
+      message: st.message,
+      file: st.file,
+      ...(st.license ? { license: st.license } : {}),
+      ...(st.conLai != null ? { conLaiNgay: st.conLai } : {}),
+      ...(st.sourceHub ? { sourceHub: true } : {}),
+      hint: st.ok
+        ? 'Không cần làm gì thêm.'
+        : `Đưa Device ID ${st.deviceId} cho người dùng gửi Fast Source. Nhận được file JSON thì gọi `
+          + 'license_activate({ license: "<nguyên văn nội dung file>" }). KHÔNG tự tạo hay đoán nội dung giấy phép.',
+    };
+  },
+
+  license_activate(hub, args = {}) {
+    const text = String(args.license ?? '').trim();
+    if (!text) throw new Error('Thiếu `license` — dán nguyên văn nội dung file .json Fast Source cấp.');
+    // saveLicense verify trước rồi mới ghi; không hợp lệ thì nó ném lỗi và không để lại file.
+    const kq = saveLicense(hub, text);
+    return {
+      file: kq.file,
+      license: kq.license,
+      ...(kq.conLai != null ? { conLaiNgay: kq.conLai } : {}),
+      note: 'Đã kích hoạt. Các tool khác dùng được ngay lần gọi tiếp theo — không cần khởi động lại MCP server.',
     };
   },
 };

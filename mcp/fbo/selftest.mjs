@@ -85,6 +85,21 @@ ok('autoApprove trong servers.json khớp tool thật', unknown.length === 0,
   unknown.length ? `không có: ${unknown.join(', ')}` : `${approved.length} tool`);
 ok('query_sql KHÔNG nằm trong autoApprove', !approved.includes('query_sql'));
 
+// Cổng giấy phép: hai tool license phải gọi được cả khi CHƯA kích hoạt — không thì người
+// dùng không có đường nào đọc Device ID để xin giấy phép. (Selftest chạy từ mã nguồn hub nên
+// các tool khác không bị chặn ở đây; phần chặn thật đã có test riêng ở tests/test-license.mjs.)
+const lic = payload(await call('license_status', {}));
+ok('license_status chạy được, trả Device ID đúng dạng',
+  /^[0-9A-Z]{5}(-[0-9A-Z]{5}){3}$/.test(lic?.deviceId ?? ''), lic?.deviceId);
+ok('license_status không trả chữ ký hay đường dẫn khoá ký',
+  !/signature|privateKey|BEGIN [A-Z ]*PRIVATE KEY/.test(JSON.stringify(lic)));
+const licSai = payload(await call('license_activate', { license: '{"payload":{"v":1},"signature":"AA"}' }));
+// Hai lý do từ chối đều đúng, tuỳ hub đã dán public key vào data/ hay chưa: "gói chưa có
+// khoá phát hành nào" (chưa dán) hoặc "verify không qua" (đã dán).
+ok('license_activate từ chối giấy phép không hợp lệ',
+  typeof licSai?.__error === 'string' && /Không lưu|public key/i.test(licSai.__error),
+  licSai?.__error?.split('\n')[0]);
+
 // Guard rail: không tồn tại thì phải nói không tồn tại.
 const missing = payload(await call('describe_controller',
   { program: PROGRAM, path: 'Dir\\KhongTonTaiBaoGio.xml' }));

@@ -19,7 +19,8 @@
         "search_content",
         "read_source",
         "resolve_vouchercode",
-        "plan_report"
+        "plan_report",
+        "license_status"
       ],
       "notes": [
         "Nguồn ở mcp/fbo/ trong chính hub này — zero dependency, không kế thừa gì từ fastbusiness-mcp.",
@@ -31,7 +32,8 @@
         "Kết quả sqlcmd đi qua file tạm với `-f o:65001 -o` chứ không qua stdout: `-f` không áp cho stdout, để mặc định thì tiếng Việt bị sqlcmd làm hỏng ngay tại nguồn, không decode ngược được.",
         "Đường dẫn node.exe để tuyệt đối cho chắc: một số client spawn với PATH tối giản.",
         "Cùng lý do PATH tối giản: sql.mjs tự dò sqlcmd ở PATH rồi tới các thư mục cài quen thuộc (Client SDK\\ODBC\\<ver>\\Tools\\Binn, SQL Server Tools\\Binn, go-sqlcmd). Máy nào cài chỗ lạ thì đặt env FBO_SQLCMD trỏ thẳng vào sqlcmd.exe — không cần sửa code.",
-        "node:sqlite là API built-in còn ở diện experimental — Node in cảnh báo ra stderr, vô hại với MCP (stdout mới là kênh giao thức)."
+        "node:sqlite là API built-in còn ở diện experimental — Node in cảnh báo ra stderr, vô hại với MCP (stdout mới là kênh giao thức).",
+        "Giấy phép: mọi tool trừ license_status/license_activate đều qua cổng requireLicense() ở tools/call. Chạy từ mã nguồn hub (có assets/ + targets.json) thì không chặn — hàng rào dành cho GÓI phân phối. license_activate CỐ TÌNH không autoApprove: nó ghi file cấu hình, người dùng nên thấy và duyệt."
       ]
     }
   }

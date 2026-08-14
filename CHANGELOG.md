@@ -5,6 +5,41 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Thêm
+
+- **Giấy phép offline cho gói phân phối.** Public key đi kèm gói
+  (`data/license-public-keys.json`), private key ở máy phát hành; người dùng gửi **Device ID**,
+  Fast Source ký một JSON gắn đúng máy đó, người dùng lưu lại là chạy được. Ed25519 qua
+  `node:crypto`, **không thêm dependency** nào.
+  - **Không gọi mạng, không máy chủ kiểm tra** — máy khách thường không ra được Internet, và
+    một MCP server treo vì chờ HTTP còn hỏng nặng hơn cả việc không có giấy phép.
+  - **Device ID** (`XBZ3E-SQ33C-K8R5F-0Y1TC`) = base32 của SHA-256 trên định danh **cài đặt
+    HĐH** (MachineGuid trên Windows, `/etc/machine-id` trên Linux, IOPlatformUUID trên macOS),
+    lùi về địa chỉ MAC rồi tên máy. Chọn định danh HĐH chứ không phải MAC vì MAC đổi khi cắm
+    thêm card hay dựng VPN — Device ID nhảy là giấy phép chết oan. Giá trị thô **được băm trước
+    khi ra khỏi tiến trình**: chuỗi gửi cho Fast Source không lộ MachineGuid hay MAC.
+  - **Chặn ở `tools/call`, không chặn lúc khởi động.** Chặn lúc khởi động thì client chỉ thấy
+    server chết, không còn chỗ nào hiện Device ID; chặn ở đây thì `tools/list` vẫn đủ tool và
+    mỗi lần gọi trả về đúng các bước gỡ. Hai tool `license_status` / `license_activate` **luôn**
+    chạy được — không thì bề mặt không có shell (chat/Cowork) không có đường nào kích hoạt, y
+    như lý do `set_pm_identity` tồn tại.
+  - **CLI**: `4ai license` (trạng thái + Device ID) · `license id` · `license import <file>` ·
+    `license path`; phía phát hành có `license keygen` và `license issue`. Lệnh runtime
+    (`report`, `serve`, `graph`) qua cùng một cổng; **compiler không bị chặn** (`check`, `sync`,
+    `list`, `explain`, `targets`, `doctor`, `setup`) — ai có mã nguồn hub thì giấy phép không
+    còn là hàng rào, chặn chỉ tổ làm người phát triển kẹt.
+  - **Verify trước, ghi sau**: giấy phép sai máy / hết hạn / sai chữ ký **không để lại file**.
+    Lưu rồi mới báo lỗi thì lần chạy sau người dùng thấy "đã có lic mà vẫn chặn" và không có
+    cách nào lần ra nguyên nhân.
+  - Hạn mặc định khi cấp là **365 ngày**, muốn vĩnh viễn phải gõ `--forever` — không có máy chủ
+    kiểm tra nên bản cấp nhầm là **không thu hồi được**.
+  - `data/license.json` và `*.pem` vào `.gitignore`; `SECRET_PATTERNS` thêm shape
+    `-----BEGIN … PRIVATE KEY-----` để `4ai check` bắt được khoá ký lọt vào file commit.
+  - `tests/test-license.mjs` (44 kiểm tra) + ba kiểm tra trong `mcp/fbo/selftest.mjs`.
+  - **Hàng rào thương mại, không phải hàng rào an toàn** — runtime là JS đọc được, ai sửa
+    `license.mjs` thì bỏ được. Mục tiêu là "chỉ chạy ở nơi đã được cấp" và để lại vết khi chạy
+    sai chỗ.
+
 ## [v0.3.0] — 2026-08-14
 
 ### Thay đổi phá vỡ

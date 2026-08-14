@@ -15,5 +15,11 @@ ledger/
 node_modules/
 package-lock.json
 data/qlda.local.json
+
+# Giấy phép đã kích hoạt trên MÁY NÀY (gắn device id) — không commit.
+data/license.json
+# Khoá ký giấy phép. Chỗ đúng của nó là ~/.4ai/keys/, dòng này là phòng thủ nếu ai đó
+# lỡ sinh khoá vào trong repo.
+*.pem
 .cursor/mcp.json
 targets.local.json

@@ -8,7 +8,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serve, reply, replyError, toolText, toolError, log, ERR, PROTOCOL_VERSION } from './lib/rpc.mjs';
-import { TOOLS, HANDLERS } from './lib/tools.mjs';
+import { TOOLS, HANDLERS, TOOLS_KHONG_CAN_LICENSE } from './lib/tools.mjs';
+import { requireLicense } from './lib/license.mjs';
 
 const SERVER = { name: '4ai-fbo', version: '1.0.0' };
 
@@ -57,6 +58,16 @@ async function onMessage(msg) {
       const name = params?.name;
       const handler = HANDLERS[name];
       if (!handler) return reply(id, toolError(`Không có tool \`${name}\`.`));
+      // Cổng giấy phép. Đặt ở tools/call chứ không ở initialize/tools/list: chặn lúc khởi
+      // động thì client chỉ thấy server chết, không có chỗ nào hiện Device ID cho người dùng.
+      // Chặn ở đây thì danh sách tool vẫn liệt kê được, và mọi lần gọi trả về ĐÚNG các bước gỡ.
+      if (!TOOLS_KHONG_CAN_LICENSE.has(name)) {
+        try {
+          requireLicense(HUB, { what: name });
+        } catch (e) {
+          return reply(id, toolError(e.message));
+        }
+      }
       try {
         const result = await handler(HUB, params?.arguments ?? {});
         return reply(id, toolText(result));

@@ -969,7 +969,7 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[[\"4ai-fbo\"],[\"mcp__4ai-fbo__list_programs\",\"mcp__4ai-fbo__index_program\",\"mcp__4ai-fbo__find_controller\",\"mcp__4ai-fbo__describe_controller\",\"mcp__4ai-fbo__list_related\",\"mcp__4ai-fbo__resolve_entities\",\"mcp__4ai-fbo__search_content\",\"mcp__4ai-fbo__read_source\",\"mcp__4ai-fbo__resolve_vouchercode\",\"mcp__4ai-fbo__plan_report\"]]",
+      "ownedCanonical": "[[\"4ai-fbo\"],[\"mcp__4ai-fbo__list_programs\",\"mcp__4ai-fbo__index_program\",\"mcp__4ai-fbo__find_controller\",\"mcp__4ai-fbo__describe_controller\",\"mcp__4ai-fbo__list_related\",\"mcp__4ai-fbo__resolve_entities\",\"mcp__4ai-fbo__search_content\",\"mcp__4ai-fbo__read_source\",\"mcp__4ai-fbo__resolve_vouchercode\",\"mcp__4ai-fbo__plan_report\",\"mcp__4ai-fbo__license_status\"]]",
       "ownedKeys": [
         "enabledMcpjsonServers",
         "permissions.allow"
@@ -1002,6 +1002,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T00:14:58.940Z",
+  "syncedAt": "2026-08-14T01:57:28.079Z",
   "target": "4ai"
 }
