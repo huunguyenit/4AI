@@ -23,7 +23,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { dataRoot } from './index.mjs';
+import { stateFile } from './index.mjs';
 
 export const PRODUCT = '4ai';
 export const LICENSE_VERSION = 1;
@@ -263,11 +263,13 @@ export function loadPublicKeys(hub) {
 }
 
 /**
- * Nơi lưu giấy phép của LẦN CÀI NÀY. Cùng chỗ với `qlda.local.json`: chạy như plugin thì đó
- * là `${CLAUDE_PLUGIN_DATA}` — ghi được và sống sót qua mỗi lần update gói.
+ * Nơi lưu giấy phép. Cùng chỗ với `qlda.local.json`: `stateRoot()` — thư mục cấp NGƯỜI DÙNG khi
+ * chạy như plugin, không phải `${CLAUDE_PLUGIN_DATA}`. Giấy phép sống lâu hơn một lần cài và
+ * lâu hơn một phiên Cowork; để nó trong thư mục phiên là bắt người dùng xin lại giấy phép mỗi
+ * lần mở phiên mới.
  */
 export function licensePath(hub) {
-  return process.env.FBO_LICENSE_FILE || path.join(dataRoot(hub), 'data', 'license.json');
+  return process.env.FBO_LICENSE_FILE || stateFile(hub, 'data', 'license.json');
 }
 
 export function readLicenseFile(hub) {

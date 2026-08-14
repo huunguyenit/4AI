@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseFrontmatter, FmError } from './fm.mjs';
+import { stateRoot } from '../../mcp/fbo/lib/index.mjs';
 import { applyDefaults, validateAsset, SECRET_PATTERNS, SECRET_WAIVER } from './schema.mjs';
 
 /** Gốc hub, suy ra từ vị trí file này (tools/lib/assets.mjs → ../../). */
@@ -19,9 +20,10 @@ export function ledgerRoot(hub = HUB) {
   const local = readJson(localCfgPath, {});
   if (local.mcpDataRoot) return path.join(local.mcpDataRoot, '4ai', 'ledger');
   // Chạy như plugin: `hub` là gốc GÓI, bị ghi đè mỗi lần update — báo cáo ghi vào đó là mất.
-  // FBO_DATA_ROOT (= ${CLAUDE_PLUGIN_DATA}) là chỗ sống sót, cùng nơi index và qlda.local.json.
-  // Biến này chỉ được đặt trong tiến trình MCP nên nhánh này vô hại với CLI ở hub.
-  if (process.env.FBO_DATA_ROOT) return path.join(process.env.FBO_DATA_ROOT, 'ledger');
+  // Ledger đi cùng `qlda.local.json` và giấy phép ở `stateRoot()` (thư mục cấp người dùng),
+  // KHÔNG phải ${CLAUDE_PLUGIN_DATA}: trong Cowork thư mục đó thuộc về từng phiên, nên báo cáo
+  // rà soát của các phiên trước biến mất — mà ledger tồn tại chính để giữ vết qua thời gian.
+  if (process.env.FBO_DATA_ROOT) return path.join(stateRoot(hub), 'ledger');
   return path.join(hub, 'ledger');
 }
 

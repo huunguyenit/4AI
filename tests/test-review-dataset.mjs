@@ -150,7 +150,9 @@ process.stdout.write('\n=== chưa gán PM: thông báo phải chỉ ra CÁCH CH�
 // tên của bạn là gì" rồi bịa mã ví dụ. Nên nó phải gọi tên tool chữa được ở mọi bề mặt.
 const CHUA_GAN_PM = path.join(ROOT, '.4ai', 'scratch', 'khong-co-pm-cho-test');
 const envCu = process.env.FBO_DATA_ROOT;
+const envStateCu = process.env.FBO_STATE_ROOT;
 process.env.FBO_DATA_ROOT = CHUA_GAN_PM;
+process.env.FBO_STATE_ROOT = CHUA_GAN_PM;
 let loiPm = '';
 try {
   resolveReviewFilters(ROOT, {});
@@ -158,6 +160,7 @@ try {
   loiPm = e.message;
 }
 if (envCu === undefined) delete process.env.FBO_DATA_ROOT; else process.env.FBO_DATA_ROOT = envCu;
+if (envStateCu === undefined) delete process.env.FBO_STATE_ROOT; else process.env.FBO_STATE_ROOT = envStateCu;
 
 ok('Cài đặt chưa gán PM thì ném lỗi', loiPm !== '', loiPm);
 ok('Thông báo gọi tên tool `set_pm_identity`', loiPm.includes('set_pm_identity'), loiPm);

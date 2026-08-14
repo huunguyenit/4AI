@@ -22,7 +22,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readSource, decodeSource } from './encoding.mjs';
-import { dataRoot } from './index.mjs';
+import { stateFile } from './index.mjs';
 import { loadQldaConfig } from '../../../src/database/qlda-metadata.mjs';
 
 /** Gốc hub tính từ chính file này (mcp/fbo/lib/ → lên ba cấp), không phụ thuộc cwd. */
@@ -169,7 +169,7 @@ function laQldaProgram(programPath) {
  * y hệt như chưa sửa gì.
  */
 export function duongDanQldaLocal() {
-  return path.join(dataRoot(MODULE_HUB_ROOT), 'data', 'qlda.local.json');
+  return stateFile(MODULE_HUB_ROOT, 'data', 'qlda.local.json');
 }
 
 function localConnString(key) {

@@ -5,6 +5,7 @@
 // Data root mặc định là hub; env FBO_DATA_ROOT tách nó ra khi chạy như plugin.
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
@@ -62,8 +63,63 @@ export function slugFor(programPath) {
 
 // Chỗ ghi index tách khỏi chỗ chứa code: khi chạy như plugin, gốc plugin bị ghi đè mỗi
 // lần update nên index phải nằm ngoài (FBO_DATA_ROOT = ${CLAUDE_PLUGIN_DATA}).
+//
+// Dùng cho thứ DỰNG LẠI ĐƯỢC (index sqlite). Thứ không dựng lại được — giấy phép, cấu hình,
+// ledger — dùng `stateRoot()` bên dưới.
 export function dataRoot(hub) {
   return process.env.FBO_DATA_ROOT || hub;
+}
+
+/** Thư mục trạng thái cấp NGƯỜI DÙNG, không phụ thuộc phiên hay lần cài. */
+function thuMucNguoiDung() {
+  if (process.platform === 'win32' && process.env.APPDATA) return path.join(process.env.APPDATA, '4ai');
+  if (process.env.XDG_DATA_HOME) return path.join(process.env.XDG_DATA_HOME, '4ai');
+  return path.join(os.homedir(), '.4ai');
+}
+
+/**
+ * Gốc cho trạng thái PHẢI SỐNG SÓT: giấy phép, `data/qlda.local.json`, ledger.
+ *
+ * Tách khỏi `dataRoot()` vì `${CLAUDE_PLUGIN_DATA}` không bền như tên gọi gợi ý. Trong Cowork
+ * nó nằm trong thư mục CỦA TỪNG PHIÊN: phiên đóng là biến mất cùng giấy phép vừa kích hoạt và
+ * cấu hình vừa khai — đo được, không phải suy đoán (một phiên phải kích hoạt lại giấy phép và
+ * khai lại kết nối sau khi phiên trước bị xoá). Index mất thì `index_program` dựng lại; giấy
+ * phép mất thì người dùng phải xin lại Fast Source.
+ *
+ * Quy tắc song song với `dataRoot()`, không dò filesystem để đoán:
+ *   1. `FBO_STATE_ROOT` — chốt cứng, dùng cho test và máy có nhiều bản cài.
+ *   2. có `FBO_DATA_ROOT` (tức đang chạy như plugin) → thư mục người dùng cố định.
+ *   3. còn lại (chạy từ mã nguồn hub) → chính hub, y như trước.
+ */
+export function stateRoot(hub) {
+  return process.env.FBO_STATE_ROOT || (process.env.FBO_DATA_ROOT ? thuMucNguoiDung() : hub);
+}
+
+/**
+ * Đường dẫn một file trạng thái, kèm DI CHUYỂN từ vị trí cũ (`dataRoot`) khi nơi mới chưa có.
+ *
+ * Không có bước này thì mọi bản cài hiện hữu mất giấy phép và danh tính PM ngay lần chạy đầu
+ * sau khi cập nhật — đúng thứ thay đổi này sinh ra để tránh. Copy chứ không move: vị trí cũ
+ * còn nguyên để bản plugin cũ (nếu người dùng rollback) vẫn chạy được.
+ *
+ * Cố tình KHÔNG nhớ "đã di chuyển rồi" trong biến module: `fs.existsSync(dich)` đã là câu trả
+ * lời, mà rẻ hơn cái giá của một bộ nhớ ẩn — nhớ theo tiến trình thì một tiến trình đổi
+ * `FBO_DATA_ROOT` giữa chừng (test) sẽ đọc mãi bản copy cũ, sai mà không có dấu hiệu gì.
+ */
+export function stateFile(hub, ...rel) {
+  const dich = path.join(stateRoot(hub), ...rel);
+  if (fs.existsSync(dich)) return dich;
+
+  const nguon = path.join(dataRoot(hub), ...rel);
+  if (nguon !== dich && fs.existsSync(nguon)) {
+    // Hỏng ở đây KHÔNG được làm sập lời gọi: coi như chưa có file, người dùng khai lại —
+    // khó chịu, nhưng vẫn hơn là mọi tool ngừng chạy vì một lần copy thất bại.
+    try {
+      fs.mkdirSync(path.dirname(dich), { recursive: true });
+      fs.copyFileSync(nguon, dich);
+    } catch { /* bỏ qua có chủ đích */ }
+  }
+  return dich;
 }
 
 export function indexPathFor(hub, programPath) {

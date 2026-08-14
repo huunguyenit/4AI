@@ -10,7 +10,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-report-pipeline-'));
+// Cả HAI gốc — xem ghi chú ở test-sql-conn.mjs: state root mới là nơi cấu hình được đọc.
 process.env.FBO_DATA_ROOT = tmp;
+process.env.FBO_STATE_ROOT = tmp;
 const DB_APP = 'TEST_APP';
 const PROGRAM_QLDA = String.raw`\\test-share\FastPro$\QLDA\Src-Onl`;
 /** Program của một khách bất kỳ — KHÁC PROGRAM_QLDA, để kiểm nhánh "không phải QLDA". */

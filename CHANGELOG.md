@@ -5,6 +5,30 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Sửa lỗi — trạng thái mất theo phiên Cowork
+
+- **`stateRoot()` tách khỏi `dataRoot()`.** `${CLAUDE_PLUGIN_DATA}` không bền như tên gọi: trong
+  Cowork nó nằm trong thư mục của TỪNG PHIÊN. Đo được, không phải suy đoán — thư mục phiên
+  hôm trước biến mất cùng `license.json` kích hoạt lúc 13:33 và `qlda.local.json` khai lúc 13:44;
+  phiên kế tiếp phải kích hoạt lại giấy phép và khai lại kết nối từ đầu. Từ nay:
+  - `dataRoot()` giữ nguyên cho thứ **dựng lại được** (index SQLite).
+  - `stateRoot()` cho thứ **không dựng lại được** — `data/license.json`, `data/qlda.local.json`,
+    `ledger/` — mặc định `%APPDATA%/4ai` khi chạy như plugin, vẫn là hub khi chạy từ mã nguồn
+    (hành vi dev không đổi). Chốt bằng `FBO_STATE_ROOT` khi cần.
+  - `stateFile()` **copy một lần** từ vị trí cũ khi nơi mới chưa có, nên bản cài hiện hữu không
+    mất giấy phép sau khi cập nhật. Copy chứ không move: rollback về bản cũ vẫn chạy.
+  - Không nhớ "đã di chuyển" trong biến module — `fs.existsSync` đã là câu trả lời, rẻ hơn cái
+    giá của bộ nhớ ẩn. Bản đầu có `Set` memo và nó làm `test-sql-conn` đỏ theo đúng kiểu khó dò
+    nhất: đọc mãi bản copy đầu tiên sau khi data root đổi.
+- **Test không còn ghi vào thư mục người dùng thật.** Bốn test chỉ trỏ `FBO_DATA_ROOT` vào thư
+  mục tạm; sau khi tách gốc, chúng bắt đầu ghi cấu hình giả (`TEST_APP`, `\\test-share\...`) vào
+  `%APPDATA%/4ai` — nơi plugin thật đọc, tức là test làm hỏng cấu hình máy dev. Cả bốn giờ chốt
+  luôn `FBO_STATE_ROOT`. Thêm `tests/test-state-root.mjs` ghim: hub không đổi hành vi, hai gốc
+  tách nhau khi chạy như plugin, có di chuyển, không ghi đè bản mới, và không nhớ ngầm giữa các
+  lần đổi data root.
+- **`tests/test-setup.mjs` chạy được trở lại** — thiếu `import { fileURLToPath }`, ném
+  `ReferenceError` ngay dòng đầu nên cả file chưa từng chạy (lỗi có sẵn, không phải do thay đổi này).
+
 ### Sửa lỗi — bề mặt không có shell (chat/Cowork)
 
 Rút từ một phiên `/4ai:pm-review` chạy thật trên Cowork: báo cáo cuối cùng ra được, nhưng mất

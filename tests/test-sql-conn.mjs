@@ -10,7 +10,10 @@ import path from 'node:path';
 // Trỏ data root vào thư mục tạm TRƯỚC khi nạp sql.mjs: máy dev có thể đã khai chuỗi kết nối
 // thật trong data/qlda.local.json, để nguyên thì test đo trạng thái máy chứ không đo code.
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-conn-'));
+// Cả HAI gốc: state root là nơi cấu hình thật sự được đọc/ghi, và mặc định của nó là thư mục
+// người dùng (%APPDATA%\4ai). Chỉ trỏ FBO_DATA_ROOT thì test ghi đè cấu hình THẬT của máy dev.
 process.env.FBO_DATA_ROOT = tmp;
+process.env.FBO_STATE_ROOT = tmp;
 const { nguonKetNoi, redact } = await import('../mcp/fbo/lib/sql.mjs');
 
 // `data/qlda.json` chỉ giữ TOKEN `{QldaProgramPath}` (gói phân phối công khai không mang

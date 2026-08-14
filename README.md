@@ -162,8 +162,10 @@ node tools/4ai.mjs license import duong-dan-file.json
 ```
 
    Không có terminal thì: `license_activate({ license: "<dán nguyên nội dung file>" })`. Giấy
-   phép lưu ở `${CLAUDE_PLUGIN_DATA}/data/license.json` — sống sót qua mỗi lần update plugin.
-   Kích hoạt xong dùng được ngay, **không cần khởi động lại MCP server**.
+   phép lưu ở **thư mục trạng thái cấp người dùng** — `%APPDATA%\4ai\data\license.json` trên
+   Windows — nên chỉ phải kích hoạt **một lần trên mỗi máy**: sống sót qua update plugin, qua
+   cài lại, và qua từng phiên Cowork. Kích hoạt xong dùng được ngay, **không cần khởi động lại
+   MCP server**.
 
 Xem trạng thái và hạn bất cứ lúc nào: `node tools/4ai.mjs license`.
 
@@ -251,8 +253,8 @@ không sao (khác hẳn chuỗi kết nối):
 set_pm_identity(maNv: "PM01", boPhanLt: "FSD")
 ```
 
-Tool tự ghi vào `data/qlda.local.json` (đã gitignore) ở đúng data root của lần cài (dev: gốc
-hub; plugin: `${CLAUDE_PLUGIN_DATA}` — sống sót qua update). Các tool khác (`list_programs`,
+Tool tự ghi vào `data/qlda.local.json` (đã gitignore) ở đúng **state root** (dev: gốc hub;
+plugin: `%APPDATA%\4ai` — xem [Trạng thái nằm ở đâu](#trạng-thái-nằm-ở-đâu)). Các tool khác (`list_programs`,
 `get_review_dataset`, `report`) đọc lại giá trị này ngay lần gọi tiếp theo, không cần khởi động
 lại MCP server. Nhập nhầm dạng token mẫu (`{PMName}`) sẽ bị tool từ chối, không âm thầm nuốt.
 
@@ -307,9 +309,10 @@ mà không phải in chuỗi bí mật ra màn hình thì dùng `nguonKetNoi(pro
 #### ⚠️ Khai rồi mà vẫn báo chưa khai — hai cái bẫy
 
 **Bẫy 1 — sửa nhầm bản `qlda.local.json`.** Một máy thường có nhiều bản: trong hub, trong thư
-mục **gói plugin đã cài**, và trong data root. Chỉ **một** bản được đọc: `${CLAUDE_PLUGIN_DATA}/data/qlda.local.json`
-khi chạy như plugin, gốc hub khi chạy dev. Copy file cấu hình của hub vào thư mục gói plugin
-là công cốc — không ai đọc nó, và lỗi trông y hệt như chưa sửa gì.
+mục **gói plugin đã cài**, trong thư mục dữ liệu của phiên. Chỉ **một** bản được đọc:
+`%APPDATA%\4ai\data\qlda.local.json` khi chạy như plugin, gốc hub khi chạy dev. Copy file cấu
+hình của hub vào thư mục gói plugin là công cốc — không ai đọc nó, và lỗi trông y hệt như chưa
+sửa gì. Không chắc thì hỏi `doctor`, nó in ra đường dẫn thật đang được đọc.
 
 **Bẫy 2 — đặt biến môi trường sau khi tiến trình đã chạy.** Tiến trình MCP giữ **bản chụp** môi
 trường lúc khởi động. `setx` hay sửa trong System Properties xong mà chưa thoát hẳn ứng dụng
@@ -320,6 +323,23 @@ Không có shell để chạy `doctor` (chat, Cowork) thì gọi **tool MCP `doc
 root đang dùng, **đường dẫn thật** của file cấu hình được đọc, danh sách **tên khoá** đã khai,
 nguồn kết nối app/sys/đồ thị, giấy phép, sqlcmd — không bao giờ trả giá trị chuỗi kết nối. Một
 lần gọi tool này thay cho việc thử lại nhiều lần rồi đoán.
+
+### Trạng thái nằm ở đâu
+
+Hai gốc, cố ý khác nhau:
+
+| | Gốc | Chứa gì | Mất thì sao |
+|---|---|---|---|
+| **data root** | `FBO_DATA_ROOT` (plugin: `${CLAUDE_PLUGIN_DATA}`), dev: hub | index SQLite | chạy lại `index_program` |
+| **state root** | `FBO_STATE_ROOT`, mặc định `%APPDATA%\4ai` (plugin); dev: hub | `data/license.json`, `data/qlda.local.json`, `ledger/` | phải xin lại giấy phép, khai lại cấu hình |
+
+Tách ra vì `${CLAUDE_PLUGIN_DATA}` **không bền như tên gọi**: trong Cowork nó nằm trong thư mục
+của **từng phiên**, phiên đóng là mất theo. Trước khi tách, mỗi phiên Cowork mới là một lần kích
+hoạt lại giấy phép và gán lại PM. Index thì dựng lại được nên cứ để nguyên chỗ cũ.
+
+Bản cài cũ không mất gì: lần đầu đọc mà state root chưa có file, 4AI **copy** từ data root sang
+(copy chứ không move — rollback về bản plugin cũ vẫn chạy). Muốn chốt chỗ khác (máy nhiều bản
+cài, hoặc chạy test) thì đặt `FBO_STATE_ROOT`.
 
 Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.gitignore`):
 

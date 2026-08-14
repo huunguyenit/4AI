@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { scanSecrets } from '../tools/lib/assets.mjs';
 
@@ -16,7 +17,9 @@ function ok(label, cond, detail) {
 }
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), '4ai-setup-'));
+// Cả HAI gốc — xem ghi chú ở test-sql-conn.mjs: state root mới là nơi cấu hình được đọc.
 process.env.FBO_DATA_ROOT = tmp;
+process.env.FBO_STATE_ROOT = tmp;
 const { chanDoan, inChanDoan, duongDanLocal, KHOA_BI_MAT } = await import('../tools/lib/setup.mjs');
 
 process.stdout.write('=== ghi vào data root của LẦN CÀI, không phải hub ===\n');

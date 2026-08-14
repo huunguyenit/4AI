@@ -158,11 +158,11 @@
     },
     {
       "path": "mcp/fbo/lib/index.mjs",
-      "sha256": "ca9297b9c95ead09da620bd0ba3ffea54bea0a392f0046c04189798d7a2db050"
+      "sha256": "aeaf02edb84ce9018a9a936f76d3a442656ec4cc98a35469b973844c64a219c9"
     },
     {
       "path": "mcp/fbo/lib/license.mjs",
-      "sha256": "424aa19187a3bd6e9b6c4fc9690464606ec18f7784ae6f39a047eb57b06143b3"
+      "sha256": "a1a53719d7394eb0ad57dffcdde4362c57158a521aac85fbdb326f457c3079d4"
     },
     {
       "path": "mcp/fbo/lib/rpc.mjs",
@@ -170,11 +170,11 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "dc236ed2c7a8567c1b5fe29930483c7874e812149a7e92406f2050756cfcbc98"
+      "sha256": "7cc237bb1e4b0adf2e07d3a8c6bfef9dce928dbb59a7d8715c01a225787d4549"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "a75b0021ab4e77a86786b273f8e3e0ea5720572141792008d700b7e9fa78210b"
+      "sha256": "30a7763817ec61d1ff7492cd00ca395a4b63bf25afc0c3a6c4d4c09234e368c0"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -350,7 +350,7 @@
     },
     {
       "path": "src/database/qlda-metadata.mjs",
-      "sha256": "58bad3827b462e30097ea45ae10cce40f1bf6912883a35b6aa2d5bcc6616b5de"
+      "sha256": "a7746197a344077f9b440f41d7bb59fe33462d2f5186c80880d44251e4dd8c1e"
     },
     {
       "path": "src/database/query-executor.mjs",
@@ -378,7 +378,7 @@
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "385d22140dfb5d74a2da1df8b697c265e38cd5a6d157beeb3244eaadb07290c3"
+      "sha256": "cdbae46c5c5e162f542ebe460baf0d9b6c518fcce693171076ed082f7581afb0"
     },
     {
       "path": "tools/lib/assignee.mjs",
@@ -494,7 +494,7 @@
     },
     {
       "path": "tools/lib/setup.mjs",
-      "sha256": "1038ea4d4881e898bb7b0cdc00ef93ba808bdbb1adcea222ed55e3af709ef49e"
+      "sha256": "9c681e993bbe535a932e9745a11b5f48ed1ac38e70cc7b87c8d99691d76c8d7d"
     },
     {
       "path": "tools/lib/staffing.mjs",
@@ -532,6 +532,6 @@
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T07:12:09.972Z",
+  "syncedAt": "2026-08-14T07:59:36.267Z",
   "target": "plugin-cursor"
 }

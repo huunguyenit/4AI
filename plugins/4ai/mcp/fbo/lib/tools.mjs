@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readSource, stripAccents } from './encoding.mjs';
-import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot } from './index.mjs';
+import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot, stateRoot } from './index.mjs';
 import {
   runSql, objectSql, sqlLiteral, redact,
   duongDanQldaLocal, nguonKetNoi, nguonKetNoiGraph, findSqlcmd,
@@ -371,7 +371,7 @@ export const TOOLS = [
   {
     name: 'set_pm_identity',
     description:
-      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, chạy như plugin thì ghi ${CLAUDE_PLUGIN_DATA}/data/qlda.local.json (sống sót qua update, không phải chỗ hub/gói plugin read-only). Gọi tool này NGAY khi list_programs / get_review_dataset / render_review_report báo "CHƯA GÁN PM" — đừng đi hỏi vòng hay tự tra bằng SQL. Hỏi người dùng đúng hai giá trị: `maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên đầy đủ) và `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Không tự đoán, không bịa mã ví dụ, và không viết file bằng Write — đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
+      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, chạy như plugin thì ghi vào thư mục trạng thái cấp NGƯỜI DÙNG (Windows: %APPDATA%/4ai/data/qlda.local.json), KHÔNG phải gốc gói plugin và KHÔNG phải ${CLAUDE_PLUGIN_DATA} — chỗ đó thuộc về từng phiên Cowork nên mất khi phiên đóng. Gọi tool này NGAY khi list_programs / get_review_dataset / render_review_report báo "CHƯA GÁN PM" — đừng đi hỏi vòng hay tự tra bằng SQL. Hỏi người dùng đúng hai giá trị: `maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên đầy đủ) và `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Không tự đoán, không bịa mã ví dụ, và không viết file bằng Write — đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -391,7 +391,7 @@ export const TOOLS = [
   {
     name: 'license_activate',
     description:
-      'Lưu giấy phép Fast Source cấp (nội dung JSON có `payload` và `signature`) vào đúng nơi cài đặt — chạy như plugin thì ghi ${CLAUDE_PLUGIN_DATA}/data/license.json, đường dẫn này người dùng không sửa tay được nên đây là đường kích hoạt DUY NHẤT ở bề mặt không có shell. Verify chữ ký + Device ID + hạn TRƯỚC khi ghi: không hợp lệ thì không lưu gì cả. Dán nguyên nội dung file khách nhận được, không sửa, không format lại. Tool này chạy được cả khi chưa có giấy phép.',
+      'Lưu giấy phép Fast Source cấp (nội dung JSON có `payload` và `signature`) vào đúng nơi cài đặt — chạy như plugin thì ghi vào thư mục trạng thái cấp NGƯỜI DÙNG (Windows: %APPDATA%/4ai/data/license.json) — sống lâu hơn một lần cài và một phiên Cowork, nên chỉ phải kích hoạt MỘT lần trên mỗi máy. Đường dẫn này người dùng không sửa tay được nên đây là đường kích hoạt DUY NHẤT ở bề mặt không có shell. Verify chữ ký + Device ID + hạn TRƯỚC khi ghi: không hợp lệ thì không lưu gì cả. Dán nguyên nội dung file khách nhận được, không sửa, không format lại. Tool này chạy được cả khi chưa có giấy phép.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -457,7 +457,7 @@ export const HANDLERS = {
       throw new Error(
         'Thiếu `query` và CHƯA GÁN PM. Cách chữa: gọi tool `set_pm_identity({ maNv, boPhanLt })` ' +
         '— chạy được ở mọi bề mặt, tự ghi đúng chỗ (bề mặt không có shell thì đây là đường DUY NHẤT: ' +
-        'đường dẫn qlda.local.json nằm trong ${CLAUDE_PLUGIN_DATA}, không sửa tay được). ' +
+        'đường dẫn qlda.local.json chỉ tính được trong tiến trình MCP, không sửa tay được). ' +
         '`maNv` là MÃ nhân viên trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên). ' +
         'Hoặc truyền `query` (mã dự án hoặc tên) để tìm mà không cần danh tính PM.');
     }
@@ -1007,10 +1007,10 @@ export const HANDLERS = {
         `Giá trị "${isPmPlaceholder(maNv) ? maNv : boPhanLt}" trông giống token mẫu (dạng {Ten}), không phải danh tính thật — nhập lại mã nhân viên và bộ phận cụ thể.`);
     }
 
-    // File nằm ở data root CỦA LẦN CÀI ĐẶT NÀY, không phải hub — khi chạy như plugin đó là
-    // ${CLAUDE_PLUGIN_DATA} (ghi được, sống sót qua update), khi chạy dev đó là hub (như cũ).
-    // Cùng quy tắc loadLocalPm() ở qlda-metadata.mjs dùng để ĐỌC lại giá trị này.
-    const file = path.join(dataRoot(hub), 'data', 'qlda.local.json');
+    // ĐÚNG hàm mà sql.mjs dùng để ĐỌC file này — ghi và đọc không thể lệch nhau, kể cả khi
+    // quy tắc chọn thư mục đổi. Chạy như plugin thì đây là thư mục trạng thái cấp người dùng
+    // (`%APPDATA%\4ai`), sống lâu hơn một lần cài và một phiên Cowork; chạy dev thì là hub.
+    const file = duongDanQldaLocal();
     fs.mkdirSync(path.dirname(file), { recursive: true });
 
     let existing = {};
@@ -1123,7 +1123,11 @@ export const HANDLERS = {
     return {
       caiDat: {
         hub,
+        // dataRoot: index dựng lại được, có thể mất theo phiên. stateRoot: giấy phép + cấu hình
+        // + ledger, phải sống lâu hơn phiên và lần cài. Hai giá trị này khác nhau khi chạy như
+        // plugin — in cả hai để không ai phải đoán thứ gì nằm ở đâu.
         dataRoot: dataRoot(hub),
+        stateRoot: stateRoot(hub),
         fileCauHinh,
         tonTai,
         ...(doiCuPhap ? { loi: 'JSON sai cú pháp — file bị bỏ qua hoàn toàn' } : {}),

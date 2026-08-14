@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { dataRoot } from '../../mcp/fbo/lib/index.mjs';
+import { stateFile } from '../../mcp/fbo/lib/index.mjs';
 import { licenseStatus } from '../../mcp/fbo/lib/license.mjs';
 import { findSqlcmd, nguonKetNoi } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadata.mjs';
@@ -47,9 +47,12 @@ export const KHOA_CAU_TRUC = [
     mo_ta: 'Share chứa file đính kèm (chỉ cần khi đọc tài liệu khảo sát)' },
 ];
 
-/** Đường dẫn file cấu hình cục bộ của LẦN CÀI NÀY — plugin thì nằm ở ${CLAUDE_PLUGIN_DATA}. */
+/**
+ * Đường dẫn file cấu hình cục bộ. Chạy như plugin thì nằm ở thư mục trạng thái cấp NGƯỜI DÙNG
+ * (`%APPDATA%\4ai` trên Windows), không phải `${CLAUDE_PLUGIN_DATA}` — xem `stateRoot()`.
+ */
 export function duongDanLocal(hub) {
-  return path.join(dataRoot(hub), 'data', 'qlda.local.json');
+  return stateFile(hub, 'data', 'qlda.local.json');
 }
 
 function docLocal(file) {

@@ -9,11 +9,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stripAccents } from '../../mcp/fbo/lib/encoding.mjs';
-import { dataRoot } from '../../mcp/fbo/lib/index.mjs';
+import { stateFile } from '../../mcp/fbo/lib/index.mjs';
 
 const MODULE_HUB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const CONFIG_REL = path.join('data', 'qlda.json');
-const LOCAL_REL = path.join('data', 'qlda.local.json');
+const LOCAL_REL = ['data', 'qlda.local.json'];
 
 /** configPath -> { mtimeMs, json } — nạp lại khi file đổi, không cache vĩnh viễn. */
 const configCache = new Map();
@@ -25,15 +25,15 @@ export function isPmPlaceholder(value) {
 }
 
 /**
- * Đọc `pm` từ qlda.local.json ở DATA ROOT (per cài đặt) — KHÔNG phải `root` trực tiếp.
- * `dataRoot()` trả `FBO_DATA_ROOT`/`${CLAUDE_PLUGIN_DATA}` khi chạy dưới dạng plugin (thư
- * mục ghi được, sống sót qua update), hoặc chính `root` khi chạy dev (env chưa đặt — hành vi
- * cũ, không đổi). Chạy như plugin mà đọc thẳng `root` (gốc gói cài) sẽ trỏ vào chỗ read-only
- * bị ghi đè mỗi lần update.
+ * Đọc `pm` từ qlda.local.json ở STATE ROOT (cấp người dùng) — KHÔNG phải `root` trực tiếp.
+ * `stateFile()` trả thư mục người dùng cố định khi chạy dưới dạng plugin, hoặc chính `root`
+ * khi chạy dev (hành vi cũ, không đổi). Chạy như plugin mà đọc thẳng `root` (gốc gói cài) sẽ
+ * trỏ vào chỗ read-only bị ghi đè mỗi lần update; đọc `${CLAUDE_PLUGIN_DATA}` thì mất theo
+ * phiên Cowork — xem docstring `stateRoot()`.
  * @returns {{maNv?: string, boPhanLt?: string}|null}
  */
 function loadLocalPm(root) {
-  const file = path.join(dataRoot(root), LOCAL_REL);
+  const file = stateFile(root, ...LOCAL_REL);
   if (!fs.existsSync(file)) return null;
   try {
     const local = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -43,9 +43,9 @@ function loadLocalPm(root) {
   }
 }
 
-/** Đọc thẳng data/qlda.local.json ở data root — dùng cho overlay cấu trúc QLDA bên dưới. */
+/** Đọc thẳng data/qlda.local.json ở state root — dùng cho overlay cấu trúc QLDA bên dưới. */
 function loadLocalFile(root) {
-  const file = path.join(dataRoot(root), LOCAL_REL);
+  const file = stateFile(root, ...LOCAL_REL);
   if (!fs.existsSync(file)) return {};
   try {
     const local = JSON.parse(fs.readFileSync(file, 'utf8'));
