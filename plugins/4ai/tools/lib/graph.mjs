@@ -320,11 +320,23 @@ function nodeLiteral(schema, sql, kind, row, col, boi) {
  *
  * @param {object} schema
  * @param {{nodes: Map, edges: Array}} graph
- * @param {{scopes?: string[], boi?: string}} [opts] - `scopes` giới hạn phạm vi lần ghi này;
- *   bỏ trống = suy từ chính dữ liệu đang có. `boi` là mã người chạy, ghi vào cột audit.
+ * @param {{scopes?: string[], boi?: string, boSung?: boolean}} [opts] - `scopes` giới hạn phạm
+ *   vi lần ghi này; bỏ trống = suy từ chính dữ liệu đang có. `boi` là mã người chạy, ghi vào
+ *   cột audit. `boSung` xem chú thích ngay dưới.
+ *
+ * HAI CHẾ ĐỘ GHI, và chọn nhầm là mất dữ liệu:
+ *
+ *   mặc định (`boSung` falsy) — "lô này LÀ toàn bộ sự thật của các scope này". Sau khi MERGE,
+ *     mọi dòng cùng scope mà không có trong lô đều bị XOÁ. Đúng cho `graph build`,
+ *     `graph experience`, đường báo cáo: chúng quét lại từ đầu nên lô luôn đầy đủ.
+ *   `boSung: true` — "thêm/sửa đúng những dòng trong lô, không đụng gì khác". Bắt buộc cho
+ *     mọi đường ghi TỪNG BẢN GHI MỘT (`playbook add`): ở đó lô chỉ có một dòng, và luật xoá
+ *     theo scope sẽ hiểu thành "dự án này chỉ còn đúng một hướng dẫn" rồi xoá sạch phần đã
+ *     ghi những lần trước. Cạnh cũng chuyển sang chèn-nếu-chưa-có thay vì xoá-rồi-dựng-lại.
  */
 export function emitSql(schema, { nodes, edges }, opts = {}) {
   const sql = schema.sql;
+  const boSung = !!opts.boSung;
   const L = [];
   const kinds = Object.keys(schema.nodeKinds);
   const edgeDefs = allEdgeTypeDefs(schema);
@@ -339,9 +351,13 @@ export function emitSql(schema, { nodes, edges }, opts = {}) {
 
   L.push('-- Sinh bởi `node tools/4ai.mjs graph build` — KHÔNG sửa tay.');
   L.push('-- DATABASE là nguồn thật (lược đồ v3). JSONL chỉ là hạt giống cho lần nạp đầu.');
-  L.push(`-- Chiến lược nạp: ${sql.reloadStrategy.kind} — MERGE theo khoá, GIỚI HẠN trong scope bên dưới.`);
+  L.push(boSung
+    ? '-- Chiến lược nạp: BỔ SUNG — chỉ MERGE các dòng trong lô, KHÔNG xoá dòng nào.'
+    : `-- Chiến lược nạp: ${sql.reloadStrategy.kind} — MERGE theo khoá, GIỚI HẠN trong scope bên dưới.`);
   L.push(`-- Phạm vi lần ghi này: ${scopes.join(', ')}`);
-  L.push('-- Không có DELETE toàn bảng: dữ liệu ngoài các scope này KHÔNG bị đụng tới.');
+  L.push(boSung
+    ? '-- Không có DELETE nào: lô này là một phần bổ sung, không phải bản đầy đủ của scope.'
+    : '-- Không có DELETE toàn bảng: dữ liệu ngoài các scope này KHÔNG bị đụng tới.');
   L.push('-- Chạy trên DB nội bộ 4AI. Không chạy trên DB nghiệp vụ hay DB của khách.');
   L.push('SET NOCOUNT ON;');
   L.push('SET XACT_ABORT ON;');
@@ -424,7 +440,7 @@ export function emitSql(schema, { nodes, edges }, opts = {}) {
   // IN_PHASE, HAS_PM_REVIEW… của tầng dự án rồi không dựng lại được — mất dữ liệu không có
   // trong nguồn nào.
   const loaiCanhCoTrongLanNay = [...new Set(edges.map((e) => e.type))].sort();
-  if (loaiCanhCoTrongLanNay.length) {
+  if (loaiCanhCoTrongLanNay.length && !boSung) {
     L.push('-- Cạnh trong phạm vi: xoá rồi dựng lại (cạnh không có khoá tự nhiên để MERGE).');
     L.push(`-- Chỉ đụng ${loaiCanhCoTrongLanNay.length} loại có mặt trong lần chạy này; loại khác giữ nguyên.`);
     for (const type of loaiCanhCoTrongLanNay) {
@@ -461,10 +477,13 @@ export function emitSql(schema, { nodes, edges }, opts = {}) {
     L.push(`ON t.${q(keyCol)} = s.${q(keyCol)}`);
     L.push(`WHEN MATCHED THEN UPDATE SET ${capNhat.map((c) => `t.${q(c)} = s.${q(c)}`).join(', ')}`);
     L.push(`WHEN NOT MATCHED BY TARGET THEN INSERT (${cols.map(q).join(', ')}) VALUES (${cols.map((c) => `s.${q(c)}`).join(', ')});`);
-    // Xoá chỉ trong phạm vi lần ghi này — node của scope khác nằm ngoài tầm với.
-    L.push(`DELETE t FROM ${nodeTable(sql, kind)} t`);
-    L.push(`  WHERE t.${q('scope')} IN (${scopeList})`);
-    L.push(`    AND NOT EXISTS (SELECT 1 FROM ${tmp} s WHERE s.${q(keyCol)} = t.${q(keyCol)});`);
+    // Xoá chỉ trong phạm vi lần ghi này — node của scope khác nằm ngoài tầm với. Chế độ bổ
+    // sung bỏ hẳn bước này: lô một dòng không phải là tuyên bố "scope này chỉ còn một dòng".
+    if (!boSung) {
+      L.push(`DELETE t FROM ${nodeTable(sql, kind)} t`);
+      L.push(`  WHERE t.${q('scope')} IN (${scopeList})`);
+      L.push(`    AND NOT EXISTS (SELECT 1 FROM ${tmp} s WHERE s.${q(keyCol)} = t.${q(keyCol)});`);
+    }
     L.push(`DROP TABLE ${tmp};`);
     L.push('');
   }
@@ -498,7 +517,15 @@ export function emitSql(schema, { nodes, edges }, opts = {}) {
         (props.length ? ', ' + props.map((p) => lit(e[p], colType(sql, p))).join(', ') : '') + ')').join(',\n'));
       L.push(`) AS v(${['fk', 'tk', ...props].map(q).join(', ')})`);
       L.push(`JOIN ${nodeTable(sql, fromKind)} f ON f.${q(schema.nodeKinds[fromKind].key)} = v.${q('fk')}`);
-      L.push(`JOIN ${nodeTable(sql, toKind)} t ON t.${q(schema.nodeKinds[toKind].key)} = v.${q('tk')};`);
+      // Chế độ bổ sung không xoá cạnh cũ, nên phải tự chống trùng: gõ `playbook add` hai lần
+      // cùng một hướng dẫn thì MERGE node ghi đè đúng một dòng, còn cạnh sẽ thành hai bản sao
+      // nếu không chặn ở đây.
+      L.push(`JOIN ${nodeTable(sql, toKind)} t ON t.${q(schema.nodeKinds[toKind].key)} = v.${q('tk')}`
+        + (boSung ? '' : ';'));
+      if (boSung) {
+        L.push(`WHERE NOT EXISTS (SELECT 1 FROM ${edgeTable(sql, type)} e`);
+        L.push('  WHERE e.$from_id = f.$node_id AND e.$to_id = t.$node_id);');
+      }
     }
     L.push('');
   }

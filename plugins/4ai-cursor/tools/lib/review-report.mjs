@@ -20,6 +20,7 @@ import { runGraphSql } from '../../mcp/fbo/lib/sql.mjs';
 import { datasetToGraph } from './graph-sync.mjs';
 import { goiYPhanCong } from './assignee.mjs';
 import { snapshotGoiY, toGraphNodes, docLog, doiChieu, tongHop } from './recommendation-log.mjs';
+import { docPlaybook, ghepVaoUr } from './playbook.mjs';
 
 /** Trạng thái PM chỉ theo dõi hạn, không phân tích — xem `pm-deadline-review`. */
 const CHI_THEO_DOI = ['XN', 'TH'];
@@ -63,6 +64,40 @@ function vongHocGoiY(dataset, byProject, ngay, deps = {}) {
 }
 
 /**
+ * Hướng dẫn thực chiến đã ghi, ghép vào UR đang rà soát — nhóm theo mã dự án.
+ *
+ * Tra bằng `sysid`/`menu_id` của UR chứ không bằng `ma_da`: giá trị của kho này nằm ở chỗ dự
+ * án MỚI đọc được kinh nghiệm dự án CŨ. Lọc theo dự án đang rà soát là tự tay chặn đúng công
+ * dụng đó — xem chú thích đầu playbook.mjs.
+ *
+ * Nuốt lỗi giống vongHocGoiY(): kho hướng dẫn là mục phụ trợ, chưa ai gõ dòng nào (bảng chưa
+ * tồn tại) là trạng thái bình thường lúc mới bật, không phải lý do để mất báo cáo.
+ *
+ * @returns {Map<string, Array>} maDa → [{ur, huongDan}]
+ */
+function huongDanChoDataset(dataset, deps = {}) {
+  const theoDuAn = new Map();
+  try {
+    const urs = dataset.yeuCau ?? [];
+    if (!urs.length) return theoDuAn;
+    const gom = (k) => [...new Set(urs.map((u) => trimmed(u[k])).filter(Boolean))];
+    const kho = docPlaybook({ runGraphSql: deps.runGraphSql ?? runGraphSql },
+      { sttRecs: gom('stt_rec'), sysids: gom('sysid'), menuIds: gom('menu_id') });
+    if (!kho.length) return theoDuAn;
+
+    for (const cap of ghepVaoUr(urs, kho)) {
+      const maDa = trimmed(cap.ur.ma_da);
+      if (!maDa) continue;
+      if (!theoDuAn.has(maDa)) theoDuAn.set(maDa, []);
+      theoDuAn.get(maDa).push(cap);
+    }
+  } catch {
+    return new Map();
+  }
+  return theoDuAn;
+}
+
+/**
  * Dataset cố định → danh sách file báo cáo (HTML + payload JSON cạnh nó) + mô hình đồ thị.
  *
  * @param {string} hub
@@ -92,6 +127,17 @@ export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
   // phải xác nhận gì — họ duyệt trên web QLDA, hệ thống chỉ quan sát kết quả.
   const { hieuQuaGoiY, banGhi } = vongHocGoiY(dataset, byProject, ngay, deps);
   if (hieuQuaGoiY) portfolio.hieuQuaGoiY = hieuQuaGoiY;
+
+  // Hướng dẫn thực chiến đã ghi từ các dự án TRƯỚC, ghép vào UR đang rà soát theo hiện vật.
+  // Rót xuống từng payload dự án để trang riêng cũng hiện được, không chỉ trang tổng.
+  const huongDan = huongDanChoDataset(dataset, deps);
+  if (huongDan.size) {
+    portfolio.huongDan = [...huongDan.values()].flat();
+    for (const [maDa, payload] of Object.entries(byProject)) {
+      const cua = huongDan.get(maDa);
+      if (cua?.length) payload.huongDan = cua;
+    }
+  }
 
   // Tầng dự án cho đồ thị: dựng ở đây vì dataset đã nằm sẵn trong tay, nhưng KHÔNG đẩy lên DB
   // ở đây — module này trả mô tả, caller quyết định ghi. Cùng kỷ luật với `files`.

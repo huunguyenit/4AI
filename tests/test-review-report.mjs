@@ -64,9 +64,9 @@ const demKpi = (h, nhan) => {
   const m = h.match(new RegExp(`<b>(\\d+)</b>\\s*<span>${nhan}</span>`));
   return m ? Number(m[1]) : null;
 };
-ok('Thẻ "giai đoạn chưa chốt hẹn" đếm 1 (DR01 đã bị loại)',
-  demKpi(html, 'giai đoạn chưa chốt hẹn') === 1,
-  `đếm ${demKpi(html, 'giai đoạn chưa chốt hẹn')}, kỳ vọng chỉ DR03`);
+ok('Thẻ "Chưa chốt hẹn" đếm 1 (DR01 đã bị loại)',
+  demKpi(html, 'Chưa chốt hẹn') === 1,
+  `đếm ${demKpi(html, 'Chưa chốt hẹn')}, kỳ vọng chỉ DR03`);
 
 process.stdout.write('\n=== Trường hợp không còn giai đoạn nào đáng báo ===\n');
 const payloadSach = {
@@ -76,8 +76,8 @@ const payloadSach = {
 const htmlSach = renderReport(payloadSach, h);
 ok('Mọi giai đoạn đã chốt hoặc không còn tồn đọng -> thông báo trống',
   htmlSach.includes('Không có giai đoạn nào vừa chưa chốt đã hẹn vừa còn yêu cầu tồn đọng'));
-ok('Thẻ tóm tắt về 0', demKpi(htmlSach, 'giai đoạn chưa chốt hẹn') === 0,
-  `đếm ${demKpi(htmlSach, 'giai đoạn chưa chốt hẹn')}`);
+ok('Thẻ tóm tắt về 0', demKpi(htmlSach, 'Chưa chốt hẹn') === 0,
+  `đếm ${demKpi(htmlSach, 'Chưa chốt hẹn')}`);
 
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures === 0 ? 'TẤT CẢ PASS' : 'CÓ LỖI'} (${failures} thất bại) ===\n`);
 process.exit(failures === 0 ? 0 : 1);

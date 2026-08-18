@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 18 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 20 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -364,6 +364,59 @@ export const TOOLS = [
         pmName: { type: 'string', description: 'Lọc dự án theo nbdmda.ma_lt1/ma_lt2/ma_lt3. Bỏ trống (và không truyền project) thì lấy pm.maNv từ qlda.local.json' },
         pmDept: { type: 'string', description: 'Lọc yêu cầu theo nbphyc.bp_lt (bộ phận lập trình)' },
         maxRows: { type: 'integer', maximum: 10000, description: 'Giới hạn dòng THÔ trước khi gộp đầu mục — mặc định 5000' },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'playbook_add',
+    description:
+      'Ghi MỘT cách làm vào kho hướng dẫn lập trình thực chiến (node Playbook trong đồ thị 4AI). '
+      + 'Dùng khi lập trình viên vừa kể cách họ đã sửa một màn hình và cách đó đáng để dự án SAU dùng lại. '
+      + 'KHÔNG dùng để chép lại nội dung yêu cầu của khách — cái đó đã nằm ở nbphyc, ghi lại chỉ là nhân bản dữ liệu. '
+      + '`how` phải là CÁC BƯỚC THẬT, đủ để người khác lặp lại được, viết bằng lời của người đã làm; tóm tắt thành '
+      + 'một câu chung chung thì dự án sau đọc xong vẫn không làm được gì. '
+      + 'BẮT BUỘC có ít nhất một neo tra cứu (`sysid` / `menuId` / `bang` / `tags`): đó là đường DUY NHẤT để lần rà '
+      + 'soát sau tìm ra hướng dẫn này — thiếu hết thì nó nằm trong DB mà không ai đọc lại. '
+      + '`sysid` (controller thật, lấy từ describe_controller) đáng tin hơn `menuId` nhiều: menu_id trên UR là số '
+      + 'hiệu BA gõ tay, thường không khớp cây menu thật của khách. Có sysid thì luôn khai sysid. '
+      + '`nguonLt` là mã lập trình viên mà kinh nghiệm ĐẾN TỪ họ — khác với người gõ (tự lấy từ danh tính PM máy này). '
+      + 'Ghi BỔ SUNG, không xoá hướng dẫn nào đã có; gõ lại cùng tiêu đề trong cùng dự án thì SỬA dòng cũ.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project: { type: 'string', description: 'Mã dự án nbdmda.ma_da nơi cách làm này đã chạy THẬT — đây là xuất xứ, không phải bộ lọc lúc tra cứu' },
+        title: { type: 'string', description: 'Tiêu đề ngắn — dòng dự án sau đọc trước tiên' },
+        how: { type: 'string', description: 'Các bước làm thật, đủ để người khác lặp lại. Xuống dòng được.' },
+        ur: { type: 'string', description: 'nbphyc.stt_rec của UR sinh ra kinh nghiệm này, nếu có' },
+        when: { type: 'string', description: 'Khi nào áp dụng được — điều kiện, phiên bản SP, dạng màn hình' },
+        warn: { type: 'string', description: 'Chỗ dễ sai, thứ không được đụng vào' },
+        sysid: { type: 'string', description: 'Controller thật — neo tra cứu ĐÁNG TIN NHẤT' },
+        menuId: { type: 'string', description: 'menu_id — neo yếu, chỉ dùng khi không xác định được sysid' },
+        bang: { type: 'string', description: 'Tên bảng SQL nếu cách làm xoay quanh một bảng' },
+        tags: { type: 'array', items: { type: 'string' }, description: 'Từ khoá nghiệp vụ, dùng khi không có hiện vật cụ thể nào để neo' },
+        nguonLt: { type: 'string', description: 'Mã lập trình viên mà kinh nghiệm đến từ họ' },
+      },
+      required: ['project', 'title', 'how'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'playbook_search',
+    description:
+      'Tra kho hướng dẫn lập trình thực chiến. Gọi TRƯỚC khi bắt tay sửa một màn hình FBO: rất có thể người khác '
+      + 'đã làm đúng việc đó ở dự án khác và đã ghi lại cách làm cùng chỗ dễ sập. '
+      + 'Tra bằng `sysid` / `menuId` / `bang` / từ khoá. CỐ Ý KHÔNG có tham số lọc theo dự án: công dụng của kho là '
+      + 'để dự án MỚI dùng lại kinh nghiệm dự án CŨ, lọc theo dự án đang làm thì gần như luôn trả rỗng. '
+      + 'Kết quả rỗng nghĩa là CHƯA AI GHI — không phải là "không có cách làm", đừng diễn giải thành không làm được.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sysid: { type: 'string', description: 'Controller thật' },
+        menuId: { type: 'string', description: 'menu_id' },
+        bang: { type: 'string', description: 'Tên bảng SQL' },
+        tuKhoa: { type: 'string', description: 'Từ khoá tìm trong tiêu đề / cách làm / bối cảnh / tags' },
+        maxRows: { type: 'integer', maximum: 500, description: 'Giới hạn dòng — mặc định 100' },
       },
       additionalProperties: false,
     },
@@ -990,6 +1043,77 @@ export const HANDLERS = {
         + 'mở được, nên đừng hứa "mở file HTML ra xem" và đừng thử Read nó — phân tích thẳng từ '
         + '`ddUR` ở đây. Người dùng muốn một file cầm được thì ghi bản tóm tắt của bạn ra thư mục '
         + 'làm việc của phiên, đừng dựng lại báo cáo từ dữ liệu thô.',
+    };
+  },
+
+  /**
+   * Ghi một hướng dẫn vào đồ thị — đường DUY NHẤT ở bề mặt không có shell.
+   *
+   * Đi qua đúng module và đúng emitter mà CLI `4ai playbook add` dùng: luật hợp lệ và chiến
+   * lược ghi chỉ được khai một chỗ. `boSung: true` là bắt buộc — lô một dòng mà dùng chế độ
+   * mặc định sẽ xoá sạch hướng dẫn cũ của cùng dự án (xem chú thích ở emitSql).
+   */
+  async playbook_add(hub, args = {}) {
+    const { kiemEntry, entryToGraph } = await import('../../../tools/lib/playbook.mjs');
+    const { loadSchema, graphTuObject, validateGraph, emitSql } = await import('../../../tools/lib/graph.mjs');
+    const { runGraphScript } = await import('./sql.mjs');
+    const { pmIdentity } = await import('../../../tools/lib/assets.mjs');
+
+    const entry = {
+      maDa: args.project, sttRec: args.ur, tieuDe: args.title, boiCanh: args.when,
+      cachLam: args.how, canhBao: args.warn, sysid: args.sysid, menuId: args.menuId,
+      bang: args.bang, tags: args.tags ?? [], nguonLt: args.nguonLt,
+    };
+    const loi = kiemEntry(entry);
+    if (loi.length) throw new Error(`Chưa ghi được — ${loi.join(' · ')}`);
+
+    const pm = pmIdentity(hub);
+    const ngay = new Date().toISOString().slice(0, 10);
+    const ket = entryToGraph(entry, { boi: pm.maNv, ngay });
+
+    const schema = loadSchema(hub);
+    const g = graphTuObject(schema, ket);
+    // Request nằm NGOÀI lô: node đó do đường báo cáo nạp, dựng lại ở đây sẽ ghi đè bản đầy đủ.
+    const errs = [...g.errors, ...validateGraph(schema, g, { kindNgoai: ['Request'] })];
+    if (errs.length) throw new Error(`Lỗi đồ thị: ${errs.map((e) => e.message).join('; ')}`);
+
+    // writer.mjs vẫn là nơi duy nhất chạm filesystem output.
+    const rel = path.join('.4ai', 'graph', 'playbook.sql');
+    writeArtifacts({ destRoot: stateRoot(hub),
+      files: [{ relPath: rel, content: emitSql(schema, g, { scopes: ket.scopes, boSung: true }) }] });
+    const r = runGraphScript({ scriptPath: path.join(stateRoot(hub), rel) });
+
+    return {
+      khoa: `${ket.scopes[0]}|${ket.id}`,
+      database: r.database,
+      neo: {
+        sysid: entry.sysid || null, menu_id: entry.menuId || null,
+        bang: entry.bang || null, tags: entry.tags,
+      },
+      note: 'Đã ghi. Lần rà soát sau, mọi UR có cùng sysid/menu_id sẽ thấy hướng dẫn này trong '
+        + 'tab "Gợi ý kỹ thuật" của báo cáo — kể cả ở dự án khác.',
+    };
+  },
+
+  async playbook_search(hub, args = {}) {
+    const { docPlaybook } = await import('../../../tools/lib/playbook.mjs');
+    const { runGraphSql } = await import('./sql.mjs');
+    const rows = docPlaybook({ runGraphSql }, {
+      sysids: args.sysid ? [args.sysid] : [],
+      menuIds: args.menuId ? [args.menuId] : [],
+      bangs: args.bang ? [args.bang] : [],
+      tuKhoa: args.tuKhoa,
+      maxRows: args.maxRows ?? 100,
+      neLoi: false, // tra cứu do người gọi: lỗi phải nổi lên, không giả vờ là kho rỗng
+    });
+    return {
+      soDong: rows.length,
+      huongDan: rows,
+      note: rows.length
+        ? 'Kinh nghiệm, không phải quy định — đọc rồi tự quyết. `ma_da` là nơi cách làm này đã '
+          + 'chạy thật, không phải điều kiện áp dụng.'
+        : 'Kho chưa có dòng nào khớp. Đây KHÔNG phải bằng chứng là việc này không làm được — '
+          + 'chỉ là chưa ai ghi lại. Làm xong thì ghi bằng `playbook_add`.',
     };
   },
 

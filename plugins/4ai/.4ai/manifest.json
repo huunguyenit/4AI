@@ -122,7 +122,7 @@
     },
     {
       "path": "data/graph-schema.json",
-      "sha256": "59081a603b69a2386ac298a65d650a945b5ee5e2b37728074b16720f4db5c5a6"
+      "sha256": "82574e40fa95d8cd9e5de14b5c90f75a93e3b69b8905c07093dbd7b0dc42f3e4"
     },
     {
       "path": "data/graph/capability.jsonl",
@@ -174,7 +174,7 @@
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "0027f015500203c9ddf43541bf84aeabb170139f5d7c681ff07244fcde87d470"
+      "sha256": "5cd9b9d59eda7140441790576d0863fb3be590694e92930ae28422d83b8796f9"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -374,7 +374,7 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "89f30348caec944b75e13d2e0d65250e856a309675994a47eb6fe0925890d351"
+      "sha256": "6e86779f803bcc51d8daa9bf7027a0bd73c790103adf94180a1ac04f2254632e"
     },
     {
       "path": "tools/lib/assets.mjs",
@@ -438,7 +438,7 @@
     },
     {
       "path": "tools/lib/graph.mjs",
-      "sha256": "07324bb2075eeaad3a001798bc533f2bc66b3aaa9b9eab4f255f6fe3945b39e0"
+      "sha256": "cddacb277a8e72d2af707e33780a9790ce1a191e12b001dd134b8226567b6835"
     },
     {
       "path": "tools/lib/json.mjs",
@@ -455,6 +455,10 @@
     {
       "path": "tools/lib/paths.mjs",
       "sha256": "cd520ad281c6cdd0fd084dfecc67a61378229b1dd6a5572404e81169255e32ef"
+    },
+    {
+      "path": "tools/lib/playbook.mjs",
+      "sha256": "dda368d85940049ff83c1093fc04e2ea46506b0824d3797d38ec6f4fef0812c3"
     },
     {
       "path": "tools/lib/prompt.mjs",
@@ -474,7 +478,7 @@
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "ea853ac2602192f23b32163256c295a8e8f62172afefbc2b33eb8744fc68d18a"
+      "sha256": "23ed35797bc85e6450135e481608779a47594ce6c16ef5c8da3ec9866e6763ca"
     },
     {
       "path": "tools/lib/review-dataset.mjs",
@@ -482,7 +486,7 @@
     },
     {
       "path": "tools/lib/review-report.mjs",
-      "sha256": "70b3d5b093d5ef7c48692469cdd32771189ef5a4d3c0e11a17f7fb73fc8c81a0"
+      "sha256": "1990f141980e93f5de0185760196cf67ab082603a003b46e1fa58597005acf99"
     },
     {
       "path": "tools/lib/schema.mjs",
@@ -490,7 +494,7 @@
     },
     {
       "path": "tools/lib/serve.mjs",
-      "sha256": "8fd80f22d5eb82d0f9c48bd1630d423526700833739d8a2ec4acee5e9c4a857d"
+      "sha256": "4283f6b0504b2ecf86303302a08ef00ee712cf064edbe10df2689db0d84b69a5"
     },
     {
       "path": "tools/lib/setup.mjs",
@@ -526,12 +530,12 @@
     },
     {
       "path": "tools/templates/report/report.css",
-      "sha256": "b279705b7056a3029ba3f5804efcd8e823afc67ec29d870f474696bc7341c172"
+      "sha256": "3c126163fd5d84b5bd0b56dcbe507eae4670688ea7507c91d16435800f26dde4"
     }
   ],
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-14T08:13:54.851Z",
+  "syncedAt": "2026-08-18T02:55:21.199Z",
   "target": "plugin"
 }

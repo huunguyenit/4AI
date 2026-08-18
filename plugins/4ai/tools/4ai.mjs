@@ -34,6 +34,15 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
                                         bỏ trống cả hai = toàn bộ LTQL của PM máy này
   node tools/4ai.mjs report <payload>   (tương thích) payload tay: portfolio / performance / kpi
                                         (mcpDataRoot từ %USERPROFILE%\.cursor\fbo-local.json, lùi về <hub>/ledger nếu chưa có)
+  node tools/4ai.mjs playbook add       ghi một cách làm vào kho hướng dẫn lập trình (vào đồ thị)
+                                        --project MA_DA --title "..." --how "..." bắt buộc
+                                        neo tra cứu: --sysid | --menu | --table | --tags a,b (ít nhất một)
+                                        --ur A000...YC1 --when "..." --warn "..." --from MA_LT --dry-run
+  node tools/4ai.mjs playbook edit      sửa hướng dẫn đã có, CHỈ trường được truyền
+                                        --project MA_DA --title "<tiêu đề đang có>" để chỉ dòng
+                                        không truyền = giữ nguyên; truyền "" = XOÁ trường đó
+                                        tiêu đề nằm trong khoá nên không đổi được bằng edit
+  node tools/4ai.mjs playbook search    tra kho: [--sysid S] [--menu M] [--table T] [<từ khoá>] [--json]
   node tools/4ai.mjs serve [path]       mở report qua http://127.0.0.1:<port>, tự mở trình duyệt
                                         [--port N] [--no-open] — Ctrl+C để tắt
                                         path bỏ trống -> tự tìm report mới nhất trong ledger
@@ -357,6 +366,205 @@ async function cmdGraphExperience(opts) {
   }
 }
 
+// ---------------------------------------------------------------- playbook
+
+/**
+ * `playbook add` — PM gõ một cách làm vào kho hướng dẫn lập trình.
+ *
+ * Đi qua ĐÚNG đường đẩy của `graph experience`: entry → node → emitSql → runGraphScript. Không
+ * có đường ghi tắt nào vào DB, vì mọi thứ vào đồ thị đều phải qua validate schema — hướng dẫn
+ * ghi sai kiểu thì dự án sau đọc ra rác, mà lúc đó không còn ai nhớ để sửa.
+ */
+/** Đối số CLI → hình dạng `entry`. Giữ nguyên `undefined` cho cờ VẮNG MẶT — xem gopEntry(). */
+function entryTuOpts(opts) {
+  return {
+    maDa: opts.project,
+    sttRec: opts.ur,
+    tieuDe: opts.title,
+    boiCanh: opts.when,
+    cachLam: opts.how,
+    canhBao: opts.warn,
+    sysid: opts.sysid,
+    menuId: opts.menu,
+    bang: opts.table,
+    tags: opts.tags,
+    nguonLt: opts.from,
+    doTinCay: opts.confidence,
+  };
+}
+
+/** Entry đã chốt → validate → sinh script → nạp. Dùng chung cho `add` và `edit`. */
+async function napPlaybook(entry, { dryRun }) {
+  const { kiemEntry, entryToGraph } = await import('./lib/playbook.mjs');
+  const { loadSchema, graphTuObject, validateGraph, emitSql } = await import('./lib/graph.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+  const { pmIdentity } = await import('./lib/assets.mjs');
+
+  const loi = kiemEntry(entry);
+  if (loi.length) {
+    for (const e of loi) process.stderr.write(`  ${e}\n`);
+    fail(`${loi.length} chỗ chưa đủ để ghi hướng dẫn.`);
+  }
+
+  const pm = pmIdentity(HUB);
+  const ngay = new Date().toISOString().slice(0, 10);
+  const ket = entryToGraph(entry, { boi: pm.maNv, ngay });
+
+  const schema = loadSchema(HUB);
+  const g = graphTuObject(schema, ket);
+  // Request là node NGOÀI lô: nó do đường báo cáo nạp, đã nằm sẵn trong DB. Dựng lại ở đây sẽ
+  // ghi đè bản đầy đủ bằng một bản chỉ có mỗi stt_rec.
+  const errs = [...g.errors, ...validateGraph(schema, g, { kindNgoai: ['Request'] })];
+  if (errs.length) {
+    for (const e of errs.slice(0, 10)) process.stderr.write(`  ${e.message}\n`);
+    fail(`${errs.length} lỗi đồ thị — không nạp.`);
+  }
+
+  const rel = path.join('.4ai', 'graph', 'playbook.sql');
+  // boSung: lô này có ĐÚNG MỘT hướng dẫn. Chế độ mặc định của emitter hiểu lô là bản đầy đủ
+  // của scope và sẽ xoá mọi hướng dẫn khác của cùng dự án — xem chú thích ở emitSql().
+  writeArtifacts({ destRoot: HUB,
+    files: [{ relPath: rel, content: emitSql(schema, g, { scopes: ket.scopes, boSung: true }) }] });
+
+  const tags = Array.isArray(entry.tags) ? entry.tags
+    : String(entry.tags ?? '').split(',').map((t) => t.trim()).filter(Boolean);
+  process.stdout.write(`Hướng dẫn: ${entry.tieuDe}\n`);
+  process.stdout.write(`  khoá  ${ket.scopes[0]}|${ket.id}\n`);
+  process.stdout.write(`  neo   ${[entry.sysid && `sysid=${entry.sysid}`, entry.menuId && `menu=${entry.menuId}`,
+    entry.bang && `bảng=${entry.bang}`, tags.length && `tags=${tags.join(',')}`]
+    .filter(Boolean).join(' · ') || '(không có)'}\n`);
+  if (dryRun) {
+    process.stdout.write(`DRY RUN — chưa nạp. Script ở ${rel}\n`);
+    return;
+  }
+  const { runGraphScript } = await import('../mcp/fbo/lib/sql.mjs');
+  try {
+    const r = runGraphScript({ scriptPath: path.join(HUB, rel) });
+    process.stdout.write(`Đã nạp vào ${r.database} — scope ${ket.scopes.join(', ')}\n`);
+  } catch (e) {
+    fail(e.message);
+  }
+}
+
+async function cmdPlaybookAdd(opts) {
+  const entry = entryTuOpts(opts);
+  // `add` là ghi MỚI: cờ vắng mặt nghĩa là trường đó rỗng, không có gì cũ để giữ.
+  entry.tags = opts.tags ? String(opts.tags).split(',') : [];
+  await napPlaybook(entry, { dryRun: opts.dryRun });
+}
+
+/**
+ * `playbook edit` — đọc dòng cũ, chỉ ghi đè trường ĐƯỢC TRUYỀN.
+ *
+ * Vì sao cần lệnh riêng thay vì bảo người dùng gõ lại `add`: MERGE ghi đè toàn bộ cột từ lô,
+ * nên `add` gõ lại chỉ để thêm `--from` mà quên `--warn` sẽ xoá trắng `canhBao` — im lặng,
+ * `kiemEntry` không biết cái gì "đáng lẽ phải còn đó".
+ *
+ * Định vị dòng bằng `--project` + `--title`: tiêu đề CHÍNH LÀ nửa sau của khoá (qua slug), nên
+ * đổi tiêu đề là đổi khoá, tức là một dòng khác. Đây không phải hạn chế tạm — đổi tên trong
+ * chế độ ghi bổ sung sẽ để lại dòng cũ nằm đó mà không ai gọi được nữa, tệ hơn là không cho đổi.
+ */
+async function cmdPlaybookEdit(opts) {
+  const { slugTieuDe, docTheoKhoa, rowToEntry, gopEntry } = await import('./lib/playbook.mjs');
+  const { runGraphSql } = await import('../mcp/fbo/lib/sql.mjs');
+
+  const maDa = String(opts.project ?? '').trim();
+  const tieuDe = String(opts.title ?? '').trim();
+  if (!maDa || !tieuDe) {
+    fail('cách dùng: playbook edit --project MA_DA --title "<tiêu đề đang có>" [trường cần đổi]\n'
+      + '  Truyền chuỗi rỗng để XOÁ một trường, ví dụ --warn ""\n'
+      + '  Không truyền thì trường đó giữ nguyên.');
+  }
+
+  let dong;
+  try {
+    dong = docTheoKhoa({ runGraphSql }, maDa, slugTieuDe(tieuDe));
+  } catch (e) {
+    fail(e.message);
+  }
+  if (!dong.length) {
+    fail(`không có hướng dẫn nào của \`${maDa}\` mang tiêu đề "${tieuDe}".\n`
+      + '  Tiêu đề là một PHẦN của khoá — sửa nó không đổi được bằng `edit`.\n'
+      + '  Xem tiêu đề đang có: `4ai playbook search`');
+  }
+  if (dong.length > 1 && !opts.ur) {
+    process.stderr.write(`  ${dong.length} hướng dẫn cùng tiêu đề, khác UR:\n`);
+    for (const d of dong) process.stderr.write(`    --ur ${d.stt_rec || '(không có)'}\n`);
+    fail('thêm `--ur` để chỉ đúng một.');
+  }
+  const cu = rowToEntry(opts.ur
+    ? dong.find((d) => String(d.stt_rec).trim() === String(opts.ur).trim()) ?? dong[0]
+    : dong[0]);
+
+  // Không cho `edit` đổi thứ tạo nên khoá — đổi được thì nó là `add` một dòng mới, còn dòng cũ
+  // nằm lại vĩnh viễn. Nói thẳng chứ không lặng lẽ bỏ qua đối số người ta vừa gõ.
+  const moi = entryTuOpts(opts);
+  if (moi.sttRec !== undefined && String(moi.sttRec).trim() !== String(cu.sttRec).trim()) {
+    fail(`\`--ur\` ở đây để CHỌN dòng, không đổi được: nó nằm trong khoá. `
+      + `Dòng đang chọn có UR \`${cu.sttRec || '(không có)'}\`.`);
+  }
+  delete moi.maDa; delete moi.sttRec; delete moi.tieuDe;
+
+  const daDoi = Object.entries(moi).filter(([, v]) => v !== undefined).map(([k]) => k);
+  if (!daDoi.length) {
+    fail('không có trường nào để đổi. Truyền ít nhất một, ví dụ --warn "..." (hoặc --warn "" để xoá).');
+  }
+
+  const sau = gopEntry(cu, moi);
+  process.stdout.write(`Sửa ${daDoi.length} trường: ${daDoi.join(', ')}\n`);
+  for (const k of daDoi) {
+    const truoc = Array.isArray(cu[k]) ? cu[k].join(',') : String(cu[k] ?? '');
+    const nay = Array.isArray(sau[k]) ? sau[k].join(',') : String(sau[k] ?? '');
+    process.stdout.write(`  ${k}: ${truoc ? `"${cutNgan(truoc)}"` : '(rỗng)'}`
+      + ` → ${nay ? `"${cutNgan(nay)}"` : '(XOÁ)'}\n`);
+  }
+  await napPlaybook(sau, { dryRun: opts.dryRun });
+}
+
+const cutNgan = (s) => (s.length > 60 ? s.slice(0, 59).replace(/\n/g, ' ') + '…' : s.replace(/\n/g, ' '));
+
+/** `playbook search` — tra kho. Cố ý KHÔNG lọc theo dự án: xem chú thích đầu playbook.mjs. */
+async function cmdPlaybookSearch(rest, opts) {
+  const { docPlaybook } = await import('./lib/playbook.mjs');
+  const { runGraphSql } = await import('../mcp/fbo/lib/sql.mjs');
+
+  const rows = docPlaybook({ runGraphSql }, {
+    sysids: opts.sysid ? [opts.sysid] : [],
+    menuIds: opts.menu ? [opts.menu] : [],
+    bangs: opts.table ? [opts.table] : [],
+    tuKhoa: rest[0] ?? opts.tags ?? '',
+    // Người gõ lệnh thì phải thấy lỗi: câu SQL sai trông y hệt kho rỗng.
+    neLoi: false,
+  });
+
+  if (opts.json) { process.stdout.write(JSON.stringify(rows, null, 2) + '\n'); return; }
+  if (!rows.length) {
+    process.stdout.write('Không có hướng dẫn nào khớp. Kho rỗng lúc mới bật là bình thường — '
+      + 'ghi cái đầu tiên bằng `playbook add`.\n');
+    return;
+  }
+  for (const r of rows) {
+    const neo = [r.sysid && `sysid ${r.sysid}`, r.menu_id && `menu ${r.menu_id}`, r.bang && `bảng ${r.bang}`]
+      .filter(Boolean).join(' · ');
+    process.stdout.write(`\n■ ${r.tieuDe}\n`);
+    process.stdout.write(`  ${neo || '(không có neo hiện vật)'} · từ ${r.ma_da}`
+      + `${r.nguonLt ? ` · kinh nghiệm của ${r.nguonLt}` : ''}\n`);
+    if (r.boiCanh) process.stdout.write(`  Khi nào: ${r.boiCanh}\n`);
+    process.stdout.write(`  Cách làm: ${r.cachLam}\n`);
+    if (r.canhBao) process.stdout.write(`  Cẩn thận: ${r.canhBao}\n`);
+  }
+  process.stdout.write(`\n${rows.length} hướng dẫn.\n`);
+}
+
+async function cmdPlaybook(sub, opts, rest = []) {
+  if (sub === 'add') return cmdPlaybookAdd(opts);
+  if (sub === 'edit') return cmdPlaybookEdit(opts);
+  if (sub === 'search' || sub === 'list') return cmdPlaybookSearch(rest, opts);
+  fail(`playbook: lệnh con không rõ: ${sub} (add | edit | search)`);
+}
+
+// ---------------------------------------------------------------- graph
+
 async function cmdGraph(sub, opts) {
   if (sub === 'experience') return cmdGraphExperience(opts);
   if (sub && !['build', 'check', 'push'].includes(sub)) {
@@ -553,15 +761,36 @@ function findLatestReport(root) {
   return null;
 }
 
+/**
+ * Đối số đường dẫn của `serve` → path tương đối trong ledger, luôn KHÔNG có dấu `/` mở đầu.
+ *
+ * Hai chuyện phải gỡ ở đây, cả hai đều đã cắn thật:
+ *   - `serve /review` ghép thẳng vào gốc URL cho ra `http://host//review` — hai dấu gạch.
+ *   - Git Bash trên Windows dịch `/review` thành `C:/Program Files/Git/review` TRƯỚC khi node
+ *     nhìn thấy đối số. Tài liệu agent đang bảo chạy đúng câu đó, nên phải cắt về đoạn
+ *     `review/...` chứ không được coi là người dùng gõ sai.
+ */
+function relServe(arg) {
+  const s = String(arg ?? '').replace(/\\/g, '/');
+  const m = s.match(/(^|\/)(review(?:\/.*)?)$/);
+  return m ? m[2] : s.replace(/^\/+/, '');
+}
+
 async function cmdServe(rest, opts) {
-  const { startServer, openBrowser } = await import('./lib/serve.mjs');
+  const { startServer, openBrowser, resolveReviewAlias } = await import('./lib/serve.mjs');
   const root = ledgerRoot(HUB);
   if (!fs.existsSync(root)) fail(`chưa có ledger nào để xem: ${root} — chạy \`report\` trước`);
 
-  const openRel = rest[0] ?? findLatestReport(root);
+  // Phân giải alias NGAY tại đây thay vì để server trả 302: URL in ra terminal và URL đưa cho
+  // trình duyệt phải là địa chỉ THẬT của trang. `/review` chỉ là lối tắt gõ cho nhanh — thứ
+  // người dùng copy được phải mở lại đúng trang đó, kể cả ở một phiên serve khác.
+  const yeuCau = rest[0] ? relServe(rest[0]) : findLatestReport(root);
+  const alias = yeuCau ? resolveReviewAlias(root, `/${yeuCau}`) : null;
+  const openRel = alias ? alias.replace(/^\/+/, '') : (yeuCau ?? '');
+
   const port = opts.port ? Number(opts.port) : 0;
   const server = await startServer({ root, port });
-  const url = `http://127.0.0.1:${server.address().port}/${openRel ? openRel.replace(/\\/g, '/') : ''}`;
+  const url = `http://127.0.0.1:${server.address().port}/${openRel}`;
 
   process.stdout.write(`4ai serve: ${url}\n`);
   process.stdout.write('Ctrl+C để tắt.\n');
@@ -602,6 +831,18 @@ const { values, positionals } = parseArgs({
     project: { type: 'string' },
     dept: { type: 'string' },
     help: { type: 'boolean', default: false },
+    // playbook add/search
+    ur: { type: 'string' },
+    title: { type: 'string' },
+    when: { type: 'string' },
+    how: { type: 'string' },
+    warn: { type: 'string' },
+    sysid: { type: 'string' },
+    menu: { type: 'string' },
+    table: { type: 'string' },
+    tags: { type: 'string' },
+    from: { type: 'string' },
+    confidence: { type: 'string' },
     // license issue/keygen
     device: { type: 'string' },
     to: { type: 'string' },
@@ -653,6 +894,9 @@ switch (cmd) {
   case 'serve':
     await chanGiayPhep('serve');
     await cmdServe(rest, values); break;
+  case 'playbook':
+    await chanGiayPhep('playbook');
+    await cmdPlaybook(rest[0] ?? 'search', { ...values, dryRun: values['dry-run'] }, rest.slice(1)); break;
   default:
     fail(`lệnh không rõ: ${cmd}\n${USAGE}`);
 }

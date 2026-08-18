@@ -45,7 +45,7 @@ function listReviewDates(reviewDir) {
  * nếu ngày đó chưa từng chạy toàn bộ); /review/<MA_DA> -> report dự án đó ở ngày gần nhất.
  * @returns {string|null} path tuyệt đối (kèm ngày) để redirect, hoặc null nếu không phải alias.
  */
-function resolveReviewAlias(root, urlPath) {
+export function resolveReviewAlias(root, urlPath) {
   const reviewDir = path.join(root, 'review');
   if (!fs.existsSync(reviewDir)) return null;
 

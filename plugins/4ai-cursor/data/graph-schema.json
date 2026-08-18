@@ -10,7 +10,7 @@
     },
     "decision": {
       "nghia": "Suy luận/đánh giá do PM hoặc quy trình rà soát tạo ra. `ExperienceFact` và `RecommendationLog` thuộc tầng này chứ không phải `fact`: chúng là kết quả SUY từ nội dung UR (rút hiện vật, chấm điểm), luôn mang `doTinCay`/thang chấm, không phải dữ liệu chép nguyên từ QLDA.",
-      "kinds": ["PMReview", "CapabilityVerdict", "Capability", "ExperienceFact", "RecommendationLog"]
+      "kinds": ["PMReview", "CapabilityVerdict", "Capability", "ExperienceFact", "RecommendationLog", "Playbook"]
     },
     "plan": {
       "nghia": "Thực thi — cái sẽ làm hoặc đã làm.",
@@ -109,13 +109,18 @@
       "truong": "NVARCHAR(MAX)",
       "ngayHoanThanh": "SMALLDATETIME",
       "duyetBoiPm": "BIT",
-      "daGoiY": "NVARCHAR(MAX)"
+      "daGoiY": "NVARCHAR(MAX)",
+      "boiCanh": "NVARCHAR(MAX)",
+      "cachLam": "NVARCHAR(MAX)",
+      "canhBao": "NVARCHAR(MAX)",
+      "tags": "NVARCHAR(MAX)",
+      "ngayNhap": "SMALLDATETIME"
     },
     "auditColumns": {
       "note": "Ba cột này KHÔNG khai trong `props` của từng nodeKind — emitter tự thêm vào mọi bảng node. Chúng trả lời 'dòng này của scope nào, ai ghi, lúc nào' — bắt buộc khi nhiều người ghi chung.",
       "items": ["scope", "capNhatLuc", "capNhatBoi"]
     },
-    "arrayProps": ["columns", "constraints", "hienVat", "truong", "daGoiY"],
+    "arrayProps": ["columns", "constraints", "hienVat", "truong", "daGoiY", "tags"],
     "arrayPropsNote": "Các prop này nhận mảng trong JSONL (vd `\"columns\": [\"ma_ct\",\"ten_ct\"]`). Emitter tự JSON.stringify khi sinh literal SQL — cột lưu chuỗi JSON trong NVARCHAR(MAX), không có kiểu mảng native trong SQL Server graph node.",
     "reloadStrategy": {
       "kind": "upsert-scoped",
@@ -259,6 +264,18 @@
       "propsNote": "`daGoiY` là snapshot thứ hạng TẠI LÚC GỢI Ý (mảng `{ma_lt1, diem, doTinCay}`) — không chấm lại về sau, vì trọng số có thể đã đổi. `chamTheo` = 'hien-vat' | 'menu_id', cho biết thứ hạng đó dựa trên thang nào. KHÔNG lưu kết cục (PM đã giao ai): nó được suy lúc truy vấn bằng cách đối chiếu với `ma_lt1` hiện tại, giống cách lược đồ này xử lý nhãn 'Quá hạn' — lưu lại sẽ tạo một bản sao có thể lệch với sự thật ở QLDA.",
       "khongLuuLyDo": "Vì sao PM đổi người thì KHÔNG quan sát được từ nbphyc, nên không có trường nào cho nó. Bịa một lý do nghe hợp lý còn tệ hơn để trống.",
       "sqlTable": "node_RecommendationLog"
+    },
+    "Playbook": {
+      "key": "id",
+      "scoped": true,
+      "keyNote": "Ghép `stt_rec|slug(tieuDe)` — một node cho MỖI cách làm được ghi lại. `scope` là mã dự án nơi kinh nghiệm ra đời, nên hai dự án rút ra cùng một cách làm vẫn là hai node có xuất xứ riêng, không đè lên nhau.",
+      "whyNote": "Kinh nghiệm thực chiến của lập trình viên hiện chỉ nằm trong đầu người và trong chat. `ExperienceFact` KHÔNG thay được: nó rút tự động từ nội dung UR nên chỉ trả lời 'ai đã đụng vào hiện vật nào' — một dòng đếm được, không phải một cách làm. Câu hỏi mà dự án sau thật sự cần là 'màn hình này sửa kiểu gì cho đúng, chỗ nào dễ sập' — thứ đó không suy ra được từ `noi_dung`, phải có người viết ra. Node này là chỗ để viết, và nó nằm trong ĐỒ THỊ chứ không phải file cục bộ vì cùng lý do đã chuyển RecommendationLog vào DB: kinh nghiệm nằm trên máy một người là kinh nghiệm không ai khác đọc được.",
+      "props": ["id", "ma_da", "stt_rec", "tieuDe", "boiCanh", "cachLam", "canhBao", "menu_id", "sysid", "bang", "tags", "nguonLt", "nhapBoi", "ngayNhap", "doTinCay", "duyetBoiPm"],
+      "propsNote": "`cachLam` là phần bắt buộc và là lý do node tồn tại — các bước làm thật, viết cho người sẽ sửa dự án sau đọc. `boiCanh` nói khi nào áp dụng được, `canhBao` nói chỗ dễ sai. `nguonLt` là mã lập trình viên mà kinh nghiệm đến từ họ, `nhapBoi` là người gõ vào — hai mã này thường KHÁC nhau (LT kể, PM ghi) nên không được gộp làm một.",
+      "khoaTraCuu": "Tra cứu cho dự án SAU đi bằng `sysid` / `menu_id` / `bang` / `tags`, KHÔNG đi bằng `ma_da`. `ma_da` chỉ là xuất xứ: hỏi 'dự án này có hướng dẫn gì' thì mãi mãi không dùng lại được kinh nghiệm của khách khác — mà đó chính là điều node này sinh ra để làm.",
+      "sysidNote": "Cùng lý do đã nêu ở ExperienceFact: `nbphyc.menu_id` là số hiệu BA ghi tay, không phải khoá ngoại tới màn hình. `sysid` (controller thật) mới là khoá đáng tin; `menu_id` giữ lại làm gợi ý yếu.",
+      "doTinCayNote": "Mặc định 1 và `duyetBoiPm` = 1: khác ExperienceFact ở chỗ đây là do NGƯỜI viết ra và gõ vào có chủ đích, không phải regex/LLM đoán từ văn xuôi. Hạ `doTinCay` khi ghi lại một cách làm mới thử một lần chưa kiểm chứng.",
+      "sqlTable": "node_Playbook"
     }
   },
 
@@ -328,7 +345,9 @@
       { "type": "HAS_IMPLEMENTATION_PLAN", "cauHoi": "Kế hoạch thực thi là gì?", "allowedPairs": [["Request", "ImplementationPlan"]] },
       { "type": "PRODUCED_EXPERIENCE", "cauHoi": "UR này để lại kinh nghiệm thật nào?", "allowedPairs": [["Request", "ExperienceFact"]] },
       { "type": "EXPERIENCE_ON", "cauHoi": "Kinh nghiệm này nằm trên hiện vật nào?", "allowedPairs": [["ExperienceFact", "Menu"], ["ExperienceFact", "Controller"], ["ExperienceFact", "Table"]] },
-      { "type": "HAS_RECOMMENDATION", "cauHoi": "Hệ thống đã gợi ý ai cho yêu cầu này, và theo thang nào?", "allowedPairs": [["Request", "RecommendationLog"]] }
+      { "type": "HAS_RECOMMENDATION", "cauHoi": "Hệ thống đã gợi ý ai cho yêu cầu này, và theo thang nào?", "allowedPairs": [["Request", "RecommendationLog"]] },
+      { "type": "HAS_PLAYBOOK", "cauHoi": "Làm yêu cầu này rút ra cách làm nào?", "allowedPairs": [["Request", "Playbook"]] },
+      { "type": "PLAYBOOK_ON", "cauHoi": "Cách làm này áp cho hiện vật nào — hỏi ngược từ màn hình sắp sửa ra hướng dẫn đã có?", "allowedPairs": [["Playbook", "Menu"], ["Playbook", "Controller"], ["Playbook", "Table"]] }
     ],
     "edgeProps": ["ghi_chu", "nguon", "taoTuUr", "doTinCay"]
   },

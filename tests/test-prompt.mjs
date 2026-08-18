@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // test-prompt.mjs — promptCuaUr() (tools/lib/prompt.mjs) và render mục "Prompt gợi ý" trong report.
 
-import { promptCuaUr, nhanDienTinhNangMoi } from '../tools/lib/prompt.mjs';
+import { promptCuaUr, promptKyThuat, nhanDienTinhNangMoi } from '../tools/lib/prompt.mjs';
 import { renderReport } from '../tools/lib/report.mjs';
 import { loadHolidays } from '../tools/lib/workdays.mjs';
 
@@ -74,7 +74,7 @@ const r3 = promptCuaUr({ stt_rec: 'DV098' }, {});
 ok('prompt null', r3.prompt === null);
 ok('err báo thiếu luongDuLieu', /luongDuLieu/.test(r3.err ?? ''), r3.err);
 
-process.stdout.write('\n=== renderReport: mục "Luồng dữ liệu" có khối Prompt gợi ý, escape đúng ===\n');
+process.stdout.write('\n=== renderReport: khối prompt nằm ở mục riêng, escape đúng, không nhân đôi ===\n');
 const h = loadHolidays();
 const payload = {
   ma_da: 'DEMO1', ma_pbsp: 'FBISP2422', ten_ngan: 'Demo Co', ngay_chay: '2026-08-11',
@@ -90,11 +90,53 @@ const payload = {
   ],
 };
 const html = renderReport(payload, h);
-const muc = html.slice(html.indexOf('id="luong-du-lieu"'), html.indexOf('id="ddl"'));
-ok('Có tiêu đề khối prompt', muc.includes('Prompt gợi ý — dán vào Claude Code'));
+// Prompt chuyển từ mục "Luồng dữ liệu" lên mục riêng đứng đầu tab kỹ thuật, và giờ gộp cả
+// kinh nghiệm thực chiến. Để nguyên ở chỗ cũ thì một UR có cả hai sẽ hiện HAI hộp prompt và
+// người đọc không biết dán cái nào.
+const muc = html.slice(html.indexOf('id="prompt-ky-thuat"'), html.indexOf('id="huong-dan"'));
+ok('Có tiêu đề khối prompt', muc.includes('Prompt — dán vào Claude Code'));
 ok('Có nút Copy dùng chung CSS/JS với khối SQL', muc.includes('class="sql-copy"'));
 ok('Nội dung prompt xuất hiện trong <pre>', muc.includes('=== BỐI CẢNH ==='));
 ok('Ghi chú đặc biệt được escape, không lọt HTML sống', !muc.includes('<b> & "đặc biệt"') && muc.includes('&lt;b&gt;'));
+ok('Mục "Luồng dữ liệu" KHÔNG còn hộp prompt thứ hai cho cùng UR',
+  !html.slice(html.indexOf('id="luong-du-lieu"'), html.indexOf('id="ddl"')).includes('dán vào Claude Code'));
+
+process.stdout.write('\n=== promptKyThuat: SQL script bị loại trừ có chủ đích ===\n');
+const uDdl = {
+  stt_rec: 'DDL01', fcode1: '[DDL-01]', noi_dung: 'Thêm bảng theo dõi',
+  trang_thai: 'DD', giai_doan_da: 'DV',
+  ddl: { target: 'Table', action: 'CREATE', bang: 'x99$' },
+};
+const rd = promptKyThuat(uDdl, { ma_da: 'DEMO1' }, { coDdl: true });
+ok('Có prompt dù UR chỉ có ddl', rd.err === null && typeof rd.prompt === 'string');
+ok('Prompt NÓI RÕ script SQL nằm ngoài phạm vi', rd.prompt?.includes('NGOÀI PHẠM VI PROMPT NÀY'));
+ok('Nói lý do: đầu ra xác định, sửa lại là mất tính đối chiếu',
+  rd.prompt?.includes('đầu ra xác\nđịnh') || rd.prompt?.includes('đầu ra xác định'));
+ok('Bảo chạy nguyên văn, cấm nhờ AI viết lại',
+  rd.prompt?.includes('Chạy NGUYÊN VĂN') && rd.prompt?.includes('KHÔNG nhờ AI viết lại'));
+ok('KHÔNG nhét câu lệnh SQL nào vào prompt',
+  !/CREATE TABLE|ALTER TABLE|INSERT INTO/i.test(rd.prompt ?? ''));
+
+process.stdout.write('\n=== promptKyThuat: gộp kinh nghiệm + giữ phân nhánh tính năng mới ===\n');
+const rk = promptKyThuat(u4, { ma_da: 'DEMO1', ma_pbsp: 'FBISP2422' }, {
+  huongDan: [{ tieuDe: 'Cách cũ đã chạy', cachLam: 'B1: abc', canhBao: 'Include chung',
+    _khop: 'sysid', sysid: 'APTran', ma_da: 'KHACHKHAC', nguonLt: 'HOATV' }],
+});
+ok('Có mục kinh nghiệm đã có', rk.prompt?.includes('KINH NGHIỆM ĐÃ CÓ (1)'));
+ok('Nêu xuất xứ dự án khác và người kể',
+  rk.prompt?.includes('đã chạy thật ở dự án KHACHKHAC') && rk.prompt?.includes('kinh nghiệm của HOATV'));
+ok('Giữ phân nhánh TẠO TÍNH NĂNG MỚI của promptCuaUr, không rơi về checklist chung',
+  rk.prompt?.includes('TẠO TÍNH NĂNG MỚI') && rk.prompt?.includes('XML — phục vụ GUI'));
+ok('Nói rõ kinh nghiệm không phải quy định', rk.prompt?.includes('KHÔNG phải quy định'));
+
+const rMenu = promptKyThuat({ stt_rec: 'X1', noi_dung: 'y' }, {}, {
+  huongDan: [{ tieuDe: 'T', cachLam: 'C', _khop: 'menu_id', menu_id: '01.00.00' }],
+});
+ok('Khớp yếu qua menu được cảnh báo NGAY TRONG prompt, không chỉ trên HTML',
+  rMenu.prompt?.includes('khớp YẾU qua menu'));
+
+ok('UR không có gì thì trả lỗi có kiểm soát, không dựng prompt rỗng',
+  promptKyThuat({ stt_rec: 'Z' }, {}, {}).prompt === null);
 
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures === 0 ? 'TẤT CẢ PASS' : 'CÓ LỖI'} (${failures} thất bại) ===\n`);
 process.exit(failures === 0 ? 0 : 1);

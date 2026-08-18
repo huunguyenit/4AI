@@ -6,15 +6,17 @@
   --line: #E2E8F0;
   --track: #E2E8F0;
   --primary: #1E40AF;
-  --bad: #DC2626;
+  --bad: #B91C1C;
   --bad-bg: #FEF2F2;
-  --warn: #D97706;
+  --warn: #B45309;
   --warn-bg: #FFFBEB;
-  --ok: #059669;
+  --ok: #047857;
   --ok-bg: #ECFDF5;
   --dd: #1D4ED8;
   --xn: #7C3AED;
-  --th: #0D9488;
+  --th: #0F766E;
+  --calm: #475569;
+  --calm-bg: #F1F5F9;
   --code-bg: #0F172A;
   --code-fg: #E2E8F0;
   --code-kw: #7DD3FC;
@@ -40,6 +42,8 @@
     --dd: #60A5FA;
     --xn: #C4B5FD;
     --th: #5EEAD4;
+    --calm: #94A3B8;
+    --calm-bg: rgba(148, 163, 184, .10);
     --code-bg: #060B16;
     --code-fg: #E2E8F0;
     --code-kw: #7DD3FC;
@@ -214,6 +218,7 @@ tbody tr:hover {
 
 .pill {
   display: inline-block;
+  background: var(--mut);
   font-family: ui-monospace, monospace;
   font-size: 11px;
   font-weight: 700;
@@ -461,7 +466,7 @@ pre {
 }
 
 .phan-cong tbody tr:first-child td {
-  background: var(--track)
+  background: var(--calm-bg)
 }
 
 .chart {
@@ -832,10 +837,13 @@ body.dash {
   letter-spacing: -.02em
 }
 
+/* --calm chứ không --mut: nhãn và dòng phụ giờ mang phần định lượng ("≤ 3 ngày LV",
+   "UR ở DD") nên phải đọc được, mà --mut trên nền --bad-bg chỉ đạt 4.35:1 — dưới ngưỡng AA. */
 .kpi span {
   display: block;
   font-size: 12px;
-  color: var(--mut);
+  font-weight: 600;
+  color: var(--calm);
   margin-top: 2px
 }
 
@@ -843,8 +851,7 @@ body.dash {
   display: block;
   font-size: 11px;
   font-style: normal;
-  color: var(--mut);
-  opacity: .85;
+  color: var(--calm);
   margin-top: 4px
 }
 
@@ -1341,4 +1348,169 @@ a.act-row:hover {
   .hero-con {
     margin-left: 0
   }
+}
+/* ---------------------------------------------------------------- danh sách UR đầy đủ
+ *
+ * Dùng lại lưới của .act-row: hai danh sách trên cùng một tab mà khác bố cục cột thì mắt
+ * phải học lại vị trí thông tin ở nửa dưới trang. Khác biệt duy nhất là màu: mục chưa tới
+ * hạn đi bằng --calm (xám xanh trầm) thay vì đỏ/cam.
+ */
+.ul-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap
+}
+
+.ul-head .lead {
+  margin: 0;
+  flex: 1 1 320px
+}
+
+.ul-keys {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap
+}
+
+.ul-key {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  white-space: nowrap
+}
+
+.sv-calm {
+  color: var(--calm)
+}
+
+.act-row[data-muc=con-thoi-gian] {
+  border-left-color: var(--calm);
+  background: var(--calm-bg)
+}
+
+.act-row[data-muc=khong-co-han] {
+  border-left-color: var(--line)
+}
+
+/* Cao hơn một màn chút thì cuộn trong khung, không đẩy phần còn lại của tab xuống mất hút.
+   Badge đếm ở tiêu đề section cho biết tổng, nên phần bị cuộn khuất không bị hiểu là không có. */
+.ul-scroll {
+  max-height: 460px;
+  overflow-y: auto;
+  padding-right: 4px
+}
+
+.pcard-why {
+  font-size: 12px;
+  color: var(--calm);
+  margin: 0 0 8px
+}
+
+.pcard-counts {
+  flex-wrap: wrap
+}
+
+.pcard-counts .calm {
+  color: var(--calm)
+}
+
+/* Nền dịu làm --mut tụt xuống 4.34:1 — trong khung này chữ phụ đi bằng --calm để giữ AA.
+   Dịu mắt là bớt gào, không phải bớt đọc được. */
+.act-row[data-muc=con-thoi-gian] .a-da,
+.act-row[data-muc=con-thoi-gian] .a-han,
+.act-row[data-muc=con-thoi-gian] .a-con {
+  color: var(--calm)
+}
+
+/* Ở dark mode --dd/--xn/--primary là màu SÁNG (chúng vốn dùng làm màu CHỮ trên nền tối), nên
+   pill và chip đang lấy chúng làm NỀN thì chữ trắng chỉ còn 1,85:1 — không đọc nổi. Đảo chữ
+   sang màu nền trang: mực nào nền nấy. Nhãn trạng thái DD/XN/TH có mặt trên mọi dòng của
+   danh sách UR, không phải chi tiết trang trí bỏ qua được. */
+@media (prefers-color-scheme:dark) {
+  .pill {
+    color: var(--bg)
+  }
+
+  #f-all:checked~main .chip[for=f-all],
+  #f-qua:checked~main .chip[for=f-qua],
+  #f-sap:checked~main .chip[for=f-sap],
+  #f-pm:checked~main .chip[for=f-pm] {
+    color: var(--bg)
+  }
+}
+
+/* ---------------------------------------------------------------- hướng dẫn thực chiến */
+.hd-ur > h3 {
+  font-size: 14px;
+  margin: 18px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--line)
+}
+
+.hd {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--calm);
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-bottom: 8px
+}
+
+.hd h4 {
+  margin: 0 0 4px;
+  font-size: 14px
+}
+
+.hd-meta {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--calm)
+}
+
+/* Khớp qua menu_id là bằng chứng YẾU (menu_id do BA gõ tay). Nhãn phải khác được bằng CHỮ,
+   không chỉ bằng màu — bản in đen trắng vẫn phải phân biệt. */
+.hd-khop {
+  font-weight: 600
+}
+
+.hd-khop.yeu {
+  color: var(--warn);
+  border-bottom: 1px dotted currentColor;
+  cursor: help
+}
+
+.hd-khi,
+.hd-canh {
+  margin: 0 0 6px;
+  font-size: 13px
+}
+
+.hd-canh {
+  color: var(--warn)
+}
+
+.hd-lam p {
+  margin: 4px 0 0;
+  white-space: pre-wrap
+}
+
+/* Cách làm ghi cho CHÍNH yêu cầu này — không phải tư liệu tham khảo mà là chỉ dẫn để bắt tay
+   vào. Nổi hơn hẳn phần kinh nghiệm mượn từ dự án khác. */
+.hd.hd-chinh {
+  border-left-color: var(--primary);
+  background: var(--calm-bg)
+}
+
+.hd-khop.chinh {
+  color: var(--primary)
+}
+
+/* Chữ phụ trong hàng ứng viên số 1: nền tô nhạt làm --mut tụt dưới ngưỡng AA. */
+.phan-cong tbody tr:first-child td .muted {
+  color: var(--calm)
 }

@@ -629,6 +629,71 @@ Cấu hình trọng số chấm điểm: `data/qlda.json` → `review.phanCong` 
 ngược giữa chừng: [`docs/experience-engine/`](docs/experience-engine/) và
 [`docs/adr/ADR-0001`](docs/adr/ADR-0001-experience-engine-scope.md).
 
+### Hướng dẫn lập trình thực chiến — `playbook`
+
+Kho kinh nghiệm ở trên do MÁY rút, và nó chỉ trả lời được *ai* đã đụng vào *hiện vật nào*.
+Câu mà lập trình viên thật sự cần trước khi sửa — *màn hình này làm kiểu gì cho đúng, chỗ nào
+dễ sập* — không suy ra được từ `nbphyc.noi_dung`, vì đó là lời khách yêu cầu chứ không phải
+nhật ký sửa code. Nên có một kho thứ hai, do **người viết**:
+
+```bash
+# LT kể cách đã làm → PM ghi lại
+node tools/4ai.mjs playbook add \
+  --project HOATP --ur A000572010YC1 \
+  --title "Thêm số thứ tự cho màn hình browse danh mục" \
+  --how "B1: ... B2: ... B3: KHÔNG đụng Include chung" \
+  --warn "Include dùng chung 40 controller" \
+  --sysid DMNhanVien --from HOATV
+
+# sửa về sau: CHỈ trường được truyền bị ghi đè, phần còn lại giữ nguyên
+node tools/4ai.mjs playbook edit \
+  --project HOATP --title "Thêm số thứ tự cho màn hình browse danh mục" \
+  --sysid DMNhanVien          # thêm neo, không đụng gì khác
+node tools/4ai.mjs playbook edit --project HOATP --title "..." --warn ""   # XOÁ trường
+
+# trước khi bắt tay sửa một màn hình, hỏi kho xem có ai làm rồi chưa
+node tools/4ai.mjs playbook search --sysid DMNhanVien
+```
+
+`add` và `edit` khác nhau ở chỗ **cờ vắng mặt nghĩa là gì**. `add` là ghi mới nên vắng mặt =
+rỗng; `edit` đọc dòng cũ nên vắng mặt = **giữ nguyên**, và muốn xoá thì phải gõ `--warn ""` ra
+tường minh. Cần tách vì `MERGE` ghi đè toàn bộ cột: gõ lại `add` chỉ để thêm `--from` mà quên
+`--warn` sẽ xoá trắng cảnh báo, im lặng. Tiêu đề nằm trong khoá nên `edit` không đổi được nó —
+đổi tiêu đề là một dòng khác, và trong chế độ ghi bổ sung thì dòng cũ sẽ nằm lại vĩnh viễn.
+`nhapBoi`/`ngayNhap` luôn là người và lúc ghi **lần đầu**; ai vừa sửa nằm ở cột audit
+`capNhatBoi`/`capNhatLuc`.
+
+Ở bề mặt không có shell (chat/Cowork) thì dùng tool MCP `playbook_add` / `playbook_search` —
+cùng module, cùng luật hợp lệ.
+
+Ba điều đáng nhớ về thiết kế của nó:
+
+- **Tra bằng hiện vật, KHÔNG bằng mã dự án.** `ma_da` chỉ là *xuất xứ* — nơi cách làm đó đã
+  chạy thật. Cả tính năng sinh ra để dự án MỚI dùng lại kinh nghiệm dự án CŨ; lọc theo dự án
+  đang làm thì mãi mãi trả rỗng.
+- **Bắt buộc có neo** (`--sysid` / `--menu` / `--table` / `--tags`). Không có neo thì không lần
+  tra cứu nào chạm tới được, và công gõ vào bị vứt đi — nên CLI chặn thẳng thay vì ghi rồi thôi.
+  Ưu tiên `--sysid`: `menu_id` là số hiệu BA gõ tay, khớp qua nó được đánh dấu là *khớp yếu*
+  ngay trên báo cáo.
+- **Ghi bổ sung, không xoá.** Khác `graph build`/`graph experience` (quét lại từ đầu nên lô là
+  bản đầy đủ của scope), `playbook add` chỉ đẩy một dòng — dùng chế độ ghi mặc định sẽ xoá sạch
+  hướng dẫn cũ của cùng dự án. Xem `boSung` trong `emitSql()`.
+
+Hướng dẫn đã ghi tự hiện lại ở tab **Gợi ý kỹ thuật** của báo cáo rà soát, ghép theo hiện vật
+của từng UR — kể cả khi nó đến từ khách khác.
+
+### Gợi ý kỹ thuật → prompt dán thẳng vào Claude Code
+
+Đầu tab **Gợi ý kỹ thuật** là một prompt cho mỗi UR, gộp sẵn bối cảnh + kinh nghiệm đã có +
+luồng dữ liệu + việc cần làm. Các mục bên dưới là cùng nội dung đó, bày ra để đọc bằng mắt —
+người sắp code chỉ cần bấm Copy một lần thay vì tự ghép lại từ ba chỗ.
+
+**Script SQL cố ý KHÔNG nằm trong prompt.** Nó là đầu ra xác định của `tools/lib/ddl.mjs` — cùng
+đặc tả `ddl` thì sinh lại ra đúng từng byte, và đó chính là thứ hỏng ngay khi cho model đọc:
+model sẽ "cải thiện" tên cột, đổi kiểu, thêm index, mỗi lần một khác, rồi không ai đối chiếu lại
+được với đặc tả nữa. Prompt chỉ mang phần cần suy nghĩ; script thì chạy nguyên văn. Muốn đổi thì
+sửa đặc tả rồi sinh lại, đừng sửa script.
+
 ## 📁 Cấu trúc Thư mục
 
 | Nơi | Mục đích |

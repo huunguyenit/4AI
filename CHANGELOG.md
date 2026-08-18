@@ -5,6 +5,137 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Thêm — kho hướng dẫn lập trình thực chiến
+
+- **Node kind `Playbook` + `4ai playbook add|search` + tool MCP `playbook_add`/`playbook_search`.**
+  `ExperienceFact` do máy rút chỉ trả lời được "ai đã đụng vào hiện vật nào" — không có một chữ
+  nào về CÁCH làm, vì `nbphyc.noi_dung` là lời khách yêu cầu chứ không phải nhật ký sửa code.
+  Kho mới do người viết: LT kể, PM ghi (node giữ riêng `nguonLt` và `nhapBoi` — gộp làm một là
+  mất dấu người thật sự biết việc).
+  - **Tra bằng `sysid`/`menu_id`/`bang`/`tags`, KHÔNG bằng `ma_da`.** `ma_da` chỉ là xuất xứ.
+    Lọc theo dự án đang rà soát là tự tay chặn đúng công dụng của tính năng — cả kho sinh ra để
+    dự án mới dùng lại kinh nghiệm dự án cũ.
+  - **Bắt buộc có ít nhất một neo tra cứu**, chặn ngay ở `kiemEntry()` chứ không ghi rồi thôi:
+    hướng dẫn không neo vào hiện vật nào thì nằm trong DB mà không lần tra nào chạm tới.
+  - Khớp qua `menu_id` hiện trên báo cáo là **khớp yếu** kèm giải thích — cùng lý do đã ghi ở
+    `ExperienceFact`: đo trên DVDKB_FBO, 25 giá trị `menu_id` thì đúng 1 tồn tại trong cây menu
+    thật của khách.
+  - Hướng dẫn tự hiện ở tab "Gợi ý kỹ thuật" của báo cáo rà soát, ghép theo hiện vật của từng UR.
+- **`4ai playbook edit` — sửa từng trường, không ghi đè cả dòng.** `MERGE` ghi đè TOÀN BỘ cột từ
+  lô, nên gõ lại `add` chỉ để thêm `--from` mà quên `--warn` sẽ xoá trắng `canhBao` — im lặng,
+  `kiemEntry` không biết cái gì "đáng lẽ phải còn đó". `edit` đọc dòng cũ rồi chỉ đè trường được
+  truyền; cờ **vắng mặt** = giữ nguyên, chuỗi **rỗng tường minh** (`--warn ""`) = xoá. Node
+  `parseArgs` phân biệt sẵn hai trạng thái đó, nhờ vậy xoá là việc phải GÕ RA chứ không xảy ra do
+  quên. Tiêu đề nằm trong khoá nên `edit` từ chối đổi nó (đổi tên trong chế độ ghi bổ sung sẽ để
+  dòng cũ nằm lại mà không ai gọi được nữa). `nhapBoi`/`ngayNhap` giữ nguyên của lần ghi ĐẦU —
+  ai vừa sửa đã nằm ở cột audit `capNhatBoi`/`capNhatLuc`.
+
+  Bốn lỗi chỉ lộ ra khi ghi entry ĐẦU TIÊN lên DB thật — đường ghi báo thành công, đường đọc trả
+  rỗng hoặc rác, và `docPlaybook` nuốt lỗi nên không có gì chỉ ra vì sao:
+  - **Cạnh `HAS_PLAYBOOK` không bao giờ được tạo.** Đầu `Request` viết thành `Request:<ma_da>|
+    <stt_rec>`, nhưng `Request` KHÔNG phải kind scoped (khoá là `stt_rec` trần) — phép JOIN lúc
+    nạp không khớp dòng nào và cạnh lặng lẽ không sinh ra, script vẫn báo chạy xong. Hai đầu một
+    cạnh phải viết theo đúng cờ `scoped` của từng kind, giống `graph-sync.mjs` và
+    `recommendation-log.mjs` vẫn làm.
+  - **Select cột `key` không tồn tại.** Khoá của bảng node là `id`; `sql.keyColumn` trong schema
+    nói về view đồ thị chứ không phải bảng node.
+  - **`cachLam` nhiều dòng phá vỡ TSV của `sqlcmd`.** Nó BẢN CHẤT là nhiều dòng — đó là các bước
+    làm. Một bản ghi bị đọc thành 4 dòng rác. Mã hoá LF thành sentinel rồi khôi phục ở JS; khác
+    `experience-build.mjs` (ở đó thay bằng khoảng trắng là đủ) vì ở đây xuống dòng là THÔNG TIN.
+  - **`sqlcmd` cắt nvarchar(max) ở 256 ký tự, âm thầm.** `-W` (bắt buộc để parseTsv chạy) loại
+    trừ nhau với `-y` nên không sửa được ở tầng `execSql`. Vòng qua bằng cách chia mảnh
+    `CAST(SUBSTRING(...) AS NVARCHAR(200))` rồi ghép ở JS, kèm cột `LEN` để **nói ra** khi nội
+    dung vượt trần thay vì trả bản cụt như thể đủ.
+  - `docPlaybook` giờ có `neLoi: false` cho đường tra cứu do người gõ (`playbook search`, tool
+    MCP): ở đó im lặng là tai hại — một câu SQL sai trông y hệt một kho rỗng, và người dùng sẽ
+    gõ lại hướng dẫn tưởng lần trước chưa ghi được. Đường báo cáo vẫn nuốt lỗi như cũ.
+
+### Thêm — gợi ý kỹ thuật thành prompt cho AI
+
+- **Mục `prompt-ky-thuat` đứng đầu tab "Gợi ý kỹ thuật".** Mỗi UR một prompt dán thẳng vào
+  Claude Code, gộp bối cảnh + kinh nghiệm thực chiến đã có + luồng dữ liệu + việc cần làm. Ba
+  mục bên dưới là cùng nội dung đó bày ra để đọc bằng mắt. Trước đây prompt chỉ có ở mục "Luồng
+  dữ liệu" và chỉ mang `luongDuLieu` — người sắp code phải tự ghép lại từ ba chỗ.
+- **Script SQL CỐ Ý không vào prompt.** Nó là đầu ra XÁC ĐỊNH của `tools/lib/ddl.mjs` (cùng đặc
+  tả → cùng script từng byte), mà đó cũng là thứ hỏng ngay khi cho model đọc: model sẽ "cải
+  thiện" tên cột, đổi kiểu, thêm index — mỗi lần một khác, không còn đối chiếu lại được với đặc
+  tả. Prompt thay vào đó có khối `NGOÀI PHẠM VI PROMPT NÀY` nói rõ script nằm ở đâu, chạy nguyên
+  văn, và muốn đổi thì sửa đặc tả `ddl` rồi sinh lại chứ đừng sửa script.
+- Hộp prompt cũ ở mục "Luồng dữ liệu" bỏ đi — một UR có cả hai sẽ hiện hai hộp và người đọc
+  không biết dán cái nào. Phần phân nhánh "tính năng mới vs sửa màn hình có sẵn" của
+  `promptCuaUr` tách thành `khoiDichVaViec()` để hai prompt dùng chung một nguồn: nhân đôi nó là
+  cách chắc chắn nhất để hai prompt dạy hai điều khác nhau về cùng một UR.
+
+### Sửa lỗi — trang trôi ngang ở bề rộng điện thoại
+
+- **Mọi bảng bọc trong khung cuộn riêng (`.tw`).** Bảng 8 cột không thể vừa 375px, và khi tràn
+  thì cả TRANG trôi ngang chứ không phải mình nó — người đọc mất luôn cột trái làm mốc.
+- **URL trong `noi_dung` UR ngắt được.** Nó là một token không có chỗ ngắt tự nhiên; ở bề rộng
+  điện thoại nó đẩy cả trang. Chỉ mở `overflow-wrap` cho link, không đụng văn xuôi thường.
+- Sau khi sửa: 0 tràn ngang ở 375px và 1280px, trên cả ba tab.
+
+### Sửa lỗi — hướng dẫn không tới được chính UR nó viết cho
+
+- **Bỏ luật "hướng dẫn của chính UR đang xét thì giấu đi".** Luật đó dựa trên một giả định
+  ngầm sai: rằng hướng dẫn luôn được ghi SAU khi làm xong, nên hiện lại chỉ là tiếng vọng. Thực
+  tế UR ở `DD` là việc CHƯA làm, và cách làm ghi cho nó chính là chỉ dẫn cho người sắp bắt tay
+  vào — đúng chỗ cần nó nhất thì lại là chỗ duy nhất bị giấu. Ca thật: HOATP UR10 (fcode1 `10`,
+  DD) có hướng dẫn ghi đích danh mà tab "Gợi ý kỹ thuật" trống trơn. Giờ nó hiện đầu danh sách
+  với nhãn riêng "cách làm ghi cho chính yêu cầu này", tách bạch với kinh nghiệm mượn từ dự án
+  khác; thứ tự ưu tiên thành `chinh-ur` → `sysid` → `menu_id`.
+- **Câu tra có thêm nhánh `stt_rec`.** Trước đó chỉ lọc theo `sysid`/`menu_id`, nên hướng dẫn
+  chỉ neo bằng `tags` không bao giờ được lấy về cho chính UR nó được viết cho.
+
+### Sửa lỗi — đường ghi từng bản ghi làm mất dữ liệu
+
+- **`emitSql()` có thêm chế độ `boSung`.** Chế độ mặc định hiểu lô đang ghi LÀ toàn bộ sự thật
+  của các scope trong đó, và xoá mọi dòng cùng scope không có mặt trong lô. Đúng với `graph
+  build`/`graph experience`/đường báo cáo (chúng quét lại từ đầu), nhưng sai chí mạng với đường
+  ghi từng bản ghi một: `playbook add` lần hai sẽ xoá hướng dẫn ghi lần đầu của cùng dự án — im
+  lặng, không lỗi. `boSung: true` bỏ mọi `DELETE` và chuyển chèn cạnh sang chèn-nếu-chưa-có.
+  Chế độ mặc định không đổi; `tests/test-playbook.mjs` ghim cả hai chiều.
+
+### Sửa lỗi — URL `4ai serve`
+
+- **`serve /review` in ra và mở đúng địa chỉ trang.** Trước đây ghép thẳng đối số vào gốc URL
+  nên ra `http://127.0.0.1:<port>//review` (hai dấu gạch), và qua Git Bash trên Windows còn tệ
+  hơn: shell dịch `/review` thành `C:/Program Files/Git/review` trước khi node nhìn thấy — đúng
+  câu lệnh mà tài liệu agent đang bảo chạy. Giờ alias được phân giải NGAY ở CLI thành đường dẫn
+  thật (`/review/<ngay>/_tong/tong.html`) thay vì để server trả 302, nên URL copy được từ
+  terminal mở lại đúng trang ở phiên sau.
+
+### Sửa — báo cáo rà soát đọc sai ý
+
+- **Nhãn KPI viết lại.** `chờ cổng PM (DD)` → **Chờ duyệt**, `giai đoạn chưa chốt hẹn` →
+  **Chưa chốt hẹn**, `yêu cầu trong phạm vi` (không rõ nghĩa ở thẻ đó) → **UR đang theo dõi**.
+  Phần định lượng ("≤ 3 ngày LV", "DD/XN/TH", "UR ở DD") xuống dòng phụ: nhồi điều kiện vào
+  chính cái nhãn thì con số to bên trên mất chỗ dựa.
+- **Thẻ dự án nói vì sao bị xếp "Cần chú ý".** HUM và PSL_DKVN hiện nhãn đó bên cạnh ba số 0
+  (quá hạn / sắp tới / chờ duyệt) vì lý do thật — giai đoạn chưa tick chốt đã hẹn — không nằm
+  trong ba con số đang hiện. Thẻ giờ có dòng lý do và đếm luôn cả "chưa chốt hẹn" + tổng UR.
+- **Tab Tổng quan liệt kê ĐỦ UR ở DD/XN/TH.** Trước đây chỉ có danh sách việc gấp, nên dự án
+  không có mục nào quá hạn/sắp tới/chờ duyệt thì KPI báo "1 UR đang theo dõi" mà cả trang không
+  chỉ ra được UR nào. UR chưa tới hạn đi bằng token màu `--calm` (xám xanh trầm) kèm nhãn chữ
+  `CÒN HẠN` — dịu mắt nhưng vẫn đọc được mức độ khi in đen trắng.
+
+### Sửa — tương phản màu dưới ngưỡng WCAG AA
+
+Phát hiện khi đo lại toàn trang sau các thay đổi trên; đều là lỗi có sẵn, nhưng nhãn và chú
+thích mới dùng chung đúng những token đó nên sửa luôn:
+
+- `--bad` `#DC2626`→`#B91C1C`, `--warn` `#D97706`→`#B45309`, `--ok` `#059669`→`#047857`. Bộ cũ
+  đạt ngưỡng 3:1 cho con số KPI 34px nhưng chỉ được 3,0–4,4:1 ở nhãn 10–12px dùng chung token.
+- Dark mode: `.pill` và chip đang chọn lấy `--dd`/`--xn`/`--primary` (vốn là màu CHỮ trên nền
+  tối) làm NỀN với chữ trắng — nhãn trạng thái `XN` chỉ còn 1,85:1. Đảo chữ sang màu nền trang.
+- **`.pill` không có nền mặc định.** Nó đặt `color: #fff` rồi trông chờ class biến thể
+  (`.tt-dd`/`.tt-xn`/`.dx`) cấp nền. Nhãn vai trò ("PM", "phó phòng") ở bảng gợi ý phân công gọi
+  `<span class="pill">` trần — chữ trắng nằm thẳng trên nền ô, 1,23:1, tức là **không đọc được
+  chữ nào**. Nền mặc định giờ nằm ở chính `.pill`, không phụ thuộc lời gọi có nhớ thêm class.
+- `--th` `#0D9488`→`#0F766E`: chữ trắng trên nhãn trạng thái `TH` chỉ đạt 3,74:1.
+- Hàng ứng viên số 1 ở bảng phân công tô bằng `--track` (`#E2E8F0`) — quá tối để `--mut` (3,86:1)
+  và `--warn` (4,07:1) đọc được trên đó. Đổi sang `--calm-bg` và chữ phụ dùng `--calm`.
+- Sau khi sửa: 0 vi phạm ở cả light lẫn dark, trên trang tổng và cả ba tab của trang dự án.
+
 ## [v0.4.0] — 2026-08-14
 
 ### Sửa lỗi — trạng thái mất theo phiên Cowork
