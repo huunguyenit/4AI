@@ -101,10 +101,10 @@ thêm gì phía repo.
 4. Mở **Customize** ở thanh bên → tìm plugin **4ai** → **Install** → chọn scope *project* hoặc
    *user*.
 
-Gói cài gồm: rule (doctrine + rule, ra file `.mdc` thật với `alwaysApply` đúng khai báo trong
-hub — **không** hạ xuống thành skill như bên Claude), agent, command, và MCP `4ai-fbo`. Không có
-thư mục `skills/`: 4AI hiện gộp skill-kind asset vào rule cho Cursor, giống hệt hành vi khi
-`sync` thẳng vào `.cursor/rules/` của một project đã clone.
+Gói cài gồm bốn primitive, mỗi cái đúng thư mục Cursor auto-discover: `rules/` (doctrine +
+rule, ra `.mdc` thật với `alwaysApply` đúng khai báo trong hub — **không** hạ xuống thành skill
+như bên Claude), `skills/<id>/SKILL.md` (kèm `references/` nếu có), `agents/`, `commands/`, và
+MCP `4ai-fbo`. Giống hệt hành vi khi `sync` thẳng vào `.cursor/` của một project đã clone.
 
 Yêu cầu: **Node.js 22+** trên máy chạy Cursor (MCP dùng `node:sqlite` built-in).
 
@@ -205,10 +205,12 @@ cấp là chữ ký hỏng ngay; nới hạn bằng tay cũng vậy.
 > cấp" và để lại vết rõ ràng khi chạy sai chỗ, không phải chống dịch ngược. Mất private key =
 > không cấp thêm được giấy phép cho khoá đó (giấy phép đã cấp vẫn chạy) → sao lưu chỗ an toàn.
 
-## ⚙️ Cấu hình cục bộ (trước khi dùng `query_sql` / `report`)
+## ⚙️ Cấu hình cục bộ (trước khi tra QLDA / chạy `report`)
 
-Áp dụng cho **cả hai cách cài** — MCP `4ai-fbo` cần biết chuỗi kết nối DB và danh tính PM
-trước khi `query_sql`, `get_review_dataset` hay `node tools/4ai.mjs report` chạy được.
+Áp dụng cho **cả hai cách cài** — MCP `4ai-fbo` cần biết chuỗi kết nối DB **nội bộ** và danh tính
+PM trước khi `list_programs`, `get_review_dataset` hay `node tools/4ai.mjs report` chạy được.
+`query_sql` trên chương trình **khách** thì không chờ bước này: truyền thẳng đường dẫn program là
+chạy, kết nối đọc từ `Web.config` của chính program.
 `data/qlda.json` chỉ chứa **tên key**, không bao giờ chứa giá trị thật (bị `4ai check` soi).
 
 ### Cách nhanh nhất — `setup` rồi `doctor`
@@ -278,8 +280,10 @@ ra màn hình), chỉ là thứ không nên nằm trong một repo công khai.
 
 ### 4. Chuỗi kết nối DB — env hoặc `qlda.local.json`
 
-Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.json` sau, cuối cùng mới dò
-`Web.config` của chương trình QLDA**:
+Ba key sau phân giải theo thứ tự **env trước, `data/qlda.local.json` sau — và hết**. Không có
+bước dò `Web.config`: đây là hai DB **nội bộ**, chưa khai thì tool báo lỗi kèm chỉ dẫn chứ
+không mượn `Web.config` của chương trình QLDA (hai nguồn không bảo đảm trỏ cùng một server —
+mượn nhầm thì truy vấn vẫn chạy, vẫn ra số, chỉ là ra từ chỗ khác).
 
 | Biến môi trường | Tương đương trong `qlda.local.json` | Dùng cho |
 |---|---|---|
@@ -287,24 +291,31 @@ Ba key sau đều phân giải theo thứ tự **env trước, `data/qlda.local.
 | `QLDA_SYS_CONNECTION` | `sysConnectionString` | DB hệ thống QLDA |
 | `GRAPH_4AI_CONNECTION` | `graphConnectionString` | DB đồ thị nội bộ của hub — kinh nghiệm, gợi ý phân công |
 
-`appConnectionString`/`sysConnectionString` đa số máy **không cần khai gì cả** —
-`Web.config` của QLDA tự phân giải được. Chỉ cần override khi máy không truy cập được share
-chứa QLDA, hoặc muốn trỏ DB khác lúc test.
+`appConnectionString`/`sysConnectionString` là **bắt buộc** nếu muốn dùng `list_programs` và
+mọi tool tra dự án — chúng chạy trên DB nội bộ QLDA. `node tools/4ai.mjs setup` ghi hộ.
 
 `graphConnectionString` thì **bắt buộc** nếu muốn dùng `node tools/4ai.mjs graph push`/
 `graph experience` hoặc muốn gợi ý phân công chấm theo kinh nghiệm hiện vật (xem
 [Kho kinh nghiệm & đồ thị](#-kho-kinh-nghiệm--đồ-thị) bên dưới) — đồ thị sống hẳn trong DB này,
 không còn là chỉ mục tuỳ chọn dựng lại được từ file.
 
-Thứ tự này **chỉ áp cho DB nội bộ QLDA**. Chương trình của **khách** (đường dẫn lấy từ
-`nbdmda`) luôn đọc `Web.config` của chính nó — mỗi khách một server/database riêng, không có
-cách nào khai trước bằng env, và không được phép lấy nhầm kết nối QLDA.
+Thứ tự này **chỉ áp cho hai DB nội bộ** ở trên. Chương trình của **khách** đi đường ngược lại
+và là đường mặc định của `query_sql`: truyền `program` (đường dẫn hoặc mã dự án `nbdmda.ma_da`)
+thì kết nối đọc thẳng từ `Web.config` của chính program đó, **không phải khai trước gì cả**.
+Mỗi khách một server/database riêng, không có cách nào khai sẵn bằng env, và không được phép
+lấy nhầm kết nối QLDA.
 
-Khai bằng env/local thì **không phải truyền `database` ở mỗi lệnh** nữa (thiếu `Initial Catalog`
-thì lấy `databaseName`/`sysDatabaseName` trong `data/qlda.json`); chỉ khi rớt xuống `Web.config`
-mới cần, vì Web.config của QLDA để placeholder `%Database`. Muốn kiểm kết nối đang lấy từ đâu
+| Tra database nào | Nguồn kết nối | Phải khai trước? |
+|---|---|---|
+| Chương trình khách (`query_sql`, mọi dự án) | `Web.config` của chính program | Không |
+| QLDA (`list_programs`, `report`, UR) | env `QLDA_*_CONNECTION` → `qlda.local.json` | **Có** |
+| Đồ thị 4AI (`graph push`, gợi ý phân công) | env `GRAPH_4AI_CONNECTION` → `graphConnectionString` | **Có** |
+
+Khai bằng env/local thì **không phải truyền `database` ở mỗi lệnh** (thiếu `Initial Catalog` thì
+lấy `databaseName`/`sysDatabaseName` trong `data/qlda.json`). Muốn kiểm kết nối đang lấy từ đâu
 mà không phải in chuỗi bí mật ra màn hình thì dùng `nguonKetNoi(programPath, dbType)` trong
-`mcp/fbo/lib/sql.mjs` — nó chỉ trả về tên nguồn (`env` / `qlda.local.json` / `Web.config`).
+`mcp/fbo/lib/sql.mjs` — nó chỉ trả về tên nguồn (`env` / `qlda.local.json` / `Web.config` /
+`chưa khai`), và `doctor` in sẵn cả ba dòng đó.
 
 #### ⚠️ Khai rồi mà vẫn báo chưa khai — hai cái bẫy
 
@@ -750,6 +761,33 @@ git push
 - **Claude Code:** Ngay lập tức (sau `/sync`), gọi bằng `/my-skill-id`
 - **Cursor:** Reload cửa sổ, dùng bình thường
 - **Antigravity:** Reload workspace, agent tự nạp theo `SKILL.md` khi liên quan
+
+### Skill có `references/` — danh mục tra cứu lớn
+
+Skill nào mang theo dữ liệu tra cứu quá lớn để nhét vào thân (danh mục hàm, bảng đối chiếu,
+đặc tả dài) thì đặt phần đó thành file reference riêng:
+
+```
+assets/skills/<domain>/<id>.md                    ← SKILL, phải có frontmatter
+assets/skills/<domain>/<id>/references/<tên>.md   ← markdown TRẦN, không frontmatter
+```
+
+Thân SKILL trỏ tới chúng bằng token **`{REFDIR}`** — mỗi dialect thay bằng đường dẫn của
+chính nó, nên viết một lần là đúng ở mọi nơi:
+
+| Dialect | File chính | Reference |
+|---|---|---|
+| Claude Code / Cursor / plugin / Antigravity | `skills/<id>/SKILL.md` | `skills/<id>/references/<tên>.md` |
+| Copilot | `.github/instructions/<id>.instructions.md` | `.github/instructions/references/<id>/<tên>.md` |
+
+Cursor gọi `references/` đúng cái tên đó và nạp theo yêu cầu, nên layout trùng Claude Code.
+Chỉ Copilot còn dạng phẳng vì nó không có primitive skill.
+
+Nhờ tách file, SKILL.md giữ nguyên vai trò mục lục nhẹ — agent chỉ mở reference khi task thật
+sự chạm tới. Ví dụ đang có: `fbo-sql-reference` (221 function, 747 procedure, 93 bảng `sys*`).
+
+Ràng buộc do `check` cưỡng chế: reference phải có skill chủ cùng `id`, cùng `domain`, và skill
+đó **không được** `always: true` (reference sinh ra để nạp theo yêu cầu, không phải luôn nạp).
 
 ## 🔐 Bảo Mật
 

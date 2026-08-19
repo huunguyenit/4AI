@@ -2,7 +2,7 @@
   "files": [
     {
       "path": ".claude-plugin/plugin.json",
-      "sha256": "25c0a3af1a8ca77615f1db025b751fc3ec60a710249404973d3eb0bef587804a"
+      "sha256": "41ccc2acfb0381d230a790b88cb60e756828e59fe27577711cf0b0d1ab3de875"
     },
     {
       "path": ".mcp.json",
@@ -149,8 +149,12 @@
       "sha256": "c0b2f9904223b07516a280104257489c8776673f4ca027979fc545e8b6dd9e90"
     },
     {
+      "path": "data/license.json",
+      "sha256": "2854f9214a7dd46e0f27a2cc4fa4b4e79a9c1fa8fb5d178df8eb013e6c5e722b"
+    },
+    {
       "path": "data/qlda.json",
-      "sha256": "76c1c2fd05d8532826638f3bebd4272892f4a6ca8410c031a994701d98d1f571"
+      "sha256": "ad4f9e4671178a4b89a5a179a5f1f754535e655eece3b57f2dc2c2475c1f914d"
     },
     {
       "path": "mcp/fbo/lib/encoding.mjs",
@@ -170,11 +174,11 @@
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "b29e42ddef1a24be42a1e7452c8c0de098d4ca9377561466437aac8959b92431"
+      "sha256": "296d65c42b3b10a32163e5480685b087c814c28b26699fc3a5fa0142887d9785"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "5cd9b9d59eda7140441790576d0863fb3be590694e92930ae28422d83b8796f9"
+      "sha256": "6d03a646b86300bd6c0b17ad5d2c2ed60528d50da170ce4d63540bfa53f78abf"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
@@ -182,7 +186,7 @@
     },
     {
       "path": "mcp/fbo/selftest.mjs",
-      "sha256": "1878a1f120f637930abefd6ff8f2e559993d959045de82d2ebf6f817daa7039b"
+      "sha256": "67e6d05cf75499ffe21c8bcdb8b732481fcab2d11d7ab2010f3543bdb68f48b2"
     },
     {
       "path": "mcp/fbo/server.mjs",
@@ -279,10 +283,34 @@
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-sql-via-mcp/SKILL.md",
-      "sha256": "adaf5aa0d736576672eab59e8cc05974e75e291cc7449b1b802eec9b3f3f38af",
-      "sourceId": "fbo-sql-via-mcp",
+      "path": "skills/fbo-sql-reference/SKILL.md",
+      "sha256": "0a7cc5b1c34d3494e27dadc5c8cb127c3f37c40151a353d73bf4b2d01c7b935a",
+      "sourceId": "fbo-sql-reference",
       "sourceVersion": 1
+    },
+    {
+      "path": "skills/fbo-sql-reference/references/functions.md",
+      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
+      "sourceId": "fbo-sql-reference#functions",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/fbo-sql-reference/references/procedures.md",
+      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
+      "sourceId": "fbo-sql-reference#procedures",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/fbo-sql-reference/references/table.md",
+      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
+      "sourceId": "fbo-sql-reference#table",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/fbo-sql-via-mcp/SKILL.md",
+      "sha256": "e35110ffcff182bbc71f711916eb9c4cefbe100a73094d48b003c42e4b99f126",
+      "sourceId": "fbo-sql-via-mcp",
+      "sourceVersion": 2
     },
     {
       "path": "skills/pm-adr/SKILL.md",
@@ -374,15 +402,15 @@
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "6e86779f803bcc51d8daa9bf7027a0bd73c790103adf94180a1ac04f2254632e"
+      "sha256": "fc256d5da9dbc088f154a4339899d222b33c1686e903b65b827bc1fcdd32305d"
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "cdbae46c5c5e162f542ebe460baf0d9b6c518fcce693171076ed082f7581afb0"
+      "sha256": "4d9787349698faad56f9225f2113d36ed88c4d83d5c934f5615f1493e4cefb8b"
     },
     {
       "path": "tools/lib/assignee.mjs",
-      "sha256": "5caa7d6b64c65c97127a7e25d625b4a06fe87f5ee36f209b06a4dcd73ca1714e"
+      "sha256": "b1e72b3cf1841b1f5e7826a9fa7e10257dee494dbaa61a8da146187b7ecc69e7"
     },
     {
       "path": "tools/lib/ddl.mjs",
@@ -390,31 +418,35 @@
     },
     {
       "path": "tools/lib/emit/antigravity.mjs",
-      "sha256": "c1da2137de2faa51b65870e7f2f94c52cb23d0c184afb9c554e99e692a4ba4dc"
+      "sha256": "0469c7aeda3947edab843734770fa79522ed38a778bf5ee2c4172ca2c5c49242"
     },
     {
       "path": "tools/lib/emit/claude.mjs",
-      "sha256": "273bc4441a1ecd7745491134a532fe8b2d9f12f5bc1b46a5a78577e4f5e2d79f"
+      "sha256": "0f4bfa9b81ec62ab9b74838cec6c1d0d6608b766856fa4953890dc215363310d"
     },
     {
       "path": "tools/lib/emit/common.mjs",
-      "sha256": "f71ef3ec405cf3c0077b23d7dd326e6544881d773708c0609a186204f70d2fe4"
+      "sha256": "ed87df87257269902fef6ce0632aa4107bd1040d77ee2b69d79c99390c8b7790"
     },
     {
       "path": "tools/lib/emit/cursor-plugin.mjs",
-      "sha256": "a388eec060cabeeade316ab63f85e1a616e8133b89f88a0506a49a91a8497854"
+      "sha256": "a0ed9baab42d65a3ac3534d56b01ef8fb77872a689d0369f6ceb1c401f97a338"
     },
     {
       "path": "tools/lib/emit/cursor.mjs",
-      "sha256": "16434771043217fae2c6db5ecc1ce94c87c5f36a596c4d99f068955e7c06d649"
+      "sha256": "2b98e59fffd840dccd83afaff01ce3e5373264133beb477f4c8f62dde1d75ac7"
     },
     {
       "path": "tools/lib/emit/plugin.mjs",
-      "sha256": "515726ede3cd09baf279ca10a7297b60629e4def7e99514c781752abc7e78e70"
+      "sha256": "3f45f78877edc92799c5b890f695784b4c112fed17819f506d4ecfb87c056140"
     },
     {
       "path": "tools/lib/emit/vscode.mjs",
-      "sha256": "8b2b178bc81220dd4419d773d818351638fbaffa7db5d8a6ed9c436234d8d33a"
+      "sha256": "aa4866f485e5cbab7acf9aadf19da0815c795503e4d90ae2733aa9629797e388"
+    },
+    {
+      "path": "tools/lib/evidence.mjs",
+      "sha256": "75ca5bedd23c9990ab28088a5065e2e0fd47a44676fd34ae088acdb2827853ee"
     },
     {
       "path": "tools/lib/experience-build.mjs",
@@ -454,15 +486,15 @@
     },
     {
       "path": "tools/lib/paths.mjs",
-      "sha256": "cd520ad281c6cdd0fd084dfecc67a61378229b1dd6a5572404e81169255e32ef"
+      "sha256": "d8e8fe741b2320933b4e0f6f2a75f09c84ed7795b7eb252a94359b98ea4276a9"
     },
     {
       "path": "tools/lib/playbook.mjs",
-      "sha256": "dda368d85940049ff83c1093fc04e2ea46506b0824d3797d38ec6f4fef0812c3"
+      "sha256": "a9398ada2c1058e5f0845f4765a630ee698fa491fbf3c88f57eabc02166db8ff"
     },
     {
       "path": "tools/lib/prompt.mjs",
-      "sha256": "b7bab1060ea9d78c2096de509b9556b2285fdab9a6772bd61d3f362015f38aeb"
+      "sha256": "7508a8a6464c566d3732fef927441d5c077a13070dcea760f74eb4ea6ebae145"
     },
     {
       "path": "tools/lib/recommendation-log.mjs",
@@ -478,11 +510,11 @@
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "23ed35797bc85e6450135e481608779a47594ce6c16ef5c8da3ec9866e6763ca"
+      "sha256": "44fb65578b6fee441ddab4cc4194ace7424980a98ea4dc9e598882bbe213360a"
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "bd6f13536a68e96af22113f6d6dd94ad2f9bc2332b375057efe69a392acb04c6"
+      "sha256": "9d98cba04948fb5e34935d404cdffd41ed09a96d4f8bc6e8bfa59039e49a58f2"
     },
     {
       "path": "tools/lib/review-report.mjs",
@@ -506,7 +538,7 @@
     },
     {
       "path": "tools/lib/sync.mjs",
-      "sha256": "9b4f2e7fe909d15ea0340643614528389d10e7007c9f02bf80046e1d05af8fdb"
+      "sha256": "0302869e5c5798bcf5436d27fac9452ad88fe9349929a4cc65390510859c126d"
     },
     {
       "path": "tools/lib/template.mjs",
@@ -530,12 +562,12 @@
     },
     {
       "path": "tools/templates/report/report.css",
-      "sha256": "3c126163fd5d84b5bd0b56dcbe507eae4670688ea7507c91d16435800f26dde4"
+      "sha256": "e626609467a2ceb3aab6b8407e35e91a7ee4f88836570f4b2565bd1ad9c32a5f"
     }
   ],
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-18T02:55:21.199Z",
+  "syncedAt": "2026-08-19T08:59:01.837Z",
   "target": "plugin"
 }

@@ -6,7 +6,9 @@
 //   .vscode/mcp.json                              ← key `servers` (KHÁC mcpServers) + type stdio
 
 import { emitPaths, mcpPath } from '../paths.mjs';
-import { banner, bannerAggregate, seeAlsoLine, alwaysOnAssets, onDemandAssets } from './common.mjs';
+import {
+  banner, bannerAggregate, seeAlsoLine, alwaysOnAssets, onDemandAssets, forEmit, referenceFiles,
+} from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 
 function instructionsFile(asset) {
@@ -59,12 +61,14 @@ export function emitVscode({ assets, mcpServers }) {
   }
 
   for (const a of onDemand) {
-    for (const e of emitPaths(a, 'vscode')) {
+    const x = forEmit(a, 'vscode');
+    for (const e of emitPaths(x, 'vscode')) {
       if (e.mode !== 'file') continue;
-      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: chatmodeFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: promptFile(a), sourceId: a.id, sourceVersion: a.version });
-      else textFiles.push({ relPath: e.path, content: instructionsFile(a), sourceId: a.id, sourceVersion: a.version });
+      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: chatmodeFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: promptFile(x), sourceId: a.id, sourceVersion: a.version });
+      else textFiles.push({ relPath: e.path, content: instructionsFile(x), sourceId: a.id, sourceVersion: a.version });
     }
+    textFiles.push(...referenceFiles(x, 'vscode'));
   }
 
   const mp = mcpPath('vscode');

@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { HUB, loadAssets, readJson, resolveMcpServers } from './assets.mjs';
+import { HUB, loadAssets, loadTargets, readJson, resolveMcpServers } from './assets.mjs';
 import { syncTarget, ensureImportLine } from './writer.mjs';
 import { emitClaude } from './emit/claude.mjs';
 import { emitCursor } from './emit/cursor.mjs';
@@ -27,13 +27,7 @@ function isUnc(p) {
 }
 
 export async function runSync(opts) {
-  const targetsCfg = readJson(path.join(HUB, 'targets.json'));
-  const localTargets = readJson(path.join(HUB, 'targets.local.json'), { targets: [] });
-  // Merge local overrides vào targets config
-  if (localTargets.targets?.length) {
-    const localByName = new Map(localTargets.targets.map((t) => [t.name, t]));
-    targetsCfg.targets = targetsCfg.targets.map((t) => ({ ...t, ...localByName.get(t.name) }));
-  }
+  const targetsCfg = loadTargets(HUB);
   const mcpCfg = readJson(path.join(HUB, 'mcp', 'servers.json'), { servers: {} });
   // KHÔNG resolve `{{HUB}}` ở đây. Token phải còn nguyên tới lúc emitter chạy, vì mỗi target
   // giải nó ra một gốc khác nhau: target cục bộ giải ra đường dẫn hub trên máy này, còn plugin

@@ -104,9 +104,9 @@
     },
     {
       "path": ".agents/rules/fbo-sql-via-mcp.md",
-      "sha256": "943b1f3fa862d17ce2c854772a0132ac59fb9fb4276dfdc76bc90f924f9cdec4",
+      "sha256": "7075fedc1157229eabfc87c9b0b4dde6db2cbdb2d6a33d1258810b12fae8594e",
       "sourceId": "fbo-sql-via-mcp",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/rules/pm-doctrine.md",
@@ -187,6 +187,30 @@
       "sourceVersion": 1
     },
     {
+      "path": ".agents/skills/fbo-sql-reference/SKILL.md",
+      "sha256": "5b219d4f5e305b46ea9974f101a3fe78a9bd2fd78ac3fa2e79b9713f85e492ab",
+      "sourceId": "fbo-sql-reference",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/fbo-sql-reference/references/functions.md",
+      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
+      "sourceId": "fbo-sql-reference#functions",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/fbo-sql-reference/references/procedures.md",
+      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
+      "sourceId": "fbo-sql-reference#procedures",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/fbo-sql-reference/references/table.md",
+      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
+      "sourceId": "fbo-sql-reference#table",
+      "sourceVersion": 1
+    },
+    {
       "path": ".agents/skills/pm-adr/SKILL.md",
       "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
       "sourceId": "pm-adr",
@@ -254,7 +278,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "eef938f69e6847c8d65c26524ec1f4f79888112289e1a205c48ef947354e3649"
+      "sha256": "11a92c9a21db9de434fa0be5dd7bbc392bfc29ded7e8e8da09f675707e6c31ab"
     },
     {
       "path": ".claude/agents/fbo-change-reviewer.md",
@@ -455,6 +479,30 @@
       "sourceVersion": 1
     },
     {
+      "path": ".claude/skills/fbo-sql-reference/SKILL.md",
+      "sha256": "5b219d4f5e305b46ea9974f101a3fe78a9bd2fd78ac3fa2e79b9713f85e492ab",
+      "sourceId": "fbo-sql-reference",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-sql-reference/references/functions.md",
+      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
+      "sourceId": "fbo-sql-reference#functions",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-sql-reference/references/procedures.md",
+      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
+      "sourceId": "fbo-sql-reference#procedures",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/fbo-sql-reference/references/table.md",
+      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
+      "sourceId": "fbo-sql-reference#table",
+      "sourceVersion": 1
+    },
+    {
       "path": ".claude/skills/pm-adr/SKILL.md",
       "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
       "sourceId": "pm-adr",
@@ -504,7 +552,7 @@
     },
     {
       "path": ".cursor/agents/pm-deadline-review.md",
-      "sha256": "f49a719336f921838dc438e344b4871ae6099355ce55669d1c4822a017d8897a",
+      "sha256": "a37a51be589434c78a325654964f87d432eda4d14e7d5a2ec69259a2d22d6008",
       "sourceId": "pm-deadline-review",
       "sourceVersion": 11
     },
@@ -623,27 +671,9 @@
       "sourceVersion": 1
     },
     {
-      "path": ".cursor/rules/4ai-asset-authoring.mdc",
-      "sha256": "9ad956a194b90e090ac583485c6e9f9a1c015120a911b4e17156a4dbd42f7fa2",
-      "sourceId": "4ai-asset-authoring",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/fbo-controller-anatomy.mdc",
-      "sha256": "f236505de50e8e143e37ea66456ccc44eba121abbf0371ba8ecb22f7547d7fe9",
-      "sourceId": "fbo-controller-anatomy",
-      "sourceVersion": 1
-    },
-    {
       "path": ".cursor/rules/fbo-customization-scope.mdc",
       "sha256": "52bd4e242a84a3218a9fecccbf3ac381d0598102a93be98123c096bbdd196de6",
       "sourceId": "fbo-customization-scope",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/fbo-customization-workflow.mdc",
-      "sha256": "c3ec3084ce239baae644f5369796421451c92d766e44244a4323e452c0c88b0d",
-      "sourceId": "fbo-customization-workflow",
       "sourceVersion": 1
     },
     {
@@ -665,28 +695,10 @@
       "sourceVersion": 1
     },
     {
-      "path": ".cursor/rules/fbo-js-api.mdc",
-      "sha256": "d5f9e123c37e9cdedda234b0edfc1798b51e5abc7243203144be38f421d4b351",
-      "sourceId": "fbo-js-api",
-      "sourceVersion": 1
-    },
-    {
       "path": ".cursor/rules/fbo-lookup-discipline.mdc",
       "sha256": "94c8f273ed641c217792c26cc49ff8de9b78346780ddf911378b80af803afb7f",
       "sourceId": "fbo-lookup-discipline",
       "sourceVersion": 2
-    },
-    {
-      "path": ".cursor/rules/fbo-navigation-recipes.mdc",
-      "sha256": "c1ded15c26b800b139b63ab04ff5c4991e78baee082114fe7c80d92e887d3fdc",
-      "sourceId": "fbo-navigation-recipes",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/fbo-nd252-ty-gia-hq.mdc",
-      "sha256": "0355300a98839daaee080db077676341c72f1a00887a2f4ea8723d6a8c9f5545",
-      "sourceId": "fbo-nd252-ty-gia-hq",
-      "sourceVersion": 1
     },
     {
       "path": ".cursor/rules/fbo-never-invent-files.mdc",
@@ -695,39 +707,9 @@
       "sourceVersion": 1
     },
     {
-      "path": ".cursor/rules/fbo-new-table-proposal.mdc",
-      "sha256": "18b3c5485f8c8c6050435cdd9356a2498f528444c27c38aff02dca6492ece0d4",
-      "sourceId": "fbo-new-table-proposal",
-      "sourceVersion": 4
-    },
-    {
-      "path": ".cursor/rules/fbo-sql-object-lookup.mdc",
-      "sha256": "7409c6895e65edf87c9f854719d4874ef5ce0a3a82772421808fb90c417ac4f1",
-      "sourceId": "fbo-sql-object-lookup",
-      "sourceVersion": 1
-    },
-    {
       "path": ".cursor/rules/fbo-sql-via-mcp.mdc",
-      "sha256": "a6d6a83f3edfdfb05e948d1ec950179c559e6487f48424104fdc0f72296b6028",
+      "sha256": "8a23d08b711e5ac8d879c55520d7a7d685726a4f1f46e8568836f357e5da3133",
       "sourceId": "fbo-sql-via-mcp",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/pm-adr.mdc",
-      "sha256": "e697a2f25f83fb46f83a59771d8056e0134955726f5d48b91e92df61cc230926",
-      "sourceId": "pm-adr",
-      "sourceVersion": 1
-    },
-    {
-      "path": ".cursor/rules/pm-capability-graph.mdc",
-      "sha256": "d6783a4df8b7c2ed5d5a2391398c8086cb0823f165c11126c42caf2bc3a635ac",
-      "sourceId": "pm-capability-graph",
-      "sourceVersion": 2
-    },
-    {
-      "path": ".cursor/rules/pm-customer-program-registry.mdc",
-      "sha256": "471404c78feb2fdb010edf2656e2e533356c19cbd865944873afe3d0dbb9497c",
-      "sourceId": "pm-customer-program-registry",
       "sourceVersion": 2
     },
     {
@@ -755,16 +737,106 @@
       "sourceVersion": 1
     },
     {
-      "path": ".cursor/rules/pm-task-ledger.mdc",
-      "sha256": "731545b1bab83b8ca57848a024a51671f1b989c7afe6bfc122cd0ce19b0a1e73",
-      "sourceId": "pm-task-ledger",
-      "sourceVersion": 1
-    },
-    {
       "path": ".cursor/rules/pm-ur-routing.mdc",
       "sha256": "18950bfbcad7b34916fe7cb04c69ca2295d5b6b93d91ff6a5f35575e007cfeb9",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/skills/4ai-asset-authoring/SKILL.md",
+      "sha256": "edf286bc4640da127d959bc7490b7652ebe9f7617c0ee133235a037e2d895920",
+      "sourceId": "4ai-asset-authoring",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-controller-anatomy/SKILL.md",
+      "sha256": "4c07a064ae7c2984f7e69fdbceb07e9a288ffaed77f5ec1de2df2dce196a75d9",
+      "sourceId": "fbo-controller-anatomy",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-customization-workflow/SKILL.md",
+      "sha256": "582da78cc72f54f397e357b42394fbbf14d15986e6ee8e6162a6decc9373954d",
+      "sourceId": "fbo-customization-workflow",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-js-api/SKILL.md",
+      "sha256": "efb039be2217413d627fec82d299cea2a6d0fd34c3cafac614f943ccdd0708aa",
+      "sourceId": "fbo-js-api",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-navigation-recipes/SKILL.md",
+      "sha256": "ddef6ef24f30805f20ac68cc79f8eea479f79aaf9e63288d3ae262b178aa3f87",
+      "sourceId": "fbo-navigation-recipes",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-nd252-ty-gia-hq/SKILL.md",
+      "sha256": "b322c681c133eaa1097a9a791e459ea99d898b57d4553b6507115e21ac79b0c4",
+      "sourceId": "fbo-nd252-ty-gia-hq",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-new-table-proposal/SKILL.md",
+      "sha256": "b80da9c41065b972c8b9b666141f9c332f22936c4c36f6be2ffa8910d4a58c6e",
+      "sourceId": "fbo-new-table-proposal",
+      "sourceVersion": 4
+    },
+    {
+      "path": ".cursor/skills/fbo-sql-object-lookup/SKILL.md",
+      "sha256": "9341193ca013ad2a3374842d596b55e1420931971203ee9ccaf9f14e84c93e61",
+      "sourceId": "fbo-sql-object-lookup",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-sql-reference/SKILL.md",
+      "sha256": "b3abe135bb2394186fc7ee735c69e44a55195767fb989223c6a5ace7deeb0109",
+      "sourceId": "fbo-sql-reference",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-sql-reference/references/functions.md",
+      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
+      "sourceId": "fbo-sql-reference#functions",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-sql-reference/references/procedures.md",
+      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
+      "sourceId": "fbo-sql-reference#procedures",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/fbo-sql-reference/references/table.md",
+      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
+      "sourceId": "fbo-sql-reference#table",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/pm-adr/SKILL.md",
+      "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
+      "sourceId": "pm-adr",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/pm-capability-graph/SKILL.md",
+      "sha256": "6abac3f28e23b1df2e347dfbc5cee5ef3c138673ef9706a9dedb8a20765c42f1",
+      "sourceId": "pm-capability-graph",
+      "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/skills/pm-customer-program-registry/SKILL.md",
+      "sha256": "1d81a6197783764eebcd4877999e11a3947dd8ada15de5921d63f02aeaeb786f",
+      "sourceId": "pm-customer-program-registry",
+      "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/skills/pm-task-ledger/SKILL.md",
+      "sha256": "1299379422630aefe068c7d18bcc900f9037aa8349ce98535b85af5b0828a14e",
+      "sourceId": "pm-task-ledger",
+      "sourceVersion": 1
     },
     {
       "path": ".github/chatmodes/fbo-change-reviewer.chatmode.md",
@@ -822,7 +894,7 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "3adc232f67812ac111e692e3f2b543fd7e21691da1a63305fcabd439eecc2dec"
+      "sha256": "6b08742635bc788e78815ccc584851684bc721322e392ed143d52eaaad44fd8d"
     },
     {
       "path": ".github/instructions/fbo-controller-anatomy.instructions.md",
@@ -891,6 +963,12 @@
       "sourceVersion": 1
     },
     {
+      "path": ".github/instructions/fbo-sql-reference.instructions.md",
+      "sha256": "d9f63da3f53d53f6d185e1c8729af83e85858052f5c53fb36e1a67a00d7b1f54",
+      "sourceId": "fbo-sql-reference",
+      "sourceVersion": 1
+    },
+    {
       "path": ".github/instructions/pm-adr.instructions.md",
       "sha256": "f555f8dbc87e4dd42f9e2acad3b27695ea6a4de8a73d62099e62fb4efbeb2bf7",
       "sourceId": "pm-adr",
@@ -912,6 +990,24 @@
       "path": ".github/instructions/pm-task-ledger.instructions.md",
       "sha256": "04fa805b70b8fa829465c307923661a26b0df75f712136509788342678d43a45",
       "sourceId": "pm-task-ledger",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/fbo-sql-reference/functions.md",
+      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
+      "sourceId": "fbo-sql-reference#functions",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/fbo-sql-reference/procedures.md",
+      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
+      "sourceId": "fbo-sql-reference#procedures",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/fbo-sql-reference/table.md",
+      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
+      "sourceId": "fbo-sql-reference#table",
       "sourceVersion": 1
     },
     {
@@ -1002,6 +1098,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-18T02:55:21.141Z",
+  "syncedAt": "2026-08-19T08:59:01.774Z",
   "target": "4ai"
 }

@@ -260,11 +260,19 @@ export const TOOLS = [
   {
     name: 'query_sql',
     description:
-      'Chạy SQL trên database của program. Tên database cũng tự phân giải: db=sys lấy sysConnectionString (placeholder thì rớt về appSetting sysDatabaseName), db=app lấy appConnectionString và nếu gặp %Database thì dò tiếp bảng `entity` của db sys, cột cdata. Chỉ phải truyền `database` khi muốn ép, hoặc `entity` khi program có nhiều entity. Truyền `object` để soi nhanh cấu trúc table/view hoặc định nghĩa proc; hoặc `sql` cho câu tự viết. Mặc định chỉ đọc; câu lệnh ghi bị chặn trừ khi allowWrite=true.',
+      'Chạy SQL trên database của MỘT CHƯƠNG TRÌNH KHÁCH (program dự án FBO/FBI) — đường tra database của khách, '
+      + 'dùng cho MỌI dự án chứ không riêng QLDA. Không phải khai cấu hình gì trước: kết nối đọc thẳng từ Web.config '
+      + 'của chính program, chỉ cần truyền `program` (đường dẫn program hoặc mã dự án nbdmda.ma_da — xem list_programs). '
+      + 'Hai DB NỘI BỘ đi đường khác hẳn, không dính Web.config: QLDA lấy kết nối từ env/data/qlda.local.json (truyền '
+      + 'chính program QLDA đã khai), còn DB đồ thị 4AI không tra qua tool này. '
+      + 'Tên database cũng tự phân giải: db=sys lấy sysConnectionString (placeholder thì rớt về appSetting sysDatabaseName), db=app lấy appConnectionString và nếu gặp %Database thì dò tiếp bảng `entity` của db sys, cột cdata. Chỉ phải truyền `database` khi muốn ép, hoặc `entity` khi program có nhiều entity. Truyền `object` để soi nhanh cấu trúc table/view hoặc định nghĩa proc; hoặc `sql` cho câu tự viết. Mặc định chỉ đọc; câu lệnh ghi bị chặn trừ khi allowWrite=true.',
     inputSchema: {
       type: 'object',
       properties: {
-        program: { type: 'string' },
+        program: {
+          type: 'string',
+          description: 'Chương trình KHÁCH nào — đường dẫn program hoặc mã dự án nbdmda.ma_da. Kết nối phân giải từ Web.config của chính program đó.',
+        },
         object: { type: 'string', description: 'Tên table/view/proc cần soi' },
         sql: { type: 'string', description: 'Câu SQL tự viết' },
         db: { type: 'string', enum: ['app', 'sys'], default: 'app' },
@@ -883,7 +891,9 @@ export const HANDLERS = {
         rows: res.rows,
         truncated: res.truncated,
         warning: res.stderr,
-        note: 'Kết nối phân giải từ Web.config nội bộ — connection string không bao giờ được trả về.',
+        // Nói ĐÚNG nguồn thật chứ không nói cứng "Web.config": program khách đọc Web.config, còn
+        // QLDA lấy từ env/qlda.local.json. In sai nguồn là kiểu chẩn đoán tự tin mà lệch.
+        note: `Kết nối phân giải từ ${nguonKetNoi(programPath, args.db ?? 'app')} — connection string không bao giờ được trả về.`,
       };
     } catch (e) {
       throw new Error(redact(e.message));
@@ -1231,6 +1241,12 @@ export const HANDLERS = {
     }
     if (!pmDaKhai) {
       goiY.push('Chưa gán PM — gọi `set_pm_identity({ maNv, boPhanLt })`. Hỏi người dùng đúng hai giá trị đó, không đoán.');
+    }
+    // QLDA cũng chỉ còn env + qlda.local.json (bỏ chốt cuối Web.config), nên "chưa khai" ở đây là
+    // hỏng thật chứ không phải chuyện nhỏ: list_programs và mọi tool tra dự án sẽ dừng theo.
+    if (qldaPath && [nguonKetNoi(qldaPath, 'app'), nguonKetNoi(qldaPath, 'sys')].includes('chưa khai')) {
+      goiY.push(`Chưa khai kết nối QLDA: thêm \`appConnectionString\`/\`sysConnectionString\` vào ĐÚNG file \`${fileCauHinh}\` `
+        + '(hoặc env QLDA_APP_CONNECTION/QLDA_SYS_CONNECTION). QLDA không còn đọc Web.config — chương trình KHÁCH thì vẫn đọc, không ảnh hưởng.');
     }
     if (nguonGraph === 'chưa khai') {
       goiY.push(`Đồ thị năng lực chưa dùng được: thêm khoá \`graphConnectionString\` vào ĐÚNG file \`${fileCauHinh}\`. `

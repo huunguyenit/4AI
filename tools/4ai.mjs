@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { HUB, loadAssets, readJson, resolveMcpServers, scanSecrets, ledgerRoot } from './lib/assets.mjs';
+import { HUB, loadAssets, loadTargets, readJson, resolveMcpServers, scanSecrets, ledgerRoot } from './lib/assets.mjs';
 import { skeleton, KINDS } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
 import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
@@ -55,13 +55,7 @@ function fail(msg) {
 }
 
 function loadConfig() {
-  const targetsCfg = readJson(path.join(HUB, 'targets.json'), { version: 1, domains: null, targets: [] });
-  const localTargets = readJson(path.join(HUB, 'targets.local.json'), { targets: [] });
-  // Merge local overrides vào targets config
-  if (localTargets.targets?.length) {
-    const localByName = new Map(localTargets.targets.map((t) => [t.name, t]));
-    targetsCfg.targets = targetsCfg.targets.map((t) => ({ ...t, ...localByName.get(t.name) }));
-  }
+  const targetsCfg = loadTargets(HUB);
   const mcpCfg = readJson(path.join(HUB, 'mcp', 'servers.json'), { version: 1, servers: {} });
   mcpCfg.servers = resolveMcpServers(mcpCfg.servers);
   return { targetsCfg, mcpCfg };

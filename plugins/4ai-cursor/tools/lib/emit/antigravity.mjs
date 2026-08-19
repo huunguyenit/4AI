@@ -14,7 +14,7 @@
 //   .agents/mcp_config.json          key `mcpServers`, cùng shape Cursor (không cần `type`)
 
 import { emitPaths, mcpPath, isAlwaysOn } from '../paths.mjs';
-import { banner, seeAlsoLine } from './common.mjs';
+import { banner, seeAlsoLine, forEmit, referenceFiles } from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 
 const MODEL_TIER = { inherit: 'inherit', haiku: 'flash', sonnet: 'pro', opus: 'pro' };
@@ -58,12 +58,14 @@ export function emitAntigravity({ assets, mcpServers }) {
   const notes = ['Antigravity: mapping rule trigger/globs suy từ tài liệu Windsurf-kế-thừa, chưa xác nhận trên IDE thật — kiểm tra lại trước khi tin cậy.'];
 
   for (const a of assets) {
-    for (const e of emitPaths(a, 'antigravity')) {
-      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: workflowFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'skill') textFiles.push({ relPath: e.path, content: skillFile(a), sourceId: a.id, sourceVersion: a.version });
-      else textFiles.push({ relPath: e.path, content: ruleFile(a), sourceId: a.id, sourceVersion: a.version });
+    const x = forEmit(a, 'antigravity');
+    for (const e of emitPaths(x, 'antigravity')) {
+      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: workflowFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'skill') textFiles.push({ relPath: e.path, content: skillFile(x), sourceId: a.id, sourceVersion: a.version });
+      else textFiles.push({ relPath: e.path, content: ruleFile(x), sourceId: a.id, sourceVersion: a.version });
     }
+    textFiles.push(...referenceFiles(x, 'antigravity'));
   }
 
   const mp = mcpPath('antigravity');

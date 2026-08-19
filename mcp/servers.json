@@ -2,7 +2,7 @@
   "version": 1,
   "servers": {
     "4ai-fbo": {
-      "description": "MCP riêng của 4AI: index và tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi ảnh hưởng của Include, đọc file giữ nguyên encoding, truy vấn SQL qua Web.config.",
+      "description": "MCP riêng của 4AI: index và tra cứu controller FBO/FBI, phân giải DTD entity, đo phạm vi ảnh hưởng của Include, đọc file giữ nguyên encoding, và truy vấn SQL trên database của TỪNG CHƯƠNG TRÌNH KHÁCH (kết nối đọc từ Web.config của chính program, không phải khai trước).",
       "transport": "stdio",
       "command": "C:\\Program Files\\nodejs\\node.exe",
       "args": ["{{HUB}}\\mcp\\fbo\\server.mjs", "--hub", "{{HUB}}"],
@@ -27,7 +27,8 @@
         "Index nằm ở <hub>/.4ai/index/<slug>.sqlite. KHÔNG BAO GIỜ ghi vào thư mục program của khách.",
         "query_sql CỐ TÌNH không nằm trong autoApprove — nó chạm database thật; câu lệnh ghi còn cần allowWrite: true.",
         "resolve_vouchercode cũng chạm database nhưng VẪN autoApprove: nó chỉ chạy hai câu SELECT cố định trên bảng từ điển hệ thống (wcommand, dmct9), không nhận SQL tự do, không có đường ghi. 'Chạm DB' không phải tiêu chí loại trừ — 'nhận SQL tự do' mới là.",
-        "Kết nối phân giải nội bộ từ Web.config; module sql.mjs redact mọi shape connection string trước khi trả ra, cộng thêm bịt theo giá trị thật của server/user/password và cắt cụm `Server <tên>,` mà SQL Server tự khai trong message lỗi.",
+        "query_sql là đường tra database của CHƯƠNG TRÌNH KHÁCH — mọi dự án, không riêng QLDA. Ba nguồn kết nối tách bạch: program khách đọc Web.config của chính nó (không khai gì trước); DB nội bộ QLDA chỉ lấy từ env QLDA_APP_CONNECTION/QLDA_SYS_CONNECTION rồi data/qlda.local.json; DB đồ thị 4AI chỉ lấy từ env GRAPH_4AI_CONNECTION rồi graphConnectionString, và không tra qua query_sql. Hai DB nội bộ KHÔNG còn chốt cuối Web.config: chưa khai thì báo lỗi kèm chỉ dẫn, vì mượn Web.config nghĩa là âm thầm chạy trên server khác mà vẫn ra số.",
+      "Kết nối phân giải nội bộ; module sql.mjs redact mọi shape connection string trước khi trả ra, cộng thêm bịt theo giá trị thật của server/user/password và cắt cụm `Server <tên>,` mà SQL Server tự khai trong message lỗi.",
         "Tên database tự phân giải: db sys lấy sysConnectionString (placeholder thì rớt về appSetting sysDatabaseName), db app lấy appConnectionString và gặp %Database thì dò bảng entity cột cdata bên db sys. Program nhiều entity thì tool liệt kê mã rồi dừng — không đoán hộ.",
         "Kết quả sqlcmd đi qua file tạm với `-f o:65001 -o` chứ không qua stdout: `-f` không áp cho stdout, để mặc định thì tiếng Việt bị sqlcmd làm hỏng ngay tại nguồn, không decode ngược được.",
         "Đường dẫn node.exe để tuyệt đối cho chắc: một số client spawn với PATH tối giản.",

@@ -95,13 +95,11 @@
         { "kind": "env", "name": "QLDA_APP_CONNECTION", "type": "appConnectionString" },
         { "kind": "env", "name": "QLDA_SYS_CONNECTION", "type": "sysConnectionString" },
         { "kind": "localFile", "path": "data/qlda.local.json", "key": "appConnectionString" },
-        { "kind": "localFile", "path": "data/qlda.local.json", "key": "sysConnectionString" },
-        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "appConnectionString" },
-        { "kind": "webConfig", "programRef": "databases.qlda.path", "key": "sysConnectionString" }
+        { "kind": "localFile", "path": "data/qlda.local.json", "key": "sysConnectionString" }
       ],
       "pathNote": "`path`/`databaseName`/`sysDatabaseName` ở trên là TOKEN `{...}` — giá trị thật do từng máy tự khai qua `node tools/4ai.mjs setup` (ghi `qldaProgramPath`/`qldaDatabaseName`/`qldaSysDatabaseName` vào data/qlda.local.json, gitignore). File này chỉ chứa tên key, không chứa giá trị thật của công ty.",
-      "note": "DB NỘI BỘ của công ty, KHÔNG phải DB nghiệp vụ của khách. Kết nối phân giải theo đúng `resolveOrder` dưới đây: env trước, rồi data/qlda.local.json, Web.config chỉ là chốt cuối. Cưỡng chế ở mcp/fbo/lib/sql.mjs — `programPath` khớp `path` (sau khi gán từ local) thì đi đường QLDA, khác thì là chương trình khách và đọc Web.config của chính nó.",
-      "databaseNote": "Khai kết nối bằng env/local (có `Initial Catalog`, hoặc để trống thì lấy `databaseName`/`sysDatabaseName` ở đây) thì KHÔNG phải truyền `database` mỗi lệnh nữa. Chỉ khi rớt xuống Web.config mới cần, vì Web.config của QLDA để placeholder %Database.",
+      "note": "DB NỘI BỘ của công ty, KHÔNG phải DB nghiệp vụ của khách. Kết nối CHỈ phân giải theo `resolveOrder` dưới đây: env trước, rồi data/qlda.local.json. KHÔNG còn chốt cuối Web.config — chưa khai thì tool báo lỗi kèm chỉ dẫn chứ không mượn Web.config của chương trình QLDA (hai nguồn không bảo đảm trỏ cùng một server; mượn nhầm thì vẫn ra số, chỉ là ra từ chỗ khác). Cưỡng chế ở mcp/fbo/lib/sql.mjs — `programPath` khớp `path` (sau khi gán từ local) thì đi đường QLDA, khác thì là chương trình khách và đọc Web.config của chính nó.",
+      "databaseNote": "Khai kết nối bằng env/local (có `Initial Catalog`, hoặc để trống thì lấy `databaseName`/`sysDatabaseName` ở đây) thì KHÔNG phải truyền `database` mỗi lệnh nữa. Không còn đường rớt xuống Web.config, nên thiếu cả env lẫn local thì tool dừng và chỉ ra đúng khoá phải khai — chạy `node tools/4ai.mjs setup` là xong.",
       "indexedAt": "2026-08-08",
       "indexStats": { "files": 3310, "parsed": 823, "controllers": "Grid:1137 Filter:893 Report:479 Dir:459 Include:181" }
     },

@@ -193,7 +193,25 @@ program <path>. Controller gần tên nhất tìm được là <X> (nếu có)."
 
 ## SQL through query_sql only · **BẮT BUỘC**
 
-<!-- assets/rules/fbo-xml/fbo-sql-via-mcp.md v1 -->
+<!-- assets/rules/fbo-xml/fbo-sql-via-mcp.md v2 -->
+## Phạm vi — `query_sql` là đường tra DB của CHƯƠNG TRÌNH KHÁCH
+
+Dùng cho **mọi dự án**, không phải tool riêng của QLDA. Truyền `program` (đường dẫn program
+hoặc mã dự án `nbdmda.ma_da`) là đủ: kết nối đọc thẳng từ `Web.config` của chính program đó,
+không phải khai cấu hình gì trước.
+
+Ba nguồn kết nối tách bạch, đừng lẫn:
+
+| Database | Nguồn kết nối | Cần khai trước? |
+|---|---|---|
+| Program khách (app/sys) | `Web.config` của chính program | Không |
+| QLDA (DB nội bộ) | env `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION`, rồi `data/qlda.local.json` | **Có** |
+| Đồ thị 4AI | env `GRAPH_4AI_CONNECTION`, rồi `graphConnectionString` | **Có**, và không tra qua `query_sql` |
+
+Máy có sẵn MCP database khác **không** đổi điều này: câu hỏi về dữ liệu FBO/FBI của một khách
+vẫn đi `query_sql`, vì chỉ nó phân giải đúng database theo program (leg `sys`, `%Database`,
+bảng `entity`) và không để credential đi qua tay người hay model.
+
 ## Vì sao
 
 `Web.config` của mỗi program FBO chứa connection string SQL Server **dạng plaintext**,
@@ -235,6 +253,8 @@ người hay model chạm vào credential.
   vòng qua nó bằng cách tự đọc `Web.config`.
 - `db` sai thì object "không tồn tại": cấu hình hệ thống nằm bên `sys`, nghiệp vụ bên `app`.
   Đổi `db` trước khi kết luận không tồn tại.
+- Lỗi "Chưa khai kết nối QLDA" **chỉ** dính DB nội bộ QLDA. Đừng suy ra là `query_sql` hỏng:
+  program của khách không cần khai gì, cứ gọi bình thường.
 
 ## Ledger discipline · **BẮT BUỘC**
 
@@ -457,6 +477,7 @@ corpus để sẵn bản đồ file.
 | `fbo-nd252-ty-gia-hq` | Spec NĐ 252/2026/NĐ-CP — thêm tùy chọn bật/tắt trường "Tỷ giá hq" trên HDA/HD1 gồm form nhập, cảnh báo khi lưu, post sổ ctgt20, phát hành HĐĐT và import. |
 | `fbo-new-table-proposal` | Yêu cầu nhắc tạo bảng/thêm cột thì cấp đặc tả `ddl` để tools/lib/ddl.mjs sinh SQL — đừng tự viết cú pháp. Màn hình FBO đã có sẵn thì khai luongDuLieu, không tạo bảng mới. |
 | `fbo-sql-object-lookup` | Tìm và đọc table/proc/view đứng sau một màn hình FBO qua query_sql — tham số object để soi cấu trúc, sql cho câu tự viết, liên hệ field màn hình với cột database. |
+| `fbo-sql-reference` | Danh mục function, stored procedure và bảng sys* dùng chung của FBO/FBI SP2422 — tra trước khi viết SQL mới, khi nghi logic đã có sẵn, hoặc khi cần chữ ký hàm. |
 | `pm-adr` | Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau. |
 | `pm-capability-graph` | Đọc và bảo trì đồ thị năng lực FBO và mạng rà soát Request (Phase/Status/Evidence/PMReview/Plan) — file JSONL là nguồn thật, SQL Server graph là chỉ mục, dựng bằng 4ai graph build. |
 | `pm-customer-program-registry` | Tra "khách X nằm ở đâu" ra program path, dòng sản phẩm FBO/FBI, SP version qua tool list_programs — nguồn là bảng nbdmda trong DB QLDA nội bộ, không phải file cục bộ. |

@@ -387,6 +387,7 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
     // "đang rảnh" thì vẫn là phỏng đoán yếu. Hiện vật là bằng chứng mạnh nhất vì nó phân giải
     // được về màn hình thật; menu chỉ là khoá gộp nên tụt xuống một bậc.
     const doTinCay = (dungHienVat && hv) ? 'cao' : kn ? 'trung-binh' : dv ? 'trung-binh' : 'thap';
+    const bacBangChung = doTinCay === 'cao' ? 2 : doTinCay === 'trung-binh' ? 1 : 0;
 
     const hs = hoSo.get(khoa) ?? {};
     return {
@@ -396,6 +397,7 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
       laPm: laPm.has(khoa),
       diem,
       doTinCay,
+      bacBangChung,
       lyDo,
       chiTiet: {
         diemHienVat: Math.round(diemHienVat * 10) / 10,
@@ -413,13 +415,32 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
     };
   });
 
+  // BẬC BẰNG CHỨNG XẾP TRƯỚC ĐIỂM. Hai thang không cùng đơn vị: điểm kinh nghiệm là TƯƠNG ĐỐI
+  // (chia cho người dẫn đầu, mẫu số tối thiểu `baoHoaSoUr`) còn điểm phạt tải là TUYỆT ĐỐI
+  // (−15/UR, trần −60). Ở một hiện vật chỉ có đúng một người từng đụng đúng một lần, người đó
+  // được `1/3 × 100 = 33,3` rồi bị trừ thẳng 60 — âm điểm, và rơi xuống DƯỚI những người không
+  // có một bằng chứng nào (0 điểm). Đo được trên dữ liệu thật: hai báo cáo `zcrptInventoryFGoods`
+  // / `zcrptProductionYieldCalSheet` chỉ một người từng làm, mà top 3 gợi ý ra toàn người chưa
+  // từng chạm tới. Đó là lật ngược đúng thứ tự ưu tiên khai ở đầu file (tiêu chí 1 > tiêu chí 2).
+  //
+  // Xếp theo bậc trước thì điểm phạt tải làm đúng việc của nó: phân định GIỮA những người cùng
+  // có kinh nghiệm, chứ không xoá được kinh nghiệm của người khác. Tải vẫn hiện nguyên trong
+  // `lyDo` để PM thấy cái giá phải trả khi chọn người đang gánh nặng.
   ungVien.sort((a, b) =>
+    b.bacBangChung - a.bacBangChung ||
     b.diem - a.diem ||
     a.chiTiet.soUrToiHan - b.chiTiet.soUrToiHan ||
     a.ma_lt1.localeCompare(b.ma_lt1));
 
+  // Cắt top-N là an toàn CHÍNH VÌ đã xếp theo bậc trước: người có bằng chứng luôn đứng trên
+  // người không có, nên không bao giờ còn cảnh top-N toàn người chưa từng chạm tới hiện vật
+  // trong khi người từng làm bị đẩy xuống dưới đường cắt. Không cần luật "giữ thêm" nào nữa —
+  // thử rồi: nó làm bảng của một menu đông người phình ra cả roster.
   return {
     ungVien: ungVien.slice(0, w.soGoiY),
+    // Có ai trong tập được xét mang bằng chứng không. Mục báo cáo dùng nó để nói thẳng "cả ba
+    // ứng viên đều chưa từng làm phần này" thay vì để PM tự suy từ cột độ tin cậy.
+    soCoBangChung: ungVien.filter((c) => c.bacBangChung > 0).length,
     laBaoCaoDauRa: laDauRa,
     nhanDienTu,
     // Nói rõ điểm được chấm bằng bằng chứng nào — hai thang khác hẳn nhau về độ tin cậy,

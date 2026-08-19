@@ -14,7 +14,9 @@
 //   MCP: không ghi file — in lệnh `claude mcp add` cho người dùng.
 
 import { emitPaths, mcpPath } from '../paths.mjs';
-import { banner, bannerAggregate, seeAlsoLine, alwaysOnAssets, onDemandAssets } from './common.mjs';
+import {
+  banner, bannerAggregate, seeAlsoLine, alwaysOnAssets, onDemandAssets, forEmit, referenceFiles,
+} from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 
 function skillFile(asset) {
@@ -107,12 +109,15 @@ export function emitClaude({ assets, mcpServers, target }) {
   }
 
   for (const a of asSkills) {
-    for (const e of emitPaths({ ...a, always: false, kind: a.kind === 'doctrine' ? 'skill' : a.kind }, 'claude', { claudeRoot })) {
+    const x = forEmit(a, 'claude', { claudeRoot },
+      { always: false, kind: a.kind === 'doctrine' ? 'skill' : a.kind });
+    for (const e of emitPaths(x, 'claude', { claudeRoot })) {
       if (e.mode !== 'file') continue;
-      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(a), sourceId: a.id, sourceVersion: a.version });
-      else textFiles.push({ relPath: e.path, content: skillFile(a), sourceId: a.id, sourceVersion: a.version });
+      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(x), sourceId: a.id, sourceVersion: a.version });
+      else textFiles.push({ relPath: e.path, content: skillFile(x), sourceId: a.id, sourceVersion: a.version });
     }
+    textFiles.push(...referenceFiles(x, 'claude', { claudeRoot }));
   }
 
   // MCP — chỉ project scope.

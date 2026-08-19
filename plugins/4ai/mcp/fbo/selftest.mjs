@@ -14,8 +14,11 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const HUB = path.resolve(HERE, '..', '..');
 const SERVER = path.join(HERE, 'server.mjs');
 
+// Không còn corpus cục bộ để hardcode (resolveProgram() trong tools.mjs chỉ nhận path thật
+// hoặc nbdmda.ma_da thật, đọc thẳng DB QLDA — xem comment ở đó). Không truyền --program thì
+// script tự chọn dự án REACHABLE đầu tiên từ list_programs sau khi kết nối xong (bên dưới).
 const argProgram = process.argv.indexOf('--program');
-const PROGRAM = argProgram !== -1 ? process.argv[argProgram + 1] : '_CORPUS';
+const explicitProgram = argProgram !== -1 ? process.argv[argProgram + 1] : null;
 
 const child = spawn(process.execPath, [SERVER, '--hub', HUB], { stdio: ['pipe', 'pipe', 'pipe'] });
 child.stderr.setEncoding('utf8');
@@ -85,6 +88,24 @@ ok('autoApprove trong servers.json khớp tool thật', unknown.length === 0,
   unknown.length ? `không có: ${unknown.join(', ')}` : `${approved.length} tool`);
 ok('query_sql KHÔNG nằm trong autoApprove', !approved.includes('query_sql'));
 
+// PROGRAM: --program truyền tay, không thì lấy dự án REACHABLE đầu tiên đứng tên PM máy này.
+// Gọi list_programs MỘT LẦN, dùng lại kết quả cho cả bước chọn PROGRAM lẫn bước tìm `target`
+// bên dưới (tránh round-trip DB thứ hai không cần thiết).
+const progs = payload(await call('list_programs', {}));
+let PROGRAM = explicitProgram;
+if (!PROGRAM) {
+  const first = progs?.programs?.find((p) => p.reachable);
+  if (!first) {
+    fail(`không có --program và list_programs không trả dự án REACHABLE nào để tự chọn` +
+      (progs?.__error ? ` (${progs.__error})` : ''));
+    process.stdout.write(`\nCÓ LỖI — ${failures} kiểm tra thất bại\n`);
+    child.kill();
+    process.exit(1);
+  }
+  PROGRAM = first.maDa;
+  process.stdout.write(`(tự chọn program: ${PROGRAM} — ${first.name ?? first.shortName ?? ''})\n`);
+}
+
 // Cổng giấy phép: hai tool license phải gọi được cả khi CHƯA kích hoạt — không thì người
 // dùng không có đường nào đọc Device ID để xin giấy phép. (Selftest chạy từ mã nguồn hub nên
 // các tool khác không bị chặn ở đây; phần chặn thật đã có test riêng ở tests/test-license.mjs.)
@@ -100,36 +121,39 @@ ok('license_activate từ chối giấy phép không hợp lệ',
   typeof licSai?.__error === 'string' && /Không lưu|public key/i.test(licSai.__error),
   licSai?.__error?.split('\n')[0]);
 
-// Guard rail: không tồn tại thì phải nói không tồn tại.
-const missing = payload(await call('describe_controller',
-  { program: PROGRAM, path: 'Dir\\KhongTonTaiBaoGio.xml' }));
-ok('file không tồn tại → found:false', missing?.found === false);
-ok('kèm cảnh báo không được bịa file',
-  typeof missing?.note === 'string' && /KHÔNG được tự tạo mới/.test(missing.note));
-
-// Guard rail: chặn câu lệnh ghi.
+// Guard rail: chặn câu lệnh ghi. Không cần index — query_sql đi thẳng DB.
 const write = payload(await call('query_sql', { program: PROGRAM, sql: 'DELETE FROM CPTran' }));
 ok('query_sql chặn câu lệnh ghi', typeof write?.__error === 'string' && /allowWrite/.test(write.__error));
 
-// Guard rail: resolve_vouchercode phải đòi `code` chứ không đoán.
+// Guard rail: resolve_vouchercode phải đòi `code` chứ không đoán. Cũng không cần index.
 const noCode = payload(await call('resolve_vouchercode', { program: PROGRAM }));
 ok('resolve_vouchercode thiếu code → lỗi rõ ràng',
   typeof noCode?.__error === 'string' && /code/i.test(noCode.__error));
 
-// Guard rail: không rò connection string trong bất kỳ output nào.
-const sqlAttempt = payload(await call('query_sql', { program: PROGRAM, object: 'APTran' }));
-const voucherAttempt = payload(await call('resolve_vouchercode', { program: PROGRAM, code: 'HDA' }));
-const allOutput = JSON.stringify([missing, write, sqlAttempt, voucherAttempt]) + serverLog.join('');
-const leak = /(?:password|pwd|uid|user\s*id)\s*=\s*(?!\*\*\*)[^;"'\s,}]+/i.exec(allOutput);
-ok('không rò credential ra output/stderr', !leak, leak ? `thấy: ${leak[0].slice(0, 40)}` : undefined);
-
-// Tra cứu thật (chỉ khi program tới được).
-const progs = payload(await call('list_programs', {}));
-const target = progs.programs?.find((p) => p.code === PROGRAM || p.programPath === PROGRAM);
+// describe_controller (kể cả nhánh "file không tồn tại") BẮT BUỘC có index trước
+// (requireIndex() trong tools.mjs) — phải index_program trước khi gọi, không thì lỗi
+// "chưa được index" đè lên đúng cái guard rail đang muốn kiểm.
+// `maDa`, KHÔNG PHẢI `code` — list_programs không có field `code` (bug cũ: so sánh luôn
+// undefined, target luôn tìm trượt qua nhánh programPath, SKIP không bao giờ kích hoạt).
+const target = progs.programs?.find((p) => p.maDa === PROGRAM || p.programPath === PROGRAM);
 if (target && !target.reachable) {
-  process.stdout.write(`SKIP  tra cứu thật — program ${PROGRAM} không tới được\n`);
+  process.stdout.write(`SKIP  guard rail describe_controller + tra cứu thật — program ${PROGRAM} không tới được\n`);
 } else {
   if (!target?.indexed) await call('index_program', { program: PROGRAM });
+
+  // Guard rail: không tồn tại thì phải nói không tồn tại.
+  const missing = payload(await call('describe_controller',
+    { program: PROGRAM, path: 'Dir\\KhongTonTaiBaoGio.xml' }));
+  ok('file không tồn tại → found:false', missing?.found === false);
+  ok('kèm cảnh báo không được bịa file',
+    typeof missing?.note === 'string' && /KHÔNG được tự tạo mới/.test(missing.note));
+
+  // Guard rail: không rò connection string trong bất kỳ output nào.
+  const sqlAttempt = payload(await call('query_sql', { program: PROGRAM, object: 'APTran' }));
+  const voucherAttempt = payload(await call('resolve_vouchercode', { program: PROGRAM, code: 'HDA' }));
+  const allOutput = JSON.stringify([missing, write, sqlAttempt, voucherAttempt]) + serverLog.join('');
+  const leak = /(?:password|pwd|uid|user\s*id)\s*=\s*(?!\*\*\*)[^;"'\s,}]+/i.exec(allOutput);
+  ok('không rò credential ra output/stderr', !leak, leak ? `thấy: ${leak[0].slice(0, 40)}` : undefined);
 
   const found = payload(await call('find_controller', { program: PROGRAM, query: 'giay bao no', limit: 5 }));
   ok('find_controller ra kết quả', (found?.count ?? 0) > 0, `${found?.count} controller`);

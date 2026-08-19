@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// test-sql-conn.mjs — QLDA lấy kết nối từ env/qlda.local.json; chương trình KHÁCH vẫn đọc
-// Web.config. Không chạm DB, không dùng chuỗi kết nối thật.
+// test-sql-conn.mjs — QLDA lấy kết nối CHỈ từ env/qlda.local.json (không còn chốt cuối
+// Web.config); chương trình KHÁCH thì ngược lại, luôn đọc Web.config của chính nó và không
+// phải khai gì trước. Không chạm DB, không dùng chuỗi kết nối thật.
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -50,22 +51,23 @@ process.stdout.write('=== chưa khai qldaProgramPath: KHÔNG program nào bị n
 // bừa — khớp nhầm là chạy câu SQL của khách trên DB nội bộ công ty.
 ok('Chưa khai -> Web.config', nguonKetNoi(QLDA, 'app') === 'Web.config');
 
-process.stdout.write('\n=== chưa khai kết nối: rớt về Web.config (bước cuối resolveOrder) ===\n');
-// Máy chưa cấu hình — hành vi phải y hệt trước khi có tính năng này.
+process.stdout.write('\n=== chưa khai kết nối: BÁO chưa khai, KHÔNG rớt về Web.config ===\n');
+// Đây là điểm đổi hành vi: QLDA chỉ còn env + qlda.local.json. Rớt về Web.config nghe thì
+// tiện, nhưng nó chạy được trên một server KHÁC mà vẫn ra số — hỏng kiểu không ai nhận ra.
 ghiLocal();
-ok('QLDA app -> Web.config', nguonKetNoi(QLDA, 'app') === 'Web.config');
-ok('QLDA sys -> Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
+ok('QLDA app chưa khai -> chưa khai', nguonKetNoi(QLDA, 'app') === 'chưa khai', nguonKetNoi(QLDA, 'app'));
+ok('QLDA sys chưa khai -> chưa khai', nguonKetNoi(QLDA, 'sys') === 'chưa khai', nguonKetNoi(QLDA, 'sys'));
 
-process.stdout.write('\n=== khai ở qlda.local.json: đứng giữa env và Web.config ===\n');
+process.stdout.write('\n=== khai ở qlda.local.json: đứng sau env, và chỉ cho ĐÚNG leg đã khai ===\n');
 ghiLocal({ appConnectionString: 'Data Source=L;Initial Catalog=TEST_APP' });
 ok('Có local, chưa có env -> qlda.local.json', nguonKetNoi(QLDA, 'app') === 'qlda.local.json');
-ok('Khoá chưa khai vẫn rớt về Web.config', nguonKetNoi(QLDA, 'sys') === 'Web.config');
+ok('Leg sys chưa khai KHÔNG ăn theo leg app', nguonKetNoi(QLDA, 'sys') === 'chưa khai', nguonKetNoi(QLDA, 'sys'));
 
 process.stdout.write('\n=== khai env: env THẮNG local ===\n');
 process.env.QLDA_APP_CONNECTION = 'Data Source=X;Initial Catalog=TEST_APP;Integrated Security=SSPI';
 ok('QLDA app -> env', nguonKetNoi(QLDA, 'app') === 'env');
-ok('Chưa khai env sys thì leg sys KHÔNG ăn theo leg app',
-  nguonKetNoi(QLDA, 'sys') === 'Web.config', nguonKetNoi(QLDA, 'sys'));
+ok('Chưa khai env sys thì leg sys vẫn là chưa khai',
+  nguonKetNoi(QLDA, 'sys') === 'chưa khai', nguonKetNoi(QLDA, 'sys'));
 process.env.QLDA_SYS_CONNECTION = 'Data Source=X;Initial Catalog=TEST_SYS;Integrated Security=SSPI';
 ok('QLDA sys -> env', nguonKetNoi(QLDA, 'sys') === 'env');
 

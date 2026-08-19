@@ -51,6 +51,14 @@ export function emitPaths(asset, tool, opts = {}) {
       if (asset.kind === 'command') {
         return [{ path: cu(`commands/${id}.md`), mode: 'file' }];
       }
+      // Cursor CÓ primitive Skill thật, auto-discover ở `.cursor/skills/` (project) và
+      // `~/.cursor/skills/` (user) — cùng layout `<id>/SKILL.md` với Claude Code, và
+      // `references/` bên trong là thư mục đi kèm được hỗ trợ chính thức.
+      if (asset.kind === 'skill') {
+        return [{ path: cu(`skills/${id}/SKILL.md`), mode: 'file' }];
+      }
+      // doctrine + rule vẫn là rule: chúng cần `alwaysApply`/`globs` — cơ chế kích hoạt mà
+      // skill không có. Đổi chúng thành skill là mất phần "luôn nạp".
       if (asset.kind === 'doctrine') {
         return [{ path: cu(`rules/00-${id}.mdc`), mode: 'file' }];
       }
@@ -90,6 +98,8 @@ export function emitPaths(asset, tool, opts = {}) {
     case 'cursor-plugin':
       if (asset.kind === 'agent') return [{ path: `agents/${id}.md`, mode: 'file' }];
       if (asset.kind === 'command') return [{ path: `commands/${id}.md`, mode: 'file' }];
+      // `skills/` trong gói plugin cũng auto-discover — mỗi thư mục con có `SKILL.md`.
+      if (asset.kind === 'skill') return [{ path: `skills/${id}/SKILL.md`, mode: 'file' }];
       if (asset.kind === 'doctrine') return [{ path: `rules/00-${id}.mdc`, mode: 'file' }];
       return [{ path: `rules/${id}.mdc`, mode: 'file' }];
 
@@ -125,4 +135,41 @@ export function mcpPath(tool, opts = {}) {
     default:
       return null;
   }
+}
+
+/**
+ * Thư mục chứa file `references/*.md` đi kèm một skill, cho từng dialect.
+ *
+ * Hai hình dạng, do primitive của dialect quyết định — không phải lựa chọn thẩm mỹ:
+ *  - dialect có skill là THƯ MỤC (`skills/<id>/SKILL.md`): reference nằm ngay trong đó,
+ *    `skills/<id>/references/`. Đây là layout Claude Code/Antigravity đọc được.
+ *  - dialect có asset là MỘT FILE (`rules/<id>.mdc`, `<id>.instructions.md`): không có thư
+ *    mục riêng để chui vào, nên phải tự tạo và đặt tên theo id — `references/<id>/` — nếu
+ *    không hai skill cùng thư mục sẽ ghi đè reference của nhau.
+ *
+ * @returns {string|null} đường dẫn thư mục (rel so với dest root), null nếu asset không ra file
+ */
+export function referenceDir(asset, tool, opts = {}) {
+  const first = emitPaths(asset, tool, opts)[0];
+  if (!first || first.mode !== 'file') return null;
+  const p = first.path;
+  const slash = p.lastIndexOf('/');
+  const dir = slash === -1 ? '' : p.slice(0, slash);
+  const base = slash === -1 ? p : p.slice(slash + 1);
+  const tail = base === 'SKILL.md' ? 'references' : `references/${asset.id}`;
+  return dir === '' ? tail : `${dir}/${tail}`;
+}
+
+/**
+ * Đường dẫn TƯƠNG ĐỐI từ file chính tới thư mục reference — giá trị thay cho token
+ * `{REFDIR}` trong thân asset. Nhờ nó một thân asset viết một lần vẫn trỏ đúng ở mọi
+ * dialect, dù layout mỗi nơi một khác.
+ */
+export function referenceRef(asset, tool, opts = {}) {
+  const dir = referenceDir(asset, tool, opts);
+  if (!dir) return null;
+  const primary = emitPaths(asset, tool, opts)[0].path;
+  const slash = primary.lastIndexOf('/');
+  const from = slash === -1 ? '' : primary.slice(0, slash + 1);
+  return dir.startsWith(from) ? dir.slice(from.length) : dir;
 }

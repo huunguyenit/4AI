@@ -9,14 +9,16 @@
 //
 //   <plugin>/.cursor-plugin/plugin.json
 //   <plugin>/rules/<id>.mdc            ← doctrine (00- prefix) + rule, alwaysApply theo isAlwaysOn
+//   <plugin>/skills/<id>/SKILL.md      ← skill thật (name/description), references/ đi kèm
 //   <plugin>/agents/<id>.md            ← subagent thật (name/description/model/readonly)
 //   <plugin>/commands/<id>.md
 //   <plugin>/mcp.json                  ← ${PLUGIN_ROOT} — KHÔNG dấu chấm đầu, khác Claude
 //   <plugin>/{mcp,src,tools,data}/**   ← runtime chép nguyên văn
 //
-// Không có `skills/`: 4AI chưa dùng primitive Skill thật của Cursor ở target `cursor` sống
-// (cursor.mjs gộp cả rule lẫn skill-kind asset thành .mdc) — giữ nguyên hành vi đó ở đây để
-// người cài qua marketplace và người clone+sync thấy CÙNG một trải nghiệm.
+// `skills/` trong gói cũng auto-discover — mỗi thư mục con có `SKILL.md` là một skill
+// (cursor.com/docs/reference/plugins). Trước đây 4AI gộp skill vào `.mdc` vì Cursor chưa có
+// primitive Skill; nay dùng đúng nó ở CẢ hai nơi, nên người cài qua marketplace và người
+// clone+sync vẫn thấy CÙNG một trải nghiệm.
 //
 // Biến đường dẫn built-in `${PLUGIN_ROOT}` đã xác nhận qua tài liệu Cursor (Agent Plugin MCP
 // mẫu dùng `"cwd": "${PLUGIN_ROOT}"`). Biến kiểu ${CLAUDE_PLUGIN_DATA} (thư mục ghi được, sống
@@ -27,7 +29,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { emitPaths, mcpPath, isAlwaysOn } from '../paths.mjs';
-import { banner, seeAlsoLine, isReadonlyAgent, runtimeFiles, bareCommand } from './common.mjs';
+import {
+  banner, seeAlsoLine, isReadonlyAgent, runtimeFiles, bareCommand, forEmit, referenceFiles,
+} from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 import { stableStringify } from '../json.mjs';
 import { HUB } from '../assets.mjs';
@@ -54,6 +58,17 @@ function mdcFile(asset) {
   return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${head}${body}${seeAlsoLine(asset)}`;
 }
 
+/** Skill thật của Cursor — `name` bắt buộc trùng tên thư mục cha, tức `id` của asset. */
+function skillFile(asset) {
+  const { description, body } = pluginText(asset);
+  const fm = stringifyFrontmatter({
+    name: asset.id,
+    description,
+    ...(asset.globs?.length ? { paths: asset.globs } : {}),
+  });
+  return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${body}${seeAlsoLine(asset)}`;
+}
+
 function agentFile(asset) {
   const { description, body } = pluginText(asset);
   const fm = stringifyFrontmatter({
@@ -78,12 +93,15 @@ export function emitCursorPlugin({ assets, mcpServers, target }) {
   const notes = [];
 
   for (const a of assets) {
-    for (const e of emitPaths(a, 'cursor-plugin')) {
+    const x = forEmit(a, 'cursor-plugin');
+    for (const e of emitPaths(x, 'cursor-plugin')) {
       if (e.mode !== 'file') continue;
-      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(a), sourceId: a.id, sourceVersion: a.version });
-      else textFiles.push({ relPath: e.path, content: mdcFile(a), sourceId: a.id, sourceVersion: a.version });
+      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'skill') textFiles.push({ relPath: e.path, content: skillFile(x), sourceId: a.id, sourceVersion: a.version });
+      else textFiles.push({ relPath: e.path, content: mdcFile(x), sourceId: a.id, sourceVersion: a.version });
     }
+    textFiles.push(...referenceFiles(x, 'cursor-plugin'));
   }
 
   // Runtime chép nguyên văn. Đọc là input — writer vẫn là nơi duy nhất ghi.

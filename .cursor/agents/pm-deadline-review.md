@@ -62,9 +62,9 @@ Với **từng** UR DD:
 | Kiểm tra đầu vào tài liệu | `query_sql` `sysfileinfo` (`controller='nbphyc'` + `syskey=stt_rec`, và cấp dự án `controller='nbdmda'` + `syskey=ma_da`), đọc TLKS. **Không** tin mỗi `tlks_yn`. |
 | Xử lý ảnh hưởng | `find_controller` / `describe_controller` / `list_related kind=all` theo `menu_id`/`sysid`. Thiếu thì ghi "Cần làm rõ", không đoán. |
 | Phân chia công việc | Đề xuất `ma_lt1`. `ma_lt1` rỗng **hoặc bằng mã PM** = chưa phân (BA để mặc định). |
-| Cổng PM | `XN` = trong phạm vi và đã chốt hạn; `TA` = chưa chốt hạn / ngoài TLKS chưa có căn cứ; `KL` = vượt FBO — **bắt buộc** `PMReview` nối `BASED_ON` tới `CapabilityVerdict` verdict `khong` (xem [pm-capability-graph](../rules/pm-capability-graph.mdc)). Không có thì hỏi PM, không tự kết luận. |
+| Cổng PM | `XN` = trong phạm vi và đã chốt hạn; `TA` = chưa chốt hạn / ngoài TLKS chưa có căn cứ; `KL` = vượt FBO — **bắt buộc** `PMReview` nối `BASED_ON` tới `CapabilityVerdict` verdict `khong` (xem [pm-capability-graph](../skills/pm-capability-graph/SKILL.md)). Không có thì hỏi PM, không tự kết luận. |
 
-UR nhắc tạo bảng/thêm cột → script SQL thật theo [fbo-new-table-proposal](../rules/fbo-new-table-proposal.mdc), không mô tả bằng lời.
+UR nhắc tạo bảng/thêm cột → script SQL thật theo [fbo-new-table-proposal](../skills/fbo-new-table-proposal/SKILL.md), không mô tả bằng lời.
 
 Phân tích sống **trong chat**. Không nhét `deXuat` vào HTML lần sinh đầu.
 

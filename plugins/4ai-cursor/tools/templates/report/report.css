@@ -67,7 +67,10 @@ body {
 }
 
 a {
-  color: var(--primary)
+  color: var(--primary);
+  /* URL trong noi_dung UR là một token không có chỗ ngắt — ở bề rộng điện thoại nó đẩy cả
+     trang trôi ngang. Chỉ cho phép ngắt trong link, không đụng văn xuôi thường. */
+  overflow-wrap: anywhere
 }
 
 header {
@@ -1513,4 +1516,11 @@ a.act-row:hover {
 /* Chữ phụ trong hàng ứng viên số 1: nền tô nhạt làm --mut tụt dưới ngưỡng AA. */
 .phan-cong tbody tr:first-child td .muted {
   color: var(--calm)
+}
+
+/* Bảng rộng cuộn TRONG khung của nó. Không có khung này thì một bảng 8 cột ở bề rộng điện
+   thoại kéo cả trang trôi ngang — người đọc mất luôn cột trái làm mốc. */
+.tw {
+  overflow-x: auto;
+  max-width: 100%
 }

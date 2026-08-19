@@ -5,6 +5,169 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Sửa — `query_sql` là tool của CHƯƠNG TRÌNH KHÁCH, QLDA và đồ thị chỉ còn env + local
+
+- **Mô tả tool khiến agent tưởng `query_sql` dành riêng cho QLDA nên không gọi nó.** Câu mở đầu
+  cũ ("Chạy SQL trên database của program") không nói program nào, trong khi mọi ví dụ quanh nó
+  đều là QLDA — máy có sẵn MCP database khác thì agent chọn cái kia. Nay mô tả nói thẳng ngay câu
+  đầu: đây là đường tra database của **chương trình khách**, dùng cho mọi dự án, kết nối đọc từ
+  `Web.config` của chính program và **không phải khai cấu hình gì trước**. Field `program` cũng có
+  description riêng thay vì `{ type: 'string' }` trống.
+- **Ba nguồn kết nối tách bạch, nói ra đủ ở cả ba nơi agent đọc** (mô tả tool, rule
+  `fbo-sql-via-mcp`, `mcp/servers.json`): program khách → Web.config của chính nó; QLDA → env
+  `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION` rồi `data/qlda.local.json`; đồ thị 4AI → env
+  `GRAPH_4AI_CONNECTION` rồi `graphConnectionString`, và không tra qua `query_sql`.
+- **Bỏ chốt cuối Web.config của QLDA** (`databases.qlda.resolveOrder` mất hai bước `webConfig`).
+  Rớt về Web.config nghe thì tiện, nhưng nó nối vào một server có thể KHÁC server đã khai ở env —
+  truy vấn vẫn chạy, vẫn ra số, chỉ là ra từ chỗ khác; kiểu hỏng chỉ lộ sau khi đã tin vào số
+  liệu. Nay chưa khai thì `thieuKetNoiQlda()` dừng và chỉ đúng khoá phải điền, đúng file phải sửa
+  (`duongDanQldaLocal()`), kèm câu nhắc rằng chương trình khách KHÔNG dính lỗi này.
+- **`nguonKetNoi()` trả thêm `'chưa khai'`** cho đúng trạng thái mới, và `doctor` có gợi ý riêng cho
+  nó — trước đây nó trả `'Web.config'`, tức là chẩn đoán báo "ổn" cho đúng cấu hình mà nay mọi
+  truy vấn QLDA đều dừng. `query_sql` cũng thôi in cứng "phân giải từ Web.config nội bộ" trong
+  `note`: nó gọi `nguonKetNoi()` để nói đúng nguồn thật của lần chạy đó.
+- Hợp đồng bảo mật không đổi: tất cả những chỗ trên chỉ nói **tên nguồn** và **tên khoá**, không
+  bao giờ giá trị. `tests/test-sql-conn.mjs` cập nhật theo hành vi mới và vẫn kiểm điều đó.
+
+### Sửa — Cursor: skill thôi bị hạ xuống rule
+
+- **Cursor có primitive Skill thật, 4AI vẫn map `kind: skill` → `rules/<id>.mdc`.** Mapping đó
+  đúng lúc viết emitter — khi ấy thứ gần nhất với skill là `.mdc` rule mang `description` +
+  `alwaysApply: false` (Cursor gọi là *Agent Requested rule*): agent đọc description rồi tự
+  quyết nạp thân. Nay Cursor auto-discover `.cursor/skills/` và `~/.cursor/skills/` với đúng
+  layout `<id>/SKILL.md` của Claude Code, nên giữ mapping cũ là ép sai primitive.
+  - Bằng chứng thấy ngay trên máy dev: `~/.cursor/` đã có `skills/` (19 skill FBO viết tay)
+    và `skills-cursor/` (skill Cursor tự ship, kèm manifest). Cursor còn ship sẵn hai skill
+    tên `create-skill` và `migrate-to-skills`.
+  - Xác nhận bằng tài liệu: `cursor.com/docs/context/skills` (đường dẫn, frontmatter
+    `name`/`description`/`paths`, và **`references/` là thư mục đi kèm được hỗ trợ chính thức,
+    "loaded on demand"**) và `cursor.com/docs/reference/plugins` (`skills/` trong gói plugin
+    cũng auto-discover, mỗi thư mục con có `SKILL.md`).
+- **Doctrine và rule VẪN là rule**, không đổi. Chúng cần `alwaysApply`/`globs` — cơ chế kích
+  hoạt mà skill không có; đổi chúng thành skill là mất phần "luôn nạp". Sự phân biệt
+  rule-vs-skill của hub giờ chiếu đúng sang Cursor thay vì bị san phẳng.
+- **Reference đi kèm skill hết dạng lưu vong.** Trước đây với Cursor chúng rơi vào
+  `rules/references/<id>/` — thư mục Cursor chỉ quét `.mdc`, nên ba file `.md` nằm đó không có
+  gì nạp. Nay vào `skills/<id>/references/`, đúng chỗ Cursor đọc, và `referenceDir()` tự khớp
+  vì nó vốn phân nhánh theo `SKILL.md` — không phải sửa thêm dòng nào.
+- Ảnh hưởng khi sync: 12–13 skill chuyển từ `rules/*.mdc` sang `skills/<id>/SKILL.md`, file
+  `.mdc` cũ bị prune sạch (chúng nằm trong manifest). Áp cho cả target `cursor` sống lẫn gói
+  `plugins/4ai-cursor/`, nên người cài qua marketplace và người clone+sync vẫn thấy cùng một
+  trải nghiệm.
+
+### Thêm — skill mang được `references/`, và danh mục SQL dùng chung của SP2422
+
+- **Hub nhận một hình dạng asset mới: skill có phụ lục.** File đặt ở
+  `assets/skills/<domain>/<id>/references/<tên>.md`, là markdown trần — không frontmatter,
+  không id, không version riêng. `loadAssets()` tách chúng khỏi luồng validate asset (nếu
+  không, chúng rơi vào luật "đường dẫn phải là `assets/<kind>/<domain>/<id>.md`" và làm đỏ
+  `check`), rồi gắn vào skill chủ. Ba lỗi được cưỡng chế: reference không có skill chủ, chủ
+  không phải kind `skill`, và chủ khai `always: true` — cái cuối vì reference tồn tại để nạp
+  THEO YÊU CẦU; gắn nó vào một asset luôn-nạp là bơm cả danh mục vào mọi phiên.
+- **Token `{REFDIR}` trong thân skill.** Layout reference khác nhau theo dialect vì primitive
+  khác nhau: nơi skill là THƯ MỤC (`skills/<id>/SKILL.md`) thì reference nằm trong đó; nơi
+  asset là MỘT FILE (`rules/<id>.mdc`) thì phải tự tạo thư mục đặt tên theo id
+  (`rules/references/<id>/`), nếu không hai skill cùng thư mục ghi đè reference của nhau.
+  `forEmit()` thay token bằng đường dẫn tương đối đúng của từng dialect, nên thân asset viết
+  một lần vẫn trỏ đúng ở cả sáu emitter. Cùng một object được dùng cho `emitPaths` lẫn nội
+  dung file — hai bên không thể tính ra hai đường dẫn khác nhau.
+- **Skill `fbo-sql-reference`** — danh mục quét từ chương trình FBO chuẩn SP2422 qua
+  `query_sql`: 221 function (`ff_`, `Fast*`, `df_`), 747 stored procedure (`fs_`, `Fast*`,
+  `ds_`, `rs_`; đã loại 31 `dt_*` của SQL Server), 93 bảng `sys*` ở cả db `app` và `sys`.
+  Mỗi thủ tục kèm cờ tác dụng phụ `IUDTX` (có `INSERT`/`UPDATE`/`DELETE`/`CREATE TABLE`/`EXEC`
+  trong thân). SKILL.md cố ý ngắn — chỉ nói file nào chứa gì và mở khi nào, để skill khác
+  không gánh 250 KB danh mục.
+  - Ý nghĩa suy từ tên + chữ ký + tên tham số, **không phải từ đọc thân**, và mọi file nói
+    thẳng điều đó ở đầu. Đủ để chọn đúng đối tượng cần tra, chưa đủ để khẳng định hành vi.
+  - Cờ `IUDTX` là kết quả quét văn bản, không phải phân tích luồng: cờ `X` che mất mọi thứ
+    SQL động bên trong làm, nên `-----` không phải bảo chứng "chỉ đọc".
+  - Mã nhóm chứng từ (`fs_Post<XX>Tran`, `Voucher$*Update$<XX>`) chỉ khai những mã có bằng
+    chứng đủ mạnh; mã còn lại ghi rõ là chưa xác nhận, trỏ về `dmct`/`sysvouchertype` thay
+    vì đoán.
+
+### Sửa — cờ `-----` nói dối về 124 đối tượng mã hoá; phục hồi chữ ký cho cả 124
+
+- **`-----` không phân biệt "không ghi" với "không đọc được".** 124 đối tượng khai
+  `WITH ENCRYPTION`: `sys.sql_modules.definition` là `NULL`, nên phép quét `IUDTX` không
+  thấy gì và trả về `-----` — đúng cái ký hiệu dùng cho "thân chỉ đọc". Người đọc bảng sẽ
+  kết luận ngược hoàn toàn. Nay chúng mang dấu **⊗** cạnh tên và cột Ghi ghi `mã hoá`, kèm
+  một dòng legend nói rõ hai thứ khác nhau ở đâu.
+- **Tên tham số của nhóm này bị thay bằng `@_0`, `@_1`…** nên chữ ký trong metadata vô dụng.
+  Phục hồi được **cả 124** — 858/1135 vị trí tham số có tên — từ bốn nguồn, ghi rõ nguồn
+  từng cái: script nguồn chưa obfuscate trong SourceCollection (`A`), và chỗ gọi thật —
+  token runtime `@@id`/`@@master`/`@@refresh`… trong controller XML, hoặc tên biến của thủ
+  tục gọi nó (`B`). Vị trí nào không có bằng chứng thì **giữ nguyên `@_N`**; mỗi đối tượng
+  kèm một lời gọi thật chép nguyên văn — tên chỉ là diễn giải của nó.
+  - **Nguồn `D` — bản giải mã thân lệnh** (người dùng cung cấp) là thứ đóng lại toàn bộ
+    khoảng trống. Nó KHÔNG trả lại tên gốc: obfuscate xảy ra TRƯỚC khi mã hoá nên thân
+    giải mã vẫn mang `@_0`. Giá trị nằm ở chỗ khác — đọc được thân thì suy tên từ CÁCH
+    DÙNG: cột nào được gán, token `REPLACE(@sql, '@cFileGroup', @_1)`, hay tên khai ngay
+    trong `sp_executesql @sql, N'@u int, @v char(3)', @_1, @_0`. Cả 58 chữ ký khớp tuyệt
+    đối với metadata SP2422, nên áp được thẳng.
+  - **Cờ tác dụng phụ của 58 đối tượng này giờ là số đo thật**, hậu tố `ᴰ`, thay cho
+    `mã hoá`. Vài cái lệch hẳn so với phỏng đoán theo tên: `FastBusiness$Query$DrillDown`
+    và `FastBusiness$CheckSum` hoá ra **chỉ đọc**, còn `FastBusiness$Post$Loading` —
+    nghe như một thủ tục đọc — thật ra là `IUDTX`.
+  - Hai quy luật họ, mỗi cái đặt tên cho hàng chục vị trí: đuôi chuẩn của họ `ds_*` là
+    `(clientCode, extension)` — đối chiếu được với `ds_SystemGetLookup`, thủ tục cùng họ
+    KHÔNG mã hoá và còn nguyên tên; và đuôi `(language, userID, admin)` của họ
+    `$Fields$`/`$Filters$`/`$Config$`, trong đó `char(1)` luôn được so với `'V'`.
+  - Chữ ký từ SP khác chỉ được áp khi **số tham số VÀ dãy kiểu khớp tuyệt đối** với SP2422;
+    17 đối tượng có script nhưng chữ ký đã đổi giữa các SP nên bị loại, không lấy tên bừa.
+  - `Decryption_22_5.5_app.sql` (377 KB, tưởng là mỏ vàng) hoá ra là bản ĐÃ obfuscate — cho
+    thân lệnh nhưng vẫn `@_N`. Chỉ 5 đối tượng có script còn tên thật.
+  - `sys.sql_expression_dependencies` bỏ sót lời gọi nằm trong SQL động; phải quét text
+    (`syscomments.text LIKE`) mới ra. Quét một tên mỗi lần — ghép nhiều `LIKE` là timeout.
+  - Đã tìm và không thấy gì ở `App_Data\Controllers\Templates\Upload` (mọi bản SP). Quét
+    toàn bộ SourceCollection (không chỉ nhánh SP24) moi thêm được 4 đối tượng nữa từ các
+    bản SP18–SP22.7 — `App$Voucher$View`, `App$GetSalesPrice`, `App$Dynamic$GenData`,
+    `System$GetAccessRight`.
+  - 58 thủ tục còn mù phần lớn là `ds_*` — API tầng trình bày do runtime web gọi thẳng, nên
+    bằng chứng không nằm trong SQL lẫn XML. Sáu thủ tục họ `$Config$`/`$Fields$`/`$Filters$`
+    thì được gọi qua cơ chế **dispatch bằng chuỗi tên**
+    (`@e = '<tên proc>' + char(254) + '<hậu tố>'`), nên XML có nhắc tên mà không lộ tham số —
+    mục *Họ dispatch* ghi lại cơ chế này.
+  - Quét 120 file `.dll` trong `bin\` của chương trình chuẩn (cả UTF-8 lẫn UTF-16):
+    không có chuỗi tên đối tượng nào. Đường này ghi lại là đã đóng, khỏi thử lại.
+  - Phiếu điền tay `docs/fbo-sql-encrypted-worksheet.md` đã lập rồi xoá — bản giải mã về
+    trước khi cần dùng tới. Thứ tự tìm kiếm rút ra được ghi lại trong SKILL.md: **xin bản
+    giải mã trước**, ba đường còn lại chỉ là bù khi không có nó.
+  - Ba đối tượng mã hoá NHƯNG vẫn còn tên tham số thật được tách thành mục riêng — trước đó
+    bị gộp vào diện "chưa suy được", trong khi chữ ký của chúng dùng được ngay.
+
+### Sửa — báo cáo rà soát: ba chỗ kết luận sai
+
+- **`tlks_yn = 1` không còn được coi là "đã có căn cứ".** `nbphyc.trang_tlks` là ô tự do và người
+  lên UR gõ vào đó TÊN LOẠI tài liệu làm căn cứ, không chỉ số trang (đo trên dữ liệu thật: 963
+  dòng `BBLV`, 998 dòng `XNKH`, 963 dòng `PL`). Câu SQL thứ năm đọc `sysfileinfo` — đính kèm cấp
+  dự án (`nbdmda`) lẫn cấp UR (`nbphyc`) — rồi `evidence.mjs` đối chiếu ĐÚNG loại đã khai. Ca thật
+  bắt được: một dự án có duy nhất một file TLKS trong khi năm UR ở DD đều khai căn cứ là BBLV; luật
+  "không có tài liệu nào" không bắt được ca đó. Ba vế cùng đúng — UR ở `DD`, không tra ra tệp đúng
+  loại, giai đoạn chưa tick `xac_nhan_da_hen_yn` — thì cột **Đề xuất** hiện `TA` kèm lý do. Trước
+  đây cột này luôn là `—` ở mọi báo cáo sinh tự động, vì `deXuat` chỉ đọc từ payload viết tay.
+  - Câu SQL đính kèm nhận DANH SÁCH KHOÁ, không nhận `where`: bản nhét `where` vào subquery chạy
+    tức thì trên một dự án nhưng **timeout** trên phạm vi cả LTQL (`sysfileinfo` 44 nghìn dòng,
+    `RTRIM()` hai đầu chặn index).
+  - Kết luận "thiếu tài liệu" luôn kê kèm kho đính kèm hiện có, để PM kiểm lại được thay vì phải tin.
+- **Xếp hạng ứng viên: bậc bằng chứng thắng điểm phạt tải.** Điểm kinh nghiệm là thang TƯƠNG ĐỐI
+  (chia cho người dẫn đầu, mẫu số tối thiểu `baoHoaSoUr`) còn phạt tải là số TUYỆT ĐỐI (−15/UR,
+  trần −60) — hai thang không cùng đơn vị. Người duy nhất từng làm đúng một hiện vật được
+  `1/3 × 100 = 33,3` rồi bị trừ thẳng 60, thành âm điểm và rơi xuống DƯỚI những người không có một
+  bằng chứng nào (0 điểm). Đo được trên dữ liệu thật: hai báo cáo mà đúng một người từng làm, top 3
+  gợi ý ra toàn người chưa từng chạm tới. Nay xếp `bacBangChung` trước, điểm sau — tải chỉ phân định
+  GIỮA những người cùng có kinh nghiệm. Bảng bày luôn phép trừ (`−26,7 (33,3 − 60 tải)`) để con số
+  âm đứng đầu không đọc như báo cáo hỏng, và nói thẳng khi KHÔNG ứng viên nào từng làm phần đó.
+- **`hienVat` được chép sang payload.** `datasetToPayloads()` bỏ quên trường này, nên toàn bộ khối
+  `nhanSu.kinhNghiemHienVat` là dữ liệu chết và mọi UR âm thầm rơi về thang `menu_id` — chính thang
+  mà `review-dataset.mjs` ghi rõ chỉ phân giải được 1/25 trên dữ liệu thật.
+- **Hướng dẫn playbook không còn khớp qua menu gộp.** `menu_id` dạng `NN.00.00` là rổ cấp phân hệ,
+  không định vị một màn hình — đo trên chính một lượt chạy thật, `01.00.00` gánh 632 UR của riêng
+  một người. Một hướng dẫn về "đánh số thứ tự cho browse danh mục" neo ở `01.00.00` đã bị gắn vào
+  một UR xin thêm tuỳ chọn loại khách khỏi báo cáo bán hàng. `laMenuGop()` chặn neo đó ở CẢ hai
+  đầu — `ghepVaoUr()` bỏ qua khi ghép, `kiemEntry()` từ chối khi ghi — vì nhận nó lúc ghi là hứa
+  một đường tra cứu không tồn tại. Bù lại, thêm đường khớp qua `hienVat` (danh sách `sysid` rút từ
+  chính nội dung UR), bắt được cả UR đụng nhiều màn hình cùng lúc.
+
 ### Thêm — kho hướng dẫn lập trình thực chiến
 
 - **Node kind `Playbook` + `4ai playbook add|search` + tool MCP `playbook_add`/`playbook_search`.**

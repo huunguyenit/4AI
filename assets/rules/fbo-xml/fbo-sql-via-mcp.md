@@ -3,12 +3,30 @@ id: fbo-sql-via-mcp
 title: SQL through query_sql only
 kind: rule
 domain: fbo-xml
-description: Truy vấn SQL qua query_sql (nó tự phân giải Web.config) — không bao giờ đọc, trích, log hay echo connection string / user / password, không tự ghép chuỗi kết nối.
+description: Mọi truy vấn database của chương trình khách đi qua query_sql — nó tự phân giải Web.config của program; không đọc hay echo connection string, không tự ghép chuỗi kết nối, không mượn MCP khác.
 severity: hard
 always: true
 requires: [4ai-fbo]
-version: 1
+version: 2
 ---
+
+## Phạm vi — `query_sql` là đường tra DB của CHƯƠNG TRÌNH KHÁCH
+
+Dùng cho **mọi dự án**, không phải tool riêng của QLDA. Truyền `program` (đường dẫn program
+hoặc mã dự án `nbdmda.ma_da`) là đủ: kết nối đọc thẳng từ `Web.config` của chính program đó,
+không phải khai cấu hình gì trước.
+
+Ba nguồn kết nối tách bạch, đừng lẫn:
+
+| Database | Nguồn kết nối | Cần khai trước? |
+|---|---|---|
+| Program khách (app/sys) | `Web.config` của chính program | Không |
+| QLDA (DB nội bộ) | env `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION`, rồi `data/qlda.local.json` | **Có** |
+| Đồ thị 4AI | env `GRAPH_4AI_CONNECTION`, rồi `graphConnectionString` | **Có**, và không tra qua `query_sql` |
+
+Máy có sẵn MCP database khác **không** đổi điều này: câu hỏi về dữ liệu FBO/FBI của một khách
+vẫn đi `query_sql`, vì chỉ nó phân giải đúng database theo program (leg `sys`, `%Database`,
+bảng `entity`) và không để credential đi qua tay người hay model.
 
 ## Vì sao
 
@@ -51,3 +69,5 @@ người hay model chạm vào credential.
   vòng qua nó bằng cách tự đọc `Web.config`.
 - `db` sai thì object "không tồn tại": cấu hình hệ thống nằm bên `sys`, nghiệp vụ bên `app`.
   Đổi `db` trước khi kết luận không tồn tại.
+- Lỗi "Chưa khai kết nối QLDA" **chỉ** dính DB nội bộ QLDA. Đừng suy ra là `query_sql` hỏng:
+  program của khách không cần khai gì, cứ gọi bình thường.

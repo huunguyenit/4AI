@@ -6,13 +6,16 @@
 //
 // HAI LOẠI DATABASE, HAI ĐƯỜNG PHÂN GIẢI KHÁC HẲN NHAU:
 //
-//   QLDA (DB nội bộ của công ty — nbdmda/nbphyc/frpost/userinfo2)
-//     → env `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION`, rồi `data/qlda.local.json`.
-//       Web.config chỉ là chốt cuối. Xem `data/qlda.json → databases.qlda.resolveOrder`.
+//   DA — chương trình của KHÁCH (đường dẫn lấy từ nbdmda.dir_pro_web) — ĐƯỜNG MẶC ĐỊNH
+//     → Web.config của chính program đó, không phải khai gì trước. Mỗi khách một
+//       server/database riêng, không có cách nào khai trước bằng env, và cũng KHÔNG được
+//       lấy nhầm kết nối QLDA.
 //
-//   DA — chương trình của KHÁCH (đường dẫn lấy từ nbdmda.dir_pro_web)
-//     → Web.config của chính program đó. Mỗi khách một server/database riêng, không có
-//       cách nào khai trước bằng env, và cũng KHÔNG được lấy nhầm kết nối QLDA.
+//   QLDA (DB nội bộ của công ty — nbdmda/nbphyc/frpost/userinfo2) và DB đồ thị 4AI
+//     → CHỈ env (`QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION`/`GRAPH_4AI_CONNECTION`), rồi
+//       `data/qlda.local.json`. KHÔNG có đường Web.config: chưa khai thì BÁO LỖI kèm chỉ dẫn
+//       chứ không âm thầm mượn Web.config của chương trình QLDA — hai nguồn đó không bảo đảm
+//       trỏ cùng một server. Xem `data/qlda.json → databases.qlda.resolveOrder`.
 //
 // Phân biệt bằng `programPath`: khớp với `databases.qlda.path` thì là QLDA. Xem laQldaProgram().
 
@@ -192,14 +195,18 @@ function localConnString(key) {
  * truy vấn vẫn đúng nên không ai nhận ra, cho tới lúc máy khác mất share thì mới vỡ. Đây là
  * cách kiểm mà không phải in chuỗi kết nối ra màn hình.
  *
- * @returns {'env'|'qlda.local.json'|'Web.config'}
+ * `Web.config` từ nay chỉ còn là câu trả lời cho CHƯƠNG TRÌNH KHÁCH. Program đã nhận diện là
+ * QLDA mà chưa khai env/local thì trả `chưa khai` — trước đây chỗ này trả `Web.config`, tức là
+ * `doctor` báo "ổn" cho đúng cấu hình mà nay mọi truy vấn QLDA đều dừng lại có chỉ dẫn.
+ *
+ * @returns {'env'|'qlda.local.json'|'Web.config'|'chưa khai'}
  */
 export function nguonKetNoi(programPath, dbType = 'app') {
   if (!laQldaProgram(programPath)) return 'Web.config';
   const laSys = dbType === 'sys';
   if (String(process.env[laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'] ?? '').trim()) return 'env';
   if (localConnString(laSys ? 'sysConnectionString' : 'appConnectionString')) return 'qlda.local.json';
-  return 'Web.config';
+  return 'chưa khai';
 }
 
 /**
@@ -229,19 +236,39 @@ function qldaConn(dbType) {
 
 // ---------------------------------------------------------------- phân giải theo leg
 
+/**
+ * Program ĐÚNG LÀ QLDA nhưng chưa khai kết nối — dừng ở đây, kèm chỉ dẫn.
+ *
+ * Trước đây nhánh này rớt xuống Web.config của chính chương trình QLDA. Bỏ đi vì hai nguồn
+ * không bảo đảm cùng trỏ một server: máy chưa khai env/local vẫn chạy được và vẫn ra số, chỉ
+ * là ra từ chỗ khác — kiểu hỏng chỉ lộ sau khi đã tin vào số liệu. Chương trình KHÁCH không
+ * dính luật này: nó vẫn đọc Web.config của chính nó, không phải khai gì trước.
+ */
+function thieuKetNoiQlda(dbType) {
+  const laSys = dbType === 'sys';
+  throw new Error(
+    `Chưa khai kết nối QLDA (${laSys ? 'sys' : 'app'}). DB nội bộ QLDA CHỈ lấy kết nối từ env hoặc `
+    + 'cấu hình cục bộ — KHÔNG đọc Web.config. Hai đường, theo đúng thứ tự ưu tiên:\n'
+    + `  1. khoá \`${laSys ? 'sysConnectionString' : 'appConnectionString'}\` trong ${duongDanQldaLocal()}\n`
+    + '     (có shell thì `node tools/4ai.mjs setup` ghi hộ) — có hiệu lực NGAY ở lần gọi tool sau.\n'
+    + `  2. biến môi trường ${laSys ? 'QLDA_SYS_CONNECTION' : 'QLDA_APP_CONNECTION'} — thắng đường 1, `
+    + 'nhưng KHÔNG có hiệu lực với tiến trình MCP đang chạy: nó giữ bản chụp môi trường lúc khởi '
+    + 'động, nên chưa khởi động lại ứng dụng host thì vẫn thấy đúng lỗi này.\n'
+    + 'Database của CHƯƠNG TRÌNH KHÁCH không dính lỗi này — kết nối của khách đọc thẳng từ '
+    + 'Web.config của chính program, không phải khai trước.');
+}
+
 /** Leg sys: placeholder thì rớt về appSetting `sysDatabaseName`. */
 function resolveSysConn(programPath, databaseOverride) {
   if (laQldaProgram(programPath)) {
-    const conn = qldaConn('sys');
-    if (conn) {
-      if (databaseOverride) conn.database = databaseOverride;
-      if (isPlaceholder(conn.database)) {
-        throw new Error(
-          'Kết nối QLDA (sys) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
-          + 'kết nối, hoặc `databases.qlda.sysDatabaseName` trong data/qlda.json, hoặc truyền `database`.');
-      }
-      return conn;
+    const conn = qldaConn('sys') ?? thieuKetNoiQlda('sys');
+    if (databaseOverride) conn.database = databaseOverride;
+    if (isPlaceholder(conn.database)) {
+      throw new Error(
+        'Kết nối QLDA (sys) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
+        + 'kết nối, hoặc `databases.qlda.sysDatabaseName` trong data/qlda.json, hoặc truyền `database`.');
     }
+    return conn;
   }
   const text = readWebConfigText(programPath);
   const conn = connFromWebConfig(text, 'sys');
@@ -298,17 +325,15 @@ function lookupEntityDatabase(sqlcmd, programPath, entityCode) {
 /** Leg app: override > entity lookup > giá trị ghi thẳng trong Web.config. */
 function resolveAppConn(sqlcmd, programPath, databaseOverride, entityCode) {
   if (laQldaProgram(programPath)) {
-    const conn = qldaConn('app');
-    if (conn) {
-      if (databaseOverride) conn.database = databaseOverride;
-      // QLDA là DB nội bộ một entity — không đi tra bảng `entity` như chương trình khách.
-      if (isPlaceholder(conn.database)) {
-        throw new Error(
-          'Kết nối QLDA (app) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
-          + 'kết nối, hoặc `databases.qlda.databaseName` trong data/qlda.json, hoặc truyền `database`.');
-      }
-      return conn;
+    const conn = qldaConn('app') ?? thieuKetNoiQlda('app');
+    if (databaseOverride) conn.database = databaseOverride;
+    // QLDA là DB nội bộ một entity — không đi tra bảng `entity` như chương trình khách.
+    if (isPlaceholder(conn.database)) {
+      throw new Error(
+        'Kết nối QLDA (app) không xác định được tên database — khai `Initial Catalog` trong chuỗi '
+        + 'kết nối, hoặc `databases.qlda.databaseName` trong data/qlda.json, hoặc truyền `database`.');
     }
+    return conn;
   }
   const conn = connFromWebConfig(readWebConfigText(programPath), 'app');
   if (databaseOverride) {

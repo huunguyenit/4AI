@@ -65,11 +65,20 @@ export function kiemEntry(entry = {}) {
 
   // Không có hiện vật nào thì dự án sau KHÔNG có đường nào tìm ra dòng này. Nó sẽ nằm trong DB
   // vĩnh viễn mà không lần tra cứu nào chạm tới — tức là công gõ vào bị vứt đi. Thà báo lỗi.
-  const coNeo = ['sysid', 'menuId', 'bang'].some((k) => chuan(entry[k]))
+  //
+  // `menuId` gộp cấp phân hệ KHÔNG tính là neo: `ghepVaoUr` cố ý bỏ qua nó (xem laMenuGop), nên
+  // nhận nó ở đây là hứa một đường tra cứu không tồn tại. Luật phải giống hệt nhau ở hai chỗ.
+  const menuNeoDuoc = chuan(entry.menuId) && !laMenuGop(entry.menuId);
+  const coNeo = menuNeoDuoc || ['sysid', 'bang'].some((k) => chuan(entry[k]))
     || (Array.isArray(entry.tags) && entry.tags.some((t) => chuan(t)));
   if (!coNeo) {
     loi.push('phải có ít nhất một trong `sysid` / `menuId` / `bang` / `tags` — '
       + 'đó là đường DUY NHẤT để dự án sau tìm ra hướng dẫn này; thiếu hết thì nó không bao giờ được đọc lại');
+  }
+  if (chuan(entry.menuId) && !menuNeoDuoc) {
+    loi.push(`\`menuId\` = "${chuan(entry.menuId)}" là mã gộp cấp phân hệ, không định vị một màn hình `
+      + '— nó khớp với gần như mọi UR nên bị bỏ qua khi ghép. Dùng menu_id có mảnh cuối khác 00, '
+      + 'hoặc neo bằng `sysid` của chính màn hình');
   }
 
   const dtc = entry.doTinCay;
@@ -417,6 +426,30 @@ export function gopEntry(cu = {}, moi = {}) {
  * @param {Array} khoHuong kết quả docPlaybook()
  * @returns {Array<{ur: object, huongDan: Array<object & {_khop: 'chinh-ur'|'sysid'|'menu_id'}>}>}
  */
+/**
+ * `menu_id` này có định vị được MỘT màn hình không, hay chỉ là rổ gộp cấp phân hệ.
+ *
+ * Mã menu có dạng `NN.NN.NN` đi từ phân hệ xuống màn hình. Mảnh cuối bằng `00` nghĩa là chưa đi
+ * xuống tới đâu cả: `01.00.00` là CẢ phân hệ, `36.10.00` là cả nhóm. Dùng nó làm khoá ghép
+ * nghĩa là ghép với gần như mọi thứ — đo trên chính lượt chạy này, `01.00.00` gánh 632 UR của
+ * riêng một người.
+ *
+ * Ca thật đã sinh ra lỗi: một hướng dẫn về "đánh số thứ tự cho browse danh mục" neo ở
+ * `01.00.00` được gắn vào một UR xin thêm tuỳ chọn loại khách khỏi báo cáo bán hàng — hai việc
+ * không liên quan gì nhau, khớp chỉ vì cùng rổ. Chặn ở đây thay vì hạ nhãn xuống "khớp yếu":
+ * một khớp sai không cứu được bằng cách dán nhãn cho nó.
+ *
+ * Chuỗi rỗng, `.`, hay bất cứ dạng nào không đọc ra được mảnh cuối là số → cũng coi là không
+ * định vị được.
+ */
+export function laMenuGop(menuId) {
+  const seg = chuan(menuId).split('.');
+  if (seg.length < 2) return true;
+  const cuoi = seg[seg.length - 1];
+  if (!/^\d+$/.test(cuoi)) return true;
+  return /^0+$/.test(cuoi);
+}
+
 export function ghepVaoUr(urs = [], khoHuong = []) {
   if (!khoHuong.length) return [];
   const theoUr = new Map();
@@ -430,7 +463,10 @@ export function ghepVaoUr(urs = [], khoHuong = []) {
   for (const h of khoHuong) {
     gom(theoUr, chuan(h.stt_rec), h);
     gom(theoSysid, chuan(h.sysid), h);
-    gom(theoMenu, chuan(h.menu_id), h);
+    // Hướng dẫn neo ở menu gộp thì KHÔNG vào chỉ mục menu — nó sẽ không bao giờ khớp qua đường
+    // đó. Đúng như vậy: một hướng dẫn không neo được vào màn hình nào cụ thể thì chưa có neo,
+    // và đường ra là tác giả bổ sung `sysid` chứ không phải hệ thống rải nó khắp nơi.
+    if (!laMenuGop(h.menu_id)) gom(theoMenu, chuan(h.menu_id), h);
   }
 
   const out = [];
@@ -447,7 +483,10 @@ export function ghepVaoUr(urs = [], khoHuong = []) {
     };
     them(theoUr.get(chuan(u.stt_rec)), 'chinh-ur');
     them(theoSysid.get(chuan(u.sysid)), 'sysid');
-    them(theoMenu.get(chuan(u.menu_id)), 'menu_id');
+    // `hienVat` là danh sách sysid rút từ chính nội dung UR (xem experience-extract.mjs) —
+    // chắc hơn `u.sysid` đơn lẻ và là thứ duy nhất bắt được UR đụng nhiều màn hình cùng lúc.
+    for (const hv of u.hienVat ?? []) them(theoSysid.get(chuan(hv)), 'hien-vat');
+    if (!laMenuGop(u.menu_id)) them(theoMenu.get(chuan(u.menu_id)), 'menu_id');
     if (huongDan.length) out.push({ ur: u, huongDan });
   }
   return out;

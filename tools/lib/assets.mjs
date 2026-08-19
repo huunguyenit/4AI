@@ -63,6 +63,15 @@ const KIND_FOLDER = {
 const FOLDER_KIND = Object.fromEntries(
   Object.entries(KIND_FOLDER).map(([k, v]) => [v, k]));
 
+/**
+ * Phụ lục của một skill: `assets/skills/<domain>/<id>/references/<name>.md`.
+ *
+ * Đây là cách khai một skill quá lớn để nhét hết vào SKILL.md — SKILL.md giữ phần mô tả
+ * "khi nào cần tra", còn dữ liệu tra cứu nằm ở reference, chỉ đọc khi thật sự cần. File
+ * reference là markdown TRẦN: không frontmatter, không id, không version riêng.
+ */
+const REFERENCE_RE = /^(skills)\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z0-9]+(?:-[a-z0-9]+)*)\/references\/([A-Za-z0-9][A-Za-z0-9._-]*)\.md$/;
+
 function toPosix(p) {
   return p.split(path.sep).join('/');
 }
@@ -111,6 +120,36 @@ export function readJson(file, fallback = undefined) {
 }
 
 /**
+ * Đọc `targets.json` rồi phủ `targets.local.json` lên trên.
+ *
+ * Local làm ĐÚNG HAI việc: (1) override field của target đã khai trong targets.json —
+ * chủ yếu là `path`, vốn khác nhau theo từng máy; (2) THÊM target chỉ tồn tại trên máy này,
+ * ví dụ `~/.cursor` user-global mà đường dẫn chứa tên tài khoản Windows nên không commit được.
+ *
+ * Vế (2) trước đây thiếu: cả hai chỗ merge đều dùng `.map()`, nên target mới khai trong
+ * targets.local.json bị bỏ qua IM LẶNG — không lỗi, không cảnh báo, chỉ là không sync.
+ * Và logic này từng bị chép làm hai bản (4ai.mjs `loadConfig` và sync.mjs `runSync`), nên
+ * `check` với `sync` nhìn thấy hai danh sách target khác nhau. Gộp về đây để chuyện đó
+ * không tái diễn.
+ *
+ * @returns {{version?: number, domains?: string[]|null, targets: object[]}}
+ */
+export function loadTargets(hub = HUB) {
+  const cfg = readJson(path.join(hub, 'targets.json'), { version: 1, domains: null, targets: [] });
+  const local = readJson(path.join(hub, 'targets.local.json'), { targets: [] });
+  if (!local.targets?.length) return cfg;
+
+  const localByName = new Map(local.targets.map((t) => [t.name, t]));
+  cfg.targets = cfg.targets.map((t) => ({ ...t, ...localByName.get(t.name) }));
+
+  const daBiet = new Set(cfg.targets.map((t) => t.name));
+  for (const t of local.targets) {
+    if (!daBiet.has(t.name)) cfg.targets.push(t);
+  }
+  return cfg;
+}
+
+/**
  * @returns {{assets: object[], byId: Map, errors: object[], warnings: object[]}}
  */
 export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = {}) {
@@ -124,9 +163,23 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
     return { assets, byId, errors: [{ file: 'assets/', line: 0, message: 'thư mục `assets/` không tồn tại' }], warnings };
   }
 
-  const files = fs.globSync('**/*.md', { cwd: root })
+  const all = fs.globSync('**/*.md', { cwd: root })
     .map(toPosix)
     .sort();
+
+  // Tách file reference ra khỏi luồng validate asset: chúng KHÔNG có frontmatter, không có
+  // id/kind/domain, và không bao giờ tự đứng một mình — chúng là phụ lục của đúng một skill.
+  const files = [];
+  const refsByOwner = new Map();
+  for (const rel of all) {
+    const m = REFERENCE_RE.exec(rel);
+    if (!m) { files.push(rel); continue; }
+    const [, , domain, ownerId, name] = m;
+    if (!refsByOwner.has(ownerId)) refsByOwner.set(ownerId, []);
+    refsByOwner.get(ownerId).push({ name, domain, rel, display: `assets/${rel}` });
+  }
+  for (const list of refsByOwner.values()) list.sort((a, b) => (a.name < b.name ? -1 : 1));
+
   const pm = pmIdentity(hub);
 
   for (const rel of files) {
@@ -210,6 +263,37 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
     };
     assets.push(asset);
     if (fm.id) byId.set(fm.id, asset);
+  }
+
+  // Gắn reference vào skill chủ. Chạy sau vòng lặp asset vì cần index id đầy đủ.
+  for (const [ownerId, list] of refsByOwner) {
+    const owner = byId.get(ownerId);
+    if (!owner) {
+      errors.push({ file: list[0].display, line: 1,
+        message: `reference không có skill chủ — cần \`assets/skills/${list[0].domain}/${ownerId}.md\`` });
+      continue;
+    }
+    if (owner.kind !== 'skill') {
+      errors.push({ file: list[0].display, line: 1,
+        message: `\`${ownerId}\` là kind \`${owner.kind}\`, chỉ skill mới mang được references/` });
+      continue;
+    }
+    const wrongDomain = list.find((r) => r.domain !== owner.domain);
+    if (wrongDomain) {
+      errors.push({ file: wrongDomain.display, line: 1,
+        message: `reference nằm trong domain \`${wrongDomain.domain}\` nhưng skill \`${ownerId}\` thuộc domain \`${owner.domain}\`` });
+      continue;
+    }
+    if (owner.always === true) {
+      errors.push({ file: owner.rel, line: owner.keyLines.get('always') ?? 1,
+        message: 'skill có references/ không được `always: true` — reference sinh ra để nạp theo yêu cầu' });
+      continue;
+    }
+    owner.references = list.map((r) => ({
+      name: r.name,
+      rel: r.display,
+      body: applyPmTemplate(readText(path.join(root, r.rel)).replace(/^\n+/, ''), pm),
+    }));
   }
 
   // Liên kết chéo — chỉ chạy khi đã có index đầy đủ.

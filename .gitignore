@@ -28,3 +28,12 @@ data/license.json
 *.pem
 .cursor/mcp.json
 targets.local.json
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+# Neo vào gốc repo (/graft/): graft/ trần khớp MỌI thư mục tên graft ở bất kỳ độ sâu,
+# kể cả .claude/skills/graft/ — chính file graft init sinh ra để commit và chia sẻ.
+/graft/
+
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+graft/

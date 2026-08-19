@@ -8,6 +8,14 @@
       ],
       "command": "C:\\Program Files\\nodejs\\node.exe",
       "cwd": "D:\\Fast Source\\4AI"
+    },
+    "graft": {
+      "args": [
+        "-y",
+        "@nanonets/graft",
+        "mcp"
+      ],
+      "command": "npx"
     }
   }
 }

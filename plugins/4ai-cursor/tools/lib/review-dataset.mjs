@@ -15,6 +15,7 @@ import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadat
 import { buildNhanSu, pmCuaDuAn } from './staffing.mjs';
 import { fetchForum } from './forum.mjs';
 import { sqlTuDien, buildTuDien, rutHienVat } from './experience-extract.mjs';
+import { doiChieuCanCu, deXuatTuCanCu } from './evidence.mjs';
 
 export const STATUS_MAC_DINH = ['DD', 'XN', 'TH'];
 
@@ -230,15 +231,83 @@ export function buildReviewSql(filters) {
   };
 }
 
+/** Bao nhiêu khoá nhét vào một `IN (...)`. Chia lô để câu lệnh không phình vô hạn. */
+const LO_KHOA = 800;
+
+/**
+ * Đính kèm của dự án (`controller = 'nbdmda'`, khoá `ma_da`) và của từng UR
+ * (`controller = 'nbphyc'`, khoá `stt_rec`) — bảng dùng chung `sysfileinfo`.
+ *
+ * Cần để đối chiếu `trang_tlks` với tài liệu CÓ THẬT (xem evidence.mjs). Không có bước này thì
+ * `tlks_yn = 1` là lời khai không ai kiểm, và mọi UR khai căn cứ BBLV đều lọt qua như đã có
+ * căn cứ.
+ *
+ * NHẬN DANH SÁCH KHOÁ, KHÔNG NHẬN `where`. Bản đầu nhét nguyên `where` của báo cáo vào hai
+ * subquery `IN (SELECT … FROM nbphyc JOIN nbdmda …)`; trên phạm vi một dự án thì chạy tức thì,
+ * nhưng trên phạm vi cả LTQL nó timeout thẳng — `sysfileinfo` có 44 nghìn dòng và `RTRIM()` hai
+ * đầu chặn sạch index, nên kế hoạch thành quét lồng quét. Khoá thì lúc gọi đã nằm sẵn trong tay
+ * (kết quả bốn câu trên), truyền thẳng vào là một lần quét bảng, không join.
+ *
+ * Cột `file_enc` (tên file vật lý) CỐ Ý không lấy — ở đây chỉ cần biết tài liệu có tồn tại hay
+ * không, không mở file.
+ *
+ * @returns {string[]} nhiều câu, chạy hết rồi nối kết quả lại
+ */
+export function buildDinhKemSql(maDas = [], sttRecs = []) {
+  const cau = [];
+  const them = (controller, khoaTho) => {
+    const khoa = [...new Set(khoaTho.map(trimmed).filter(Boolean))];
+    for (let i = 0; i < khoa.length; i += LO_KHOA) {
+      const lo = khoa.slice(i, i + LO_KHOA).map((k) => `'${sqlLiteral(k)}'`).join(', ');
+      cau.push(`
+SELECT
+  RTRIM(f.controller)  AS controller,
+  RTRIM(f.syskey)      AS syskey,
+  f.line_nbr           AS line_nbr,
+  ${noiDung('f.file_name')} AS file_name,
+  RTRIM(f.file_ext)    AS file_ext,
+  f.file_size          AS file_size
+FROM sysfileinfo f
+WHERE RTRIM(f.controller) = '${controller}'
+  AND RTRIM(f.syskey) IN (${lo})
+ORDER BY RTRIM(f.syskey), f.line_nbr`.trim());
+    }
+  };
+  them('nbdmda', maDas);
+  them('nbphyc', sttRecs);
+  return cau;
+}
+
 function hanKey(maDa, giaiDoan) {
   return `${trimmed(maDa)}\t${trimmed(giaiDoan)}`;
 }
 
 /**
- * Gộp bốn result set thành { projects[], yeuCau[] }. Không gọi DB.
- * @param {{yeuCauRows: object[], daumucRows: object[], hanRows: object[], duAnRows: object[]}} rows
+ * Gộp năm result set thành { projects[], yeuCau[] }. Không gọi DB.
+ * @param {{yeuCauRows: object[], daumucRows: object[], hanRows: object[], duAnRows: object[],
+ *          dinhKemRows?: object[]}} rows
  */
-export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = [], duAnRows = [] }) {
+export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = [], duAnRows = [],
+  dinhKemRows = [] }) {
+  // Đính kèm chia hai rổ theo controller — `nbdmda` khoá bằng `ma_da`, `nbphyc` khoá bằng
+  // `stt_rec`. Hai khoá KHÔNG cùng không gian giá trị nên phải tách map, gộp chung sẽ có ngày
+  // một `ma_da` trùng một `stt_rec` và tài liệu nhảy sang UR của dự án khác.
+  const tepDuAn = new Map();
+  const tepUr = new Map();
+  for (const r of dinhKemRows) {
+    const ct = trimmed(r.controller);
+    const key = trimmed(r.syskey);
+    if (!key) continue;
+    const map = ct === 'nbdmda' ? tepDuAn : ct === 'nbphyc' ? tepUr : null;
+    if (!map) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push({
+      line_nbr: r.line_nbr,
+      file_name: trimmed(r.file_name),
+      file_ext: trimmed(r.file_ext) || undefined,
+      file_size: r.file_size !== undefined ? Number(r.file_size) : undefined,
+    });
+  }
   const byDaumuc = new Map();
   for (const r of daumucRows) {
     const key = trimmed(r.stt_rec);
@@ -277,6 +346,7 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
       bp_lt: trimmed(r.bp_lt) || undefined,
       ltql: [r.ma_lt1, r.ma_lt2, r.ma_lt3].map(trimmed).filter(Boolean),
       programPath: (trimmed(r.dir_pro_web) || trimmed(r.dir_pro_app)).replace(/[\\/]+$/, '') || undefined,
+      tepDinhKem: tepDuAn.get(maDa) ?? [],
     });
   }
 
@@ -288,7 +358,8 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
     const gd = trimmed(r.giai_doan_da);
     const han = byHan.get(hanKey(maDa, gd)) ?? {};
     const duAn = byDuAn.get(maDa);
-    yeuCau.push({
+    const tepCuaUr = tepUr.get(stt) ?? [];
+    const u = {
       ma_da: maDa,
       ten_ngan: duAn?.ten_ngan,
       ma_pbsp: duAn?.ma_pbsp,
@@ -311,7 +382,17 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
       xac_nhan_da_hen_yn: han.xac_nhan_da_hen_yn,
       giai_doan_noi_dung: han.noi_dung,
       daumuc: byDaumuc.get(stt) ?? [],
-    });
+      tepDinhKem: tepCuaUr,
+    };
+    // Đối chiếu "trang" căn cứ với tệp CÓ THẬT, rồi mới suy ra đề xuất. Làm ở đây vì đúng chỗ
+    // này mới có đủ ba dữ kiện cùng lúc: `trang_tlks` của UR, đính kèm cả hai cấp, và
+    // `xac_nhan_da_hen_yn` của giai đoạn. Tách ra sau sẽ phải chuyền cả ba đi vòng.
+    const canCuTep = doiChieuCanCu({ ...u, tlks_yn: bit(u.tlks_yn) },
+      { tepDuAn: duAn?.tepDinhKem ?? [], tepUr: tepCuaUr });
+    if (canCuTep) u.canCuTep = canCuTep;
+    const dx = deXuatTuCanCu(u, canCuTep, bit(han.xac_nhan_da_hen_yn));
+    if (dx) u.deXuat = dx;
+    yeuCau.push(u);
   }
 
   return { projects: [...byDuAn.values()], yeuCau };
@@ -380,11 +461,29 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
   const hanRes = exec(sqls.han);
   const duAnRes = exec(sqls.duAn);
 
+  // Đính kèm chạy SAU và lấy khoá từ chính kết quả bốn câu trên — xem buildDinhKemSql() về lý
+  // do không nhét `where` vào subquery. `sysfileinfo` là bảng dùng chung của cả hệ thống,
+  // chương trình đời cũ có thể chưa có nó; mất đính kèm chỉ làm mục đối chiếu căn cứ im lặng,
+  // không được phép đánh sập cả báo cáo hạn — nên bắt lỗi và ghi lại lý do.
+  const dinhKemRows = [];
+  let dinhKemLoi = null;
+  try {
+    for (const sql of buildDinhKemSql(
+      (duAnRes.rows ?? []).map((r) => r.ma_da),
+      (yeuCauRes.rows ?? []).map((r) => r.stt_rec))) {
+      const res = sqlFn({ programPath, database, dbType: 'app', sql, maxRows });
+      dinhKemRows.push(...(res.rows ?? []));
+    }
+  } catch (e) {
+    dinhKemLoi = e.message;
+  }
+
   const merged = mergeReviewRows({
     yeuCauRows: yeuCauRes.rows ?? [],
     daumucRows: daumucRes.rows ?? [],
     hanRows: hanRes.rows ?? [],
     duAnRows: duAnRes.rows ?? [],
+    dinhKemRows,
   });
 
   // Rút hiện vật cho UR ở DD TRƯỚC khi dựng nhân sự: `buildNhanSu` hỏi đồ thị "ai đã làm các
@@ -411,7 +510,7 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
   }
 
   return {
-    source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc (QLDA) — 4 câu SQL cố định'
+    source: 'nbphyc + nbdmda + nbcnhanhtda + nbctdaumuc + sysfileinfo (QLDA) — 5 câu SQL cố định'
       + ', kèm nhân sự từ userinfo2 (DB sys) và nội dung forum từ frpost',
     filters: {
       project: filters.project || undefined,
@@ -420,14 +519,19 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
       statusUR: filters.statusList,
     },
     count: merged.yeuCau.length,
-    truncated: Boolean(yeuCauRes.truncated || daumucRes.truncated || hanRes.truncated || duAnRes.truncated),
+    truncated: Boolean(yeuCauRes.truncated || daumucRes.truncated || hanRes.truncated
+      || duAnRes.truncated),
+    dinhKem: { docDuoc: !dinhKemLoi, soTep: dinhKemRows.length, loi: dinhKemLoi ?? undefined },
     projects: merged.projects,
     yeuCau: merged.yeuCau,
     nhanSu,
     forum: { soTopic: forum.soTopic, thieuDuLieu: forum.thieuDuLieu },
     hint: 'Mỗi phần tử `yeuCau[]` là MỘT UR; `daumuc[]` đã gộp sẵn. `projects[]` là danh sách dự án có UR. '
       + '`ngay_ht`/`xac_nhan_da_hen_yn` lấy MAX(ngay_ht) theo (ma_da, giai_doan_da). '
-      + '`truncated: true` = một trong bốn câu bị cắt ở maxRows. '
+      + '`truncated: true` = một trong năm câu bị cắt ở maxRows. '
+      + '`yeuCau[].canCuTep` là kết quả đối chiếu `trang_tlks` với đính kèm THẬT ở `sysfileinfo` '
+      + '(cả `nbdmda` cấp dự án lẫn `nbphyc` cấp UR): `coTep: false` nghĩa là căn cứ được khai '
+      + 'nhưng không tìm thấy tài liệu nào chứng minh. `yeuCau[].deXuat` sinh từ đó — xem evidence.mjs. '
       + 'noi_dung mất dấu tiếng Việt do codepage sqlcmd — đối chiếu `noi_dung_len`. '
       + '`nhanSu.roster` là người CÒN làm và CÒN ở bộ phận đó (userinfo2.status=1, ma_bo_phan=dept); '
       + 'LTQL của dự án mà không có trong roster nghĩa là đã off hoặc chuyển phòng, khi đó PM là cấp PP. '
@@ -473,6 +577,10 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
       pmNgoaiPhong: r.ngoaiPhong,
       ltql,
       ngay_chay: ngay,
+      // Tài liệu cấp dự án (`sysfileinfo` controller=`nbdmda`). Báo cáo cần nó để nói được
+      // "đã tìm ở đâu" khi kết luận thiếu căn cứ — nói "không có BBLV" mà không kê ra dự án
+      // đang có tài liệu gì thì PM không kiểm lại được.
+      tepDuAn: (thongTin.tepDinhKem ?? []).map((t) => ({ file_name: t.file_name, file_ext: t.file_ext })),
       giaiDoan: [],
       yeuCau: [],
     };
@@ -517,6 +625,16 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
       // Mã đầu mục công việc (nbctdaumuc.ma_daumuc) — tín hiệu đầu vào/đầu ra thật cho
       // assignee.mjs → nhanDienBaoCaoDauRa(), mạnh hơn đoán qua từ khoá tự do trong noi_dung.
       maDaumuc: (u.daumuc ?? []).map((d) => trimmed(d.ma_daumuc)).filter(Boolean),
+      // `hienVat` (sysid rút từ nội dung UR, xem ganHienVat) PHẢI đi kèm sang payload: đó là
+      // thang chấm điểm ứng viên chính xác nhất, và `nhanSu.kinhNghiemHienVat` được dựng riêng
+      // để ghép với nó. Bỏ quên trường này thì cả khối kinh nghiệm hiện vật thành dữ liệu chết
+      // và mọi UR âm thầm rơi về thang `menu_id` — thang mà chính file này ghi rõ chỉ phân giải
+      // được 1/25 trên dữ liệu thật.
+      ...(u.hienVat?.length ? { hienVat: u.hienVat } : {}),
+      // Đối chiếu căn cứ và đề xuất suy ra từ nó — xem evidence.mjs.
+      ...(u.canCuTep ? { canCuTep: u.canCuTep } : {}),
+      ...(u.deXuat ? { deXuat: u.deXuat } : {}),
+      ...(u.tepDinhKem?.length ? { tepDinhKem: u.tepDinhKem } : {}),
       // Nội dung topic forum (chỉ UR ở DD có link) — với UR chỉ ghi "update theo link forum"
       // thì đây mới là yêu cầu thật. Xem forum.mjs.
       ...(u.forum?.length ? { forum: u.forum } : {}),

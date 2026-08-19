@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
 import { renderDdl } from './ddl.mjs';
-import { promptCuaUr } from './prompt.mjs';
+import { promptKyThuat } from './prompt.mjs';
 import { HUB, readJson } from './assets.mjs';
 import { goiYPhanCong, laChuaPhanCong, TRONG_SO_MAC_DINH } from './assignee.mjs';
 import { loadTemplate, renderTemplate } from './template.mjs';
@@ -439,7 +439,7 @@ function urTable(urs, cols) {
     const tds = cols.map((c) => `<td class="${c.cls ?? ''}">${c.get(u)}</td>`).join('');
     return `<tr>${tds}</tr>`;
   }).join('\n');
-  return `<table><thead><tr>${head}</tr></thead><tbody>\n${body}\n</tbody></table>`;
+  return `<div class="tw"><table><thead><tr>${head}</tr></thead><tbody>\n${body}\n</tbody></table></div>`;
 }
 
 const colStt = { ten: 'UR', cls: 'mono', get: (u) => esc(u.fcode1 || String(u.stt_rec).trim()) };
@@ -449,9 +449,22 @@ const colTrangThai = { ten: 'TT', cls: 'mono', get: (u) => `<span class="pill ${
 const colHan = { ten: 'Hạn', cls: 'mono', get: (u) => u._phase ? fmtDate(u._phase.ngay_ht) : '—' };
 const colConLai = { ten: 'Còn (ngày LV)', cls: 'mono', get: (u) =>
   u._soNgay === null ? '—' : u._soNgay < 0 ? `<span class="qua-han">quá ${Math.abs(u._soNgay)}</span>` : String(u._soNgay) };
-const colTlks = { ten: 'TLKS', get: (u) => u.tlks_yn
-  ? `<span class="ok">trong</span> ${esc(u.trang_tlks ?? '')}`
-  : `<span class="warn">ngoài</span>${u.canCu ? ' ' + esc(u.canCu) : ' <em>chưa có căn cứ</em>'}` };
+/**
+ * Cột TLKS nói HAI điều, không phải một: UR tự khai căn cứ gì, và căn cứ đó có tài liệu thật
+ * hay không. `tlks_yn = 1` chỉ là lời khai — trước đây cột này dừng ở đó nên một UR khai
+ * "trong BBLV" mà dự án không có biên bản làm việc nào vẫn hiện dấu xanh. Xem evidence.mjs.
+ */
+const colTlks = { ten: 'TLKS', get: (u) => {
+  if (!u.tlks_yn) {
+    return `<span class="warn">ngoài</span>${u.canCu ? ' ' + esc(u.canCu) : ' <em>chưa có căn cứ</em>'}`;
+  }
+  const trang = esc(u.trang_tlks ?? '');
+  const cc = u.canCuTep;
+  if (!cc) return `<span class="ok">trong</span> ${trang}`;
+  return cc.coTep
+    ? `<span class="ok">trong</span> ${trang} <span class="muted">· có ${esc(cc.tenTep)} (${esc(cc.noiTim)})</span>`
+    : `<span class="warn">trong</span> ${trang} <em>· không tìm thấy tài liệu ${esc(cc.loai)} nào</em>`;
+} };
 const colDeXuat = { ten: 'Đề xuất', get: (u) => u.deXuat
   ? `<span class="pill dx">${esc(u.deXuat.trang_thai)}</span> ${esc(u.deXuat.lyDo ?? '')}` : '—' };
 const colDuAn = { ten: 'Dự án', cls: 'mono', get: (u) => esc(u._ma_da ?? '') };
@@ -847,19 +860,33 @@ ${urTable(canGiao, [colStt, colNoiDung, colGiaiDoan, colHan, colMaLt1])}`,
       ? `<p class="lead">Nhận diện là <strong>báo cáo đầu ra</strong> (${goiY.nhanDienTu === 'payload' ? 'payload khai rõ' : 'suy từ nội dung UR'}) — có áp tiêu chí 3.</p>`
       : '';
 
+    // Ai không có một bằng chứng nào phải được nói thẳng, không để PM tự suy từ cột độ tin cậy:
+    // một bảng ba dòng "tin cậy thấp" trông y hệt một bảng có người thật sự phù hợp.
+    const khongAiTung = goiY.soCoBangChung === 0
+      ? '<p class="banner">Không ứng viên nào từng làm phần này — bảng dưới chỉ còn xếp được theo tải. Chọn người ở đây là giao việc mới hoàn toàn.</p>'
+      : '';
+
     const bang = goiY.ungVien.length
-      ? `<table><thead><tr><th>#</th><th>Ứng viên</th><th>Điểm</th><th>Độ tin cậy</th><th>Căn cứ</th></tr></thead><tbody>
+      ? `${khongAiTung}<div class="tw"><table><thead><tr><th>#</th><th>Ứng viên</th><th>Điểm</th><th>Độ tin cậy</th><th>Căn cứ</th></tr></thead><tbody>
 ${goiY.ungVien.map((c, i) => {
         const tc = DO_TIN_CAY[c.doTinCay] ?? DO_TIN_CAY['thap'];
+        // Bày phép tính khi có phạt tải. Điểm kinh nghiệm là thang TƯƠNG ĐỐI 0–100 còn phạt là
+        // số tuyệt đối, nên một người có kinh nghiệm hiếm mà đang gánh nặng ra điểm ÂM — nhìn
+        // con số âm đứng đầu bảng mà không thấy phép trừ thì đọc như báo cáo hỏng.
+        const kn = Math.round((c.chiTiet.diemHienVat + c.chiTiet.diemMenu + c.chiTiet.diemDauVao) * 10) / 10;
+        const phat = -c.chiTiet.phatTaiTrong;
+        const oDiem = phat > 0
+          ? `${c.diem} <span class="muted">(${kn} − ${phat} tải)</span>`
+          : String(c.diem);
         return `<tr>
   <td class="mono">${i + 1}</td>
   <td class="mono">${nhanUngVien(c)}</td>
-  <td class="mono">${c.diem}</td>
+  <td class="mono">${oDiem}</td>
   <td><span class="${tc.cls}">${tc.nhan}</span></td>
   <td>${c.lyDo.map(esc).join(' · ')}</td>
 </tr>`;
       }).join('\n')}
-</tbody></table>`
+</tbody></table></div>`
       : '<p class="empty">Không có ứng viên nào khớp dữ kiện đã nạp.</p>';
 
     return `<article class="phan-cong">
@@ -888,7 +915,10 @@ ${bang}
  */
 function huongDanBlock(capHuongDan) {
   if (!capHuongDan?.length) {
-    return { dem: 0, html: '<p class="empty">Chưa có hướng dẫn nào trong kho khớp với các yêu cầu này. Ghi cái đầu tiên bằng <code>4ai playbook add</code>.</p>' };
+    return { dem: 0, html: '<p class="empty">Không có hướng dẫn nào trong kho khớp với các yêu cầu này. '
+      + 'Ghi thêm bằng <code>4ai playbook add</code> — và neo nó vào <code>sysid</code> của màn hình, '
+      + 'không phải một <code>menu_id</code> gộp cấp phân hệ (dạng <code>NN.00.00</code>): neo gộp '
+      + 'khớp với gần như mọi UR nên CỐ Ý bị bỏ qua khi ghép, xem <code>laMenuGop()</code>.</p>' };
   }
   const html = capHuongDan.map(({ ur, huongDan }) => {
     const muc = huongDan.map((g) => {
@@ -899,7 +929,9 @@ function huongDanBlock(capHuongDan) {
         ? '<span class="hd-khop chinh">cách làm ghi cho chính yêu cầu này</span>'
         : g._khop === 'menu_id'
           ? `<span class="hd-khop yeu" title="menu_id là số hiệu BA ghi tay, không phải khoá ngoại tới màn hình">khớp yếu qua menu ${esc(g.menu_id ?? '')}</span>`
-          : `<span class="hd-khop">khớp controller <code>${esc(g.sysid ?? '')}</code></span>`;
+          : g._khop === 'hien-vat'
+            ? `<span class="hd-khop">khớp hiện vật rút từ nội dung UR — <code>${esc(g.sysid ?? '')}</code></span>`
+            : `<span class="hd-khop">khớp controller <code>${esc(g.sysid ?? '')}</code></span>`;
       const xuatXu = g._khop === 'chinh-ur'
         ? ''
         : ` · đã chạy ở <code>${esc(g.ma_da ?? '?')}</code>`;
@@ -958,6 +990,8 @@ export function renderReport(payload, h) {
     ngoaiTlksThieuCanCu } = summarize(payload, h);
   const urChuaChot = urs.filter((u) => u._chotDaHen === false);
   const deXuatKl = urs.filter((u) => u.deXuat?.trang_thai === 'KL');
+  const deXuatTa = urs.filter((u) => u.deXuat?.trang_thai === 'TA');
+  const thieuTaiLieu = urs.filter((u) => u.canCuTep && !u.canCuTep.coTep);
   const coDdl = urs.filter((u) => u.ddl || u.ghiChuDdl);
   const lichChuaChot = phases.some((p) => p.lichChuaChot);
 
@@ -970,6 +1004,25 @@ export function renderReport(payload, h) {
   const phanCong = phanCongBlock(chuaGiao, payload, loadTrongSoPhanCong(), pm);
   const forum = forumBlock(urs);
 
+  /**
+   * Kết luận "thiếu tài liệu" phải KÈM chỗ đã tìm, nếu không PM không có cách nào kiểm lại
+   * ngoài việc tin. Kê thẳng kho đính kèm cấp dự án ra đây: nhìn một dòng là thấy dự án có
+   * đúng những gì, và vì sao căn cứ được khai lại không tra ra.
+   */
+  const ghiChuCanCu = (() => {
+    if (!thieuTaiLieu.length) return '';
+    const teps = payload.tepDuAn ?? [];
+    const ke = teps.length
+      ? teps.map((t) => `<code>${esc(t.file_name)}</code>`).join(', ')
+      : '<em>không có tệp nào</em>';
+    const loai = [...new Set(thieuTaiLieu.map((u) => u.canCuTep.loai))].join(', ');
+    return `<p class="banner"><strong>${thieuTaiLieu.length}</strong> yêu cầu khai căn cứ loại `
+      + `<strong>${esc(loai)}</strong> nhưng không tra ra tài liệu tương ứng. Đính kèm cấp dự án `
+      + `(<code>sysfileinfo</code> · <code>nbdmda</code>) hiện có: ${ke}. Đã tìm cả đính kèm riêng `
+      + `của từng UR (<code>nbphyc</code>). Những UR vừa thiếu căn cứ vừa nằm trong giai đoạn chưa `
+      + `tick chốt đã hẹn được đề xuất <code>TA</code> ở cột Đề xuất${deXuatTa.length ? ` (${deXuatTa.length} yêu cầu)` : ''}.</p>`;
+  })();
+
   // Nhãn KPI: một danh từ viết hoa đầu câu, phần định lượng ("≤ 3 ngày LV", "DD/XN/TH") xuống
   // dòng phụ. Nhồi điều kiện vào chính cái nhãn thì con số to bên trên mất chỗ dựa — người đọc
   // phải giải mã "chờ cổng PM (DD)" trước khi biết số 0 đó nói về cái gì.
@@ -977,7 +1030,8 @@ export function renderReport(payload, h) {
     { n: quaHan.length, nhan: 'Quá hạn', muc: 'bad', phu: 'hạn giai đoạn đã trôi qua' },
     { n: sapToi.length, nhan: 'Sắp tới hạn', muc: 'warn', phu: `≤ ${h.leadWorkingDays} ngày LV` },
     { n: congPm.length, nhan: 'Chờ duyệt', muc: 'warn',
-      phu: ['UR ở DD', phanCong.dem ? `${phanCong.dem} chưa giao LT` : ''].filter(Boolean).join(' · ') },
+      phu: ['UR ở DD', phanCong.dem ? `${phanCong.dem} chưa giao LT` : '',
+        deXuatTa.length ? `${deXuatTa.length} đề xuất TA` : ''].filter(Boolean).join(' · ') },
     { n: chuaChot.length, nhan: 'Chưa chốt hẹn', muc: 'warn', phu: 'giai đoạn còn UR tồn đọng' },
     { n: urs.length, nhan: 'UR đang theo dõi', muc: '',
       phu: ['DD/XN/TH', ngoaiTlksThieuCanCu.length ? `${ngoaiTlksThieuCanCu.length} ngoài TLKS thiếu căn cứ` : '']
@@ -1002,9 +1056,9 @@ export function renderReport(payload, h) {
   const danhSach = section('toan-bo-ur', 'Toàn bộ yêu cầu đang theo dõi', '',
     danhSachUr(urs, { cotDau: { ten: 'Giai đoạn', get: (u) => u.giai_doan_da ?? '' } }), urs.length);
 
-  const phaseTable = chuaChot.length ? `<table><thead><tr><th>Giai đoạn</th><th>Hạn hiệu lực</th><th>Còn (ngày LV)</th><th>YC tồn đọng</th><th>Nội dung cần HT</th></tr></thead><tbody>
+  const phaseTable = chuaChot.length ? `<div class="tw"><table><thead><tr><th>Giai đoạn</th><th>Hạn hiệu lực</th><th>Còn (ngày LV)</th><th>YC tồn đọng</th><th>Nội dung cần HT</th></tr></thead><tbody>
 ${chuaChot.map((p) => `<tr><td>${esc(p.giai_doan_da)}</td><td class="mono">${fmtDate(p.ngay_ht)}</td><td class="mono">${p.soNgay < 0 ? `<span class="qua-han">quá ${Math.abs(p.soNgay)}</span>` : p.soNgay}</td><td class="mono">${p.soUrTonDong}</td><td>${esc(p.noi_dung ?? '')}</td></tr>`).join('\n')}
-</tbody></table>
+</tbody></table></div>
 <p class="lead">Đề xuất: đưa các yêu cầu chưa chốt được hạn trong những giai đoạn trên về trạng thái <code>TA</code>.</p>
 ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}` : '<p class="empty">Không có giai đoạn nào vừa chưa chốt đã hẹn vừa còn yêu cầu tồn đọng (DD/XN/TH).</p>';
 
@@ -1025,10 +1079,9 @@ ${than}
     const d = ld.dich ?? {};
     const dichMo = [d.syscode && `mã <code>${esc(d.syscode)}</code>`, d.sysid && `controller <code>${esc(d.sysid)}</code>`,
       d.bang && `bảng <code>${esc(d.bang)}</code>`].filter(Boolean).join(' · ');
-    const { prompt, err } = promptCuaUr(u, payload);
-    const promptBox = err
-      ? `<p class="banner">Không sinh được prompt gợi ý: ${esc(err)}</p>`
-      : `<div class="sql"><div class="sql-chip"><span>Prompt gợi ý — dán vào Claude Code</span><button class="sql-copy">Copy</button></div><pre>${esc(prompt)}</pre></div>`;
+    // Prompt của UR này đã nằm ở mục `prompt-ky-thuat` phía trên, gộp cả kinh nghiệm thực
+    // chiến — hiện lại ở đây thành hai hộp prompt cho cùng một UR, người đọc không biết dán
+    // cái nào. Ở đây chỉ còn phần MÔ TẢ luồng.
     return `<article class="flow">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
 <dl class="flow-dl">
@@ -1036,9 +1089,35 @@ ${than}
   <dt>Đích</dt><dd><strong>${esc(d.manHinh ?? '—')}</strong>${dichMo ? ` — ${dichMo}` : ''}</dd>
   ${ld.ghiChu ? `<dt>Ghi chú</dt><dd>${esc(ld.ghiChu)}</dd>` : ''}
 </dl>
-${promptBox}
 </article>`;
   }).join('\n') : '';
+
+  /**
+   * Một prompt cho mỗi UR có gợi ý kỹ thuật — gộp kinh nghiệm + luồng dữ liệu + việc cần làm.
+   *
+   * Đứng ĐẦU tab vì đây là thứ người sắp code lấy đi; ba mục bên dưới là bản đọc bằng mắt của
+   * cùng nội dung đó. SQL script cố ý không vào prompt: nó là đầu ra xác định của
+   * `tools/lib/ddl.mjs`, cho model đọc là mời nó viết lại mỗi lần một khác.
+   */
+  const promptBlock = (() => {
+    const theoUr = new Map((payload.huongDan ?? []).map((c) => [String(c.ur?.stt_rec ?? '').trim(), c.huongDan]));
+    const ungVien = urs.filter((u) => theoUr.has(String(u.stt_rec).trim()) || u.luongDuLieu || u.ddl || u.ghiChuDdl);
+    if (!ungVien.length) {
+      return { dem: 0, html: '<p class="empty">Chưa có UR nào trong phạm vi có gợi ý kỹ thuật để dựng prompt.</p>' };
+    }
+    const html = ungVien.map((u) => {
+      const { prompt, err } = promptKyThuat(u, payload, {
+        huongDan: theoUr.get(String(u.stt_rec).trim()) ?? [],
+        coDdl: !!(u.ddl || u.ghiChuDdl),
+      });
+      if (err) return `<article class="flow"><h3>${esc(u.fcode1 || String(u.stt_rec).trim())}</h3><p class="banner">Không dựng được prompt: ${esc(err)}</p></article>`;
+      return `<article class="flow">
+<h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
+<div class="sql"><div class="sql-chip"><span>Prompt — dán vào Claude Code</span><button class="sql-copy">Copy</button></div><pre>${esc(prompt)}</pre></div>
+</article>`;
+    }).join('\n');
+    return { dem: ungVien.length, html };
+  })();
 
   const chiTiet = [
     section('qua-han', 'Quá hạn', 'Yêu cầu còn ở DD/XN/TH mà hạn giai đoạn đã trôi qua.',
@@ -1047,9 +1126,13 @@ ${promptBox}
       urTable(sapToi, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), sapToi.length),
     section('chua-chot', 'Giai đoạn chưa tick chốt đã hẹn', '', phaseTable, chuaChot.length),
     section('cong-pm', 'Chờ duyệt (UR ở DD)', 'Kiểm TLKS rồi quyết định XN / TA / KL. Đề xuất bên dưới chưa được thi hành.',
-      urTable(congPm, [colStt, colNoiDung, colMaLt1, colHan, colTlks, colDeXuat]), congPm.length),
+      ghiChuCanCu + urTable(congPm, [colStt, colNoiDung, colMaLt1, colHan, colTlks, colDeXuat]), congPm.length),
     section('phan-cong', 'Gợi ý người tiếp nhận (DD chưa giao)',
-      'Xếp hạng theo: (1) đã làm menu đó trong dự án · (2) đang gánh ít UR sắp tới hạn · (3) báo cáo đầu ra thì ưu tiên người đóng góp nhiều UR đầu vào. Đây là ĐỀ XUẤT — PM chốt rồi mới giao.',
+      'Xếp CỘT ĐỘ TIN CẬY TRƯỚC, điểm sau: người từng làm đúng màn hình luôn đứng trên người chưa từng, '
+      + 'kể cả khi đang gánh nặng và điểm bị trừ xuống âm — tải chỉ phân định giữa những người cùng có '
+      + 'kinh nghiệm, không xoá được kinh nghiệm. Điểm gồm: (1) đã làm đúng hiện vật/menu đó · '
+      + '(2) trừ theo số UR sắp tới hạn đang gánh · (3) báo cáo đầu ra thì cộng cho người đóng góp nhiều '
+      + 'UR đầu vào. Đây là ĐỀ XUẤT — PM chốt rồi mới giao.',
       phanCong.html, phanCong.dem),
     section('forum', 'Nội dung forum kèm theo (DD)',
       'UR chỉ ghi "update theo link forum" thì yêu cầu thật nằm ở topic, không nằm trong UR. Nội dung dưới đây lấy từ bản sao forum trong DB — đọc nó rồi mới kết luận phạm vi và giờ công.',
@@ -1072,6 +1155,9 @@ ${chartTlks(urs)}`),
 
   const huongDan = huongDanBlock(payload.huongDan);
   const kyThuat = [
+    section('prompt-ky-thuat', 'Prompt cho AI — gộp mọi gợi ý kỹ thuật của từng UR',
+      'Mỗi UR một prompt, dán thẳng vào Claude Code: bối cảnh + kinh nghiệm đã có + luồng dữ liệu + việc cần làm. Ba mục bên dưới là cùng nội dung đó, bày ra để đọc bằng mắt. Script SQL CỐ Ý không nằm trong prompt — nó là đầu ra xác định, chạy nguyên văn chứ không đưa cho AI viết lại.',
+      promptBlock.html, promptBlock.dem),
     section('huong-dan', 'Hướng dẫn từ kinh nghiệm thực chiến',
       'Cách làm do NGƯỜI viết, không phải máy rút. Gồm cả hướng dẫn ghi đích danh yêu cầu này lẫn kinh nghiệm mượn từ dự án khác qua controller/menu — mỗi mục nói rõ nó thuộc loại nào. Đây là kinh nghiệm chứ không phải quy định: đọc rồi tự quyết. Ghi thêm bằng `4ai playbook add`.',
       huongDan.html, huongDan.dem),
@@ -1092,7 +1178,7 @@ ${chartTlks(urs)}`),
     tabs: [
       { id: 'tq', nhan: 'Tổng quan' },
       { id: 'ct', nhan: 'Chi tiết đầy đủ', dem: quaHan.length + sapToi.length + congPm.length, html: chiTiet },
-      { id: 'kt', nhan: 'Gợi ý kỹ thuật', dem: coDdl.length + coLuong.length + huongDan.dem, html: kyThuat },
+      { id: 'kt', nhan: 'Gợi ý kỹ thuật', dem: promptBlock.dem + coDdl.length + coLuong.length + huongDan.dem, html: kyThuat },
     ],
   });
 }
@@ -1288,7 +1374,10 @@ export function renderPortfolio(items, skipped, warned, meta, h) {
     section('sap-toi-toan-danh-muc', 'Danh mục — sắp tới hạn', '',
       urTable(allSapToi.sort((a, b) => a._soNgay - b._soNgay), [colDuAn, colStt, colNoiDung, colGiaiDoan, colTrangThai, colMaLt1, colHan, colConLai]), tongSapToi),
     section('chua-giao', 'Chưa giao lập trình (DD)',
-      'Yêu cầu đã duyệt nhưng chưa có lập trình. Ứng viên xếp theo: đã làm menu đó · đang gánh ít UR sắp tới hạn · báo cáo đầu ra thì ưu tiên người làm nhiều UR đầu vào. ĐỀ XUẤT — PM chốt rồi mới giao.',
+      'Yêu cầu đã duyệt nhưng chưa có lập trình. Ứng viên xếp ĐỘ TIN CẬY TRƯỚC — người từng làm đúng '
+      + 'hiện vật/menu đó luôn đứng trên người chưa từng, kể cả khi đang gánh nặng; tải chỉ phân định '
+      + 'giữa những người cùng có kinh nghiệm. Báo cáo đầu ra thì cộng thêm cho người làm nhiều UR '
+      + 'đầu vào. ĐỀ XUẤT — PM chốt rồi mới giao.',
       ghiChuNhanSu + ghiChuPpThayThe
       + urTable(allChuaGiao.sort((a, b) => (a._soNgay ?? 99) - (b._soNgay ?? 99)),
         [colDuAn, colStt, colNoiDung, colHan, colConLai, colGoiY]), tongChuaGiao),

@@ -18,7 +18,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { emitPaths, mcpPath } from '../paths.mjs';
-import { banner, seeAlsoLine, alwaysOnAssets, onDemandAssets, runtimeFiles, bareCommand } from './common.mjs';
+import {
+  banner, seeAlsoLine, alwaysOnAssets, onDemandAssets, runtimeFiles, bareCommand, forEmit, referenceFiles,
+} from './common.mjs';
 import { stringifyFrontmatter } from '../fm.mjs';
 import { stableStringify } from '../json.mjs';
 import { HUB } from '../assets.mjs';
@@ -82,12 +84,15 @@ export function emitPlugin({ assets, mcpServers, target }) {
   const asSkills = [...alwaysOnAssets(assets), ...onDemandAssets(assets)];
 
   for (const a of asSkills) {
-    for (const e of emitPaths({ ...a, always: false, kind: a.kind === 'doctrine' ? 'skill' : a.kind }, 'plugin')) {
+    const x = forEmit(a, 'plugin', {},
+      { always: false, kind: a.kind === 'doctrine' ? 'skill' : a.kind });
+    for (const e of emitPaths(x, 'plugin')) {
       if (e.mode !== 'file') continue;
-      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(a), sourceId: a.id, sourceVersion: a.version });
-      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(a), sourceId: a.id, sourceVersion: a.version });
-      else textFiles.push({ relPath: e.path, content: skillFile(a), sourceId: a.id, sourceVersion: a.version });
+      if (a.kind === 'agent') textFiles.push({ relPath: e.path, content: agentFile(x), sourceId: a.id, sourceVersion: a.version });
+      else if (a.kind === 'command') textFiles.push({ relPath: e.path, content: commandFile(x), sourceId: a.id, sourceVersion: a.version });
+      else textFiles.push({ relPath: e.path, content: skillFile(x), sourceId: a.id, sourceVersion: a.version });
     }
+    textFiles.push(...referenceFiles(x, 'plugin'));
   }
 
   // Runtime chép nguyên văn. Đọc là input — writer vẫn là nơi duy nhất ghi.
