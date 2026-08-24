@@ -4,8 +4,9 @@ Thẩm quyền: file này đứng ngang `docs/ASSET-FORMAT.md` cho riêng phần
 `schema.mjs` và file này mâu thuẫn về vocabulary, file này đúng và `schema.mjs` phải sửa
 theo.
 
-Cưỡng chế bằng `node tools/4ai.mjs check`. Trong lúc migration còn dở, vi phạm hiện dưới
-dạng `WARN`; mỗi kind chuyển sang `ERROR` ngay khi đợt rename của kind đó đóng.
+Cưỡng chế bằng `node tools/4ai.mjs check` — `NAMING_ENFORCED` trong `schema.mjs` hiện phủ
+**mọi kind**, nên sai tên là `ERROR` chặn sync, không phải cảnh báo bỏ qua được. `4ai new`
+cũng từ chối in skeleton cho id sai chuẩn, nên asset sai tên không ra đời được ngay từ đầu.
 
 ## Nguyên tắc nền
 

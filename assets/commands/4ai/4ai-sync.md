@@ -1,6 +1,6 @@
 ---
-id: sync
-title: /sync
+id: 4ai-sync
+title: /4ai-sync
 kind: command
 domain: 4ai
 description: Chạy 4AI sync — dry-run trước, tóm tắt kế hoạch ghi, dừng chờ xác nhận rồi mới ghi thật; giải thích mọi refuse.

@@ -12,7 +12,7 @@ phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` 
 | 1 | thư mục domain (mọi kind) + doctrine (3) + rule (14) | ✅ xong |
 | 2 | skill (26) — kéo theo thư mục `references/` | ✅ xong |
 | 3 | agent (12) — gồm 3 asset đổi kind | ✅ xong |
-| 4 | command (12) — đổi tên slash command người dùng gõ | ⬜ |
+| 4 | command (12) — đổi tên slash command người dùng gõ | ✅ xong |
 | 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |
 
 Thư mục domain đổi tên **một lần, cho mọi kind, trong đợt 1**: `core/` → `4ai/`,
@@ -115,7 +115,7 @@ Ba asset **đổi kind** — chúng là quy trình, không phải vai:
 | `/fbo-review` | `/erp-diff-review` |
 | `/fbo-sql` | `/erp-sql-query` |
 | `/pm-new-adr` | `/pm-adr-create` |
-| `/pm-review` | `/pm-deadline-review` |
+| `/pm-review` | *giữ nguyên* — đợt 3 đã lấy id `pm-deadline-review` cho skill; `pm-review` vốn đã hợp lệ (`<scope>-<action>`) |
 | `/pm-status` | *giữ nguyên* |
 
 ## Nợ kỹ thuật ghi nhận, chưa xử lý

@@ -28,8 +28,8 @@ version: 2
   "tìm quá khứ", "trước đây có", "có chức năng … chưa", "tham khảo yc dự án khác" → nạp skill
   `erp-history-search` trước khi tra, vì nó giữ quy tắc `ma_da` 3 tầng và luật lật hết trang.
   Tra ra UR rồi mới phân tích thì quay lại `pm-analyst`.
-- **Không** giao `pm-analyst` khi việc thật là: sửa controller (→ `fbo-customize`),
-  điều tra cấu trúc màn hình (→ `erp-explorer`), soi diff (→ `fbo-review`).
+- **Không** giao `pm-analyst` khi việc thật là: sửa controller (→ `erp-customize`),
+  điều tra cấu trúc màn hình (→ `erp-explorer`), soi diff (→ `erp-diff-review`).
 - Kết quả trả về là **draft**. Không tự chốt phạm vi hay giờ công thay người phụ trách.
 - Việc thật là **báo cáo rà soát/hạn** (không phải hỏi về một UR cụ thể) thì đường đi là
   `4ai report` khi có shell, `render_review_report` khi không — xem `pm-deadline-review`.

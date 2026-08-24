@@ -1,6 +1,6 @@
 ---
-id: fbo-find
-title: /fbo-find
+id: erp-screen-find
+title: /erp-screen-find
 kind: command
 domain: erp
 description: Điều tra một màn hình FBO — dispatch erp-explorer, trả về bản đồ file, field, quan hệ và trạng thái customize.
@@ -20,4 +20,4 @@ version: 1
 3. Trình lại báo cáo của explorer đúng cấu trúc: Kết luận / Bản đồ file / Field liên quan /
    Include đáng chú ý / Chưa chắc chắn.
 
-Không sửa file nào trong lệnh này. Người dùng muốn sửa tiếp thì chỉ sang `/fbo-customize`.
+Không sửa file nào trong lệnh này. Người dùng muốn sửa tiếp thì chỉ sang `/erp-customize`.

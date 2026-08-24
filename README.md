@@ -11,7 +11,7 @@ Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự độ
 | **Rules** | Quy tắc kiểm soát chất lượng: không lộ secret, tên biến, lỗi phổ biến | Tất cả platform |
 | **Skills** | Quy trình cụ thể: customize FBO, rà soát yêu cầu, quản lý dự án | Claude, Cursor |
 | **Agents** | Tác nhân tự động: phân tích tài liệu, audit code, kiểm tra compliance | Claude (chạy standalone) |
-| **Commands** | Slash command: `/fbo-find`, `/pm-status`, `/sync` | Claude Code, Cursor |
+| **Commands** | Slash command: `/erp-screen-find`, `/pm-status`, `/4ai-sync` | Claude Code, Cursor |
 | **Báo cáo** | Dashboard HTML ngoại tuyến: rà soát UR, KPI phòng ban | Export từ tool |
 | **MCP Servers** | Kết nối tới database, API QLDA nội bộ | Claude, Cursor |
 
@@ -46,7 +46,7 @@ Chỉ dùng được trên Claude Code. Cài một lệnh, không phải clone g
 Xong. Gói đã bao gồm sẵn:
 - **26 skill** — doctrine, rule và quy trình FBO/PM, model tự nạp khi task chạm phạm vi
 - **9 agent** — `erp-explorer`, `erp-builder`, `erp-sql-expert`, `pm-analyst`…
-- **7 command** — `/fbo-find`, `/fbo-review`, `/pm-status`, `/pm-review`…
+- **7 command** — `/erp-screen-find`, `/erp-diff-review`, `/pm-status`, `/pm-review`…
 - **MCP `4ai-fbo`** — tra cứu controller, phân giải DTD entity, đo phạm vi Include, `query_sql`
 - **CLI `tools/4ai.mjs`** — để nhóm command PM dựng được báo cáo HTML
 
@@ -68,8 +68,8 @@ Cập nhật về sau:
 **Index SQLite sống sót qua update.** Nó nằm ở `${CLAUDE_PLUGIN_DATA}` chứ không nằm trong thư
 mục cache của plugin, nên không phải chạy lại `index_program` mỗi lần nâng cấp.
 
-**Lệnh bảo trì hub không có trong plugin** — `/sync`, `/doctor`, `/new-skill`, `/new-rule`,
-`/new-agent` chỉ có ý nghĩa khi bạn đang đứng trong repo, nên chúng cố tình bị loại khỏi bản
+**Lệnh bảo trì hub không có trong plugin** — `/4ai-sync`, `/4ai-doctor`, `/4ai-skill-create`, `/4ai-rule-create`,
+`/4ai-agent-create` chỉ có ý nghĩa khi bạn đang đứng trong repo, nên chúng cố tình bị loại khỏi bản
 phân phối. Cần chúng thì dùng cách 2.
 
 ### Cách 2 — Clone repo (khi cần sửa asset)
@@ -389,7 +389,7 @@ Sau khi `sync`, assets tự động xuất hiện trong thư mục `.claude/`:
 - **Rules** → `.claude/rules/` — tự động chạy trước mỗi response
 - **Skills** → `.claude/skills/` — gọi bằng `/skill-name`
 - **Commands** → `.claude/commands.json` — tích hợp vào command palette
-- **Slash commands** → `/fbo-find`, `/pm-status`, `/sync` và 10+ command khác
+- **Slash commands** → `/erp-screen-find`, `/pm-status`, `/4ai-sync` và 10+ command khác
 
 Ví dụ: `/pm-status` hiển thị trạng thái tất cả task trong `ledger/`, phân theo dự án.
 
@@ -444,7 +444,7 @@ git push
 ```
 
 **Sau khi push:** 
-- Claude Code: Chạy `/sync` để nhận config mới
+- Claude Code: Chạy `/4ai-sync` để nhận config mới
 - Cursor: Reload cửa sổ hoặc `Ctrl+Shift+P` → reload
 - Antigravity: Reload workspace để nhận config mới
 
@@ -717,7 +717,7 @@ sửa đặc tả rồi sinh lại, đừng sửa script.
 | `assets/rules/` | Kiểm soát chất lượng (không lộ secret, tên biến, SQL injection, v.v.) |
 | `assets/skills/` | Quy trình chi tiết (customize FBO, audit, PM workflow) |
 | `assets/agents/` | Tác nhân tự động (phân tích tài liệu, code review) |
-| `assets/commands/` | Slash command (`/pm-status`, `/fbo-find`, v.v.) |
+| `assets/commands/` | Slash command (`/pm-status`, `/erp-screen-find`, v.v.) |
 | `data/` | Config tham chiếu (khách, chương trình, schema DB) |
 | `mcp/servers.json` | Kết nối tới API, database nội bộ |
 | `tools/lib/` | Library: report, prompt, assignee, staffing, template |
@@ -758,7 +758,7 @@ git push
 ```
 
 **Khi nào skill xuất hiện?**
-- **Claude Code:** Ngay lập tức (sau `/sync`), gọi bằng `/my-skill-id`
+- **Claude Code:** Ngay lập tức (sau `/4ai-sync`), gọi bằng `/my-skill-id`
 - **Cursor:** Reload cửa sổ, dùng bình thường
 - **Antigravity:** Reload workspace, agent tự nạp theo `SKILL.md` khi liên quan
 

@@ -1,6 +1,6 @@
 ---
-id: new-rule
-title: /new-rule
+id: 4ai-rule-create
+title: /4ai-rule-create
 kind: command
 domain: 4ai
 description: Tạo rule mới trong hub 4AI — hỏi 3 điều không suy ra được (severity, always/globs, targets), viết file đúng schema, chạy check.
@@ -22,4 +22,4 @@ Tạo rule mới: **$ARGUMENTS**
    - `targets`: đủ cả 4 tool hay hẹp hơn?
 3. Viết `assets/rules/<domain>/<id>.md` — body đủ Vì sao / Quy tắc / Ví dụ (path thật) / Bẫy.
 4. Chạy `node tools/4ai.mjs check` — phải exit 0; lỗi thì sửa tới xanh.
-5. Báo cáo: id, file nguồn, output của `explain <id>`, nhắc chạy `/sync` khi muốn phát hành.
+5. Báo cáo: id, file nguồn, output của `explain <id>`, nhắc chạy `/4ai-sync` khi muốn phát hành.

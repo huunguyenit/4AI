@@ -1,6 +1,6 @@
 ---
-id: new-agent
-title: /new-agent
+id: 4ai-agent-create
+title: /4ai-agent-create
 kind: command
 domain: 4ai
 description: Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only.

@@ -1,6 +1,6 @@
 ---
-id: pm-new-adr
-title: /pm-new-adr
+id: pm-adr-create
+title: /pm-adr-create
 kind: command
 domain: pm
 description: Ghi lại một quyết định thành ADR theo template chuẩn — hỏi đủ Bối cảnh/Quyết định/Hệ quả rồi tạo file trong ledger/adr/.

@@ -1,6 +1,6 @@
 ---
-id: fbo-review
-title: /fbo-review
+id: erp-diff-review
+title: /erp-diff-review
 kind: command
 domain: erp
 description: Soi diff XML hiện tại theo bộ rule FBO — dispatch erp-reviewer, phân loại Blocker / Nên sửa / Góp ý.

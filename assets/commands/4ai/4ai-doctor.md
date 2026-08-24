@@ -1,6 +1,6 @@
 ---
-id: doctor
-title: /doctor
+id: 4ai-doctor
+title: /4ai-doctor
 kind: command
 domain: 4ai
 description: Chạy 4AI doctor và giải thích từng lỗi theo hướng phải sửa gì ở đâu, không chỉ lặp lại message. Gồm cả cấu hình runtime của máy này.

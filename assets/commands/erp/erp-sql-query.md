@@ -1,6 +1,6 @@
 ---
-id: fbo-sql
-title: /fbo-sql
+id: erp-sql-query
+title: /erp-sql-query
 kind: command
 domain: erp
 description: Tra cứu SQL đằng sau màn hình FBO qua query_sql — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP.

@@ -1,6 +1,6 @@
 ---
-id: new-skill
-title: /new-skill
+id: 4ai-skill-create
+title: /4ai-skill-create
 kind: command
 domain: 4ai
 description: Tạo skill mới trong hub 4AI — ép nội dung thành quy trình cụ thể với tool-call và path thật thay vì lời khuyên chung chung, rồi chạy check.

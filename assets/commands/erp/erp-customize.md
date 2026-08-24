@@ -1,6 +1,6 @@
 ---
-id: fbo-customize
-title: /fbo-customize
+id: erp-customize
+title: /erp-customize
 kind: command
 domain: erp
 description: Customize màn hình FBO cho một khách — chốt phạm vi, lập kế hoạch, chờ duyệt, rồi mới giao erp-builder thi hành và ghi ledger.
