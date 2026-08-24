@@ -14,11 +14,7 @@
       "mcp__4ai-fbo__read_source",
       "mcp__4ai-fbo__resolve_vouchercode",
       "mcp__4ai-fbo__plan_report",
-      "mcp__4ai-fbo__license_status",
-      "Bash(graft:*)",
-      "Bash(npx graft:*)",
-      "Bash(graft-dev:*)",
-      "Bash(node dist/cli.js:*)"
+      "mcp__4ai-fbo__license_status"
     ]
   },
   "statusLine": {
