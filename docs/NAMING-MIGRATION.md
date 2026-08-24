@@ -1,6 +1,11 @@
-# Migration đặt tên — trạng thái
+# Migration đặt tên — bảng tra tên cũ
 
-Bảng ánh xạ cho việc chuẩn hoá theo `docs/NAMING.md`. **File này xoá đi khi đợt cuối đóng.**
+**Migration đã xong.** Toàn bộ 67 asset đạt chuẩn `docs/NAMING.md`; `NAMING_ENFORCED`
+phủ mọi kind nên sai tên là ERROR chặn sync.
+
+File này lẽ ra xoá khi đợt cuối đóng. Giữ lại vì tên cũ vẫn sống ở hai chỗ không sửa
+được: các mục `## [Chưa phát hành]` trong `CHANGELOG.md` (ghi chép lịch sử) và trí nhớ
+người dùng. Xoá khi không ai còn tra tên cũ nữa — không có mốc thời gian cứng cho việc đó.
 
 Mỗi đợt là một commit. Sau mỗi đợt: `check` phải exit 0, `sync --dry-run` chạy hai lần
 phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` sang `ERROR` trong
@@ -13,7 +18,7 @@ phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` 
 | 2 | skill (26) — kéo theo thư mục `references/` | ✅ xong |
 | 3 | agent (12) — gồm 3 asset đổi kind | ✅ xong |
 | 4 | command (12) — đổi tên slash command người dùng gõ | ✅ xong |
-| 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |
+| 5 | sync thật, cập nhật README + CHANGELOG | ✅ xong |
 
 Thư mục domain đổi tên **một lần, cho mọi kind, trong đợt 1**: `core/` → `4ai/`,
 `fbo-xml/` → `erp/`, `project-mgmt/` → `pm/`. Đổi từng đợt sẽ bắt `targets.json` phải khai

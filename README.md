@@ -44,7 +44,7 @@ Chỉ dùng được trên Claude Code. Cài một lệnh, không phải clone g
 ```
 
 Xong. Gói đã bao gồm sẵn:
-- **26 skill** — doctrine, rule và quy trình FBO/PM, model tự nạp khi task chạm phạm vi
+- **45 skill** — doctrine, rule và quy trình ERP/PM, model tự nạp khi task chạm phạm vi
 - **9 agent** — `erp-explorer`, `erp-builder`, `erp-sql-expert`, `pm-analyst`…
 - **7 command** — `/erp-screen-find`, `/erp-diff-review`, `/pm-status`, `/pm-review`…
 - **MCP `4ai-fbo`** — tra cứu controller, phân giải DTD entity, đo phạm vi Include, `query_sql`

@@ -2,101 +2,101 @@
   "files": [
     {
       "path": ".cursor-plugin/plugin.json",
-      "sha256": "32bd91700904f6fa983ec670b27e165ed684eda57cdf00116b0f57b9437e0525"
+      "sha256": "f3699aa3d37937a18b7499e9890dcde28773f67069df1c2ec9ade2596d618477"
     },
     {
-      "path": "agents/fbo-change-reviewer.md",
-      "sha256": "b1fdfd7364296078e79bc4b515b79d2fcae13fd3dbc896113abab76d2d214c5b",
-      "sourceId": "fbo-change-reviewer",
-      "sourceVersion": 1
-    },
-    {
-      "path": "agents/fbo-customizer.md",
-      "sha256": "d0c9ecaaeab26385509bdb156db8272a07d6c9bb80d064058f4965d009649f9c",
-      "sourceId": "fbo-customizer",
-      "sourceVersion": 1
-    },
-    {
-      "path": "agents/fbo-explorer.md",
-      "sha256": "2f5c903e445a9671b3c1a26c6fbb4d35429c154e4eb85dc2244acba30141fbde",
-      "sourceId": "fbo-explorer",
-      "sourceVersion": 1
-    },
-    {
-      "path": "agents/fbo-regulatory-rollout.md",
-      "sha256": "bb9c7ed89aaab63bb23081d92f65ae8cce304c1d2501921f3d37dd23f98598b3",
-      "sourceId": "fbo-regulatory-rollout",
+      "path": "agents/erp-builder.md",
+      "sha256": "178d3b1264580f5304138eed9f3006c0ea261c4c33de16d2951e1834f46352eb",
+      "sourceId": "erp-builder",
       "sourceVersion": 2
     },
     {
-      "path": "agents/pm-deadline-review.md",
-      "sha256": "3d4daf709c783d280ac18a590b7c1223c936362784f1d57a2813d540878ca883",
-      "sourceId": "pm-deadline-review",
-      "sourceVersion": 11
+      "path": "agents/erp-explorer.md",
+      "sha256": "f3e43c5f96b29ec4c9e73752ce10a920d484620cd4fca4794ef147f9bdfe91ce",
+      "sourceId": "erp-explorer",
+      "sourceVersion": 2
     },
     {
-      "path": "agents/pm-planner.md",
-      "sha256": "3ba754a1d240b14f95bf883bf48d59a342abf3693a46d204fa53b2bccb960d7e",
-      "sourceId": "pm-planner",
+      "path": "agents/erp-glossary-expert.md",
+      "sha256": "d9f737199f5b621393935e12e8d04aa1fed56683aa5e1dc7db7091da22dac8ff",
+      "sourceId": "erp-glossary-expert",
       "sourceVersion": 1
     },
     {
-      "path": "agents/pm-release-auditor.md",
-      "sha256": "c0538a1aa50201b862e81cd3dd937b181bd7b7c2c2c4d4b8cf31e865cf4c3f64",
-      "sourceId": "pm-release-auditor",
-      "sourceVersion": 2
+      "path": "agents/erp-reviewer.md",
+      "sha256": "8614af05f37d564eebcceaeba827e691d54f1be7cf97fd830c40c71d3843c4fb",
+      "sourceId": "erp-reviewer",
+      "sourceVersion": 1
     },
     {
-      "path": "agents/pm-release-handover.md",
-      "sha256": "e23f3f29a6f510801cf350b8d106d98cfbf08b039276a7510ef927b254425450",
-      "sourceId": "pm-release-handover",
-      "sourceVersion": 2
+      "path": "agents/erp-sql-expert.md",
+      "sha256": "c6d9a53720584efff2c62c6552a3a99a6a14fc2512a16dd95124ce359f0b2730",
+      "sourceId": "erp-sql-expert",
+      "sourceVersion": 1
     },
     {
-      "path": "agents/pm-ur-analyst.md",
-      "sha256": "a61ab76dfdbce677ef1ed7637aa90cb21d0d211d8b31882593fefa7977c6f581",
-      "sourceId": "pm-ur-analyst",
+      "path": "agents/erp-xml-expert.md",
+      "sha256": "15aea16b76778743d1c1822dd4e359b005222ac0eebd10e0fd97f065406c10e3",
+      "sourceId": "erp-xml-expert",
+      "sourceVersion": 1
+    },
+    {
+      "path": "agents/pm-analyst.md",
+      "sha256": "8f992292babe9aed67df28774e0e931e1b286f4b69dda7759ea7c67da5d146c7",
+      "sourceId": "pm-analyst",
       "sourceVersion": 4
     },
     {
-      "path": "commands/fbo-customize.md",
-      "sha256": "d873984efd8eb04a56c8af4a5c46f703df85eb4bf8c3a3131344ece3ac9bb5e6",
-      "sourceId": "fbo-customize",
+      "path": "agents/pm-architect.md",
+      "sha256": "e0647f82d6b75db6ee32bcfcffd5dda1aaf5fb147b7b0aed8c88452e31991fc5",
+      "sourceId": "pm-architect",
       "sourceVersion": 1
     },
     {
-      "path": "commands/fbo-find.md",
-      "sha256": "dd5630265addb9ec0d23d02572784bcfc26e3311be1e70c4dd6df3c4e4b9e50c",
-      "sourceId": "fbo-find",
+      "path": "agents/pm-auditor.md",
+      "sha256": "abb14982e4fd3ef838601bbc2a3a9b816ef9abe76f0b05cbb37bb965bea2ad5f",
+      "sourceId": "pm-auditor",
+      "sourceVersion": 2
+    },
+    {
+      "path": "commands/erp-customize.md",
+      "sha256": "dda6fa1df11d86c91f1892e08814e7a3e3b1f91ea747521078aa8c8c1a87aa09",
+      "sourceId": "erp-customize",
       "sourceVersion": 1
     },
     {
-      "path": "commands/fbo-review.md",
-      "sha256": "c87d8d2e18fe896068b8251f0ea22ae22b1b384a05621c0b613a88e5ae0d9f79",
-      "sourceId": "fbo-review",
+      "path": "commands/erp-diff-review.md",
+      "sha256": "8cddfb5e5faed05272a97d631eabebe4d4343c9021683098075dc3a68dc8960f",
+      "sourceId": "erp-diff-review",
       "sourceVersion": 1
     },
     {
-      "path": "commands/fbo-sql.md",
-      "sha256": "a05cee8b5edebe8e739d86eb5d715291c71948db3eac3d07c05d28d436d2cf5e",
-      "sourceId": "fbo-sql",
+      "path": "commands/erp-screen-find.md",
+      "sha256": "4fb2f62c1548f6c9032d34cdef71025c7585911ae1f517f3fc9b51ed9035d6c8",
+      "sourceId": "erp-screen-find",
       "sourceVersion": 1
     },
     {
-      "path": "commands/pm-new-adr.md",
-      "sha256": "97fa2c56d44864b6a582e92e596ed040552565ca2a7c229b2fa7d3591f511085",
-      "sourceId": "pm-new-adr",
+      "path": "commands/erp-sql-query.md",
+      "sha256": "32650b3336542479fed76c593d1730a0a0db2f04d9576407caf050aa0e8d8493",
+      "sourceId": "erp-sql-query",
+      "sourceVersion": 1
+    },
+    {
+      "path": "commands/pm-adr-create.md",
+      "sha256": "4579b07df8b2e03f9cf1b3304452ad38e9b3d98e1271461ac9783ce7484ffb39",
+      "sourceId": "pm-adr-create",
       "sourceVersion": 1
     },
     {
       "path": "commands/pm-review.md",
-      "sha256": "a6478d62251809587b8d7d5dd2010d824fc600368c39bd95dc72e75889744db1",
+      "sha256": "1d17dcfff5fecdbd00d9fa0f96c6853b2ab75295e9337374cff924e78fa47b80",
       "sourceId": "pm-review",
-      "sourceVersion": 10
+      "sourceVersion": 11
     },
     {
       "path": "commands/pm-status.md",
-      "sha256": "4a282af16f1dd863c52ff7e1f7ad22ab584ade51fcdaaf0e20ea6eff679c995d",
+      "sha256": "805c3e09a9fd889b6569001e1a08e50d964ff5c53b0f3e4b79771085e1ed3d85",
       "sourceId": "pm-status",
       "sourceVersion": 1
     },
@@ -118,7 +118,7 @@
     },
     {
       "path": "data/graph-schema.json",
-      "sha256": "82574e40fa95d8cd9e5de14b5c90f75a93e3b69b8905c07093dbd7b0dc42f3e4"
+      "sha256": "8709c99862383274c6601289b40a88cc48cd92d55ce9ffb5cfade665eadf7d34"
     },
     {
       "path": "data/graph/capability.jsonl",
@@ -158,50 +158,50 @@
     },
     {
       "path": "mcp/fbo/lib/encoding.mjs",
-      "sha256": "09700cef038f82a419ce8797adcfe3824f28f66d961a9add82359a3bd2a27a3a"
+      "sha256": "647d00c5bd69b7851f0cbfcef2a6bd5de97f32df804a5684ca9abc068e4c1e9b"
     },
     {
       "path": "mcp/fbo/lib/index.mjs",
-      "sha256": "aeaf02edb84ce9018a9a936f76d3a442656ec4cc98a35469b973844c64a219c9"
+      "sha256": "3836b92db41e87e6a996d2fabc30e6d3ea1e8784f5762130843bc8ec7facf6e0"
     },
     {
       "path": "mcp/fbo/lib/license.mjs",
-      "sha256": "a1a53719d7394eb0ad57dffcdde4362c57158a521aac85fbdb326f457c3079d4"
+      "sha256": "ebc64d7d1bbf57dfb43e27374a0d9364019cfe9e06460f33b915eacebaf6bb4e"
     },
     {
       "path": "mcp/fbo/lib/rpc.mjs",
-      "sha256": "2b9de3f9464e6fe5ae95a47937cf0b97798445169f562952d37f719c4529ea56"
+      "sha256": "e2ff73540df922a1b617a81cb783d4509839345bcadbe7e41cc1d5205d6ff07f"
     },
     {
       "path": "mcp/fbo/lib/sql.mjs",
-      "sha256": "296d65c42b3b10a32163e5480685b087c814c28b26699fc3a5fa0142887d9785"
+      "sha256": "0df633ebba79ae2f20ec7012188714a4b2832504acd2f33d79cccf5419fd7cf8"
     },
     {
       "path": "mcp/fbo/lib/tools.mjs",
-      "sha256": "6d03a646b86300bd6c0b17ad5d2c2ed60528d50da170ce4d63540bfa53f78abf"
+      "sha256": "2d0674cb895862b35c2082900c87ff2337298073c2e38a1123feeee9b1773abc"
     },
     {
       "path": "mcp/fbo/lib/xmlscan.mjs",
-      "sha256": "7a28d3dcd2f6c851c26b757b7b36ee913db2d695755c8f6d20333edaaea8518f"
+      "sha256": "25a21dace00b1da5555c0a2ec361f4a28f86cbbf07b30789f8d8b7fcfc2eab27"
     },
     {
       "path": "mcp/fbo/selftest.mjs",
-      "sha256": "67e6d05cf75499ffe21c8bcdb8b732481fcab2d11d7ab2010f3543bdb68f48b2"
+      "sha256": "8787b78d3c38e50b57aec5729265645f214887fe8aee339d5d62eb8c0ce416a4"
     },
     {
       "path": "mcp/fbo/server.mjs",
-      "sha256": "12de91da8ac054c4a58055d238be0047874eaab4205fce4e9982f2d050aa03e9"
+      "sha256": "8eefe2966b5a73b4534bbc6a631c11d6bef526ae58434eefabe37b7aefd242ff"
     },
     {
-      "path": "rules/00-core-doctrine.mdc",
-      "sha256": "74adee559d96fdaf328f28d3a60831b45cb17bee8decc94450e22836b46a7334",
-      "sourceId": "core-doctrine",
+      "path": "rules/00-4ai-doctrine.mdc",
+      "sha256": "103fbc38a9a679e56fc7c65bb43f7ace8f22b066cb309470dfb657d68319fe45",
+      "sourceId": "4ai-doctrine",
       "sourceVersion": 1
     },
     {
-      "path": "rules/00-fbo-doctrine.mdc",
-      "sha256": "960d43bb26f6af6f0d8bd0b857b400b70ba7a60ff12a27f645916d92c3863038",
-      "sourceId": "fbo-doctrine",
+      "path": "rules/00-erp-doctrine.mdc",
+      "sha256": "c46a6a55c3dbb81437c934d207603d49eeac326396c3b4f1660720fa2a23465f",
+      "sourceId": "erp-doctrine",
       "sourceVersion": 1
     },
     {
@@ -211,363 +211,789 @@
       "sourceVersion": 1
     },
     {
-      "path": "rules/fbo-customization-scope.mdc",
-      "sha256": "52bd4e242a84a3218a9fecccbf3ac381d0598102a93be98123c096bbdd196de6",
-      "sourceId": "fbo-customization-scope",
+      "path": "rules/erp-agent-routing.mdc",
+      "sha256": "d611035a7c2070f94f9661bb5faefc0188d9e089e6133dcbef6095f469f5daff",
+      "sourceId": "erp-agent-routing",
       "sourceVersion": 1
     },
     {
-      "path": "rules/fbo-encoding-and-newlines.mdc",
-      "sha256": "f0c8dcaa9dbbe4d87ea9a5a82200433ffee54ec11e09e09ad92dcfa12eb0faaa",
-      "sourceId": "fbo-encoding-and-newlines",
-      "sourceVersion": 1
-    },
-    {
-      "path": "rules/fbo-entity-resolution-first.mdc",
-      "sha256": "bf06b18e30c008d3668be0ad0e708e492ea95d5327aa6f81730ce2a1c168e21a",
-      "sourceId": "fbo-entity-resolution-first",
-      "sourceVersion": 1
-    },
-    {
-      "path": "rules/fbo-f-vs-xml-pairing.mdc",
-      "sha256": "68a4e5a1a1427e9d23d5ade7cb9f2e39f5c2dc90af030b4d422ea30f908910fc",
-      "sourceId": "fbo-f-vs-xml-pairing",
-      "sourceVersion": 1
-    },
-    {
-      "path": "rules/fbo-lookup-discipline.mdc",
-      "sha256": "94c8f273ed641c217792c26cc49ff8de9b78346780ddf911378b80af803afb7f",
-      "sourceId": "fbo-lookup-discipline",
+      "path": "rules/erp-mcp-lookup.mdc",
+      "sha256": "6bc4b1360a005f9848957708ef541f6b2c96dc40443e9b86d0c980d5230f65e9",
+      "sourceId": "erp-mcp-lookup",
       "sourceVersion": 2
     },
     {
-      "path": "rules/fbo-never-invent-files.mdc",
-      "sha256": "07ef77de5451b8187f80ac47de2af27d5529b7b539e1c12f4f4c933033f7566b",
-      "sourceId": "fbo-never-invent-files",
+      "path": "rules/erp-program-scope.mdc",
+      "sha256": "f88083225e834511bd36de263cc8485f1e8353b53f9e3a95b9aed3d3d25dcc8f",
+      "sourceId": "erp-program-scope",
       "sourceVersion": 1
     },
     {
-      "path": "rules/fbo-sql-via-mcp.mdc",
-      "sha256": "8a23d08b711e5ac8d879c55520d7a7d685726a4f1f46e8568836f357e5da3133",
-      "sourceId": "fbo-sql-via-mcp",
+      "path": "rules/erp-sql-access.mdc",
+      "sha256": "2822c2f1db6d97c40b77e17d625caffa4ab0ccb6bdd94d0a28901d22ea824af4",
+      "sourceId": "erp-sql-access",
       "sourceVersion": 2
+    },
+    {
+      "path": "rules/erp-sql-style.mdc",
+      "sha256": "41611ae6fcd60b59ed45ef51a6dc3cd37437c23f08907822e35b51273f75a575",
+      "sourceId": "erp-sql-style",
+      "sourceVersion": 3
+    },
+    {
+      "path": "rules/erp-xml-encoding.mdc",
+      "sha256": "3d5de621d33ba1a0d2964e5d0fb469ef336a758be640af057b06c2e34bd517b9",
+      "sourceId": "erp-xml-encoding",
+      "sourceVersion": 1
+    },
+    {
+      "path": "rules/erp-xml-entity-resolution.mdc",
+      "sha256": "b6e1f712181ea7f27e4315b12d28521602a7299fa6e1e98a3fa521f5bd1e8c1f",
+      "sourceId": "erp-xml-entity-resolution",
+      "sourceVersion": 1
+    },
+    {
+      "path": "rules/erp-xml-existence.mdc",
+      "sha256": "7e0f0c75f176373aa1ebf3dc21745592042d9179353502271d6a7f6a0290aebe",
+      "sourceId": "erp-xml-existence",
+      "sourceVersion": 1
+    },
+    {
+      "path": "rules/erp-xml-pairing.mdc",
+      "sha256": "3290f239860141e37ca5451c248e3ab083186ef514a89de6afdee62d606b6527",
+      "sourceId": "erp-xml-pairing",
+      "sourceVersion": 1
     },
     {
       "path": "rules/pm-ledger-discipline.mdc",
-      "sha256": "35e06a27f0f931e64f868d830257d705e55d583a0dc6b3274019551b92c372f1",
+      "sha256": "3101e9ec89fc3de2292e16a4499c20f0aa7839092143a68a16b0778bf73fef9c",
       "sourceId": "pm-ledger-discipline",
       "sourceVersion": 1
     },
     {
-      "path": "rules/pm-no-secrets-in-notes.mdc",
-      "sha256": "cb55911b3faa6c5e1b7742bda34b61a652c6e80afcab8cf86d95f16b14b5f405",
-      "sourceId": "pm-no-secrets-in-notes",
+      "path": "rules/pm-notes-secrets.mdc",
+      "sha256": "a395ecfa30ce67a78df18ae3b9698a854f5110c52800834019e71ba8763355cc",
+      "sourceId": "pm-notes-secrets",
       "sourceVersion": 1
     },
     {
-      "path": "rules/pm-program-from-workspace.mdc",
-      "sha256": "23429286d4a98dd80b845bd3908a7f8a09bf5fb920b1bbf6e36e32beac044e0f",
-      "sourceId": "pm-program-from-workspace",
+      "path": "rules/pm-program-detection.mdc",
+      "sha256": "13a915e73b99886a46cfa211bbba71a60e1db3318133c5f479a67b74949d6886",
+      "sourceId": "pm-program-detection",
       "sourceVersion": 2
     },
     {
-      "path": "rules/pm-scope-question-first.mdc",
-      "sha256": "332eb8b5531ccfff0a820f211fd3b800db8c3cd07757263c2c9b043c2d32bc03",
-      "sourceId": "pm-scope-question-first",
+      "path": "rules/pm-scope-clarification.mdc",
+      "sha256": "e0c992f497dd07fc2cb31da96f0ff33ae991698f0e30f76c3bc153e625900fb0",
+      "sourceId": "pm-scope-clarification",
       "sourceVersion": 1
     },
     {
       "path": "rules/pm-ur-routing.mdc",
-      "sha256": "18950bfbcad7b34916fe7cb04c69ca2295d5b6b93d91ff6a5f35575e007cfeb9",
+      "sha256": "ef51314fcebea00a3edc427698ef370a59a654b86148f9e15405cef54bf8fed2",
       "sourceId": "pm-ur-routing",
       "sourceVersion": 2
     },
     {
-      "path": "skills/fbo-controller-anatomy/SKILL.md",
-      "sha256": "4c07a064ae7c2984f7e69fdbceb07e9a288ffaed77f5ec1de2df2dce196a75d9",
-      "sourceId": "fbo-controller-anatomy",
+      "path": "skills/erp-category-create/SKILL.md",
+      "sha256": "889425889dcda19688d18ab0ced0ece92d38a6c7edd1599ff0fe038315bfd37e",
+      "sourceId": "erp-category-create",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-customization-workflow/SKILL.md",
-      "sha256": "582da78cc72f54f397e357b42394fbbf14d15986e6ee8e6162a6decc9373954d",
-      "sourceId": "fbo-customization-workflow",
+      "path": "skills/erp-category-create/references/check-trung.md",
+      "sha256": "a289343388a7019826ce5e55064caba1df494a2353ede74afb70dce8e4f72179",
+      "sourceId": "erp-category-create#check-trung",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-js-api/SKILL.md",
-      "sha256": "efb039be2217413d627fec82d299cea2a6d0fd34c3cafac614f943ccdd0708aa",
-      "sourceId": "fbo-js-api",
+      "path": "skills/erp-category-create/references/database.md",
+      "sha256": "de7e8688b67ee81cd76f480cbb35a26652d5074b089e7d1623502593aa25eb92",
+      "sourceId": "erp-category-create#database",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-navigation-recipes/SKILL.md",
-      "sha256": "ddef6ef24f30805f20ac68cc79f8eea479f79aaf9e63288d3ae262b178aa3f87",
-      "sourceId": "fbo-navigation-recipes",
+      "path": "skills/erp-category-create/references/xml-structure.md",
+      "sha256": "7f91750deeb374cd24c0b7790a7e4fa7e9aad6cb279cdfa6ade79e5b7fd0f700",
+      "sourceId": "erp-category-create#xml-structure",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-nd252-ty-gia-hq/SKILL.md",
-      "sha256": "b322c681c133eaa1097a9a791e459ea99d898b57d4553b6507115e21ac79b0c4",
-      "sourceId": "fbo-nd252-ty-gia-hq",
+      "path": "skills/erp-controller-reference/SKILL.md",
+      "sha256": "647bc9ed442476e463fef954af2c6da8fee43fa7f777da0d4c38afeaaadaa767",
+      "sourceId": "erp-controller-reference",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-new-table-proposal/SKILL.md",
-      "sha256": "b80da9c41065b972c8b9b666141f9c332f22936c4c36f6be2ffa8910d4a58c6e",
-      "sourceId": "fbo-new-table-proposal",
+      "path": "skills/erp-customization-execute/SKILL.md",
+      "sha256": "2c34a0a5a9a4cd870b2bb5009e73c4dbdf4b9cc3acaebce90aabc31b30e46de1",
+      "sourceId": "erp-customization-execute",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-customize/SKILL.md",
+      "sha256": "7b282d0ceda8320e58e9301da6da39a552c559eb24e9139ec730fc30edc03da6",
+      "sourceId": "erp-einvoice-customize",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-customize/references/examples-ur.md",
+      "sha256": "24c071894e446bf139d9046d84cf820d1e16bc0b01573ddcc4c4ca2398b9e371",
+      "sourceId": "erp-einvoice-customize#examples-ur",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-customize/references/reference-customize.md",
+      "sha256": "85a27e128e171f84e6b3dbca4f41ffd9db4d46c5bba0298e749755a5147501d9",
+      "sourceId": "erp-einvoice-customize#reference-customize",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-nd70-implement/SKILL.md",
+      "sha256": "3a6d20e68b995848e5d1cf4da6f6864bb074798f89b44b8e0bf650c6363aba09",
+      "sourceId": "erp-einvoice-nd70-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-nd70-implement/references/examples-ur.md",
+      "sha256": "d71c73873b39f5101415d0336f35e762faee3e3b670b92c7e072efaf28a24e1f",
+      "sourceId": "erp-einvoice-nd70-implement#examples-ur",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-einvoice-nd70-implement/references/reference-payload.md",
+      "sha256": "9ef4fb66560c23256196144a1c478f82985861670b9c70864dfe916517ef302f",
+      "sourceId": "erp-einvoice-nd70-implement#reference-payload",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-glossary-reference/SKILL.md",
+      "sha256": "c6621d955571cb53c155372db5f68c92a10e45706c04ee0db01cfd898c897f9c",
+      "sourceId": "erp-glossary-reference",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-glossary-reference/references/abbreviations.md",
+      "sha256": "d9b19317fb07000543e2b4e65386022959d3929c760071d96de8cdaa72cd12f8",
+      "sourceId": "erp-glossary-reference#abbreviations",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-glossary-reference/references/naming.md",
+      "sha256": "07c4a66c9bf520a3ad15dd20b419f10ab801257daa3fe2e38eea18f973a95e45",
+      "sourceId": "erp-glossary-reference#naming",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-glossary-reference/references/runtime-tokens.md",
+      "sha256": "2a1bf14c5f8b53784241a13831592606774bf0fa227b360d7d76a268a34e08d4",
+      "sourceId": "erp-glossary-reference#runtime-tokens",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-glossary-reference/references/vouchers.md",
+      "sha256": "43c442f901757debdb7beb52e5f22ac86cf6380c6c47661be817b39a1917e69b",
+      "sourceId": "erp-glossary-reference#vouchers",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-hddv-migrate/SKILL.md",
+      "sha256": "7e1d28d6f3cdfcefd6ed50ac144ece5207dc0648a1d97e55c54c80dfe646065a",
+      "sourceId": "erp-hddv-migrate",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/reference.md",
+      "sha256": "8c99df9d2da6892720bf0e71f53bd5942fc2fcf2e49e917446f7e158c0b69caa",
+      "sourceId": "erp-hddv-migrate#reference",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-APTran.md",
+      "sha256": "003eb9cb92c811da6933a6b2d65628177455ef67b9fb36ede9e63ed479b80be9",
+      "sourceId": "erp-hddv-migrate#tran-recipes-APTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-ASTran.md",
+      "sha256": "37c4877402c0c4f7c67d7a55fe034f03cad786600a81b0b4df1d2225209f4e05",
+      "sourceId": "erp-hddv-migrate#tran-recipes-ASTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-GLTran.md",
+      "sha256": "22d59c836efb82f7c4e269b93a6313c51c01a2358234b88e740ec0c2af6845bc",
+      "sourceId": "erp-hddv-migrate#tran-recipes-GLTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-JPTran.md",
+      "sha256": "ff714742a6a123cb57ef9dac6b3b765d79e604ffc33d0dc44a2f068cdd3d885d",
+      "sourceId": "erp-hddv-migrate#tran-recipes-JPTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PATran.md",
+      "sha256": "0cd6f57fa586680328f94be9184deb6d77321ad8a21f6e26aa5e53ae754a0998",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PATran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PFTran.md",
+      "sha256": "5f42eb9098dc25c62b186b5eab9e7ee04aa609fc425337d00f97554ef9ecc965",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PFTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PGTran.md",
+      "sha256": "439f5483513f74d01af2b272ecb1c4be68ef58f3fedde5cfcc87d1b9c123ca8e",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PGTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PSTran.md",
+      "sha256": "349f68ac3707fa304e17ece3f90d25fa431e543b9f8031908cb692bde3cc04f6",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PSTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PVTran.md",
+      "sha256": "522b689d2ed6f0fe86a395a3efd39a2ada944ac815834b83f90c439b6a7b68a0",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PVTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-PXTran.md",
+      "sha256": "30ac9a354c66c42978bdda3113dbcfab38e4909bd8612e59657a710262e9de0a",
+      "sourceId": "erp-hddv-migrate#tran-recipes-PXTran",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-hddv-migrate/references/tran-recipes-list-vs-script.md",
+      "sha256": "c0d1877e0185ef08c9d26a029e2446c2dbf8f91d0598ed9a31fc263aa87bb2cc",
+      "sourceId": "erp-hddv-migrate#tran-recipes-list-vs-script",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-history-search/SKILL.md",
+      "sha256": "aab5fdf6300016121c896d53fa7ada93aa817152b64d2d9df70bc2417abd0177",
+      "sourceId": "erp-history-search",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-history-search/references/reference-search-qlyc.md",
+      "sha256": "224dbfb8aaed716bc544cca200ede76289dc9632c0243ccee174ef30d2165914",
+      "sourceId": "erp-history-search#reference-search-qlyc",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-history-search/references/reference-trace-files.md",
+      "sha256": "d30c87ba59cc175be6aefa99b21e9e2b829c5410439b69a5de2fa5c1e86862ca",
+      "sourceId": "erp-history-search#reference-trace-files",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-api-reference/SKILL.md",
+      "sha256": "6a1befaa514d1bc3c08b909a7a1e1d35e240a1d8571a35ee74390fdc3946f529",
+      "sourceId": "erp-js-api-reference",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-js-api-reference/references/form-grid-api.md",
+      "sha256": "9ca6d856e03c9d7527041d6e7b447b53a96afe2b4fd6db7abd8b1217b2637453",
+      "sourceId": "erp-js-api-reference#form-grid-api",
+      "sourceVersion": 2
+    },
+    {
+      "path": "skills/erp-js-implement/SKILL.md",
+      "sha256": "fc9e4dae3f4589c1ad3accbac267d12f2658e7dc556e09dddbbf6fc375f8ec54",
+      "sourceId": "erp-js-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/examples-flow-multi-fa.md",
+      "sha256": "dee0930a2b61aae9043c740833327c5c35fd9231e6d78b13889b2688daeb99c2",
+      "sourceId": "erp-js-implement#examples-flow-multi-fa",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/examples-load-vv.md",
+      "sha256": "ea4f16b0f4aacc75a8a710335403ca9cb6f1a675373f227d1d27164df20343a2",
+      "sourceId": "erp-js-implement#examples-load-vv",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-flow-multi.md",
+      "sha256": "95c5716dbe8e481ff69fff8c990bbc4660dd69934cc9ac9dd4a271b2ec523811",
+      "sourceId": "erp-js-implement#js-flow-multi",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-grid-clear.md",
+      "sha256": "f42a5397a416fdbb7aac2cfab6ced581d42863c37cfd4c43b909f324aa757715",
+      "sourceId": "erp-js-implement#js-grid-clear",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-grid-fill.md",
+      "sha256": "3eb5a57432e498ddec1722ef5d37b3fc2caef4aafa47b0bc27ad5da347391fa4",
+      "sourceId": "erp-js-implement#js-grid-fill",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-grid-row-disabled.md",
+      "sha256": "4f819e454e9a42bd23a577e0276df4f2848ede7192026a1c277e93408f5218e3",
+      "sourceId": "erp-js-implement#js-grid-row-disabled",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-request-deferred.md",
+      "sha256": "da232d839269d9fda51a5ba18bd5c73cfb63aa18369e4d316d939e267b814816",
+      "sourceId": "erp-js-implement#js-request-deferred",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/js-request.md",
+      "sha256": "aa83d8c3170d7a6c6fb7f0f4891db972f0e06fa1dffb6ebac782b685fd7e5ffe",
+      "sourceId": "erp-js-implement#js-request",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/naming.md",
+      "sha256": "95fb521c549f4cf2a6632da0ada88ba16c643c5324d13f514a3e8ce7fac37738",
+      "sourceId": "erp-js-implement#naming",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/warnings.md",
+      "sha256": "f485c887090b98dd8f457ee952492bf81d0dfe98bee2465bcf2007b04c578725",
+      "sourceId": "erp-js-implement#warnings",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-js-implement/references/xml-request.md",
+      "sha256": "1b0b212af76db64984e11c2943a40ccddcf8db6e529aacc202dd728011ae8b5f",
+      "sourceId": "erp-js-implement#xml-request",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-navigation-lookup/SKILL.md",
+      "sha256": "30e2eafc315aa6233e03c379b6f5591e27c179c85530e64a71213647f4c81d8d",
+      "sourceId": "erp-navigation-lookup",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-nd252-implement/SKILL.md",
+      "sha256": "ccefc211d5d1f21d503d28ea20ee5d1e7aef12727a7438d7301ec533bbfa41e2",
+      "sourceId": "erp-nd252-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-program-config-lookup/SKILL.md",
+      "sha256": "d6aea8fd8bfbb95a398cf262c0c5b12a9f3296173c579e41579c92e67c454c68",
+      "sourceId": "erp-program-config-lookup",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-program-config-lookup/references/options-table.md",
+      "sha256": "475b5c684997eac1b219c86befc0e175942dc1a5531a352de1cabd41fdb7246c",
+      "sourceId": "erp-program-config-lookup#options-table",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-program-config-lookup/references/options-xml.md",
+      "sha256": "c7b68d67f4dfbf490b0a8bba8544b5f5da7ed03cff99ae49cad17681ab82c41a",
+      "sourceId": "erp-program-config-lookup#options-xml",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-create/SKILL.md",
+      "sha256": "da82d7450583679621f3c3d009d822458d97ceb0f4901009a6312a6f9b962049",
+      "sourceId": "erp-report-create",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-create/references/examples-report.md",
+      "sha256": "9ad81e702f6ce57ecb7f10fb485ec97f95de90bd3a63c8a66cdadfc205517b80",
+      "sourceId": "erp-report-create#examples-report",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-create/references/reference-filter-key.md",
+      "sha256": "8e99a63152144f1b6f92c957bf36fb455c1de8a704b55bde645ed1d2446c4719",
+      "sourceId": "erp-report-create#reference-filter-key",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-create/references/reference-sql-format.md",
+      "sha256": "73df1357a510d2a8bf662407dfe55777736aa7496de306e0dc2b13e2d034f843",
+      "sourceId": "erp-report-create#reference-sql-format",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-pivot-create/SKILL.md",
+      "sha256": "2bbc7e4d6ce630ac0cfa323d27cd8245b18965b3904b44388f4d4f41e8112b42",
+      "sourceId": "erp-report-pivot-create",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-pivot-create/references/examples-pivot.md",
+      "sha256": "477547ce029160497ebe38d13f1d6d138fa19ec6aa987f7e780ea8889661b248",
+      "sourceId": "erp-report-pivot-create#examples-pivot",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-report-pivot-create/references/reference-pivot.md",
+      "sha256": "0b170d0de25cf7d7729f728eb804bfeb5bac316dd27a0820fe1231365176a439",
+      "sourceId": "erp-report-pivot-create#reference-pivot",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-rollout-execute/SKILL.md",
+      "sha256": "9d0d971387aca1ea3745899de7de5d88a9e6b5c046be7b10ffee11bfe04edfe7",
+      "sourceId": "erp-rollout-execute",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-skill-author/SKILL.md",
+      "sha256": "51056e81dee7b1f8aacccfb4a550631a8e3afa04b57abd632db301e210a91284",
+      "sourceId": "erp-skill-author",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-skill-author/references/reference-patterns.md",
+      "sha256": "ae69dc70e6d192feb16615b0df8b161863372bee2186ad69ed738d70bbd2566a",
+      "sourceId": "erp-skill-author#reference-patterns",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-sql-object-lookup/SKILL.md",
+      "sha256": "55c76e8fbde871883f0d7be84329d272e7cdf3b27ddf06cb633b6b04bcc15809",
+      "sourceId": "erp-sql-object-lookup",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/erp-sql-reference/SKILL.md",
+      "sha256": "64c47391bb0a08b762010d7bc8e7b359ad0f28c725469f78a2a80c8ab5e174f5",
+      "sourceId": "erp-sql-reference",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-sql-reference/references/business-tables.md",
+      "sha256": "dfbced5515ae7d1ba87a9ef86548af984fabb2d6c3f7754036c7dcf7f9208684",
+      "sourceId": "erp-sql-reference#business-tables",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-sql-reference/references/fsd-objects.md",
+      "sha256": "eb7fdf60e7efc756eae60b42054874bc49e8ba3f2b2b2bc02b097fc554b1eca0",
+      "sourceId": "erp-sql-reference#fsd-objects",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-sql-reference/references/functions.md",
+      "sha256": "78f9f85e0e854d2480cb70f24909c2d489671373b5755046726e22b03939798b",
+      "sourceId": "erp-sql-reference#functions",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-sql-reference/references/procedures.md",
+      "sha256": "43c79d7df4e5575016c80dc89db1cb2259dba4195d6de7eb23563ab85758c8d8",
+      "sourceId": "erp-sql-reference#procedures",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-sql-reference/references/table.md",
+      "sha256": "e38187b6ce60e412a83080acce66e2b9c89d02f7c610f2debd8b33e3ddba882a",
+      "sourceId": "erp-sql-reference#table",
+      "sourceVersion": 3
+    },
+    {
+      "path": "skills/erp-table-propose/SKILL.md",
+      "sha256": "5121c9ae141182df318f5ffa052b2cf65e9ed2756292f62386f4894043bb275b",
+      "sourceId": "erp-table-propose",
       "sourceVersion": 4
     },
     {
-      "path": "skills/fbo-sql-object-lookup/SKILL.md",
-      "sha256": "9341193ca013ad2a3374842d596b55e1420931971203ee9ccaf9f14e84c93e61",
-      "sourceId": "fbo-sql-object-lookup",
+      "path": "skills/erp-view-design/SKILL.md",
+      "sha256": "162897d397bb2262588d2c0b63202f0d03a86e8dde289538f9ca158a5caaec0e",
+      "sourceId": "erp-view-design",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-sql-reference/SKILL.md",
-      "sha256": "0a7cc5b1c34d3494e27dadc5c8cb127c3f37c40151a353d73bf4b2d01c7b935a",
-      "sourceId": "fbo-sql-reference",
+      "path": "skills/erp-view-design/references/reference-item-value.md",
+      "sha256": "271ee5ba4df6c2df6889e0dbc6398e8a50f08a005347d410f09de2c2ecaae182",
+      "sourceId": "erp-view-design#reference-item-value",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-sql-reference/references/functions.md",
-      "sha256": "4126c762e789e866043bcc954783781cf09f6a32f08f612078221b374d4c1ea4",
-      "sourceId": "fbo-sql-reference#functions",
+      "path": "skills/erp-view-design/references/reference-view-attrs.md",
+      "sha256": "a2b1b757085477d9cfee0d06da04d20a0bb910ddd796ec6b304f070f96337c04",
+      "sourceId": "erp-view-design#reference-view-attrs",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-sql-reference/references/procedures.md",
-      "sha256": "1d75e9c0273075b73dacf0e55d4dbfaac5b3f81393344b85a0585c35977c3028",
-      "sourceId": "fbo-sql-reference#procedures",
+      "path": "skills/erp-voucher-data-lookup/SKILL.md",
+      "sha256": "afc4c2d0687db7eb82a8c1f9b41f696625b271341ab972fc52223547dbce8c91",
+      "sourceId": "erp-voucher-data-lookup",
       "sourceVersion": 1
     },
     {
-      "path": "skills/fbo-sql-reference/references/table.md",
-      "sha256": "38bc59c03947294a074260c97b5159e8e6b15a587924f5ee5d21066cfe98d057",
-      "sourceId": "fbo-sql-reference#table",
+      "path": "skills/erp-voucher-data-lookup/references/reference-example-pqadms.md",
+      "sha256": "1f426643863eeaaed2883ef6d5ed8ab6a775b7452689ebe1fe51ada6fb0df8b7",
+      "sourceId": "erp-voucher-data-lookup#reference-example-pqadms",
       "sourceVersion": 1
     },
     {
-      "path": "skills/pm-adr/SKILL.md",
-      "sha256": "81a88bdc239f430a491beaeb3c99901f43f5ff7a9ab2456bb00665df78f170ba",
-      "sourceId": "pm-adr",
+      "path": "skills/erp-voucher-data-lookup/references/reference-mcp.md",
+      "sha256": "e8551e407b638526801aff518eab21f6c703ce08e9fa8b909b127ffea9fe9b43",
+      "sourceId": "erp-voucher-data-lookup#reference-mcp",
       "sourceVersion": 1
     },
     {
-      "path": "skills/pm-capability-graph/SKILL.md",
-      "sha256": "6abac3f28e23b1df2e347dfbc5cee5ef3c138673ef9706a9dedb8a20765c42f1",
-      "sourceId": "pm-capability-graph",
+      "path": "skills/pm-adr-author/SKILL.md",
+      "sha256": "a710cf7ebfc08d8401ca2801d31fe4886d2b80ba875e289d3cb1490a5857585a",
+      "sourceId": "pm-adr-author",
+      "sourceVersion": 1
+    },
+    {
+      "path": "skills/pm-deadline-review/SKILL.md",
+      "sha256": "a4600009fd5c1eb886acbed525b1478238607c1541a528a2d3d761b9762975c6",
+      "sourceId": "pm-deadline-review",
+      "sourceVersion": 12
+    },
+    {
+      "path": "skills/pm-graph-maintain/SKILL.md",
+      "sha256": "1559b55997e154d66a70f9dbfc2f520af66f0becd29b4fa35eae849f3d3a9fac",
+      "sourceId": "pm-graph-maintain",
       "sourceVersion": 2
     },
     {
-      "path": "skills/pm-customer-program-registry/SKILL.md",
-      "sha256": "1d81a6197783764eebcd4877999e11a3947dd8ada15de5921d63f02aeaeb786f",
-      "sourceId": "pm-customer-program-registry",
-      "sourceVersion": 2
+      "path": "skills/pm-handover-author/SKILL.md",
+      "sha256": "678d1194f3dadf8f80ce738ee13adf2a3d45040f441aebb25bfee84f3ce5f85e",
+      "sourceId": "pm-handover-author",
+      "sourceVersion": 3
     },
     {
-      "path": "skills/pm-task-ledger/SKILL.md",
-      "sha256": "1299379422630aefe068c7d18bcc900f9037aa8349ce98535b85af5b0828a14e",
-      "sourceId": "pm-task-ledger",
+      "path": "skills/pm-ledger-maintain/SKILL.md",
+      "sha256": "fe877ad37ea2bab8d7437b0fc41105ebf902f67fb5bc0d96ddbe7bbd87ad3006",
+      "sourceId": "pm-ledger-maintain",
       "sourceVersion": 1
+    },
+    {
+      "path": "skills/pm-program-lookup/SKILL.md",
+      "sha256": "a6ba8501170d450a79ad2e005167f61271e705ea4a5ed2f33b6f380797f432f3",
+      "sourceId": "pm-program-lookup",
+      "sourceVersion": 2
     },
     {
       "path": "src/database/metadata-resolver.mjs",
-      "sha256": "4809ddd4016edc514b807ad378e71b7e6f5f9586075f27204a2e9804a6c25edb"
+      "sha256": "5ab972acfff9354b1da21dab89ffdcc5983bd9cdba226d8568c1397bcaee8648"
     },
     {
       "path": "src/database/qlda-metadata.mjs",
-      "sha256": "a7746197a344077f9b440f41d7bb59fe33462d2f5186c80880d44251e4dd8c1e"
+      "sha256": "7bbce75a5575a8f016ff8c735fbe5be63d35dabd0dd4e9f209851e2c55dc4dba"
     },
     {
       "path": "src/database/query-executor.mjs",
-      "sha256": "63037b1742e6e51a2b7ad6300671fa5b0b993895970eb8d9b15f5477d832d7e9"
+      "sha256": "c21b31bb180be21639d1b05b0c8e5f5f4c6c7cfdcd3352a76d27307492054d66"
     },
     {
       "path": "src/database/query-plan.mjs",
-      "sha256": "dece11b6f5a8941c6a4e87c6dea91424e6852ae76b827c55c0890115f7599834"
+      "sha256": "d144689d90c2c55c5b482a72dc7c296979c7b5e51c0acfec19dce0b0b5e6343a"
     },
     {
       "path": "src/database/query-prompt-builder.mjs",
-      "sha256": "6683920590490c41152898e518d7baea1a12d48bad50cff4c3e2634099a969c5"
+      "sha256": "59bd4c6cbe749cc621195d66bca4e7a650b554473ac6d2206bcede4c9733ab24"
     },
     {
       "path": "src/database/query-validator.mjs",
-      "sha256": "640b84021928af268e8156a24b1a12300f40df203cdc412a9b912f3c2060ff68"
+      "sha256": "a550309b80c826f7b51b31bd4d7106952f4fd9a0f23f2d57f1176d2e530538be"
     },
     {
       "path": "src/workflows/report-workflow.mjs",
-      "sha256": "b31a46cced3240f05eeeb495b6c813d14fc7bdff45355fb54fabfc44e8ee953b"
+      "sha256": "830b99fcf12e68ca28ff97d85af5c655c323df49a15698dd38cbc9b811974bad"
     },
     {
       "path": "tools/4ai.mjs",
-      "sha256": "fc256d5da9dbc088f154a4339899d222b33c1686e903b65b827bc1fcdd32305d"
+      "sha256": "4abd7d20c4cf1f50359281605dbe861b5f44238bc9bebd4ff8d76692c5f021e2"
     },
     {
       "path": "tools/lib/assets.mjs",
-      "sha256": "4d9787349698faad56f9225f2113d36ed88c4d83d5c934f5615f1493e4cefb8b"
+      "sha256": "a19092e65707e6e233b6bad846106aad2440dabfe08298da7548e60a435768c7"
     },
     {
       "path": "tools/lib/assignee.mjs",
-      "sha256": "b1e72b3cf1841b1f5e7826a9fa7e10257dee494dbaa61a8da146187b7ecc69e7"
+      "sha256": "c50b267dca6864804ba0ecc1b49c05166029bb308c84afb7c729d6966272594c"
+    },
+    {
+      "path": "tools/lib/ddl-suggest.mjs",
+      "sha256": "e32654ea5287cf06a13bc141fdd95751ed697b3da23c4a1d687f6de1545c9356"
     },
     {
       "path": "tools/lib/ddl.mjs",
-      "sha256": "595747819fcc735f0c35334a255628c1408df56d814d0e19f943f47e4dfb817b"
+      "sha256": "fe6e4721f979a946d1052572357975174614bcafdf8ea26a9663130735dd98da"
     },
     {
       "path": "tools/lib/emit/antigravity.mjs",
-      "sha256": "0469c7aeda3947edab843734770fa79522ed38a778bf5ee2c4172ca2c5c49242"
+      "sha256": "0feb57d353c6401b1a3d8e6497a04f940fcc0524cce8f9d02b334a8722560f41"
     },
     {
       "path": "tools/lib/emit/claude.mjs",
-      "sha256": "0f4bfa9b81ec62ab9b74838cec6c1d0d6608b766856fa4953890dc215363310d"
+      "sha256": "84f9ad815ead2e1752f72e7925441a92798db61b39239b29b0d869d58ada64a1"
     },
     {
       "path": "tools/lib/emit/common.mjs",
-      "sha256": "ed87df87257269902fef6ce0632aa4107bd1040d77ee2b69d79c99390c8b7790"
+      "sha256": "0fd34795b6b9c4c36a24b3545413607897215283e5471328460447e5ecc743dd"
     },
     {
       "path": "tools/lib/emit/cursor-plugin.mjs",
-      "sha256": "a0ed9baab42d65a3ac3534d56b01ef8fb77872a689d0369f6ceb1c401f97a338"
+      "sha256": "05fc4a67882389af100e4a0cbd601450872378e59c1bad8341eac1adcac81d4f"
     },
     {
       "path": "tools/lib/emit/cursor.mjs",
-      "sha256": "2b98e59fffd840dccd83afaff01ce3e5373264133beb477f4c8f62dde1d75ac7"
+      "sha256": "5258e2df5c4ac1a6b3bdb163120548189a3fda42c39535f81ea764e43bfebd53"
     },
     {
       "path": "tools/lib/emit/plugin.mjs",
-      "sha256": "3f45f78877edc92799c5b890f695784b4c112fed17819f506d4ecfb87c056140"
+      "sha256": "88ba9ab2872a410e82d2a6490c91eddf34bff982f1b15e442f457bf65e16b2df"
     },
     {
       "path": "tools/lib/emit/vscode.mjs",
-      "sha256": "aa4866f485e5cbab7acf9aadf19da0815c795503e4d90ae2733aa9629797e388"
+      "sha256": "6bdab32f4c170945b7656f1ebcb6f943dbb879b3dccdab0b2ce7738d1d0a0898"
     },
     {
       "path": "tools/lib/evidence.mjs",
-      "sha256": "75ca5bedd23c9990ab28088a5065e2e0fd47a44676fd34ae088acdb2827853ee"
+      "sha256": "e91b687d02eeba3c573aabbde18fd470d9dfbb3e7169be4b544301f73b436c8f"
     },
     {
       "path": "tools/lib/experience-build.mjs",
-      "sha256": "0792770d86b9b50a2799f8ab11fd9c17e44292544e4166b02aaac6fae5e99bae"
+      "sha256": "a3f57230ea4653973ac5351c76f0ceb3457ef36aa45f45e3d336ddd4674cc4cd"
     },
     {
       "path": "tools/lib/experience-extract.mjs",
-      "sha256": "f946ed6849f8f3fddba59fad74b417ec8c6bdbebb737df5f9496dbbd7502df04"
+      "sha256": "6605ed068953f8c557eeaf6bd2d80d0919a93250a959aa5d1df14adcac8ddc50"
     },
     {
       "path": "tools/lib/fm.mjs",
-      "sha256": "0c09f1b7fdc104ca86c1822d691f565a3db3c80dea86db0774752fe7f6cf4ebe"
+      "sha256": "dd438a302468e4917ac4baa5c38d4978d459e639c6dbf9e2099d155e1fda0603"
     },
     {
       "path": "tools/lib/forum.mjs",
-      "sha256": "159e19a1e518204d3e1b445aea58797527b17b059dba7ace5579b455d5b52f06"
+      "sha256": "199a1c7d88b0daac8b7d10606369b33aa357d79a18f8dfc24c8857d5477ae487"
     },
     {
       "path": "tools/lib/graph-sync.mjs",
-      "sha256": "435767df27cad056564a905b2c4b86ced868763aad44b9c4cda88d47b2bc112b"
+      "sha256": "47a5a14c46f966d5f762faecb1c08f85c1be34a46c2ea02c71458f339bb01ba0"
     },
     {
       "path": "tools/lib/graph.mjs",
-      "sha256": "cddacb277a8e72d2af707e33780a9790ce1a191e12b001dd134b8226567b6835"
+      "sha256": "83a5e527262d5126d43d0c3e874e6889b32a5269ef4a52b883ec27b347e3a002"
     },
     {
       "path": "tools/lib/json.mjs",
-      "sha256": "b24db6a8212e30098ef2f69fb1c6f9c0f0730dd8934f55efaed478bbd4391747"
+      "sha256": "4c8a60d7991cdf962b6b1a090b72bc7f685b22e4432e5ada44a1d468f8c0a5be"
     },
     {
       "path": "tools/lib/ledger-audit.mjs",
-      "sha256": "9e64eabef2c03c70f583ee7a035b289669e404f1cbca9c62bf4f6a7d0533ef52"
+      "sha256": "72dfa8b1ecaed2caa8e15762a4d1ec8f4907a53d642a310ef10fb6ef210db908"
     },
     {
       "path": "tools/lib/license-cli.mjs",
-      "sha256": "77e19e3eff1e6681929f459a0c6587ffb2571dbab4fdcbeb3f44cee4b1912375"
+      "sha256": "88eff63edb46d094c9263c5c7952dbe2b43810f8a650208e98d76114c3028404"
     },
     {
       "path": "tools/lib/paths.mjs",
-      "sha256": "d8e8fe741b2320933b4e0f6f2a75f09c84ed7795b7eb252a94359b98ea4276a9"
+      "sha256": "300118f80c44bb656bb41cd1b79a98c03bc42ecbbbc32681ae3bddedb8c4f6dd"
     },
     {
       "path": "tools/lib/playbook.mjs",
-      "sha256": "a9398ada2c1058e5f0845f4765a630ee698fa491fbf3c88f57eabc02166db8ff"
+      "sha256": "68842f1dd8233adddda9b95e42e2db0e815d8866599e1484247f9db0b45ed6c4"
     },
     {
       "path": "tools/lib/prompt.mjs",
-      "sha256": "7508a8a6464c566d3732fef927441d5c077a13070dcea760f74eb4ea6ebae145"
+      "sha256": "c04541e80dac104d67f8a3a18c707f409218e589816fc537ae898b1d30aabd5e"
     },
     {
       "path": "tools/lib/recommendation-log.mjs",
-      "sha256": "62f2c1f6e7788b7c8bf786defcbf6f8bff98cb450ab7e55c28bc3a1b06a0fbb3"
+      "sha256": "d4c6d913b980f506676e2528c44c94910983e93f57f1dedd62a5e9f0228cc99b"
     },
     {
       "path": "tools/lib/report-kpi.mjs",
-      "sha256": "fe3afe01db8aac947a08700dc904fc00f916021158e8b43e209cfaa9ef229443"
+      "sha256": "9d0c7f10893adadafdd0b63c998a9c084cd703963cdf5cb88424ca3859010dbe"
     },
     {
       "path": "tools/lib/report-performance.mjs",
-      "sha256": "d388ef9fd0adb354d7859dd6d233ce83e9dacf7c0521ec64f87b8aa078768552"
+      "sha256": "c548aca126396034982e20cfa0c15a88f24b5ebc0f0d26c55eb0f2f41b00aa0d"
     },
     {
       "path": "tools/lib/report.mjs",
-      "sha256": "44fb65578b6fee441ddab4cc4194ace7424980a98ea4dc9e598882bbe213360a"
+      "sha256": "ab16ebd354cd5089f6a228206d13de1fbda65a05b9aa5e7930b82a40838d75ca"
     },
     {
       "path": "tools/lib/review-dataset.mjs",
-      "sha256": "9d98cba04948fb5e34935d404cdffd41ed09a96d4f8bc6e8bfa59039e49a58f2"
+      "sha256": "add5c26bd7d8dda6e134e74322d85116b14a90620428319e7463b9bebbdf0fd9"
     },
     {
       "path": "tools/lib/review-report.mjs",
-      "sha256": "1990f141980e93f5de0185760196cf67ab082603a003b46e1fa58597005acf99"
+      "sha256": "5373919a37d07ced6d00e1bf52c1890fae2afe33da011d29c38416fd925ca2aa"
     },
     {
       "path": "tools/lib/schema.mjs",
-      "sha256": "5ca15b072cb8f24bb18ba9720a66b4d2c38dec8630f929b98828c15473dfe555"
+      "sha256": "341c8ceac419fff0f06e636dd8a2c1a8300e009cb16992b70af28b752ff1a3bc"
     },
     {
       "path": "tools/lib/serve.mjs",
-      "sha256": "4283f6b0504b2ecf86303302a08ef00ee712cf064edbe10df2689db0d84b69a5"
+      "sha256": "b60b16eb700216d0fb8c11af1b5908800cf524226aaa6d6512ac9ec99f22af69"
     },
     {
       "path": "tools/lib/setup.mjs",
-      "sha256": "9c681e993bbe535a932e9745a11b5f48ed1ac38e70cc7b87c8d99691d76c8d7d"
+      "sha256": "4ea13038657b2e695668ce6afbe84d3d9227261ca2fabea05751f4fe76069887"
     },
     {
       "path": "tools/lib/staffing.mjs",
-      "sha256": "a92f5d503aad37ffc17acab413d825f8e316ef2833538a2e27aa202524587ff6"
+      "sha256": "7a2eb1081e2f66aca3f82f8fc1d92cb689e2febc239d79c1ac8321f30bf8bb6a"
     },
     {
       "path": "tools/lib/sync.mjs",
-      "sha256": "0302869e5c5798bcf5436d27fac9452ad88fe9349929a4cc65390510859c126d"
+      "sha256": "2260e7c2716f8e9808cd25fa5204fa1dd48021f37b7af81f0e0ac2087b5061e1"
     },
     {
       "path": "tools/lib/template.mjs",
-      "sha256": "e0eb0af127c9abd64b6ac575964046870289d8cc568b58f85de565de0e23b013"
+      "sha256": "fa10faeb436f0aebcf40a9f725d0ac94d729b562886bdc9529dc492a881cb5fb"
+    },
+    {
+      "path": "tools/lib/topics-backfill.mjs",
+      "sha256": "34494b6a8ab95cd9f89cef6caf99a443279ed6d06412b58d44ae024fb35f9f6c"
+    },
+    {
+      "path": "tools/lib/topics.mjs",
+      "sha256": "b37090277c2060e594a94907c9f663d9fd8cad5a1f8abb18473cd1550437b144"
     },
     {
       "path": "tools/lib/workdays.mjs",
-      "sha256": "10836ef5240123041d1e5d4d5319573222916b5f6b0d6173c1f6902b1b0a2975"
+      "sha256": "6303cf0b3e305f2adc06f7dfdded9f45dde9c5215b73407aa404ac64a1504cb2"
     },
     {
       "path": "tools/lib/writer.mjs",
-      "sha256": "dee9af995b1a7308545009960cb3fa27ff9ce56667160267de729ea2064f5524"
+      "sha256": "df179d134f5b3a702a069706c36a6a8409dba62a47b4bcec0826c63deff4f59a"
     },
     {
       "path": "tools/templates/report/dashboard.html",
-      "sha256": "0bfec5df26a8e16dc59ebf9a3f23df8cb8c9f4819e8fdc3c64af23317b88ddc4"
+      "sha256": "ba2ea17bb0d3fc9a8e32b9d5756aae7d883b1f3f5849257c6e36c49371363776"
     },
     {
       "path": "tools/templates/report/page.html",
-      "sha256": "33bc54019587d7f713f6e599af10df7482157c179422ec81af9ed86af56dcf10"
+      "sha256": "a7e3a51df53d4596c6daea5059369c611da4bd1322028a18f8962c9ce0a8a20d"
     },
     {
       "path": "tools/templates/report/report.css",
-      "sha256": "e626609467a2ceb3aab6b8407e35e91a7ee4f88836570f4b2565bd1ad9c32a5f"
+      "sha256": "3d59a4974ebdf0b7ede10ee512aa3ec159a2cdadb4edbbdeee510fd55824c0f2"
     }
   ],
   "hub": "D:\\Fast Source\\4AI",
   "jsonOwnership": [],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-19T08:59:01.893Z",
+  "syncedAt": "2026-08-24T04:32:13.471Z",
   "target": "plugin-cursor"
 }
