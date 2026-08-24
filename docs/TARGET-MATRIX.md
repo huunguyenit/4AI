@@ -118,10 +118,9 @@ Xem target nào đang bật và có với tới được không:
 node tools/4ai.mjs targets
 ```
 
-**`globalPolicy` là field chết.** Nó xuất hiện trong `targets.json`, `targets.local.json` và
-trong comment của hai emitter, nhưng **không có dòng code nào đọc nó**. Hành vi scope user
-quyết định bởi `scope: "user"`, không phải field này. Xoá nó hoặc cắm dây cho nó — đừng để
-nguyên như bằng chứng giả về một cơ chế không tồn tại.
+`scope: "user"` là **công tắc duy nhất** cho hành vi scope user. Từng có một field
+`globalPolicy: "on-demand-only"` nằm cạnh nó trong config, nhưng không dòng code nào đọc —
+đã xoá. Đừng khai lại: field không ai đọc là bằng chứng giả về một cơ chế không tồn tại.
 
 ## Sync ghi thế nào
 
