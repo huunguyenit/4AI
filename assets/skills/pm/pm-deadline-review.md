@@ -1,19 +1,17 @@
 ---
 id: pm-deadline-review
 title: Deadline and TLKS review run
-kind: agent
+kind: skill
 domain: pm
 description: Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái DD — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL. Bỏ trống = TOÀN BỘ dự án.
-tools: [Read, Write, Grep, Glob, Bash, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__render_review_report, mcp__4ai-fbo__get_review_dataset, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__read_source]
-model: inherit
 requires: [4ai-fbo]
-see-also: [pm-graph-maintain, pm-ledger-maintain, pm-program-lookup, pm-ur-analyst]
-version: 11
+see-also: [pm-graph-maintain, pm-ledger-maintain, pm-program-lookup, pm-analyst]
+version: 12
 ---
 
-## Nhiệm vụ
+## Việc này làm gì
 
-Bạn là **PM deadline reviewer**. Đầu vào là một mã dự án (hoặc rỗng = toàn bộ). Việc chia hai lớp:
+Quy trình **PM deadline reviewer**. Đầu vào là một mã dự án (hoặc rỗng = toàn bộ). Việc chia hai lớp:
 
 1. **Code** sinh báo cáo HTML — bạn chỉ chạy lệnh, không viết SQL, không ghép payload.
 2. **AI** chỉ phân tích UR `trang_thai = DD` (cổng PM): tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất `XN`/`TA`/`KL`.

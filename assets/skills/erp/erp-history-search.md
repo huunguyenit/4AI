@@ -16,7 +16,7 @@ Tra **UR/ticket đã làm** trước khi clone/thiết kế — không đoán th
 > chưa được khai trong `mcp/servers.json` của hub — nên trên máy chỉ cài `4ai-fbo` thì tool
 > này **không tồn tại**. Gặp trường hợp đó thì nói thẳng là chưa có tool, **đừng** thay bằng
 > `query_sql` tự chế trên `nbphyc`: hai đường trả về khác nhau, và phân tích một UR cụ thể
-> là việc của `pm-ur-analyst`. Các bước tra file/proc phía dưới dùng `query_sql` của
+> là việc của `pm-analyst`. Các bước tra file/proc phía dưới dùng `query_sql` của
 > `4ai-fbo` thì chạy được bình thường.
 
 ---

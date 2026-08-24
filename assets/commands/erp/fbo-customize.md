@@ -3,7 +3,7 @@ id: fbo-customize
 title: /fbo-customize
 kind: command
 domain: erp
-description: Customize màn hình FBO cho một khách — chốt phạm vi, lập kế hoạch, chờ duyệt, rồi mới giao fbo-customizer thi hành và ghi ledger.
+description: Customize màn hình FBO cho một khách — chốt phạm vi, lập kế hoạch, chờ duyệt, rồi mới giao erp-builder thi hành và ghi ledger.
 argument-hint: <khách> <mô tả thay đổi>
 mode: agent
 requires: [4ai-fbo]
@@ -16,11 +16,11 @@ Yêu cầu customize: **$ARGUMENTS**
 
 1. **Chốt phạm vi** — tra khách qua `list_programs` (nbdmda) → program path + SP. Nhắc lại
    để xác nhận: "Áp vào `<programPath>`, đúng không?" (rule `erp-program-scope`).
-2. **Lập kế hoạch** theo `erp-customization-execute` (giao `pm-planner` nếu yêu cầu phức
+2. **Lập kế hoạch** theo `erp-customization-execute` (giao `pm-architect` nếu yêu cầu phức
    tạp): controller nào, cặp `.f`/`.xml` trạng thái gì, có chạm include chung không.
 3. **Mở ledger entry** trong `ledger/tasks.md` (rule `pm-ledger-discipline`).
 4. **Trình kế hoạch, DỪNG chờ duyệt.** Chưa duyệt thì chưa sửa bất kỳ file nào.
-5. Duyệt xong: giao `fbo-customizer` thi hành; xong chuyển ledger sang `Chờ xác nhận`
+5. Duyệt xong: giao `erp-builder` thi hành; xong chuyển ledger sang `Chờ xác nhận`
    và tóm tắt diff.
 
 Màn hình chỉ có `.f` chưa có XML nguồn: dừng ở bước 2, báo cần lấy nguồn theo quy trình

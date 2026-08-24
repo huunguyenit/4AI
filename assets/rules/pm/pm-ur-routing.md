@@ -1,35 +1,35 @@
 ---
 id: pm-ur-routing
-title: Route UR questions to pm-ur-analyst
+title: Route UR questions to pm-analyst
 kind: rule
 domain: pm
 severity: soft
 always: true
-description: Hỏi về yêu cầu/UR hay báo cáo dự án thì giao pm-ur-analyst, cần báo cáo thì `4ai report` / `render_review_report` — bề mặt thiếu sub-agent hay shell thì tự chạy kịch bản, không tự dựng báo cáo.
-see-also: [pm-ur-analyst, pm-deadline-review, pm-program-detection]
+description: Hỏi về yêu cầu/UR hay báo cáo dự án thì giao pm-analyst, cần báo cáo thì `4ai report` / `render_review_report` — bề mặt thiếu sub-agent hay shell thì tự chạy kịch bản, không tự dựng báo cáo.
+see-also: [pm-analyst, pm-deadline-review, pm-program-detection]
 version: 2
 ---
 
 ## Vì sao
 
-`pm-ur-analyst` biết sẵn cấu trúc `nbphyc`, giới hạn kiểu từng cột, cách lấy tài liệu từ
+`pm-analyst` biết sẵn cấu trúc `nbphyc`, giới hạn kiểu từng cột, cách lấy tài liệu từ
 `sysfileinfo` và cấm đọc cột credential. Tự tra tay là làm lại việc đó từ đầu và bỏ sót
 đúng những chỗ đã trả giá để biết.
 
 ## Quy tắc
 
-- Yêu cầu chứa từ khoá về **yêu cầu/UR** thì giao `pm-ur-analyst`: review yêu cầu, mã UR,
+- Yêu cầu chứa từ khoá về **yêu cầu/UR** thì giao `pm-analyst`: review yêu cầu, mã UR,
   trạng thái yêu cầu, danh sách yêu cầu của dự án, yêu cầu theo menu, bóc tài liệu khảo
   sát thành UR, ước lượng giờ công.
 - Xác định program theo `pm-program-detection` **trước**, rồi truyền cho agent:
   mã khách, program path, và `ma_da` nếu đã biết. Agent không đoán hộ.
 - **Phân biệt "một UR" với "lịch sử UR".** Hỏi về **một** yêu cầu cụ thể — nội dung, trạng
-  thái, ảnh hưởng, giờ công → `pm-ur-analyst`. Hỏi **đã từng có ai làm việc này chưa** —
+  thái, ảnh hưởng, giờ công → `pm-analyst`. Hỏi **đã từng có ai làm việc này chưa** —
   "tìm quá khứ", "trước đây có", "có chức năng … chưa", "tham khảo yc dự án khác" → nạp skill
   `erp-history-search` trước khi tra, vì nó giữ quy tắc `ma_da` 3 tầng và luật lật hết trang.
-  Tra ra UR rồi mới phân tích thì quay lại `pm-ur-analyst`.
-- **Không** giao `pm-ur-analyst` khi việc thật là: sửa controller (→ `fbo-customize`),
-  điều tra cấu trúc màn hình (→ `fbo-explorer`), soi diff (→ `fbo-review`).
+  Tra ra UR rồi mới phân tích thì quay lại `pm-analyst`.
+- **Không** giao `pm-analyst` khi việc thật là: sửa controller (→ `fbo-customize`),
+  điều tra cấu trúc màn hình (→ `erp-explorer`), soi diff (→ `fbo-review`).
 - Kết quả trả về là **draft**. Không tự chốt phạm vi hay giờ công thay người phụ trách.
 - Việc thật là **báo cáo rà soát/hạn** (không phải hỏi về một UR cụ thể) thì đường đi là
   `4ai report` khi có shell, `render_review_report` khi không — xem `pm-deadline-review`.
@@ -43,13 +43,13 @@ version: 2
 1. Khớp workspace → `<MA_DA>`, FBI, FBISP2422.
 2. `DD` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
    **"Đã duyệt"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
-3. Giao `pm-ur-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='DD'`.
+3. Giao `pm-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='DD'`.
 
 ## Bẫy
 
-- **Không phải bề mặt nào cũng có sub-agent.** Ở Cursor, `pm-ur-analyst` được emit thành
-  command `.cursor/commands/pm-ur-analyst.md` và **không bao giờ tự chạy** — người dùng
-  phải gõ `/pm-ur-analyst`, hoặc model đọc file đó rồi tự làm theo kịch bản. Đừng hứa với
+- **Không phải bề mặt nào cũng có sub-agent.** Ở Cursor, `pm-analyst` được emit thành
+  command `.cursor/commands/pm-analyst.md` và **không bao giờ tự chạy** — người dùng
+  phải gõ `/pm-analyst`, hoặc model đọc file đó rồi tự làm theo kịch bản. Đừng hứa với
   người dùng là nó sẽ tự nhảy vào.
 - **Chat/Cowork còn thiếu cả command lẫn shell.** Ở đó chỉ tool MCP là chạy được: không có
   `/pm-review`, không giao được sub-agent, không chạy được `node tools/4ai.mjs`. Cách đúng

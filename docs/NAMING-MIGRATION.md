@@ -11,7 +11,7 @@ phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` 
 | 0 | `docs/NAMING.md`, field `status`/`owner`, check ở mức WARN | ✅ xong |
 | 1 | thư mục domain (mọi kind) + doctrine (3) + rule (14) | ✅ xong |
 | 2 | skill (26) — kéo theo thư mục `references/` | ✅ xong |
-| 3 | agent (12) — gồm 3 asset đổi kind | ⬜ |
+| 3 | agent (12) — gồm 3 asset đổi kind | ✅ xong |
 | 4 | command (12) — đổi tên slash command người dùng gõ | ⬜ |
 | 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |
 
@@ -99,7 +99,7 @@ Ba asset **đổi kind** — chúng là quy trình, không phải vai:
 |---|---|---|
 | `fbo-regulatory-rollout` | skill `erp-rollout-execute` | mất context riêng; đọc kỹ body trước khi chuyển |
 | `pm-release-handover` | skill `pm-handover-author` | |
-| `pm-deadline-review` | gộp vào command `pm-deadline-review` | command `pm-review` hiện chỉ dispatch agent này — hai artifact cho một trách nhiệm |
+| `pm-deadline-review` | skill `pm-deadline-review` (id giữ nguyên) | **đổi so với kế hoạch**: gộp vào command sẽ nhét một quy trình 85 dòng vào thân `/pm-review`, mà command đó còn hai nhánh có-shell / không-shell cùng cần quy trình ấy. Để nó làm skill thì cả hai nhánh trỏ về một nguồn. `pm-deadline-review` vốn đã hợp lệ theo pattern skill (`review` là capability), nên id không phải đổi. |
 
 ## Đợt 4 — command
 
@@ -123,3 +123,5 @@ Ba asset **đổi kind** — chúng là quy trình, không phải vai:
 - `docs/ASSET-FORMAT.md` và `docs/TARGET-MATRIX.md` được `CLAUDE.md` khai là nguồn chuẩn
   cao nhất nhưng **không tồn tại trong repo**.
 - `erp-skill-author` và `4ai-asset-author` chồng trách nhiệm — cân nhắc gộp ở đợt 5.
+- README đếm sai số asset trong gói plugin (`26 skill`, thực tế thư mục plugin đang có 42).
+  Số đúng chỉ biết sau khi sync thật ở đợt 5 — đừng đoán, đếm rồi sửa.

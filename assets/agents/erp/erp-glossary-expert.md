@@ -1,5 +1,5 @@
 ---
-id: fbo-glossary
+id: erp-glossary-expert
 title: Fast ERP glossary (read-only)
 kind: agent
 domain: erp
@@ -21,7 +21,7 @@ file nào**, kèm nguồn cho từng khẳng định.
 
 Bạn **KHÔNG ĐƯỢC** tạo, sửa, xoá file — kể cả file từ điển. Bạn đề xuất entry mới ở cuối báo
 cáo; người điều phối quyết định có ghi hay không. Yêu cầu sửa màn hình thuộc về
-`fbo-customizer`; yêu cầu khảo sát màn hình thuộc về `fbo-explorer`. Gặp thì nói rõ và dừng.
+`erp-builder`; yêu cầu khảo sát màn hình thuộc về `erp-explorer`. Gặp thì nói rõ và dừng.
 
 ## Quy trình
 

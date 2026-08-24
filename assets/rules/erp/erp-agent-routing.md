@@ -3,10 +3,10 @@ id: erp-agent-routing
 title: Route FBO work to the layer that owns it
 kind: rule
 domain: erp
-description: Việc FBO đi đúng cửa — backend SQL giao fbo-backend, frontend XML/JS giao fbo-frontend, điều tra màn hình giao fbo-explorer, thi hành giao fbo-customizer. Không tự bơi giữa 21 skill.
+description: Việc FBO đi đúng cửa — backend SQL giao erp-sql-expert, frontend XML/JS giao erp-xml-expert, điều tra màn hình giao erp-explorer, thi hành giao erp-builder. Không tự bơi giữa 21 skill.
 severity: hard
 always: true
-see-also: [fbo-backend, fbo-frontend, fbo-explorer, fbo-customizer, fbo-glossary]
+see-also: [erp-sql-expert, erp-xml-expert, erp-explorer, erp-builder, erp-glossary-expert]
 version: 1
 ---
 
@@ -23,16 +23,16 @@ Agent tầng tồn tại để **cầm thứ tự nạp**. Bỏ qua chúng là q
 
 | Việc thật là gì | Giao cho |
 |---|---|
-| Proc, function, bảng, sổ, tùy chọn nghiệp vụ, viết hay soi SQL | **`fbo-backend`** |
-| Controller XML, bố cục form, lưới, JavaScript, "làm thế nào để làm X" | **`fbo-frontend`** |
-| Một màn hình cụ thể nằm đâu, có field gì, quan hệ với ai | `fbo-explorer` |
-| Thi hành một thay đổi **đã duyệt** vào file | `fbo-customizer` |
-| Soi diff XML theo bộ rule | `fbo-change-reviewer` |
-| Một cụm/viết tắt/mã nghĩa là gì | `fbo-glossary` |
+| Proc, function, bảng, sổ, tùy chọn nghiệp vụ, viết hay soi SQL | **`erp-sql-expert`** |
+| Controller XML, bố cục form, lưới, JavaScript, "làm thế nào để làm X" | **`erp-xml-expert`** |
+| Một màn hình cụ thể nằm đâu, có field gì, quan hệ với ai | `erp-explorer` |
+| Thi hành một thay đổi **đã duyệt** vào file | `erp-builder` |
+| Soi diff XML theo bộ rule | `erp-reviewer` |
+| Một cụm/viết tắt/mã nghĩa là gì | `erp-glossary-expert` |
 | Yêu cầu, UR, báo cáo dự án | xem rule `pm-ur-routing` |
 
 - **Chạm cả hai tầng thì giao cả hai, theo thứ tự.** Ví dụ "thêm field lên form và post vào sổ":
-  `fbo-frontend` thiết kế phần XML, `fbo-backend` phần SQL, rồi hợp nhất trước khi trình duyệt.
+  `erp-xml-expert` thiết kế phần XML, `erp-sql-expert` phần SQL, rồi hợp nhất trước khi trình duyệt.
   **KHÔNG ĐƯỢC** để một agent đoán hộ phần của tầng kia.
 - **Xác định program TRƯỚC, rồi truyền cho agent** — mã khách, program path, `ma_da` nếu đã
   biết. Agent không đoán hộ phạm vi (rule `erp-program-scope`).
@@ -46,5 +46,5 @@ Agent tầng tồn tại để **cầm thứ tự nạp**. Bỏ qua chúng là q
   *format báo cáo có mục "Đã tra gì"*. Việc backend nhiều bước mà chỉ nạp `erp-sql-style` rồi
   viết là bỏ qua đúng ba bước tra cứu đứng trước nó.
 - **Giao nhầm tầng.** "Sao lưới hiện sai định dạng số" nghe như frontend, nhưng mặt nạ có thể
-  đến từ bảng `options` — `fbo-backend` cầm phần đó. Không chắc thì hỏi lại một câu, rẻ hơn một
+  đến từ bảng `options` — `erp-sql-expert` cầm phần đó. Không chắc thì hỏi lại một câu, rẻ hơn một
   báo cáo sai tầng.

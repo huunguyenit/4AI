@@ -1,5 +1,5 @@
 ---
-id: pm-ur-analyst
+id: pm-analyst
 title: PM UR analyst
 kind: agent
 domain: pm
@@ -7,7 +7,7 @@ description: Sub-agent read-only cho yêu cầu/UR — lối A mặc định UR 
 tools: [Read, Grep, Glob, mcp__4ai-fbo__index_program, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__resolve_vouchercode, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__read_source, mcp__4ai-fbo__get_review_dataset]
 model: inherit
 requires: [4ai-fbo]
-see-also: [pm-ur-routing, pm-program-detection, pm-planner, fbo-explorer, pm-ledger-maintain, pm-deadline-review]
+see-also: [pm-ur-routing, pm-program-detection, pm-architect, erp-explorer, pm-ledger-maintain, pm-deadline-review]
 version: 4
 ---
 

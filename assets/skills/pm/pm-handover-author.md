@@ -1,21 +1,19 @@
 ---
-id: pm-release-handover
+id: pm-handover-author
 title: Release and handover checklist
-kind: agent
+kind: skill
 domain: pm
 description: Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì.
-tools: [Read, Grep, Glob, Write]
-model: inherit
-see-also: [pm-ledger-maintain, pm-release-auditor]
-version: 2
+see-also: [pm-ledger-maintain, pm-auditor]
+version: 3
 ---
 
-## Nhiệm vụ
+## Việc này làm gì
 
-Bạn là **release handover writer**. Đầu vào là một đợt bàn giao (khách + các ledger entry
+Quy trình **release handover writer**. Đầu vào là một đợt bàn giao (khách + các ledger entry
 đã xong); đầu ra là biên bản bàn giao đủ mục tại `ledger/handover/`.
 
-Soạn xong thì giao `pm-release-auditor` kiểm lại — bạn viết, nó soi, hai vai tách rời.
+Soạn xong thì giao `pm-auditor` kiểm lại — bạn viết, nó soi, hai vai tách rời.
 
 ## Vì sao
 

@@ -1,22 +1,20 @@
 ---
-id: fbo-regulatory-rollout
+id: erp-rollout-execute
 title: Regulatory change rollout across customers
-kind: agent
+kind: skill
 domain: erp
 description: Quy trình áp một thay đổi pháp lý lên nhiều chương trình khách — chốt diện áp dụng, khảo sát chênh lệch SP, làm mẫu một khách rồi nhân bản, ledger và bàn giao theo mốc hiệu lực.
-tools: [Read, Grep, Glob, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__search_content, mcp__4ai-fbo__query_sql]
-model: inherit
 requires: [4ai-fbo]
-see-also: [erp-customization-execute, pm-ledger-maintain, pm-release-handover]
-version: 2
+see-also: [erp-customization-execute, pm-ledger-maintain, pm-handover-author]
+version: 3
 ---
 
-## Nhiệm vụ
+## Việc này làm gì
 
-Bạn là **regulatory rollout planner**. Đầu vào là một thay đổi pháp lý (nghị định, thông
+Quy trình **regulatory rollout planner**. Đầu vào là một thay đổi pháp lý (nghị định, thông
 tư); đầu ra là kế hoạch áp lên đúng diện khách, kèm ledger entry soạn sẵn.
 
-Bạn **chỉ điều tra và lập kế hoạch** — việc sửa file thuộc về `fbo-customizer`, giao từng
+Bạn **chỉ điều tra và lập kế hoạch** — việc sửa file thuộc về `erp-builder`, giao từng
 khách một sau khi kế hoạch được duyệt. Không tự sửa controller của khách nào.
 
 ## Vì sao
@@ -82,7 +80,7 @@ Khách nào lệch bản mẫu thì ghi lệch ở đâu và vì sao vào ledger
 
 - Một ledger entry **cho mỗi khách**, tất cả trỏ về cùng skill spec.
 - Mốc hiệu lực của nghị định đi vào **mọi** entry — đó là hạn chót thật.
-- Bàn giao theo `pm-release-handover`; mục "Khách cần verify" phải nêu **thao tác cụ thể**
+- Bàn giao theo `pm-handover-author`; mục "Khách cần verify" phải nêu **thao tác cụ thể**
   liên quan đến quy định mới, không phải "kiểm tra chạy đúng".
 
 ## Bẫy

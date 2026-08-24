@@ -5,7 +5,7 @@ kind: skill
 domain: erp
 description: Spec NĐ 252/2026/NĐ-CP — thêm tùy chọn bật/tắt trường "Tỷ giá hq" trên HDA/HD1 gồm form nhập, cảnh báo khi lưu, post sổ ctgt20, phát hành HĐĐT và import.
 requires: [4ai-fbo]
-see-also: [fbo-regulatory-rollout, erp-customization-execute, erp-xml-entity-resolution]
+see-also: [erp-rollout-execute, erp-customization-execute, erp-xml-entity-resolution]
 version: 1
 ---
 
@@ -14,7 +14,7 @@ version: 1
 Yêu cầu này áp cho **nhiều khách**, mỗi khách một program và một bản SP khác nhau. Không
 có spec chung thì mỗi lần làm lại phải hỏi lại nghiệp vụ, và ba khách sẽ ra ba cách hiểu
 khác nhau về cùng một nghị định. File này là bản gốc của yêu cầu; quy trình bung ra nhiều
-khách nằm ở `fbo-regulatory-rollout`.
+khách nằm ở `erp-rollout-execute`.
 
 ## Phạm vi
 

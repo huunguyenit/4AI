@@ -8,7 +8,7 @@ argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự �
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-graph-maintain, erp-table-propose]
 mode: agent
-version: 10
+version: 11
 ---
 
 ## Việc cần làm
@@ -22,11 +22,10 @@ từ `pm.maNv` trong `data/qlda.local.json`), không chỉ dự án nói tới g
 
 **KHÔNG có shell** (chat, Cowork) → gọi thẳng tool `render_review_report` (`project` bỏ trống =
 toàn bộ). Nó dựng đúng bộ file đó bằng chính code của `4ai report` và trả về `ddUR[]` để phân
-tích ngay tại chỗ. Bề mặt này cũng không cấp shell cho sub-agent, nên **đừng giao
-[pm-deadline-review]** — giao là nó dừng lại hỏi xin quyền bash và mất một lượt. Tự làm theo
-kịch bản của [pm-deadline-review].
+tích ngay tại chỗ. Bề mặt này không chạy được `4ai report`, nên bỏ Bước 1 của
+[pm-deadline-review] và làm thẳng Bước 2 trên `ddUR[]` vừa nhận.
 
-**CÓ shell** → giao [pm-deadline-review]: có mã dự án thì `node tools/4ai.mjs report --project
+**CÓ shell** → làm theo [pm-deadline-review]: có mã dự án thì `node tools/4ai.mjs report --project
 $ARGUMENTS` rồi `serve /review/<MA_DA>`; bỏ trống thì `node tools/4ai.mjs report` rồi `serve /review`.
 
 Sau khi HTML có: **chỉ phân tích UR `trang_thai = DD`** (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL). `XN`/`TH` chỉ xem hạn trên báo cáo.
