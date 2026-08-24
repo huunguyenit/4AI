@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "domains": ["core", "fbo-xml", "project-mgmt"],
+  "domains": ["4ai", "erp", "pm"],
   "targets": [
     {
       "name": "4ai",
       "path": "D:\\FBO-Shared\\mcp\\4AI",
       "tools": ["claude", "cursor", "vscode", "antigravity"],
-      "domains": ["core", "fbo-xml", "project-mgmt"],
+      "domains": ["4ai", "erp", "pm"],
       "enabled": true,
       "notes": "Hub là target đầu tiên của chính nó — dogfooding. Output generate được commit để diff cho thấy generate đã tạo ra cái gì."
     },
@@ -14,7 +14,7 @@
       "name": "plugin",
       "path": "D:\\Fast Source\\4AI\\plugins\\4ai",
       "tools": ["plugin"],
-      "domains": ["core", "fbo-xml", "project-mgmt"],
+      "domains": ["4ai", "erp", "pm"],
       "enabled": true,
       "pluginName": "4ai",
       "pluginVersion": "0.4.0",
@@ -24,7 +24,7 @@
       "name": "plugin-cursor",
       "path": "D:\\Fast Source\\4AI\\plugins\\4ai-cursor",
       "tools": ["cursor-plugin"],
-      "domains": ["core", "fbo-xml", "project-mgmt"],
+      "domains": ["4ai", "erp", "pm"],
       "enabled": true,
       "pluginName": "4ai",
       "pluginVersion": "0.4.0",

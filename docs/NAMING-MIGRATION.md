@@ -9,14 +9,17 @@ phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` 
 | Đợt | Nội dung | Trạng thái |
 |---|---|---|
 | 0 | `docs/NAMING.md`, field `status`/`owner`, check ở mức WARN | ✅ xong |
-| 1 | doctrine (3) + rule (14) | ⬜ |
+| 1 | thư mục domain (mọi kind) + doctrine (3) + rule (14) | ✅ xong |
 | 2 | skill (26) — kéo theo thư mục `references/` | ⬜ |
 | 3 | agent (12) — gồm 3 asset đổi kind | ⬜ |
 | 4 | command (12) — đổi tên slash command người dùng gõ | ⬜ |
 | 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |
 
-Thư mục domain đổi tên trong đợt đầu tiên chạm tới kind đó:
-`core/` → `4ai/`, `fbo-xml/` → `erp/`, `project-mgmt/` → `pm/`.
+Thư mục domain đổi tên **một lần, cho mọi kind, trong đợt 1**: `core/` → `4ai/`,
+`fbo-xml/` → `erp/`, `project-mgmt/` → `pm/`. Đổi từng đợt sẽ bắt `targets.json` phải khai
+sáu domain song song suốt bốn commit — một file config chung ở trạng thái nửa vời là chỗ
+dễ có người sửa nhầm nhất. Đổi `domain:` không đụng tới `id`, nên các kind chưa migrate
+vẫn nguyên tên.
 
 ## Đợt 1 — doctrine
 

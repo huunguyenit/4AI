@@ -31,7 +31,7 @@ export const AGENT_ROLES = [
 
 // Kind đã đóng đợt rename ⇒ vi phạm đặt tên là ERROR. Kind chưa có tên ở đây chỉ WARN,
 // để migration đi từng đợt mà `check` vẫn exit 0 giữa các đợt.
-export const NAMING_ENFORCED = [];
+export const NAMING_ENFORCED = ['doctrine', 'rule'];
 
 export const MAX_DESCRIPTION = 200;
 

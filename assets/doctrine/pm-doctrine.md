@@ -2,7 +2,7 @@
 id: pm-doctrine
 title: Project management doctrine
 kind: doctrine
-domain: project-mgmt
+domain: pm
 description: Đơn vị quản lý là chương trình khách hàng; mọi thay đổi hướng khách phải để lại vết trong ledger; không secret trong ghi chú.
 version: 1
 ---

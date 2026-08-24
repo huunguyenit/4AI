@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { HUB, loadAssets, loadTargets, readJson, resolveMcpServers, scanSecrets, ledgerRoot } from './lib/assets.mjs';
-import { skeleton, KINDS } from './lib/schema.mjs';
+import { skeleton, KINDS, SCOPES, validateNaming } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
 import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
 import { auditLedger } from './lib/ledger-audit.mjs';
@@ -251,9 +251,16 @@ function cmdExplain(id, opts) {
 
 function cmdNew(kind, id, opts) {
   if (!KINDS.includes(kind)) fail(`kind phải là một trong: ${KINDS.join(' | ')}`);
-  if (!id || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) fail('id phải là kebab-case, ví dụ: fbo-check-options');
-  const domain = opts.domain ?? (id.startsWith('fbo-') ? 'fbo-xml' : id.startsWith('pm-') ? 'project-mgmt' : 'core');
+  if (!id || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) fail('id phải là kebab-case, ví dụ: erp-options-lookup');
+  // Scope là segment đầu của id (docs/NAMING.md), và bằng luôn domain — không suy đoán nữa.
+  const scope = id.split('-')[0];
+  if (!opts.domain && !SCOPES.includes(scope)) {
+    fail(`\`${id}\` phải bắt đầu bằng scope: ${SCOPES.join(' | ')} — xem docs/NAMING.md`);
+  }
+  const domain = opts.domain ?? scope;
   const fm = skeleton(kind, id, domain);
+  const naming = validateNaming(fm);
+  if (naming.length) fail(naming.map((n) => n.message).join('; '));
   const folder = kind === 'doctrine' ? 'assets/doctrine' : `assets/${kind}s/${domain}`;
   process.stdout.write(`# Lưu vào: ${folder}/${id}.md\n`);
   process.stdout.write(stringifyFrontmatter(fm) + '\n');

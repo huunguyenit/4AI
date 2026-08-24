@@ -425,7 +425,7 @@ git clone https://github.com/huunguyenit/4AI.git
 cd 4AI
 
 # 2. Sửa hoặc tạo asset (ví dụ: skill mới)
-# Mở assets/skills/fbo-xml/your-skill.md
+# Mở assets/skills/erp/your-skill.md
 # Viết theo format: YAML frontmatter + Markdown content
 
 # 3. Validate
@@ -731,7 +731,7 @@ Ví dụ: Bạn muốn tạo skill mới để rà soát yêu cầu tốt hơn.
 
 ```bash
 # 1. Tạo file mới (hoặc sửa có sẵn)
-touch assets/skills/fbo-xml/my-new-skill.md
+touch assets/skills/erp/my-new-skill.md
 
 # 2. Viết theo format (YAML + Markdown)
 ---
