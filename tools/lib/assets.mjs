@@ -5,7 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseFrontmatter, FmError } from './fm.mjs';
 import { stateRoot } from '../../mcp/fbo/lib/index.mjs';
-import { applyDefaults, validateAsset, SECRET_PATTERNS, SECRET_WAIVER } from './schema.mjs';
+import { applyDefaults, validateAsset, validateNaming, NAMING_ENFORCED,
+         SECRET_PATTERNS, SECRET_WAIVER } from './schema.mjs';
 
 /** Gốc hub, suy ra từ vị trí file này (tools/lib/assets.mjs → ../../). */
 export const HUB = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..');
@@ -228,6 +229,13 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
     if (fm.id && fm.id !== stem) {
       errors.push({ file: display, line: keyLines.get('id') ?? 1,
         message: `\`id: ${fm.id}\` phải bằng tên file \`${stem}\`` });
+    }
+
+    // Đặt tên (docs/NAMING.md). Kind chưa đóng đợt rename thì chỉ WARN — nếu không,
+    // đợt 0 sẽ làm `check` fail trên cả 68 asset và không ai sync được nữa.
+    for (const n of validateNaming(fm)) {
+      const bucket = NAMING_ENFORCED.includes(fm.kind) ? errors : warnings;
+      bucket.push({ file: display, line: keyLines.get(n.field) ?? 1, message: n.message });
     }
 
     if (fm.domain && domains && !domains.includes(fm.domain)) {

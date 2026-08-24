@@ -1,0 +1,122 @@
+# Migration đặt tên — trạng thái
+
+Bảng ánh xạ cho việc chuẩn hoá theo `docs/NAMING.md`. **File này xoá đi khi đợt cuối đóng.**
+
+Mỗi đợt là một commit. Sau mỗi đợt: `check` phải exit 0, `sync --dry-run` chạy hai lần
+phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` sang `ERROR` trong
+`schema.mjs:NAMING_ENFORCED`.
+
+| Đợt | Nội dung | Trạng thái |
+|---|---|---|
+| 0 | `docs/NAMING.md`, field `status`/`owner`, check ở mức WARN | ✅ xong |
+| 1 | doctrine (3) + rule (14) | ⬜ |
+| 2 | skill (26) — kéo theo thư mục `references/` | ⬜ |
+| 3 | agent (12) — gồm 3 asset đổi kind | ⬜ |
+| 4 | command (12) — đổi tên slash command người dùng gõ | ⬜ |
+| 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |
+
+Thư mục domain đổi tên trong đợt đầu tiên chạm tới kind đó:
+`core/` → `4ai/`, `fbo-xml/` → `erp/`, `project-mgmt/` → `pm/`.
+
+## Đợt 1 — doctrine
+
+| Cũ | Mới |
+|---|---|
+| `core-doctrine` | `4ai-doctrine` |
+| `fbo-doctrine` | `erp-doctrine` |
+| `pm-doctrine` | *giữ nguyên* |
+
+## Đợt 1 — rule
+
+| Cũ | Mới | Ghi chú |
+|---|---|---|
+| `my-style-sql` | `erp-sql-style` | không có scope, tên cá nhân hoá |
+| `fbo-sql-via-mcp` | `erp-sql-access` | |
+| `fbo-encoding-and-newlines` | `erp-xml-encoding` | |
+| `fbo-f-vs-xml-pairing` | `erp-xml-pairing` | |
+| `fbo-entity-resolution-first` | `erp-xml-entity-resolution` | |
+| `fbo-never-invent-files` | `erp-xml-existence` | concern là danh từ, không phải mệnh lệnh |
+| `fbo-customization-scope` | `erp-program-scope` | |
+| `fbo-lookup-discipline` | `erp-mcp-lookup` | |
+| `fbo-layer-routing` | `erp-agent-routing` | |
+| `pm-no-secrets-in-notes` | `pm-notes-secrets` | |
+| `pm-program-from-workspace` | `pm-program-detection` | |
+| `pm-scope-question-first` | `pm-scope-clarification` | |
+| `pm-ledger-discipline` | *giữ nguyên* | đã đúng 3 segment |
+| `pm-ur-routing` | *giữ nguyên* | |
+
+## Đợt 2 — skill
+
+| Cũ | Mới | Ghi chú |
+|---|---|---|
+| `4ai-asset-authoring` | `4ai-asset-author` | |
+| `fbo-tim-qua-khu` | `erp-history-search` | id tiếng Việt |
+| `fbo-nd252-ty-gia-hq` | `erp-nd252-implement` | id tiếng Việt |
+| `fbo-create-category` | `erp-category-create` | |
+| `fbo-create-hddv` | `erp-hddv-migrate` | |
+| `fbo-create-skill` | `erp-skill-author` | ⚠ chồng trách nhiệm với `4ai-asset-author` |
+| `fbo-customization-workflow` | `erp-customization-execute` | |
+| `fbo-design-view-field` | `erp-view-design` | |
+| `fbo-einvoice-customize` | `erp-einvoice-customize` | |
+| `fbo-einvoice-nd70-discount` | `erp-einvoice-nd70-implement` | |
+| `fbo-get-voucher-data` | `erp-voucher-data-lookup` | |
+| `fbo-new-table-proposal` | `erp-table-propose` | |
+| `fbo-js-patterns` | `erp-js-implement` | |
+| `fbo-report` | `erp-report-create` | |
+| `fbo-report-pivot` | `erp-report-pivot-create` | |
+| `fbo-controller-anatomy` | `erp-controller-reference` | tri thức thuần |
+| `fbo-js-api` | `erp-js-api-reference` | tri thức thuần |
+| `fbo-glossary-reference` | `erp-glossary-reference` | |
+| `fbo-sql-reference` | `erp-sql-reference` | |
+| `fbo-navigation-recipes` | `erp-navigation-lookup` | |
+| `fbo-program-config` | `erp-program-config-lookup` | |
+| `fbo-sql-object-lookup` | `erp-sql-object-lookup` | |
+| `pm-adr` | `pm-adr-author` | |
+| `pm-capability-graph` | `pm-graph-maintain` | |
+| `pm-customer-program-registry` | `pm-program-lookup` | |
+| `pm-task-ledger` | `pm-ledger-maintain` | |
+
+## Đợt 3 — agent
+
+| Cũ | Mới | Ghi chú |
+|---|---|---|
+| `fbo-backend` | `erp-sql-expert` | tên cũ nói tầng, không nói vai |
+| `fbo-frontend` | `erp-xml-expert` | |
+| `fbo-glossary` | `erp-glossary-expert` | |
+| `fbo-change-reviewer` | `erp-reviewer` | |
+| `fbo-customizer` | `erp-builder` | |
+| `fbo-explorer` | `erp-explorer` | |
+| `pm-planner` | `pm-architect` | |
+| `pm-ur-analyst` | `pm-analyst` | |
+| `pm-release-auditor` | `pm-auditor` | |
+
+Ba asset **đổi kind** — chúng là quy trình, không phải vai:
+
+| Cũ (agent) | Thành | Ghi chú |
+|---|---|---|
+| `fbo-regulatory-rollout` | skill `erp-rollout-execute` | mất context riêng; đọc kỹ body trước khi chuyển |
+| `pm-release-handover` | skill `pm-handover-author` | |
+| `pm-deadline-review` | gộp vào command `pm-deadline-review` | command `pm-review` hiện chỉ dispatch agent này — hai artifact cho một trách nhiệm |
+
+## Đợt 4 — command
+
+| Cũ | Mới |
+|---|---|
+| `/doctor` | `/4ai-doctor` |
+| `/sync` | `/4ai-sync` |
+| `/new-rule` | `/4ai-rule-create` |
+| `/new-skill` | `/4ai-skill-create` |
+| `/new-agent` | `/4ai-agent-create` |
+| `/fbo-customize` | `/erp-customize` |
+| `/fbo-find` | `/erp-screen-find` |
+| `/fbo-review` | `/erp-diff-review` |
+| `/fbo-sql` | `/erp-sql-query` |
+| `/pm-new-adr` | `/pm-adr-create` |
+| `/pm-review` | `/pm-deadline-review` |
+| `/pm-status` | *giữ nguyên* |
+
+## Nợ kỹ thuật ghi nhận, chưa xử lý
+
+- `docs/ASSET-FORMAT.md` và `docs/TARGET-MATRIX.md` được `CLAUDE.md` khai là nguồn chuẩn
+  cao nhất nhưng **không tồn tại trong repo**.
+- `erp-skill-author` và `4ai-asset-author` chồng trách nhiệm — cân nhắc gộp ở đợt 5.

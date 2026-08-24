@@ -6,7 +6,7 @@ domain: core
 description: Dùng khi tạo hoặc sửa asset trong hub 4AI (rule/skill/agent/command/doctrine) — schema frontmatter, subset YAML, quy ước đặt tên, và bước check bắt buộc trước khi báo xong.
 targets: [claude, cursor]
 see-also: [pm-scope-question-first]
-version: 1
+version: 2
 ---
 
 ## Vì sao
@@ -27,7 +27,9 @@ toàn bộ hợp đồng để viết đúng ngay lần đầu. Nguồn chuẩn 
 
 1. `node tools/4ai.mjs new <kind> <id>` — in skeleton đúng schema ra stdout.
 2. Đặt file đúng chỗ: `assets/<kind>s/<domain>/<id>.md` (doctrine: `assets/doctrine/<id>.md`).
-   **Tên file phải bằng `id`**, kebab-case, prefix theo domain (`fbo-`, `pm-`, `4ai-`).
+   **Tên file phải bằng `id`**. Đặt tên theo `docs/NAMING.md` — segment đầu là scope
+   (`4ai` | `erp` | `pm`) và phải bằng `domain`; skill kết thúc bằng capability, agent kết
+   thúc bằng role. `check` báo WARN cho asset chưa migrate, nhưng asset MỚI phải đúng ngay.
 3. Frontmatter chỉ dùng subset YAML: `key: scalar`, `key: [a, b]`, block sequence
    `- item`. KHÔNG nested map, KHÔNG block scalar `|`/`>`, KHÔNG null. Giá trị bắt đầu
    bằng `[` mà là chuỗi thì phải bọc nháy.

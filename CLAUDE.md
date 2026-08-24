@@ -32,6 +32,8 @@ phải cho cùng kết quả — đó là bài kiểm tra idempotency.
 | File | Mở khi |
 |---|---|
 | `docs/ASSET-FORMAT.md` | Viết hoặc sửa asset trong `assets/` |
+| `docs/NAMING.md` | Đặt tên asset — scope, pattern theo kind, vocabulary capability/role |
+| `docs/NAMING-MIGRATION.md` | Đang trong đợt đổi tên; xoá khi đợt cuối đóng |
 | `docs/TARGET-MATRIX.md` | Sửa emitter, hoặc hỏi "asset này ra file nào" (cột Antigravity đánh dấu chưa xác nhận) |
 | `targets.json` | Thêm/bật/tắt nơi sync ghi tới |
 | `mcp/servers.json` | Đụng tới cấu hình MCP |
