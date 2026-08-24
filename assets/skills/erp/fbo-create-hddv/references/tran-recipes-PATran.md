@@ -1,0 +1,36 @@
+# PATran — HDDV Recipe (PNE / m83$) — **Nhóm II***
+
+**File:** `App_Data/Controllers/Dir/PATran.xml`  
+**Include:** `%InputInvoice.Include.PATran;` → `InputInvoice.PATran`  
+**Bảng link HĐ:** `h83$000000` (hardcode trong PATran include, **không** `h&Tag;$`)  
+**Detail/Tax:** `d83`, `r30`
+
+## Entity SQL — DÙNG II*, KHÔNG đổi sang InputInvoice*
+
+| Event | Entity |
+|-------|--------|
+| Inserting | `&IICheck;` |
+| Inserted | `&IIInsert;` |
+| Updated | `&IIUpdate;` |
+| Deleted | `&IIDelete;` |
+
+`IIInsert` / `IIUpdate` vẫn gọi `&InputInvoiceRefreshGridCommand;` bên trong `InputInvoice.PATran`.
+
+## @script — R2SP222
+
+```xml
+&InputInvoiceScriptDeclare;
+&InputInvoiceScriptWarning;
+&IIInsert;              <!-- KHÔNG InputInvoiceInsert -->
+&InputInvoiceScriptQuery; ...
+```
+
+## Extender kèm theo
+
+- `FlowMultiVoucher` + `FlowMultiScript`
+- **Không** DPScript
+
+## Khi migrate sang dự án khác
+
+1. Copy cả `InputInvoice.PATran` (entity `IICheck`, `IIInsert`, `IIUpdate`, `IIDelete`, `IIInsertDataScript`).
+2. Nếu dự án **có List**: thay block `InputInvoiceScript*` bằng `ListDeclare` + `ListWarning` + `ListCommand` + `IIInsert` + `ListQuery` — **vẫn dùng IIInsert**, không đổi tên entity.

@@ -1,0 +1,44 @@
+# Ví dụ: PQA ← DMS (FBISP229)
+
+## File XML
+
+| File | Path |
+|---|---|
+| Filter | `App_Data/Controllers/Filter/PQADMSFilter.xml` |
+| Form | `App_Data/Controllers/Filter/PQADMSForm.xml` |
+| Grid | `App_Data/Controllers/Grid/PQADMSGrid.xml` |
+| Lookup | `App_Data/Controllers/Lookup/PQADMSLookup.xml` |
+| Detail | `App_Data/Controllers/Grid/PQADetail.xml` |
+| Tran | `App_Data/Controllers/Dir/PQATran.xml` |
+
+## Mapping nguồn → đích
+
+| Nguồn (DMS) | Đích (PQA `ctbbkt`) |
+|---|---|
+| `dpd.stt_rec` | `stt_rec_dms` |
+| `dpd.stt_rec0` | `stt_rec0dms` |
+| `dpd.so_ct` | `dms_so` |
+| `dpd.line_nbr` | `dms_ln` |
+| SL chọn grid | `so_luong` |
+
+## Điều kiện nguồn
+
+- `mpd.nho_le_yn = 1` (mua nhỏ lẻ)
+- `mpd.status = '2'` (đã duyệt)
+- `fsdSttRecRef.ma_ct = 'PQA'` khi tính SL đã lấy
+
+## Proc
+
+`fsd_FastBusiness$Voucher$BeforeAfterUpdate$PQATranFromDMSTran`
+
+- `@Dtable = 'ctbbkt'`, `@Mtable = 'phbbkt'`
+- Cập nhật `dpd$.sl_pqa` (quy đổi `he_so`)
+- Partition: `CONVERT(VARCHAR(6), b.ngay_ct, 112)` từ `cpd$000000`
+
+## Test nhanh
+
+1. DMS nhỏ lẻ đã duyệt, ≥ 2 dòng hàng
+2. PQA → Lấy dữ liệu → chọn 1 tờ trình, tick dòng
+3. Lưu PQA → `fsdSttRecRef` có `stt_rec_pre` = `stt_rec_dms`
+4. Lấy tiếp → SL còn lại giảm; hết SL → lookup không hiện tờ trình
+5. Chặn 2 tờ trình trên 1 PQA (Form validate)

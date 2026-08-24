@@ -1,0 +1,28 @@
+# PGTran — HDDV Recipe (PNG / m78$)
+
+**File:** `App_Data/Controllers/Dir/PGTran.xml`  
+**Include:** `%InputInvoice.Include.PGTran;`  
+**Bảng link HĐ:** `h78$`  
+**Detail/Tax:** `d78`, `r30`
+
+## Entity SQL (nhóm chuẩn)
+
+| Event | Entity |
+|-------|--------|
+| Inserting | `&InputInvoiceCheck;` |
+| Inserted | `&InputInvoiceInsert;` |
+| Updated | `&InputInvoiceUpdate;` |
+| Deleted | `&InputInvoiceDelete;` |
+
+## @script — R2SP222
+
+`InputInvoiceScript*` + `InputInvoiceInsert/Update/Delete`.
+
+## Extender kèm theo
+
+- `FlowMultiVoucher` + `FlowMultiScript`
+- `DPScript`
+
+## View
+
+`t_thue` footer: gộp `[ong_ba], [ticket]` trên một dòng view (tránh trùng dòng).

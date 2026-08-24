@@ -1,0 +1,23 @@
+# Ví dụ tham chiếu
+
+Không dùng file này làm định nghĩa pattern. Pattern: [SKILL.md](SKILL.md).
+
+## Mapping Filter field@name → proc English
+
+Filter `Processing` (đúng `field@name`):
+
+```sql
+exec zc_rptPlanActualRevenue @nam, @ct_theo, @ma_kh, @ma_nvbh, @tk_dt, @nh_vt1, @nh_vt2, @nh_vt3, @ma_dvcs, @@language, @@userID, @@admin
+```
+
+| Field XML (`name`) | Proc |
+|--------------------|------|
+| `nam` | `@Year` |
+| `ct_theo` | `@DetailBy` |
+| `ma_kh` | `@Customer` |
+| `ma_nvbh` | `@SalesEmployee` |
+| `tk_dt` | `@SalesAccount` |
+| `nh_vt1` / `nh_vt2` / `nh_vt3` | `@ItemGroup1` / `@ItemGroup2` / `@ItemGroup3` |
+| `ma_dvcs` | `@Unit` |
+
+File: `{app}/App_Data/Controllers/Filter/zcrptPlanActualRevenue.xml` + `{app}/zc_rptPlanActualRevenue.sql`.

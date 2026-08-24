@@ -1,0 +1,90 @@
+# List extender vs InputInvoiceScript*
+
+`InputInvoiceInsert` / `IIInsert` gọi `InputInvoiceRefreshGridCommand`:
+
+```sql
+select @script = @script + 'refresh$InputInvoice$ParentGrid(this);'
+```
+
+`@script` phải được khai báo và trả về client. Có **2 cách** — chọn **một**, không trộn.
+
+---
+
+## Cách 1 — Dự án đã bật Extender.List (tận dụng, không gỡ)
+
+**Inserted:**
+
+```xml
+&ListDeclare;
+&ListWarning;
+&ListCommand;
+&InputInvoiceInsert;    <!-- hoặc &IIInsert; theo recipe Tran -->
+&ListQuery;<![CDATA[, @stt_rec as stt_rec, @@unit as ma_dvcs else
+select @stt_rec as stt_rec, @@unit as ma_dvcs
+]]>&CommandShowWarningMessage;<![CDATA[
+return
+]]>
+```
+
+**Updated:**
+
+```xml
+&ListDeclare;
+&ListWarning;
+&ListCommand;
+&InputInvoiceUpdate;    <!-- hoặc &IIUpdate; -->
+&ListQuery;
+&CommandShowWarningMessage;
+```
+
+**Deleted:** giữ `&ListDeleted;` trước `&InputInvoiceDelete;` nếu nguồn có.
+
+**Script/Response:** giữ `ListCreate`, `ListDispose`, `ListShown`, `ListScattering`, `ListScript`, `ListTicket`, `ListResponseTicket` nếu List đang hoạt động.
+
+**Không thêm:** `InputInvoiceScriptDeclare`, `InputInvoiceScriptWarning`, `InputInvoiceScriptQuery`.
+
+---
+
+## Cách 2 — Dự án không bật List (R2SP222)
+
+**Inserted:**
+
+```xml
+&InputInvoiceScriptDeclare;
+&InputInvoiceScriptWarning;
+&InputInvoiceInsert;    <!-- hoặc &IIInsert; -->
+&InputInvoiceScriptQuery;<![CDATA[, @stt_rec as stt_rec, @@unit as ma_dvcs else
+select @stt_rec as stt_rec, @@unit as ma_dvcs
+]]>&CommandShowWarningMessage;<![CDATA[
+return
+]]>
+```
+
+**Updated:**
+
+```xml
+&InputInvoiceScriptDeclare;
+&InputInvoiceScriptWarning;
+&InputInvoiceUpdate;    <!-- hoặc &IIUpdate; -->
+&InputInvoiceScriptQuery;
+&CommandShowWarningMessage;
+```
+
+**Deleted:** chỉ `&InputInvoiceDelete;` (hoặc `&IIDelete;`) — **bỏ** `&ListDeleted;`.
+
+**Script/Response:** bỏ toàn bộ `List*`; giữ `GetTicket` + `UploadCreateTicket`.
+
+---
+
+## Cách nhận biết nhanh
+
+```bash
+# ListDeclare rỗng trong dự án không bật List
+resolve_entities → ListDeclare = declare @script... (từ Extender.ent)
+
+# File đích đã có block List đang chạy → Cách 1
+rg "&ListDeclare" App_Data/Controllers/Dir/{Tran}.xml
+
+# R2SP222 sau migrate → Cách 2
+rg "&InputInvoiceScriptDeclare" App_Data/Controllers/Dir/{Tran}.xml
+```

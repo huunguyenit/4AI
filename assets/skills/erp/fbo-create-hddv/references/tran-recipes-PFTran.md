@@ -1,0 +1,27 @@
+# PFTran — HDDV Recipe (PNC / m73$)
+
+**File:** `App_Data/Controllers/Dir/PFTran.xml`  
+**Include:** `%InputInvoice.Include.PFTran;`  
+**Bảng link HĐ:** `h73$`  
+**Detail/Tax:** `d73`, `r30`
+
+## Entity SQL (nhóm chuẩn)
+
+| Event | Entity |
+|-------|--------|
+| Inserting | `&InputInvoiceCheck;` |
+| Inserted | `&InputInvoiceInsert;` |
+| Updated | `&InputInvoiceUpdate;` |
+| Deleted | `&InputInvoiceDelete;` |
+
+## @script — R2SP222
+
+`InputInvoiceScript*` + `InputInvoiceInsert/Update/Delete`.
+
+## Extender kèm theo
+
+- `FlowMultiVoucher` + `FlowMultiScript`
+- `DPScript` (Down Payment)
+- Grid DP: `p&Tag;` trong script
+
+## Pattern giống PGTran / PVTran (mua hàng có DP)

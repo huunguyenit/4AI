@@ -1,0 +1,56 @@
+# XML — Response action + SQL
+
+## Vị trí
+
+Dir: `App_Data\Controllers\Dir\{Voucher}Tran.xml`  
+Grid: `App_Data\Controllers\Grid\{Name}.xml`
+
+```xml
+<response>
+  <action id="LoadVVDetail">
+    <text>
+      <![CDATA[
+declare @json nvarchar(max)
+exec zc_LoadItemJobToWIDetail @ma_vv_m, @@unit, @stt_rec, @@userID, @@admin, @json output
+select isnull(@json, '[]') as json
+      ]]>
+    </text>
+  </action>
+</response>
+```
+
+## Quy tắc
+
+| Quy tắc | Chi tiết |
+|---------|----------|
+| `action id` | **Trùng** context trong `f.request` / `g.request` |
+| Tham số Dir | `['ma_vv_m', 'stt_rec']` → `@ma_vv_m`, `@stt_rec` |
+| Tham số Grid | `[['ma_dvcs', 'String', val]]` → `@ma_dvcs` |
+| Session | `@@userID`, `@@admin`, `@@unit` trong SQL |
+| Trả JSON | `select ... as json` → `JSON.parse(result[0].Value)` |
+| Trả value | `select 1 as value` / `0` / mã lỗi — dùng trong chain deferred |
+| Trả nhiều cột | `result[0].Value`, `result[1].Value`, ... |
+| Proc nặng | `exec proc ... @json output` — không nhét SQL dài trong XML |
+
+## Kiểu trả và mục đích
+
+| Trả về | Dùng khi |
+|--------|----------|
+| `json` | Fill grid, transfer data |
+| `value` 0/1 | Pass/fail check (quyền, điều kiện) |
+| `value` 1/2/3... | Mã lỗi nghiệp vụ — `switch` trong ResponseComplete |
+| `script` | `select 'refreshGrid(this)' as script` — FBO tự chạy sau response |
+
+Pattern chain request: [js-request-deferred.md](js-request-deferred.md).
+
+## Field master kích hoạt (Dir)
+
+```xml
+<field name="ma_vv_m">
+  <clientScript><![CDATA[onchange="onChange$Voucher$MaVV(this);"]]></clientScript>
+</field>
+```
+
+## Grid detail — response riêng
+
+Grid detail có thể dùng `on$GridVoucherDetail$ResponseComplete` — xem [naming.md](naming.md).

@@ -1,0 +1,90 @@
+# Quy tắc đặt tên hàm JS
+
+## Form master (Dir — `*Tran.xml`)
+
+| Loại | Pattern | Ví dụ |
+|------|---------|-------|
+| onChange field | `onChange$Voucher$field_name` | `onChange$Voucher$MaVV` |
+| onFocus field | `onFocus$Voucher$field_name` | `onFocus$Voucher$ma_kh` |
+| Response form | `on$Voucher$ResponseComplete` | `case 'LoadVVDetail':` |
+| Load grid con | `load$Grid{Name}$` | `load$GridVoucherDetailXuatAm$` |
+| Dispose grid | `dispose$Grid{Name}$` | |
+
+**`$Voucher$`** = placeholder chuẩn FastBusiness trên Dir (không đổi theo tên file).
+
+## Grid detail (`Grid\*.xml`)
+
+| Loại | Pattern | Ví dụ |
+|------|---------|-------|
+| onChange cột | `onChange$GridVoucherDetail$Field` | `onChange$GridVoucherDetail$DienGiai` |
+| Response grid | `on$GridVoucherDetail$ResponseComplete` | `case 'Item':`, `case 'UOM':` |
+| Execute command | `on$GridVoucherDetail$ExecuteCommand` | toolbar Retrieve, Import |
+
+Grid tự fire request qua `clientScript` on field — **không** qua `f.request` của form.
+
+## Helper tùy chỉnh
+
+Đặt tên mô tả luồng:
+
+```javascript
+function insert$LoadVV$Row(g, row, item) { ... }
+function DeleteData$Detail(f, name_grid) { ... }
+```
+
+Prefix `insert$`, `load$`, `delete$` + tên nghiệp vụ.
+
+## FlowMulti (`Filter\*MultiForm.xml`)
+
+| Loại | Pattern | Ví dụ |
+|------|---------|-------|
+| Mở form | `show$Identity$` | `show$FADeviceMultiForm$` |
+| Active/close | `active$Identity$`, `close$Identity$` | |
+| Response popup | `on$Identity$Form$ResponseComplete` | `case 'GetOtherField':` |
+| Transfer chính | `on$Identity$TransferData` | `on$FADeviceMultiForm$TransferData` |
+| Transfer phụ | `on$Identity$TransferAttached` | grid/field thứ 2 |
+| Helper tag row | `findTagRowBySttRec$Identity$` | ghép array khi UNION nhiều dòng |
+
+`Identity` = giá trị entity `<!ENTITY Identity "FADeviceMultiForm">` — **không** dùng `$Voucher$`.
+
+Include chuẩn (encrypted): `show$FlowMulti$Form`, `getGrid$FlowMulti$`, `insert$RetrieveTagRow$Items`, `getColumnOrderTagRow` — gọi đúng tên, không copy implementation.
+
+## XML clientScript
+
+Dir field:
+
+```xml
+<clientScript><![CDATA[onchange="onChange$Voucher$MaVV(this);"]]></clientScript>
+```
+
+Grid field (đồng bộ cột cùng dòng):
+
+```xml
+<clientScript><![CDATA[onchange="onChange$GridVoucherDetail$DienGiai(this);"]]></clientScript>
+```
+
+Grid field (request SQL):
+
+```xml
+<clientScript><![CDATA[onchange="onChange$GridVoucherDetail$Item(this);"]]></clientScript>
+```
+
+## CDATA script section
+
+Hàm user thêm vào `<script><text><![CDATA[ ... ]]>` — trước `</text></script>`.
+
+Dùng marker `/* <flatten type="Javascript"> */` nếu file mẫu có (theo convention project).
+
+## Style điều kiện (convention dự án)
+
+Handler grid/detail đơn giản: **bọc logic trong `if (điều_kiện) { }`**, tránh `if (!đk) return;` ở đầu hàm.
+
+```javascript
+function onChange$GridVoucherDetail$DienGiai(o) {
+  var g = o.grid, f = g.get_element().parentForm, v = $func.trim(f.getItemValue('loai_ct'));
+  if (v == '6' || v == '9') {
+    // ...
+  }
+}
+```
+
+`return` sớm chỉ dùng khi guard bắt buộc (vd. `f._action === 'View'`, thoát lỗi validation).

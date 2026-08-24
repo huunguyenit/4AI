@@ -1,0 +1,91 @@
+# JS — Gọi request (Dir + Grid)
+
+## Dir — onChange master
+
+```javascript
+function onChange$Voucher$MaVV(o) {
+  var f = o.parentForm;
+  if (f._action === 'View') return;
+
+  var ma_vv_m = $func.trim(f.getItemValue('ma_vv_m'));
+  if (ma_vv_m === '') return;
+
+  DeleteData$Detail(f, 'd38');
+  f.request('LoadVVDetail', 'LoadVVDetail', ['ma_vv_m', 'stt_rec', 'ma_dvcs'], o);
+}
+```
+
+## f.request (Dir)
+
+```javascript
+f.request(actionId, context, [paramFieldNames], senderObject);
+```
+
+| Tham số | Ý nghĩa |
+|---------|---------|
+| `actionId` | Khớp `<action id="...">` |
+| `context` | Thường cùng tên actionId — `switch (context)` trong ResponseComplete |
+| `[paramFieldNames]` | Tên field form → `@param` SQL |
+| `senderObject` | `this` / `o` từ onChange |
+
+## g.request (Grid)
+
+```javascript
+g.request(g, actionId, context, [
+  ['param1', 'String', value1],
+  ['param2', 'String', value2]
+]);
+```
+
+| Tham số | Ý nghĩa |
+|---------|---------|
+| Tham số mảng `[tên, kiểu, giá trị]` | Map `@tên` trong SQL action |
+| `g` | Grid behavior (`sender` trong ExecuteCommand) |
+
+Handler: `on$Grid{Name}$ResponseComplete` trong `Grid/*.xml`.
+
+## Guard bắt buộc (Dir)
+
+```javascript
+if (f._action === 'View') return;
+```
+
+## Response handler
+
+```javascript
+function on$Voucher$ResponseComplete(sender, e) {
+  var f = e.object, context = e.type.Context, result = e.type.Result;
+  switch (context) {
+    case 'LoadVVDetail':
+      break;
+  }
+}
+```
+
+```javascript
+function on$GridInvoice$ResponseComplete(sender, e) {
+  var g = e.object, context = e.type.Context, result = e.type.Result;
+  switch (context) {
+    case 'ActionPhụ':
+      break;
+  }
+}
+```
+
+## Hai kiểu dùng request
+
+| Kiểu | Mô tả | Doc |
+|------|--------|-----|
+| **Trực tiếp** | 1 request → xử lý xong trong ResponseComplete (fill grid, set field) | [js-grid-fill.md](js-grid-fill.md) |
+| **Trước — sau** | Request 1 (check/load DB) → OK mới request 2 / showForm / handler | [js-request-deferred.md](js-request-deferred.md) |
+
+Dùng kiểu **trước — sau** khi cần đọc DB realtime trước hành động (quyền, trạng thái, validate...).
+
+## setItemControlBehavior (master field)
+
+```javascript
+case 'Customer':
+  f.setItemControlBehavior('ong_ba', result[0].Value, null, true);
+  f.live(f.getItem('ong_ba'));
+  break;
+```

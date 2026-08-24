@@ -1,0 +1,73 @@
+# Token runtime — `@@...` và biến cookie
+
+Đọc SQL nhúng trong controller FBO sẽ gặp những cái tên không có trong bảng nào và không khai
+ở file nào: `@@unit`, `@@language`, `@@stt_rec`. Runtime bơm chúng vào lúc chạy. Trang này
+dịch chúng.
+
+Nguồn: *"Hướng dẫn lập trình FBOR2SP19.1"* mục III.2.1–2.2, cộng các token quan sát được
+trong mã nguồn thật của một chương trình FBI SP2422.
+
+## Biến session SQL — `@@<tên>`
+
+Dùng thẳng trong thẻ `<text>` của command, như một biến SQL bình thường.
+
+| Token | Giá trị | Nguồn |
+|---|---|---|
+| `@@userID` | id của user đang đăng nhập | tài liệu SP19.1 · dùng thật ở `Options\Query.xml` |
+| `@@userName` | tên user đăng nhập | tài liệu SP19.1 |
+| `@@admin` | `0`/`1` — có phải admin không | tài liệu SP19.1 |
+| `@@isLogin` | `0`/`1` — đã đăng nhập chưa | tài liệu SP19.1 |
+| `@@language` | `V`/`E` — ngôn ngữ đang dùng | tài liệu SP19.1 · dùng thật ở `Options\Query.xml`, `Include\XML\*` |
+| `@@unit` | **đơn vị cơ sở** đang đăng nhập | tài liệu SP19.1 · dùng thật ở `Options\Query.xml` |
+| `@@appDatabaseName` | tên database app | tài liệu SP19.1 |
+| `@@sysDatabaseName` | tên database sys | tài liệu SP19.1 |
+| `@@form` | id của mẫu báo cáo | tài liệu SP19.1 |
+| `@@copping` | `0`/`1` — có đang **sao chép** phiếu không | tài liệu SP19.1 |
+| `@@table` | bảng của chứng từ đang mở | quan sát ở `Include\XML\PaymentApprovalComment.xml` |
+| `@@stt_rec` | khoá chứng từ đang mở | quan sát ở `Include\XML\PaymentApprovalComment.xml` |
+| `@@queryParameter` | tham số truyền vào command | quan sát ở `Options\Query.xml` |
+
+```sql
+select @ma_nt = ma_nt from @@table where stt_rec = @@stt_rec
+exec dbo.FastBusiness$App$Print$GetSignValue @@unit, '1', @@language, @@queryParameter, @@userID
+```
+
+**`@@copping` viết đúng là hai chữ `p`** — sai chính tả trong sản phẩm, không phải trong tài
+liệu này. Gõ `@@coping` sẽ trượt.
+
+**Chú ý `@@language`:** tài liệu ghi `V`/`E` hoa, nhưng code thật so bằng chữ thường
+(`case @@language when 'v' then ...` ở `Include\XML\GridTaxLoading.xml`) và `g._language`
+phía JS cũng dùng `v`/`e`. So sánh trong SQL Server mặc định không phân biệt hoa thường nên
+cả hai cùng chạy — **đừng dựa vào điều đó** nếu database đặt collation phân biệt hoa thường.
+
+Đây **không** phải danh sách đóng: runtime có thể bơm thêm token khác trong ngữ cảnh riêng.
+Gặp một `@@` lạ thì `search_content { in: "sql" }` để tìm chỗ dùng khác, đừng đoán nghĩa.
+
+## Biến cookie — giá trị mặc định của phiên
+
+Người dùng đặt một lần, hệ thống nhớ cho các lần mở màn hình sau. Tham chiếu bằng `aliasName`.
+
+| Ý nghĩa | aliasName | Ghi chú |
+|---|---|---|
+| Tài khoản mặc định chung toàn hệ thống | `defaultName` | |
+| Tài khoản mặc định cho **phải thu / bán hàng** | `defaultARAccount` | |
+| Tài khoản mặc định cho **phải trả / mua hàng** | `defaultAPAccount` | |
+| Khách hàng mặc định chung toàn hệ thống | `defaultGLCustomer` | |
+| Khách hàng mặc định cho **phải thu / bán hàng** | `defaultARCustomer` | |
+| Khách hàng mặc định cho **phải trả / mua hàng** | `defaultAPCustomer` | |
+| Từ ngày / Đến ngày | `fromDate` · `toDate` | |
+| Từ kỳ / Đến kỳ | `fromPeriod` · `toPeriod` | |
+| Từ năm / Đến năm | `fromYear` · `toYear` | |
+| Quý / Năm | `Quarter` · `Year` | **viết hoa chữ đầu**, khác hẳn nhóm còn lại |
+| Kho | `defaultSite` | *site* = kho, không phải "địa điểm" |
+| Vật tư | `defaultItem` | |
+
+Ba cặp `default*Account` / `default*Customer` theo đúng trục AR/AP của phân hệ — xem
+`abbreviations.md`: **AR = phải thu, AP = phải trả**. Lẫn hai cái này là gán nhầm tài khoản
+mặc định cho cả một màn hình.
+
+## Giới hạn
+
+Bảng cookie lấy từ tài liệu **SP19.1** và **chưa đối chiếu** với SP hiện hành — khác với nhóm
+`@@`, ở đó bảy token đã thấy dùng thật trong mã SP2422. Trước khi dựa vào một `aliasName` cụ
+thể, tìm nó trong `Controllers\` của đúng program.

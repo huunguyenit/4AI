@@ -1,0 +1,122 @@
+# Quy tắc format SQL — proc báo cáo
+
+Quy tắc (user):
+
+DECLARE param với ưu tiên thành 1 dòng, chỉ xuống hàng khi tràn màn hình (quá 10 biến)
+Trừ param truyền vào proc phải xuống dòng
+IF chỉ xuống dòng khi có begin, begin và end khi xử lý 2 logic cùng 1 if
+SELECT các biến trên 1 hàng, chỉ xuống dòng khi quá 10 cột
+INTO 1 dòng
+FROM 1 dòng
+JOIN mỗi bảng 1 dòng
+WHERE normal 1 dòng, exists 1 dòng, where lồng 1 dòng
+INSERT thẳng cột, bỏ tường minh làm chậm SQL
+
+Biến local tiếng Anh: `@EmployeeKey` (lọc NV), `@PlanKey` (điều kiện nguồn kế hoạch) — không `@NvbhKey`, `@Key_kh`.
+
+## Param CREATE PROCEDURE — mỗi dòng
+
+Không gom trên một dòng (ngoại lệ so với DECLARE). Tên tiếng Anh; Filter XML dùng `@{field.name}` cùng thứ tự.
+
+```sql
+CREATE PROCEDURE {zc_rptXxx}
+    @Year NUMERIC(4, 0),
+    @DetailBy CHAR(1),
+    @Customer VARCHAR(32),
+    @SalesEmployee VARCHAR(1024),
+    @SalesAccount VARCHAR(1024),
+    @ItemGroup1 VARCHAR(32),
+    @ItemGroup2 VARCHAR(32),
+    @ItemGroup3 VARCHAR(32),
+    @Unit VARCHAR(1024),
+    @Language CHAR(1),
+    @UserID INT,
+    @Admin BIT
+AS
+```
+
+## DECLARE / SELECT biến
+
+```sql
+DECLARE @DateFrom SMALLDATETIME, @DateTo SMALLDATETIME, @q NVARCHAR(4000), @Key NVARCHAR(4000), @PlanKey NVARCHAR(4000)
+    , @Join NVARCHAR(4000), @UnitKey NVARCHAR(4000), @AccountKey NVARCHAR(4000), @EmployeeKey NVARCHAR(4000), @s NVARCHAR(4000), @Month INT
+
+SELECT @DateFrom = ..., @DateTo = ..., @Join = '...', @Key = '...', @EmployeeKey = ''
+    , @UnitKey = dbo.FastBusiness$Function$System$GetUnitFilter('a.ma_dvcs', @Unit, @UserID, @Admin)
+```
+
+≤ 10 biến/cột: một dòng. > 10: xuống dòng tiếp, dấu `,` đầu dòng.
+
+## IF
+
+Một lệnh — không BEGIN:
+
+```sql
+IF @Customer <> '' SELECT @s = ' and a.ma_kh like ''' + REPLACE(RTRIM(@Customer), '''', '''''') + '%''', @Key = @Key + @s
+```
+
+Hai logic cùng IF — BEGIN/END:
+
+```sql
+IF @SalesEmployee <> '' BEGIN
+    SELECT @EmployeeKey = dbo.FastBusiness$Function$System$GetCodeFilter('a.ma_nvbh', 'inlist', @SalesEmployee)
+    IF @EmployeeKey <> '' SELECT @s = ' and ' + @EmployeeKey, @Key = @Key + @s
+END
+```
+
+IF lồng một lệnh: không BEGIN.
+
+## SELECT / INTO / FROM / JOIN / WHERE
+
+```sql
+SELECT a.ma_nvbh, a.ma_dvcs, MONTH(a.ngay_ct), 0, SUM(a.tien2 - a.ck)
+    INTO #month_data FROM #in a
+    GROUP BY a.ma_nvbh, a.ma_dvcs, MONTH(a.ngay_ct)
+
+UPDATE a SET ke_hoach = b.ke_hoach
+    FROM #month_data a
+    JOIN #plan_data b ON a.ma_nvbh = b.ma_nvbh AND a.ma_dvcs = b.ma_dvcs AND a.thang = b.thang
+
+SELECT p.ma_nvbh, p.ma_dvcs, p.thang, p.ke_hoach, 0
+    FROM #plan_data p
+    WHERE NOT EXISTS(SELECT 1 FROM #month_data x WHERE x.ma_nvbh = p.ma_nvbh AND x.ma_dvcs = p.ma_dvcs AND x.thang = p.thang)
+```
+
+- `INTO` cùng khối SELECT, một dòng `INTO #t` (có thể cùng dòng SELECT nếu ngắn).
+- `FROM` một dòng.
+- Mỗi `JOIN` / `LEFT JOIN` / `CROSS JOIN` một dòng; `ON` cùng dòng JOIN nếu gọn.
+- WHERE thường một dòng; `EXISTS`/`NOT EXISTS` một dòng; WHERE lồng trong EXISTS một dòng.
+
+## INSERT
+
+Không liệt kê cột:
+
+```sql
+INSERT #month_data
+SELECT a.ma_nvbh, a.ma_dvcs, MONTH(a.ngay_ct), 0, SUM(a.tien2 - a.ck)
+    FROM #in a
+    GROUP BY a.ma_nvbh, a.ma_dvcs, MONTH(a.ngay_ct)
+```
+
+**Sai:** `INSERT #month_data (ma_nvbh, ma_dvcs, thang, ke_hoach, thuc_te) SELECT ...`
+
+Struct `SELECT TOP 0 ... INTO #t`:
+- Có bảng nguồn: `SELECT TOP 0 a.col INTO #t FROM {table} a`
+- Không bảng nguồn: mỗi cột `CAST(... AS ...)` — không viết tên cột trần
+
+```sql
+SELECT TOP 0 CAST('' AS VARCHAR(32)) AS ma_nvbh, CAST('' AS VARCHAR(32)) AS ma_dvcs, CAST(0 AS INT) AS thang
+    , CAST(0 AS NUMERIC(19, 4)) AS ke_hoach, CAST(0 AS NUMERIC(19, 4)) AS thuc_te INTO #month_data
+```
+
+**Sai:** `SELECT TOP 0 ma_nvbh, ma_dvcs, thang INTO #month_data`
+
+## Sign
+
+```sql
+AS
+--C--NGUYENTDH
+BEGIN
+```
+
+Thay `NGUYENTDH` bằng user đang sửa. Không đặt sign trong thân BEGIN.

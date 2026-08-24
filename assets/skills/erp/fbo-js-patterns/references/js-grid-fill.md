@@ -1,0 +1,194 @@
+# JS — Fill grid chi tiết
+
+## setItemGridBehavior — cú pháp
+
+```javascript
+g.setItemGridBehavior(cellObject, [
+  [fieldName, value, refValue, readOnlyFlag],
+  ...
+]);
+```
+
+| Tham số | Ý nghĩa |
+|---------|---------|
+| `fieldName` | Tên cột grid (`ma_vt`, `ma_lo`, `ten_vt%l` ref qua value ref) |
+| `value` | Giá trị gán vào field |
+| `refValue` | Text hiển thị lookup (vd. `ten_vt`, `ten_kho`). `''` hoặc `null` = mặc định |
+| `readOnlyFlag` | `true` = readOnly, `null` = mặc định grid |
+
+### Ví dụ từ WIDetail — nhập ma_vt (result SQL)
+
+```javascript
+case 'Item':
+  var v = (result[0].Value == '' ? true : null),
+      t = (result[0].Value == '' ? 'false' : 'true');
+  g.setItemGridBehavior(o, [
+    ['ma_kho', result[0].Value, '', true],
+    ['ma_vi_tri', result[1].Value, '', v],
+    ['ma_lo', result[2].Value, '', null],
+    ['dvt', result[3].Value, '', true],
+    ['he_so', result[4].Value, null, null],
+    ['tk_vt', result[5].Value, '', true],
+    ['gia_ton', result[6].Value, null, null],
+    ['vi_tri_yn', [result[7].Value, t], null, null],
+    ['lo_yn', result[8].Value, null, null],
+    ['ton13', result[9].Value, null, null]
+  ]);
+  g.live(o, 'dvt');
+  break;
+```
+
+**Giải thích `ma_lo`:** `['ma_lo', result[2].Value, '', null]` — gán mã lô; tham số thứ 3 là ref `ten_lo` (để `''` nếu không có).
+
+**`vi_tri_yn`:** dạng mảng `[value, 'true'|'false']` khi cần kèm flag hiển thị.
+
+## Load JSON nhiều dòng — insert$LoadVV$Row
+
+Khi SQL trả JSON array (proc + `fsd_ToJson`):
+
+```javascript
+function insert$LoadVV$Row(g, row, item) {
+  var o = g._getItem(row, g._getColumnOrder('ma_vt'));
+  o.row = row;
+  var v = (item.ma_kho == '' ? true : null),
+      t = (item.ma_kho == '' ? 'false' : 'true');
+  g.setItemGridBehavior(o, [
+    ['ma_vt', item.ma_vt, item.ten_vt, true],
+    ['ma_kho', item.ma_kho, item.ten_kho, true],
+    ['ma_vi_tri', item.ma_vi_tri, item.ten_vi_tri, v],
+    ['ma_lo', item.ma_lo, item.ten_lo, null],
+    ['dvt', item.dvt, item.ten_dvt, true],
+    ['he_so', item.he_so, null, null],
+    ['tk_vt', item.tk_vt, '', true],
+    ['gia_ton', item.gia_ton, null, null],
+    ['vi_tri_yn', [item.vi_tri_yn, t], null, null],
+    ['lo_yn', item.lo_yn, null, null],
+    ['ton13', item.ton13, null, null],
+    ['so_luong', item.so_luong, null, null],
+    ['ma_vv', item.ma_vv, null, null]
+  ]);
+  return o;
+}
+```
+
+JSON key từ proc nên khớp tên dùng trong JS (`ten_vt`, `ten_kho`, ...).
+
+## ResponseComplete — loop append row
+
+```javascript
+case 'LoadVVDetail':
+  var g = f.getItem('d38')._controlBehavior,
+      data = [], first = true, i, row, o, item;
+  try {
+    if (result[0].Value && result[0].Value !== '[]')
+      data = JSON.parse(result[0].Value);
+  } catch (ex) {}
+  for (i = 0; i < data.length; i++) {
+    item = data[i];
+    if ($func.trim(item.ma_vt) === '') continue;
+    row = g._rowCount;
+    if (first && row > 0 && g.blankMemvar(row)) { first = false; }
+    else g._appendRow(null, true);
+    row = g._rowCount;
+    o = insert$LoadVV$Row(g, row, item);
+    g.validExpression(o, [g.$a.t_so_luong, g.$a.t_tien_nt, g.$a.t_tien]);
+  }
+  break;
+```
+
+| Bước | Mục đích |
+|------|----------|
+| `blankMemvar` dòng đầu | Tận dụng dòng trống sẵn có thay vì append |
+| `_appendRow(null, true)` | Thêm dòng mới |
+| `validExpression` | Tính lại tổng cộng grid |
+
+## Grid read-only
+
+**Khóa theo từng dòng** (điều kiện khác nhau mỗi row): dùng `g._getItem(row, col).disabled` — xem [js-grid-row-disabled.md](js-grid-row-disabled.md). **Không** dùng `g._setColumnReadOnly` (khóa cả cột).
+
+**Tab / grid chỉ xem** (toàn bộ grid):
+
+```javascript
+function load$GridVoucherDetailXuatAm$(g) {
+  g._readOnly = true;
+  ...
+}
+```
+
+Kết hợp `readOnly="true"` trên từng `<field>` trong Grid XML.
+
+## Đồng bộ cột grid — không cần f.request
+
+Dùng khi chỉ **copy/gán giá trị** giữa các cột grid, có thể kèm điều kiện field master (`loai_ct`, `ma_nt`, …). **Không** bọc `on$Grid...$ResponseComplete`, **không** wrap handler entity Include — giữ tối thiểu.
+
+### Style điều kiện
+
+**Ưu tiên** bọc thân hàm trong `if`, không `return` sớm:
+
+```javascript
+// ✅ Ưu tiên
+if (v == '6' || v == '9') {
+  // logic
+}
+
+// ❌ Tránh (trừ guard View / thoát lỗi rõ ràng)
+if (v != '6' && v != '9') return;
+```
+
+### XML — `clientScript` trên field grid
+
+```xml
+<field name="dien_giai" clientDefault="Default" width="300" aliasName="a">
+  <header v="Diễn giải" e="Description"></header>
+  <clientScript><![CDATA[onchange="onChange$GridVoucherDetail$DienGiai(this);"]]></clientScript>
+</field>
+```
+
+Grid detail: khai `onchange` trực tiếp trên `<field>` (xem [naming.md](naming.md)). Dir master phức tạp: ưu tiên MCP `add_clientscript_to_field`.
+
+### JS — handler (chi tiết + tab thuế)
+
+Mẫu chuẩn **CPDetail / CDDetail** — `loai_ct` 6 hoặc 9: đổi **Diễn giải** dòng chi tiết → gán `ten_vt` cùng dòng **và** mọi dòng tab thuế `r30`:
+
+```javascript
+function onChange$GridVoucherDetail$DienGiai(o) {
+  var g = o.grid, f = g.get_element().parentForm, v = $func.trim(f.getItemValue('loai_ct'));
+  if (v == '6' || v == '9') {
+    var dg = g._getItemValue(o.row, g._getColumnOrder('dien_giai'));
+    g._setItemValue(o.row, g._getColumnOrder('ten_vt'), dg);
+    try {
+      var z = f.getItem('r30')._controlBehavior, c = z._getColumnOrder('ten_vt');
+      for (var i = 1; i <= z._rowCount; i++) z._setItemValue(i, c, dg);
+    } catch (ex) {}
+  }
+}
+```
+
+| Thành phần | Ghi chú |
+|------------|---------|
+| `o.grid` / `o.row` | Grid chi tiết (`d56` CP, `d51` CD) và dòng đang sửa |
+| `f.getItem('r30')._controlBehavior` | Grid tab thuế — loop `_rowCount` gán `ten_vt` |
+| `f.getItemValue('loai_ct')` | Điều kiện từ master form |
+| `g._setItemValue` / `z._setItemValue` | Gán trực tiếp, không cần `setItemGridBehavior` nếu không có ref lookup |
+| `try/catch` quanh `r30` | Tab thuế có thể chưa load khi grid detail init |
+
+### Checklist nhanh
+
+```
+- [ ] Chỉ gán value client-side → onchange + _setItemValue
+- [ ] Field XML: clientScript onchange → onChange$GridVoucherDetail$FieldName
+- [ ] Hàm trong <script> của *Detail.xml (sau &ScriptTaxGridDetailFunction; nếu có)
+- [ ] Điều kiện master: if (v == '6' || v == '9') { ... } — không return sớm
+- [ ] Cần đồng bộ tab thuế: loop z._rowCount trên f.getItem('r30')
+- [ ] if (f._action === 'View') return; — chỉ khi cần chặn chế độ xem
+- [ ] Không wrapper ResponseComplete cho logic copy thuần client
+```
+
+### Ví dụ thực tế
+
+| File | Grid chi tiết | Chứng từ |
+|------|---------------|----------|
+| `CPDetail.xml` | `d56` | Giấy báo nợ (CPTran) |
+| `CDDetail.xml` | `d51` | Giấy báo có (CDTran) |
+
+`onchange` chỉ chạy khi user **sửa/tab** cột diễn giải. Nếu cần gán khi nhập thuế (`loai_hd`, `ma_thue`) mà chưa đụng lại diễn giải → thêm `clientScript` onchange trên cột thuế tương ứng — vẫn ưu tiên `if` bọc, tránh bọc ResponseComplete khi không cần server.

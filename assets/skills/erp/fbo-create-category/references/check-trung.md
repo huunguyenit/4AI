@@ -1,0 +1,148 @@
+# Validation khi lưu danh mục (Dir commands)
+
+SQL trong `<commands>` của `Dir/{controller}.xml`: `Declare`, `Inserting`, `Updating`, `Updated`.
+
+## Chọn pattern
+
+| Pattern | Điều kiện nghiệp vụ | Kỹ thuật |
+|---------|---------------------|----------|
+| **A — Khóa đơn** | Một cột định danh duy nhất | `WHERE @pk = @pk` so `@@table` |
+| **B — Khóa kép** | Dòng = tổ hợp chính xác nhiều cột (kể cả chuỗi CSV nguyên khối làm 1 phần PK) | Match PK exact + `OldValue` |
+| **C — Giao phần tử CSV** | Cột Lookup lưu `A,B,C`; cấm trùng **phần tử** với dòng khác trong **cùng phạm vi** | `fsd_StringToTable` + điều kiện phạm vi `=` |
+
+Pattern B và C có thể kết hợp (PK kép + check giao CSV trong cùng phạm vi).
+
+### Ký hiệu template
+
+| Ký hiệu | Ý nghĩa |
+|---------|---------|
+| `@pk1`, `@pk2` | Giá trị mới cột khóa |
+| `$pk1.OldValue` | Giá trị cũ khi sửa |
+| `@list_col` | Cột chứa chuỗi CSV cần tách |
+| `@scope_col` | Cột xác định phạm vi so sánh (vd cùng user, cùng mã cha) |
+| `@scope_val` | Giá trị phạm vi (`@scope_col` khi insert/update) |
+
+`fsd_StringToTable(@str)` → bảng `val`; luôn `rtrim(val)`.
+
+---
+
+## Declare — message
+
+Khai báo `@$exists`, `@$recordHasBeenChanged`, `@$duplicateInScope` (tên tùy dự án). Dùng `%s1`, `%s2` khi message cần 2 placeholder.
+
+---
+
+## Pattern A — Khóa đơn
+
+```sql
+-- Inserting
+if exists(select * from @@table where ma_xx = @ma_xx)
+begin
+  select 'ma_xx' as field, replace(@$exists, '%s', rtrim(@ma_xx)) as message
+  return
+end
+
+-- Updating: tồn tại dòng cũ
+if not exists(select * from @@table where ma_xx = $ma_xx.OldValue)
+begin
+  select 'ma_xx' as field, replace(@$recordHasBeenChanged, '%s', rtrim($ma_xx.OldValue)) as message
+  return
+end
+if @ma_xx <> $ma_xx.OldValue and exists(select * from @@table where ma_xx = @ma_xx)
+begin
+  select 'ma_xx' as field, replace(@$exists, '%s', rtrim(@ma_xx)) as message
+  return
+end
+
+-- Updated
+update @@table set datetime2 = getdate(), user_id2 = @@userID where ma_xx = $ma_xx.OldValue
+```
+
+---
+
+## Pattern B — Khóa kép (PK exact)
+
+```sql
+-- Inserting
+if exists(select * from @@table where pk1 = @pk1 and pk2 = @pk2)
+begin
+  select 'pk2' as field, replace(replace(@$exists, '%s1', rtrim(@pk1)), '%s2', rtrim(@pk2)) as message
+  return
+end
+
+-- Updating
+if not exists(select * from @@table where pk1 = $pk1.OldValue and pk2 = $pk2.OldValue)
+begin
+  select 'pk1' as field, replace(replace(@$recordHasBeenChanged, '%s1', rtrim($pk1.OldValue)), '%s2', rtrim($pk2.OldValue)) as message
+  return
+end
+if (@pk1 <> $pk1.OldValue or @pk2 <> $pk2.OldValue)
+  and exists(select * from @@table where pk1 = @pk1 and pk2 = @pk2
+    and not (pk1 = $pk1.OldValue and pk2 = $pk2.OldValue))
+begin
+  select 'pk2' as field, replace(replace(@$exists, '%s1', rtrim(@pk1)), '%s2', rtrim(@pk2)) as message
+  return
+end
+
+-- Updated
+update @@table set datetime2 = getdate(), user_id2 = @@userID
+where pk1 = $pk1.OldValue and pk2 = $pk2.OldValue
+```
+
+---
+
+## Pattern C — Giao phần tử CSV (trong phạm vi)
+
+Áp dụng khi `@list_col` là Lookup nhiều giá trị. **Phạm vi** = điều kiện business (thường `a.scope_col = @scope_val`).
+
+```sql
+-- (1) Trùng trong cùng chuỗi nhập
+if exists(select 1 from dbo.fsd_StringToTable(@list_col) group by rtrim(val) having count(*) > 1 and rtrim(val) <> '')
+begin
+  select '{list_col}' as field, N'...' as message  -- message V/E
+  return
+end
+
+-- (2) Giao với dòng khác cùng phạm vi (Inserting)
+declare @item_trung varchar(128)
+select top 1 @item_trung = rtrim(b.val)
+from @@table a
+cross apply dbo.fsd_StringToTable(a.{list_col}) b
+where a.{scope_col} = @{scope_col}
+  and exists (
+    select 1 from dbo.fsd_StringToTable(@list_col) c
+    where rtrim(c.val) <> '' and rtrim(b.val) = rtrim(c.val)
+  )
+if @item_trung is not null
+begin
+  select '{list_col}' as field, replace(replace(@$duplicateInScope, '%s1', rtrim(@{scope_col})), '%s2', @item_trung) as message
+  return
+end
+```
+
+**Updating:** thêm `and not (a.pk1 = $pk1.OldValue and a.pk2 = $pk2.OldValue)` (hoặc OldValue đủ cột khóa) để loại dòng đang sửa.
+
+Kết hợp B + C: thêm bước (2) sau khi check PK exact (pattern B).
+
+---
+
+## Checklist
+
+```
+- [ ] Xác định pattern A / B / C (có thể B+C)
+- [ ] Declare message đủ placeholder
+- [ ] Inserting: trùng trong chuỗi → trùng PK → giao CSV (nếu có)
+- [ ] Updating: OldValue tồn tại → check đổi khóa → giao CSV loại dòng cũ
+- [ ] Updated: WHERE theo OldValue toàn bộ khóa
+- [ ] Không LIKE trừ khi user yêu cầu hierarchy
+```
+
+---
+
+## Ví dụ tham chiếu (B + C)
+
+Danh mục phân quyền: PK `(name, ma_dvcs)` — `ma_dvcs` là chuỗi CSV; phạm vi `name = @name`; pattern C check giao đơn vị.
+
+Mapping: `pk1=name`, `pk2=ma_dvcs`, `list_col=ma_dvcs`, `scope_col=name`.
+
+File mẫu: `Dir/zcpqdvumhhddv.xml` (dự án TTCIZ).

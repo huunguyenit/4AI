@@ -1,0 +1,51 @@
+# PVTran — HDDV Recipe (PNA / m71$)
+
+**File:** `App_Data/Controllers/Dir/PVTran.xml`  
+**Include:** `%InputInvoice.Include.PVTran;`  
+**Bảng link HĐ:** `h71$`  
+**Detail/Tax:** `d71`, `r60`, `r30`
+
+## Entity SQL (nhóm chuẩn)
+
+| Event | Entity |
+|-------|--------|
+| Inserting | `&InputInvoiceCheck;` |
+| Inserted | `&InputInvoiceInsert;` |
+| Updated | `&InputInvoiceUpdate;` |
+| Deleted | `&InputInvoiceDelete;` |
+
+## @script — R2SP222
+
+```xml
+&InputInvoiceScriptDeclare;
+&InputInvoiceScriptWarning;
+&InputInvoiceInsert;
+&InputInvoiceScriptQuery;<![CDATA[, @stt_rec as stt_rec, @@unit as ma_dvcs else
+select @stt_rec as stt_rec, @@unit as ma_dvcs
+]]>&CommandShowWarningMessage;<![CDATA[
+return
+]]>
+```
+
+## Inserted — warning tháng HĐ nội bộ
+
+**Trước** block `InputInvoiceScript*`, set `@$warning` nếu HĐ mua/bán nội bộ khác tháng (`d71` / `c81$`):
+
+```sql
+declare @stt_rec_hd char(13), @ngay_ct_hd smalldatetime
+select @stt_rec_hd = max(stt_rec_hd) from d71$$partition$current ...
+```
+
+`InputInvoiceScriptWarning` đọc `@$warning` đã set **trước đó**.
+
+**Updated:** `ScriptQuery` trước, block warning **sau** (giữ thứ tự nguồn).
+
+## Extender kèm theo
+
+- `FlowMultiVoucher` + `FlowMultiScript`
+- `DPScript` + `DPPost*`
+- `PostScript`
+
+## Dự án có List sẵn
+
+Dùng `ListDeclare` + `ListWarning` + `ListCommand` + `InputInvoiceInsert` + `ListQuery` — **không** thêm `InputInvoiceScriptDeclare`.
