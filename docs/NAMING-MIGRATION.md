@@ -125,8 +125,9 @@ Ba asset **đổi kind** — chúng là quy trình, không phải vai:
 
 ## Nợ kỹ thuật ghi nhận, chưa xử lý
 
-- `docs/ASSET-FORMAT.md` và `docs/TARGET-MATRIX.md` được `CLAUDE.md` khai là nguồn chuẩn
-  cao nhất nhưng **không tồn tại trong repo**.
+- ~~`docs/ASSET-FORMAT.md` và `docs/TARGET-MATRIX.md` không tồn tại~~ — đã viết.
+- `globalPolicy` trong `targets.json` là field chết: có trong config và trong comment của
+  hai emitter, nhưng không dòng code nào đọc. Xoá hoặc cắm dây — xem `docs/TARGET-MATRIX.md`.
 - `erp-skill-author` và `4ai-asset-author` chồng trách nhiệm — cân nhắc gộp ở đợt 5.
 - README đếm sai số asset trong gói plugin (`26 skill`, thực tế thư mục plugin đang có 42).
   Số đúng chỉ biết sau khi sync thật ở đợt 5 — đừng đoán, đếm rồi sửa.
