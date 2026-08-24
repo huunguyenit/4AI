@@ -7,7 +7,7 @@ description: Chuyên trách tầng backend FBO — proc, function, bảng, sổ,
 tools: [Read, Grep, Glob, Write, Edit, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [erp-sql-style, fbo-sql-reference, fbo-program-config, fbo-glossary-reference, fbo-frontend]
+see-also: [erp-sql-style, erp-sql-reference, erp-program-config-lookup, erp-glossary-reference, fbo-frontend]
 version: 1
 ---
 
@@ -27,17 +27,17 @@ Tri thức backend nằm rải ở nhiều skill. Nạp **sai thứ tự** là n
 nghe hợp lý mà sai. Đi đúng bốn bước này:
 
 1. **Câu hỏi có nhắc tên bảng, tên sổ, hay một cụm nghiệp vụ?**
-   → nạp `fbo-glossary-reference`, đọc `naming.md` **trước khi** nói bảng nào.
+   → nạp `erp-glossary-reference`, đọc `naming.md` **trước khi** nói bảng nào.
    Đây là nơi chặn lớp lỗi "sổ kho → `ct70`": `ct00`/`ct70`/`ct90` là di sản, bản chính thức là
    `r00$yyyyMM`/`r70$yyyyMM`/`r90$yyyyMM`. Hai bảng cùng nghĩa ⇒ **luôn chọn bản tách kỳ**.
 
 2. **Hành vi có thể do tùy chọn chi phối?**
-   → nạp `fbo-program-config`, đọc `options-table.md`, tra bảng `options` bằng `query_sql`.
+   → nạp `erp-program-config-lookup`, đọc `options-table.md`, tra bảng `options` bằng `query_sql`.
    Tùy chọn không chỉ đổi hiển thị, nó đổi **dữ liệu nằm ở bảng nào** — `m_instock_split` là ca
    mẫu: tắt nó thì `r90` rỗng và tồn thực tế nằm ở `r70`.
 
 3. **Sắp viết logic mới?**
-   → nạp `fbo-sql-reference` và **grep trước khi viết**: `fsd-objects.md` (29 tiện ích của bộ
+   → nạp `erp-sql-reference` và **grep trước khi viết**: `fsd-objects.md` (29 tiện ích của bộ
    phận lập trình), `functions.md` (221 hàm), `procedures.md` (747 thủ tục, ~210 KB — grep tên,
    đừng đọc cả file). Phần lớn "logic cần viết" đã tồn tại.
 
@@ -46,8 +46,8 @@ nghe hợp lý mà sai. Đi đúng bốn bước này:
    hoa, alias `a`→`z`, `#temp` luôn `SELECT TOP 0`, struct dựng từ bảng thật, đệm chuỗi bằng
    `ff_PadL`, khử trùng bằng `GROUP BY`, không `ISNULL`/`RTRIM` cột trong `WHERE`.
 
-Việc chạm báo cáo thì thêm `fbo-report` (và `fbo-report-pivot` khi xoay cột). Việc cần bảng
-hoặc cột mới thì `fbo-new-table-proposal` — cấp đặc tả `ddl`, không tự viết cú pháp.
+Việc chạm báo cáo thì thêm `erp-report-create` (và `erp-report-pivot-create` khi xoay cột). Việc cần bảng
+hoặc cột mới thì `erp-table-propose` — cấp đặc tả `ddl`, không tự viết cú pháp.
 
 ## Quy trình
 

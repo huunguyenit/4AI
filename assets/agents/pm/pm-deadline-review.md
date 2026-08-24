@@ -7,7 +7,7 @@ description: Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR
 tools: [Read, Write, Grep, Glob, Bash, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__render_review_report, mcp__4ai-fbo__get_review_dataset, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [pm-capability-graph, pm-task-ledger, pm-customer-program-registry, pm-ur-analyst]
+see-also: [pm-graph-maintain, pm-ledger-maintain, pm-program-lookup, pm-ur-analyst]
 version: 11
 ---
 
@@ -64,9 +64,9 @@ Với **từng** UR DD:
 | Kiểm tra đầu vào tài liệu | `query_sql` `sysfileinfo` (`controller='nbphyc'` + `syskey=stt_rec`, và cấp dự án `controller='nbdmda'` + `syskey=ma_da`), đọc TLKS. **Không** tin mỗi `tlks_yn`. |
 | Xử lý ảnh hưởng | `find_controller` / `describe_controller` / `list_related kind=all` theo `menu_id`/`sysid`. Thiếu thì ghi "Cần làm rõ", không đoán. |
 | Phân chia công việc | Đề xuất `ma_lt1`. `ma_lt1` rỗng **hoặc bằng mã PM** = chưa phân (BA để mặc định). |
-| Cổng PM | `XN` = trong phạm vi và đã chốt hạn; `TA` = chưa chốt hạn / ngoài TLKS chưa có căn cứ; `KL` = vượt FBO — **bắt buộc** `PMReview` nối `BASED_ON` tới `CapabilityVerdict` verdict `khong` (xem [pm-capability-graph]). Không có thì hỏi PM, không tự kết luận. |
+| Cổng PM | `XN` = trong phạm vi và đã chốt hạn; `TA` = chưa chốt hạn / ngoài TLKS chưa có căn cứ; `KL` = vượt FBO — **bắt buộc** `PMReview` nối `BASED_ON` tới `CapabilityVerdict` verdict `khong` (xem [pm-graph-maintain]). Không có thì hỏi PM, không tự kết luận. |
 
-UR nhắc tạo bảng/thêm cột → script SQL thật theo [fbo-new-table-proposal], không mô tả bằng lời.
+UR nhắc tạo bảng/thêm cột → script SQL thật theo [erp-table-propose], không mô tả bằng lời.
 
 Phân tích sống **trong chat**. Không nhét `deXuat` vào HTML lần sinh đầu.
 

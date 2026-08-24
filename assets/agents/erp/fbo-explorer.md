@@ -7,7 +7,7 @@ description: Sub-agent điều tra màn hình FBO read-only — trả về bản
 tools: [Read, Grep, Glob, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source, mcp__4ai-fbo__resolve_vouchercode]
 model: inherit
 requires: [4ai-fbo]
-see-also: [erp-mcp-lookup, fbo-controller-anatomy]
+see-also: [erp-mcp-lookup, erp-controller-reference]
 version: 2
 ---
 

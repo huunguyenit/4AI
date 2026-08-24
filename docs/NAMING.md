@@ -18,7 +18,7 @@ Git. Cũng không tách tới mức `sql-select.md` / `sql-where.md` / `sql-join
 cái người dùng gõ. Đổi tên là breaking change — phải đi qua một đợt migration, không đổi lẻ.
 
 **Identifier tiếng Anh.** Văn xuôi tiếng Việt, nhưng `id`, `title`, tên thư mục thì tiếng
-Anh. `fbo-tim-qua-khu` là vi phạm, không phải ngoại lệ.
+Anh. `fbo-tim-qua-khu` (nay là `erp-history-search`) là vi phạm, không phải ngoại lệ.
 
 ## Scope
 

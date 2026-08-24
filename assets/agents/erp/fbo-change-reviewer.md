@@ -7,7 +7,7 @@ description: Sub-agent read-only soi một diff XML theo bộ rule FBO, phân lo
 tools: [Read, Grep, Glob, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-customizer, fbo-customization-workflow]
+see-also: [fbo-customizer, erp-customization-execute]
 version: 1
 ---
 

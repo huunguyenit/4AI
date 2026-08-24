@@ -16,7 +16,7 @@ Yêu cầu customize: **$ARGUMENTS**
 
 1. **Chốt phạm vi** — tra khách qua `list_programs` (nbdmda) → program path + SP. Nhắc lại
    để xác nhận: "Áp vào `<programPath>`, đúng không?" (rule `erp-program-scope`).
-2. **Lập kế hoạch** theo `fbo-customization-workflow` (giao `pm-planner` nếu yêu cầu phức
+2. **Lập kế hoạch** theo `erp-customization-execute` (giao `pm-planner` nếu yêu cầu phức
    tạp): controller nào, cặp `.f`/`.xml` trạng thái gì, có chạm include chung không.
 3. **Mở ledger entry** trong `ledger/tasks.md` (rule `pm-ledger-discipline`).
 4. **Trình kế hoạch, DỪNG chờ duyệt.** Chưa duyệt thì chưa sửa bất kỳ file nào.

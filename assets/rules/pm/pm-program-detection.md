@@ -6,7 +6,7 @@ domain: pm
 severity: hard
 always: true
 description: Thư mục làm việc đang đứng đã cho biết khách nào — tra nó qua tool list_programs (bảng nbdmda) trước, chỉ hỏi khi không khớp. Không suy mã dự án từ tên thư mục.
-see-also: [pm-customer-program-registry, pm-scope-clarification]
+see-also: [pm-program-lookup, pm-scope-clarification]
 version: 2
 ---
 

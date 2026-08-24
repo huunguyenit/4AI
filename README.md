@@ -784,7 +784,7 @@ Cursor gọi `references/` đúng cái tên đó và nạp theo yêu cầu, nên
 Chỉ Copilot còn dạng phẳng vì nó không có primitive skill.
 
 Nhờ tách file, SKILL.md giữ nguyên vai trò mục lục nhẹ — agent chỉ mở reference khi task thật
-sự chạm tới. Ví dụ đang có: `fbo-sql-reference` (221 function, 747 procedure, 93 bảng `sys*`).
+sự chạm tới. Ví dụ đang có: `erp-sql-reference` (221 function, 747 procedure, 93 bảng `sys*`).
 
 Ràng buộc do `check` cưỡng chế: reference phải có skill chủ cùng `id`, cùng `domain`, và skill
 đó **không được** `always: true` (reference sinh ra để nạp theo yêu cầu, không phải luôn nạp).

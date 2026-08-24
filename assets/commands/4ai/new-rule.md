@@ -14,7 +14,7 @@ version: 1
 
 Tạo rule mới: **$ARGUMENTS**
 
-1. Nạp skill `4ai-asset-authoring`.
+1. Nạp skill `4ai-asset-author`.
 2. Đặt `id` kebab-case có prefix domain (`fbo-`, `pm-`). Xác nhận 3 điều không tự suy
    ra được (gộp một câu hỏi, kèm đề xuất mặc định):
    - `severity`: hard (vi phạm là hỏng thật) hay soft (khuyến nghị)?

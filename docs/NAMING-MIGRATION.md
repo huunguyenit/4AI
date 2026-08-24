@@ -10,7 +10,7 @@ phải cho cùng kết quả, và kind vừa xong được chuyển từ `WARN` 
 |---|---|---|
 | 0 | `docs/NAMING.md`, field `status`/`owner`, check ở mức WARN | ✅ xong |
 | 1 | thư mục domain (mọi kind) + doctrine (3) + rule (14) | ✅ xong |
-| 2 | skill (26) — kéo theo thư mục `references/` | ⬜ |
+| 2 | skill (26) — kéo theo thư mục `references/` | ✅ xong |
 | 3 | agent (12) — gồm 3 asset đổi kind | ⬜ |
 | 4 | command (12) — đổi tên slash command người dùng gõ | ⬜ |
 | 5 | xoá file này, cập nhật README + CHANGELOG | ⬜ |

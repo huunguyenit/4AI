@@ -6,7 +6,7 @@ domain: pm
 description: Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì.
 tools: [Read, Grep, Glob, Write]
 model: inherit
-see-also: [pm-task-ledger, pm-release-auditor]
+see-also: [pm-ledger-maintain, pm-release-auditor]
 version: 2
 ---
 

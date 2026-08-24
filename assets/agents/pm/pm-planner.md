@@ -7,7 +7,7 @@ description: Sub-agent biến yêu cầu mơ hồ thành kế hoạch có phạm
 tools: [Read, Grep, Glob, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__search_content]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-explorer, pm-task-ledger]
+see-also: [fbo-explorer, pm-ledger-maintain]
 version: 1
 ---
 
@@ -25,7 +25,7 @@ chạy chậm"); đầu ra là một kế hoạch đủ để giao cho `fbo-cust
    dùng chọn, không chọn hộ.
 3. **Ước lượng ảnh hưởng.** `list_related` — màn hình kéo theo Grid/Filter/Lookup
    nào; việc điều tra sâu thì ghi rõ "giao `fbo-explorer`".
-4. **Soạn kế hoạch + ledger entry** theo format `pm-task-ledger`, trạng thái `Mới`.
+4. **Soạn kế hoạch + ledger entry** theo format `pm-ledger-maintain`, trạng thái `Mới`.
 
 ## Định dạng báo cáo (bắt buộc)
 

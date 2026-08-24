@@ -6,7 +6,7 @@ domain: erp
 description: Quy ước BẮT BUỘC khi viết proc hoặc query FBO/FBI — param tiếng Anh, sign dưới AS, keyword hoa, alias a→z, #temp, không RTRIM cột khi so sánh, Partition$Execute.
 severity: hard
 globs: ["**/*.sql", "**/App_Data/Controllers/**"]
-see-also: [fbo-sql-reference, fbo-report, erp-sql-access]
+see-also: [erp-sql-reference, erp-report-create, erp-sql-access]
 version: 3
 ---
 AI Agent **BẮT BUỘC** áp dụng khi viết proc/query mới hoặc sửa SQL hiện có.
@@ -293,7 +293,7 @@ SELECT dbo.ff_PadL(so_lsx, 16), LEFT(ma_vt, 30) FROM r70$...
 WHERE a.ma_kh LIKE RTRIM(@ma_kh) + '%'
 ```
 
-> **Không mâu thuẫn với `fbo-program-config`.** Khuôn tra bảng `options` là
+> **Không mâu thuẫn với `erp-program-config-lookup`.** Khuôn tra bảng `options` là
 > `select @x = rtrim(val) from options where name = '...'` — `rtrim` nằm ở **SELECT list**,
 > không phải `WHERE`, nên không đụng index. Luật cấm ở đây chỉ áp cho cột nằm trong
 > `WHERE`/`JOIN`. Code chuẩn của FBO có chỗ viết `where rtrim(name) = '...'` — đó là chỗ
@@ -463,7 +463,7 @@ EXEC sp_executesql @q
 Khi insert **cột explicit ít** và đã liệt kê đủ — có thể `INSERT INTO real (cols) SELECT …` trực tiếp; ưu tiên `fsd_GetSQLInsert` khi đích rộng hơn nguồn.
 
 Danh mục đầy đủ 29 đối tượng `fsd_*` (sinh câu lệnh, tách chuỗi, sinh mã, thêm cột,
-gộp nhóm, lọc quyền đơn vị): `fbo-sql-reference` → `fsd-objects.md`.
+gộp nhóm, lọc quyền đơn vị): `erp-sql-reference` → `fsd-objects.md`.
 
 Insert `#plan_raw` từ bảng nhiều cột — **không** `SELECT *`; build danh sách cột (dynamic nếu cần):
 
@@ -522,7 +522,7 @@ Kỳ theo cột ngày chứng từ (thường `ngay_ct`).
 
 Pattern DDL: ALTER `$000000` một lần → `Partition$Execute` propagate; khoảng ngày từ `dmstt.ngay_gh1/gh2`.
 
-Chi tiết chữ ký / cờ mã hoá: `fbo-sql-reference` → `references/procedures.md`.
+Chi tiết chữ ký / cờ mã hoá: `erp-sql-reference` → `references/procedures.md`.
 
 ---
 

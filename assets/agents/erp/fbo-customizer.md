@@ -7,7 +7,7 @@ description: Sub-agent thi hành một thay đổi ĐÃ DUYỆT trong đúng m�
 tools: [Read, Edit, Write, Grep, Glob, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__search_content, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-explorer, fbo-customization-workflow]
+see-also: [fbo-explorer, erp-customization-execute]
 version: 2
 ---
 
@@ -24,7 +24,7 @@ và hỏi, không tự mở rộng.
 
 1. Nhắc lại to và rõ: **program path** + **danh sách file sẽ sửa**. Hai thứ này thiếu
    một là dừng ngay, chưa sửa gì.
-2. Chạy các bước 3–5 của `fbo-customization-workflow` nếu người giao chưa làm: xác nhận
+2. Chạy các bước 3–5 của `erp-customization-execute` nếu người giao chưa làm: xác nhận
    controller, kiểm tra cặp `.f`/`.xml`, dựng bản đồ ảnh hưởng.
 3. Sửa **tối thiểu**, đúng encoding/newline gốc (rule `erp-xml-encoding`).
    Backup bản gốc thành `.bak` cạnh file trước lần Edit đầu tiên vào mỗi file.

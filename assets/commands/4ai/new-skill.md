@@ -14,7 +14,7 @@ version: 1
 
 Tạo skill mới: **$ARGUMENTS**
 
-1. Nạp skill `4ai-asset-authoring`.
+1. Nạp skill `4ai-asset-author`.
 2. Tự hỏi trước khi viết: đây có thật là **quy trình nạp theo yêu cầu** không? Nếu nó là
    ràng buộc luôn đúng → đề nghị làm rule thay vì skill. Nói ra nhận định này.
 3. Viết `assets/skills/<domain>/<id>.md`. Chuẩn chất lượng: người đọc làm theo được mà

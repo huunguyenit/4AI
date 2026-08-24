@@ -6,7 +6,7 @@ domain: pm
 description: Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái DD. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ.
 argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự án đang quản lý]"
 requires: [4ai-fbo]
-see-also: [pm-deadline-review, pm-capability-graph, fbo-new-table-proposal]
+see-also: [pm-deadline-review, pm-graph-maintain, erp-table-propose]
 mode: agent
 version: 10
 ---

@@ -7,7 +7,7 @@ description: Chuyên trách tầng frontend FBO — controller XML, layout form,
 tools: [Read, Grep, Glob, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__resolve_vouchercode, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-controller-anatomy, fbo-js-patterns, fbo-design-view-field, fbo-customizer, fbo-backend]
+see-also: [erp-controller-reference, erp-js-implement, erp-view-design, fbo-customizer, fbo-backend]
 version: 1
 ---
 
@@ -27,26 +27,26 @@ Ba ranh giới, giữ chặt:
 
 ## Thứ tự nạp — đây là phần quan trọng nhất
 
-1. **Luôn bắt đầu bằng `fbo-controller-anatomy`.** Thư mục nào chứa gì, cặp `.f`/`.xml`, ba
+1. **Luôn bắt đầu bằng `erp-controller-reference`.** Thư mục nào chứa gì, cặp `.f`/`.xml`, ba
    loại Include, thứ tự đọc 5 bước. Không có nền này thì mọi câu trả lời sau đều lơ lửng.
 
 2. **Nạp skill đúng việc:**
 
    | Việc | Skill |
    |---|---|
-   | Bố cục form, `view@height`/`@anchor`/`@split`, gộp cột, pattern `1/0/-` | `fbo-design-view-field` |
-   | Tạo/sửa danh mục (cặp Dir + Grid), khoá chính, check trùng | `fbo-create-category` |
-   | Luồng lấy dữ liệu chứng từ nguồn → đích (Retrieve/Flow) | `fbo-get-voucher-data` |
-   | Migrate HDDV / ImportXmlInputInvoice | `fbo-create-hddv` |
-   | Hoá đơn điện tử: form EIFields, dmhddtbs, Proxy Structure | `fbo-einvoice-customize` |
-   | NĐ70 chiết khấu kỳ · NĐ252 tỷ giá hq | `fbo-einvoice-nd70-discount` · `fbo-nd252-ty-gia-hq` |
-   | Từ tên nghiệp vụ ra màn hình, họ file cùng mã | `fbo-navigation-recipes` |
+   | Bố cục form, `view@height`/`@anchor`/`@split`, gộp cột, pattern `1/0/-` | `erp-view-design` |
+   | Tạo/sửa danh mục (cặp Dir + Grid), khoá chính, check trùng | `erp-category-create` |
+   | Luồng lấy dữ liệu chứng từ nguồn → đích (Retrieve/Flow) | `erp-voucher-data-lookup` |
+   | Migrate HDDV / ImportXmlInputInvoice | `erp-hddv-migrate` |
+   | Hoá đơn điện tử: form EIFields, dmhddtbs, Proxy Structure | `erp-einvoice-customize` |
+   | NĐ70 chiết khấu kỳ · NĐ252 tỷ giá hq | `erp-einvoice-nd70-implement` · `erp-nd252-implement` |
+   | Từ tên nghiệp vụ ra màn hình, họ file cùng mã | `erp-navigation-lookup` |
 
 3. **JavaScript — hai skill, hai mục đích khác nhau:**
    - Cần **tên hàm / thuộc tính** (`g._setItemValue`, `f.getItemValue`, sự kiện `Inserting`) →
-     `fbo-js-api`, có catalog Form/Grid đầy đủ kèm cột đối chiếu SP2422.
+     `erp-js-api-reference`, có catalog Form/Grid đầy đủ kèm cột đối chiếu SP2422.
    - Cần **dựng một luồng** (onChange fill lưới, FlowMulti, request trước làm sau, khoá cột
-     theo dòng) → `fbo-js-patterns`.
+     theo dòng) → `erp-js-implement`.
 
 ## Bốn rule luôn có hiệu lực, không được nhảy cóc
 

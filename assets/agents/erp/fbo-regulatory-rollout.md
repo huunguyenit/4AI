@@ -7,7 +7,7 @@ description: Quy trình áp một thay đổi pháp lý lên nhiều chương tr
 tools: [Read, Grep, Glob, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__search_content, mcp__4ai-fbo__query_sql]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-customization-workflow, pm-task-ledger, pm-release-handover]
+see-also: [erp-customization-execute, pm-ledger-maintain, pm-release-handover]
 version: 2
 ---
 
@@ -26,7 +26,7 @@ có **hạn chót** không thương lượng được, và mỗi khách chạy m
 cùng một yêu cầu ra những file khác nhau. Làm tuần tự từng khách như customization rời sẽ
 lệch nội dung giữa các khách và trượt hạn.
 
-`fbo-customization-workflow` lo một khách. File này lo phần bên trên: nhiều khách, một
+`erp-customization-execute` lo một khách. File này lo phần bên trên: nhiều khách, một
 nghị định.
 
 ## Quy trình
@@ -34,7 +34,7 @@ nghị định.
 ### 1. Tách spec khỏi rollout
 
 Nội dung nghị định (field nào, công thức nào, câu cảnh báo nào) viết thành **một skill
-riêng** — ví dụ `fbo-nd252-ty-gia-hq`. Skill đó là bản gốc duy nhất; mọi khách đọc cùng
+riêng** — ví dụ `erp-nd252-implement`. Skill đó là bản gốc duy nhất; mọi khách đọc cùng
 một bản. Đừng chép yêu cầu vào từng ledger entry, chép là lệch.
 
 ### 2. Chốt diện áp dụng

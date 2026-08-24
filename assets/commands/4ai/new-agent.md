@@ -14,7 +14,7 @@ version: 1
 
 Tạo sub-agent mới: **$ARGUMENTS**
 
-1. Nạp skill `4ai-asset-authoring`.
+1. Nạp skill `4ai-asset-author`.
 2. Chốt với người dùng (một câu, có mặc định): agent này **read-only hay được sửa file**?
    Nhiệm vụ một câu là gì?
 3. Viết `assets/agents/<domain>/<id>.md` với đủ:

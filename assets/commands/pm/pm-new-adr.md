@@ -13,7 +13,7 @@ version: 1
 
 Ghi ADR cho quyết định: **$ARGUMENTS**
 
-1. Nạp skill `pm-adr`. Kiểm tra nhanh: quyết định này có đáng ADR không (khó đảo ngược /
+1. Nạp skill `pm-adr-author`. Kiểm tra nhanh: quyết định này có đáng ADR không (khó đảo ngược /
    ảnh hưởng nhiều task / sẽ bị hỏi lại)? Không đáng thì nói thẳng và đề nghị chỉ ghi một
    dòng vào ledger entry liên quan.
 2. Xác định số thứ tự tiếp theo trong `ledger/adr/` (4 chữ số, tăng dần, không tái sử dụng).

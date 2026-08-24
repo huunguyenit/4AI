@@ -7,7 +7,7 @@ description: Trước khi sửa controller phải phân giải DTD entity bằng
 severity: hard
 globs: ["**/App_Data/Controllers/**"]
 requires: [4ai-fbo]
-see-also: [fbo-controller-anatomy, erp-program-scope]
+see-also: [erp-controller-reference, erp-program-scope]
 version: 1
 ---
 

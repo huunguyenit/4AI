@@ -15,7 +15,7 @@ version: 1
 Tra cứu SQL: **$ARGUMENTS**
 
 1. Xác định program (khách nào) — cần cho `query_sql` phân giải kết nối.
-2. Theo skill `fbo-sql-object-lookup`:
+2. Theo skill `erp-sql-object-lookup`:
    - Tên object cụ thể → `query_sql { object: "<tên>" }` (tự nhận diện table/proc/view).
    - Câu hỏi dữ liệu → `query_sql { sql: "SELECT TOP 20 …" }`.
    - Không thấy object → đổi `db` giữa `app`/`sys` trước khi kết luận không tồn tại.

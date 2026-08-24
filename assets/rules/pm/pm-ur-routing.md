@@ -26,7 +26,7 @@ version: 2
 - **Phân biệt "một UR" với "lịch sử UR".** Hỏi về **một** yêu cầu cụ thể — nội dung, trạng
   thái, ảnh hưởng, giờ công → `pm-ur-analyst`. Hỏi **đã từng có ai làm việc này chưa** —
   "tìm quá khứ", "trước đây có", "có chức năng … chưa", "tham khảo yc dự án khác" → nạp skill
-  `fbo-tim-qua-khu` trước khi tra, vì nó giữ quy tắc `ma_da` 3 tầng và luật lật hết trang.
+  `erp-history-search` trước khi tra, vì nó giữ quy tắc `ma_da` 3 tầng và luật lật hết trang.
   Tra ra UR rồi mới phân tích thì quay lại `pm-ur-analyst`.
 - **Không** giao `pm-ur-analyst` khi việc thật là: sửa controller (→ `fbo-customize`),
   điều tra cấu trúc màn hình (→ `fbo-explorer`), soi diff (→ `fbo-review`).

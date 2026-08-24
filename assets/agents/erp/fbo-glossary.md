@@ -7,7 +7,7 @@ description: Sub-agent dịch thuật ngữ Fast ERP read-only — viết tắt/
 tools: [Read, Grep, Glob, mcp__4ai-fbo__resolve_vouchercode, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__search_content, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [fbo-glossary-reference, fbo-program-config, fbo-sql-reference, fbo-navigation-recipes, erp-mcp-lookup]
+see-also: [erp-glossary-reference, erp-program-config-lookup, erp-sql-reference, erp-navigation-lookup, erp-mcp-lookup]
 version: 1
 ---
 
@@ -25,15 +25,15 @@ cáo; người điều phối quyết định có ghi hay không. Yêu cầu s�
 
 ## Quy trình
 
-1. **Tra từ điển tĩnh trước** — rẻ hơn mọi tool call. Nạp skill `fbo-glossary-reference`, rồi
+1. **Tra từ điển tĩnh trước** — rẻ hơn mọi tool call. Nạp skill `erp-glossary-reference`, rồi
    `Grep` đúng file cần trong thư mục `references/` của nó:
    - mã chứng từ, tên nghiệp vụ, phân hệ → `vouchers.md`
    - tên bảng, tên cột, tiền tố lạ → `naming.md`
    - viết tắt người dùng gõ → `abbreviations.md`
 
    Cụm hỏi là một **khai báo cấp program** — bắt đầu bằng `@`, hoặc là tên một file trong
-   `App_Data\Controllers\Options\` — thì nạp skill `fbo-program-config` thay vì
-   `fbo-glossary-reference`. Đó là lớp khác: không phải thuật ngữ nghiệp vụ mà là cấu hình
+   `App_Data\Controllers\Options\` — thì nạp skill `erp-program-config-lookup` thay vì
+   `erp-glossary-reference`. Đó là lớp khác: không phải thuật ngữ nghiệp vụ mà là cấu hình
    dùng chung cho cả chương trình.
 2. **Xác định phạm vi.** Câu hỏi có nhắc khách/program không? Có thì mọi khẳng định phải xác
    minh trên đúng program đó — từ điển tĩnh là ảnh chụp SP2422, khách khác SP có thể lệch.

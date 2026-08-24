@@ -6,7 +6,7 @@ domain: pm
 description: Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá.
 tools: [Read, Grep, Glob]
 model: inherit
-see-also: [pm-release-handover, pm-task-ledger]
+see-also: [pm-release-handover, pm-ledger-maintain]
 version: 2
 ---
 

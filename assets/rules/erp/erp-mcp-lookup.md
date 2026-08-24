@@ -7,7 +7,7 @@ description: Kỷ luật dùng 4ai-fbo — đo used_by trước khi đụng Incl
 severity: hard
 globs: ["**/App_Data/Controllers/**"]
 requires: [4ai-fbo]
-see-also: [erp-xml-existence, fbo-navigation-recipes]
+see-also: [erp-xml-existence, erp-navigation-lookup]
 version: 2
 ---
 
