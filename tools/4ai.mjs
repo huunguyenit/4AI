@@ -561,8 +561,9 @@ async function cmdPlaybook(sub, opts, rest = []) {
 
 async function cmdGraph(sub, opts) {
   if (sub === 'experience') return cmdGraphExperience(opts);
+  if (sub === 'topics') return cmdGraphTopics(opts);
   if (sub && !['build', 'check', 'push'].includes(sub)) {
-    fail(`graph: lệnh con không rõ: ${sub} (build | check | push | experience)`);
+    fail(`graph: lệnh con không rõ: ${sub} (build | check | push | experience | topics)`);
   }
   const { buildGraphArtifact } = await import('./lib/graph.mjs');
   const { writeArtifacts } = await import('./lib/writer.mjs');
@@ -655,6 +656,57 @@ async function cmdReportFromDataset(opts) {
   writeReportPlan(plan, opts.dryRun);
   await dayDoThi(built.doThi, opts);
 }
+
+/**
+ * `graph topics` — gắn nhãn chủ đề cho node Request đã nằm sẵn trong đồ thị.
+ *
+ * Chạy theo LÔ và lặp cho tới hết, vì kho là hàng chục nghìn dòng. Mốc "đã xử lý" nằm trong
+ * chính dữ liệu (`chuDe IS NULL`), nên ngắt giữa chừng rồi chạy lại là tiếp tục đúng chỗ cũ,
+ * không làm lại từ đầu và không ghi đè dòng đã có nhãn.
+ */
+async function cmdGraphTopics(opts) {
+  const { motLo, CO_LO } = await import('./lib/topics-backfill.mjs');
+  const { runGraphSql, runSql, runGraphScript } = await import('../mcp/fbo/lib/sql.mjs');
+  const { loadQldaConfig } = await import('../src/database/qlda-metadata.mjs');
+  const { writeArtifacts } = await import('./lib/writer.mjs');
+
+  const q = loadQldaConfig(HUB)?.databases?.qlda;
+  if (!q?.path || !q?.databaseName) {
+    fail('Không đọc được cấu hình QLDA (data/qlda.json → databases.qlda) — cần nó để tra đầu mục công việc.');
+  }
+  const deps = { runGraphSql, runSql, qlda: { programPath: q.path, database: q.databaseName } };
+
+  const soLuong = Number(opts.batch) || CO_LO;
+  const tran = Number(opts.max) || Infinity;
+  const tong = {};
+  let daXuLy = 0;
+  const rel = path.join('.4ai', 'graph', 'topics-backfill.sql');
+
+  for (;;) {
+    if (daXuLy >= tran) break;
+    let lo;
+    try { lo = motLo(deps, { soLuong }); }
+    catch (e) { fail(`đọc lô thất bại — ${e.message.split('\n')[0]}`); }
+    if (!lo.sql) break;
+
+    for (const [k, v] of Object.entries(lo.thongKe)) tong[k] = (tong[k] ?? 0) + v;
+    daXuLy += lo.soDong;
+
+    if (opts.dryRun) {
+      process.stdout.write(`  dry-run              ${lo.soDong} node — ${nhanThongKe(lo.thongKe)}\n`);
+      break; // dry-run chỉ soi MỘT lô: không ghi thì lô sau vẫn đúng những dòng này.
+    }
+    writeArtifacts({ destRoot: HUB, files: [{ relPath: rel, content: lo.sql }] });
+    runGraphScript({ scriptPath: path.join(HUB, rel) });
+    process.stdout.write(`  đã gắn nhãn          ${daXuLy} node\n`);
+  }
+
+  if (!daXuLy) { process.stdout.write('Không còn node Request nào thiếu chủ đề.\n'); return; }
+  process.stdout.write(`${opts.dryRun ? 'DRY RUN — ' : ''}${daXuLy} node · ${nhanThongKe(tong)}\n`);
+}
+
+const nhanThongKe = (tk) => Object.entries(tk).sort((a, b) => b[1] - a[1])
+  .map(([k, v]) => `${k}:${v}`).join(' ') || '(không nhãn nào)';
 
 /**
  * Đẩy tầng dự án của lần chạy này lên đồ thị.
