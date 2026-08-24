@@ -133,7 +133,7 @@ Không có entry ⇒ task **chưa xong**, kể cả khi code đã chạy.
 
 ## Route FBO work to the layer that owns it · **BẮT BUỘC**
 
-<!-- assets/rules/erp/erp-agent-routing.md v1 -->
+<!-- assets/rules/erp/erp-agent-routing.md v2 -->
 ## Vì sao
 
 Tri thức FBO nằm ở 21 skill và hơn 50 file reference. Không có cửa vào, model phải tự đoán nên
@@ -152,6 +152,7 @@ Agent tầng tồn tại để **cầm thứ tự nạp**. Bỏ qua chúng là q
 | Một màn hình cụ thể nằm đâu, có field gì, quan hệ với ai | `erp-explorer` |
 | Thi hành một thay đổi **đã duyệt** vào file | `erp-builder` |
 | Soi diff XML theo bộ rule | `erp-reviewer` |
+| Gom hiện vật cuối đợt để mang qua PROD | `erp-deploy-auditor` |
 | Một cụm/viết tắt/mã nghĩa là gì | `erp-glossary-expert` |
 | Yêu cầu, UR, báo cáo dự án | xem rule `pm-ur-routing` |
 

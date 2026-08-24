@@ -5,6 +5,29 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Thêm — agent `erp-deploy-auditor`: manifest mang qua PROD
+
+- **Vấn đề.** Cuối một đợt customize, danh sách hiện vật phải copy qua PROD được gom bằng trí
+  nhớ: controller nào đã sửa, câu lệnh SQL nào phải chạy. Program của khách không phải git
+  repo nên không có `git status` để đối chiếu, và bỏ sót một câu `alter` chỉ lộ ra lúc PROD
+  chạy sai.
+- **Nguồn sự thật là bản ghi phiên làm việc**, không phải mtime. Ba nguồn theo thứ tự: danh
+  sách file phiên chat để lại, ledger entry của đợt việc, rồi filesystem — nhưng filesystem
+  chỉ dùng để *xác nhận* đường dẫn có thật, không để *phát hiện*. Quét mtime bị build, deploy
+  và antivirus làm nhiễu, và một manifest thừa file nghĩa là PROD nhận thứ chưa ai duyệt.
+- **Phần Web ghi đuôi `.f`.** DEV sửa `Dir\Customer.xml`, PROD nhận bản compile, nên manifest
+  ghi `Web\App_Data\Controllers\Dir\Customer.f`. Thân include `.txt`, `.rpt`, `.xsd` giữ
+  nguyên đuôi vì không có bản compile tương ứng.
+- **Phần SQL xuất câu lệnh, không xuất tên file** — hai heading `Script App` / `Script Sys`,
+  câu lệnh chép nguyên văn từ `Script\App\NN <Stored|Function|Data>.sql` và
+  `Script\Sys\NN.sql` có sẵn, giữ đúng thứ tự số vì đó là thứ tự phụ thuộc. Agent không được
+  tự viết câu lệnh: thay đổi SQL không có script thì rơi vào mục *Cần xác nhận*.
+- **Read-only** — không `Edit`, không `Write`, không chạy script; đúng role `auditor` trong
+  danh sách đóng của `docs/NAMING.md`.
+- **`erp-agent-routing` (v2)** thêm một dòng định tuyến. Không có nó thì rule hard đó vẫn nói
+  chỉ có sáu cửa, và không ai gọi tới agent mới.
+
+
 ### Đổi — chuẩn hoá đặt tên toàn bộ 67 asset
 
 - **Vấn đề.** Tiền tố asset mọc tự phát: `fbo-`, `pm-`, `4ai-`, và một asset mang tên cá

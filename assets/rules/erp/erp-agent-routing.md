@@ -6,8 +6,8 @@ domain: erp
 description: Việc FBO đi đúng cửa — backend SQL giao erp-sql-expert, frontend XML/JS giao erp-xml-expert, điều tra màn hình giao erp-explorer, thi hành giao erp-builder. Không tự bơi giữa 21 skill.
 severity: hard
 always: true
-see-also: [erp-sql-expert, erp-xml-expert, erp-explorer, erp-builder, erp-glossary-expert]
-version: 1
+see-also: [erp-sql-expert, erp-xml-expert, erp-explorer, erp-builder, erp-glossary-expert, erp-deploy-auditor]
+version: 2
 ---
 
 ## Vì sao
@@ -28,6 +28,7 @@ Agent tầng tồn tại để **cầm thứ tự nạp**. Bỏ qua chúng là q
 | Một màn hình cụ thể nằm đâu, có field gì, quan hệ với ai | `erp-explorer` |
 | Thi hành một thay đổi **đã duyệt** vào file | `erp-builder` |
 | Soi diff XML theo bộ rule | `erp-reviewer` |
+| Gom hiện vật cuối đợt để mang qua PROD | `erp-deploy-auditor` |
 | Một cụm/viết tắt/mã nghĩa là gì | `erp-glossary-expert` |
 | Yêu cầu, UR, báo cáo dự án | xem rule `pm-ur-routing` |
 
