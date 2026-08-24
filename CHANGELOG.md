@@ -5,6 +5,518 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Đổi — chuẩn hoá đặt tên toàn bộ 67 asset
+
+- **Vấn đề.** Tiền tố asset mọc tự phát: `fbo-`, `pm-`, `4ai-`, và một asset mang tên cá
+  nhân hoá (`my-style-sql`). Hai id viết bằng tiếng Việt (`fbo-tim-qua-khu`,
+  `fbo-nd252-ty-gia-hq`) vi phạm chính quy ước "identifier tiếng Anh" của repo. Agent đặt
+  theo tầng kỹ thuật (`fbo-backend`, `fbo-frontend`) chứ không theo vai, nên đọc tên không
+  biết nó được phép làm gì. Không có chỗ nào cưỡng chế, nên mỗi asset mới lại lệch thêm.
+- **`docs/NAMING.md`** — quy ước: ba scope (`4ai` hub, `erp` cho FBO+FBI gộp, `pm` dự án
+  khách), scope là segment đầu của `id` và bằng luôn `domain` và bằng tên thư mục. Mỗi kind
+  một pattern: rule `<scope>-<domain>-<concern>`, skill `<scope>-<object>-<capability>`,
+  agent `<scope>-[<specialty>-]<role>`, command `<scope>-<action>[-<object>]`.
+- **Cưỡng chế bằng code, không bằng lời nhắc.** `validateNaming` trong `schema.mjs` với
+  `SCOPES` / `SKILL_CAPABILITIES` / `AGENT_ROLES` là danh sách đóng; `NAMING_ENFORCED` phủ
+  mọi kind nên sai tên là ERROR chặn sync. `4ai new` từ chối in skeleton cho id sai chuẩn —
+  asset lệch không ra đời được ngay từ đầu.
+- **Ba asset rời kind `agent`** vì chúng là quy trình chứ không phải vai. Cũ → mới:
+  regulatory-rollout → skill `erp-rollout-execute`; release-handover → skill
+  `pm-handover-author`; deadline-review → skill `pm-deadline-review` (id giữ nguyên).
+  Đánh đổi: chúng không còn chạy trong context riêng.
+- **Slash command đổi tên** — bảng đầy đủ trong `docs/NAMING-MIGRATION.md`. Hình dạng:
+  lệnh hub về scope `4ai` (`/4ai-sync`, `/4ai-doctor`, `/4ai-skill-create`), lệnh ERP về
+  scope `erp` (`/erp-screen-find`, `/erp-diff-review`, `/erp-sql-query`). `/pm-status` và
+  `/pm-review` giữ nguyên vì đã đúng chuẩn.
+- **Hai field metadata mới**: `status` (`draft`/`active`/`deprecated`) và `owner`. Không thêm
+  `kind: hook` — hub chưa có primitive đó.
+- **Ghi nhận chưa xử lý**: `docs/ASSET-FORMAT.md` và `docs/TARGET-MATRIX.md` được `CLAUDE.md`
+  khai là nguồn chuẩn cao nhất nhưng không tồn tại trong repo.
+
+### Thêm — từ điển thuật ngữ Fast ERP: sub-agent `erp-glossary-expert` + corpus `erp-glossary-reference`
+
+- **Vấn đề.** Yêu cầu của khách viết tắt theo thói quen kế toán Việt Nam (`LSX`, `PXK`, `NCC`,
+  `NXT`), Fast lại đặt mã 3 ký tự và tên tiếng Anh riêng, còn code thì gọi bằng `sysid`
+  controller. Ba lớp tên cho cùng một thứ, không có chỗ nào nối chúng lại — mỗi lần gặp một
+  mã lạ là một lần tra tay từ đầu, và đoán sai `sysid` từ `ma_ct` là lỗi lặp lại.
+- **`assets/skills/erp/erp-glossary-reference.md` + `references/`** — ba file từ điển,
+  quét từ DB thật của một chương trình FBI SP2422, không phải soạn từ trí nhớ:
+  - `vouchers.md` — 122 loại chứng từ từ `dmct` (db app) ghép `wcommand` (db sys): mã ↔ tên
+    tiếng Việt ↔ tên tiếng Anh (`dmct.ten_ct2`, tên chính Fast đặt) ↔ `sysid` controller ↔
+    bảng header (`m_phdbf`) và chi tiết (`m_ctdbf`), nhóm theo 16 phân hệ. Kèm mục cặp
+    "kế hoạch/thực tế" (`PXA` vs `PXH`) và mã trùng dễ nhầm.
+  - `naming.md` — quy tắc đặt tên đo trên toàn db (14.635 bảng, 312 `dm*`): tiền tố bảng
+    `dm`/`ph`/`ct`/`cttt`/`ctgt`/`bim`/`$log`, tiền tố cột kèm tần suất thật (`ma_` 108.278
+    lần, `sl_`, `tk_`, `tien_`), hậu tố `2` = bản tiếng Anh, `_nt` = ngoại tệ, quy ước `sysid`
+    (`*Tran`, `W*Tran` kho thực tế, `BI*` mua hàng), phân kỳ `$yyyyMM`.
+  - `abbreviations.md` — viết tắt người dùng gõ ↔ mã Fast ↔ English, có cột **Nguồn** phân
+    biệt "đọc từ DB" với "cách gọi nghiệp vụ" để không ai lỡ đem cách gọi tắt vào code.
+- **`assets/agents/erp/erp-glossary-expert.md`** — sub-agent read-only (`tools` không có
+  Edit/Write). Tra từ điển tĩnh trước, chỉ gọi tool khi từ điển thiếu hoặc câu hỏi gắn với
+  một program cụ thể. Báo cáo bắt buộc có mục *Nguồn & độ tin* (ghi rõ đã xác minh trên
+  program nào) và *Entry đề xuất bổ sung* — đó là cơ chế để từ điển lớn dần mà vẫn qua duyệt.
+- **Giới hạn đã ghi rõ trong asset**: từ điển là ảnh chụp SP2422. Khách chạy SP khác hoặc đã
+  customize `dmct` thì phải xác minh lại bằng `resolve_vouchercode` / `query_sql` trên đúng
+  program, và agent buộc phải nói ra điều đó thay vì khẳng định suông.
+
+### Thêm — lớp định nghĩa cấp program: `erp-program-config-lookup`, bắt đầu bằng `Options.xml`
+
+- **Vấn đề.** Controller không tự khai mặt nạ định dạng; nó viết `dataFormatString="@quantityInputFormat"`
+  rồi trỏ ra `App_Data\Controllers\Options\Options.xml`. Đọc controller mà không biết lớp này
+  thì không biết giá trị thật là gì, và không biết sửa ở đâu.
+- **`assets/skills/erp/erp-program-config-lookup.md`** — mục lục cả họ file cấu hình trong
+  `Options\` (22 mục), mỗi mục ghi rõ **đã lập tài liệu** hay **chưa lập tài liệu** — chỗ để
+  các định nghĩa program sau này nối vào. Kèm quy trình 4 bước khi gặp một khai báo lạ
+  (đọc `.xsd` trước, đọc `xmlns`, tìm chỗ dùng thật, so giữa các program) và tiêu chuẩn để
+  một file được coi là đã lập tài liệu.
+- **`{REFDIR}/options-xml.md`** — đặc tả `Options.xml`, dựng từ file thật chứ không từ ví dụ:
+  - Cấu trúc đọc từ `Options.xsd`: `var/@name` là `xs:key` (cấm trùng), `@type` chỉ nhận
+    `String`/`Numeric`/`DateTime`/`Variant`, nút con `header`/`expresion` theo `xs:sequence`.
+  - **Cú pháp tham chiếu: `@<name>`, chỉ trong thuộc tính `dataFormatString`** — đã quét
+    `Grid`/`Structure`/`Filter`/`List`/`Lookup`, không thuộc tính nào khác nhận nó.
+  - 29 mặt nạ định dạng kèm giá trị và **số lần dùng đo được** (`datetimeFormat` 3394,
+    `foreignCurrencyAmountViewFormat` 2221…), 12 mã số giới hạn độ dài field.
+  - Quy tắc Input↔View: hai bản khác nhau đúng một ký tự (`##0` vs `###`) — Input giữ số 0,
+    View giấu số 0. Tiền VND không có số lẻ, tiền ngoại tệ có 2 số lẻ.
+  - **So 4 program** (FBI SP2422/SP2421/SP24, FBO SP2264): 29 mặt nạ giống hệt, nhưng nhóm mã
+    số thì không — SP2264 có thêm `112`, và `111` là `014` thay vì `018`. Nên không copy file
+    này giữa các khách.
+  - Bẫy có thật: `Filter\zcSyncSaMoPN1Filter.f:60` dùng `@exchangeRateFormat` — **không có
+    var nào tên đó**; field `hidden="true"` nên chưa ai thấy hỏng.
+- **`erp-glossary-expert` + `erp-glossary-reference`** nối sang lớp mới: cụm bắt đầu bằng `@` hoặc là
+  tên file trong `Options\` thì agent nạp `erp-program-config-lookup` thay vì corpus thuật ngữ.
+
+#### Nửa thứ hai — bảng `options` và quan hệ chiếu ra file
+
+Lớp cấu hình cấp program có **hai nửa**, không phải một: file lo *hiển thị thế nào*, bảng
+`options` (db app) lo *phần mềm cư xử thế nào*. Skill đổi thành mục lục cả hai.
+
+- **`{REFDIR}/options-table.md`** — 512 tùy chọn trải 17 phân hệ (GL chiếm 169), khoá tra cứu
+  là `name` (duy nhất toàn bảng, 512/512) chứ không phải `stt` (trùng trong cùng phân hệ),
+  khuôn tra chuẩn `select rtrim(val) from options where name = '...'` với chỗ dùng thật, 9 họ
+  tiền tố tên, và công thức tìm các dòng khách đã đổi khỏi mặc định (`val <> defaul`).
+- **Truy được cơ chế nối hai nửa.** Cột `options.xmlformat` chứa bản đồ chiếu, nguyên văn
+  `Options{quantityInputFormat:%s}{quantityViewFormat:<CASE CHARINDEX('.', %s) ...>}Report{roundQuantity:<...>}`.
+  Kiểm chứng đầu-cuối: `m_ip_sl.val` = `# ### ### ##0.00` → `Options.xml/quantityInputFormat`
+  khớp từng ký tự; `m_round_sl.val` = `2` → `Report.xml/roundQuantity` `<header v="2"/>` khớp.
+- **Sửa một kết luận sai ở lần trước.** `options-xml.md` từng ghi `HourInputFormat`/`HourViewFormat`
+  "phá quy tắc `0`↔`#`". Sai — luật sinh thật nằm trong `xmlformat`: có dấu thập phân thì
+  `REPLACE(val,'0.','#.')`, không thì `REPLACE(val,'0','#')`. Áp vào `#000.00` ra đúng `#00#.00`.
+  Đã thay đoạn suy đoán bằng luật có nguồn.
+- **Phát hiện trôi giữa hai nguồn.** Trên chương trình đã đo, 3/12 mặt nạ định dạng lệch nhau
+  giữa bảng và file (`m_ip_cs` ≠ `CapacityNumberInputFormat`, `m_ip_diem` ≠ `markInputFormat`,
+  `m_ip_gio` ≠ `HourInputFormat`). Hậu quả không đối xứng: lưới đọc file, SQL trong
+  `Include`/`Message` đọc bảng — cùng một con số hiện hai kiểu.
+- **Ghi rõ hai chỗ chưa biết** thay vì đoán: ý nghĩa cột `attribute` (0/1, không tương quan
+  sạch với `sysvar` hay `inputmask`), và thời điểm engine chạy bước chiếu `xmlformat` ra file
+  (`xmlformat` không được tham chiếu từ bất kỳ controller nào).
+
+### Thêm — catalog Form/Grid API và token runtime, bóc từ tài liệu FBOR2SP19.1
+
+Nguồn: *"Hướng dẫn lập trình FBOR2SP19.1"* (ThắngLV, FHN, 2023). Bỏ mục III.1 (công cụ) và
+mọi link `kb.fast.com.vn` theo yêu cầu — link đã chết.
+
+- **`erp-js-api-reference` v2 + `{REFDIR}/form-grid-api.md`.** Skill này trước đây tự khai *"không có
+  catalog API chính thức trong hub"*; giờ có: 21 hàm/thuộc tính Form, ~50 của Grid, 12 sự kiện
+  vòng đời controller (`Loading`/`Scattering`/`InitExternalFields`/`Inserting`…), cú pháp biểu
+  thức `[trường]:=[a]*[b]` dùng trong `assignExpression`/`sum`/`allocate`/`validRowExpression`.
+- **Đối chiếu SP19.1 → SP2422 thay vì chép suông.** Đếm số file trong `Controllers\Include\`
+  của một chương trình FBI SP2422 dùng từng tên hàm: 17/18 còn sống (`getItemValue` 246 file,
+  `_getColumnOrder` 214, `parentForm` 186…). **`assignAggregate` = 0 file trên toàn bộ
+  `Controllers\`** — đã biến mất khỏi SP2422, việc của nó do `executeAggregate` đảm nhiệm.
+  Ghi rõ trong catalog là đừng viết vào code mới.
+- **`erp-glossary-reference` + `{REFDIR}/runtime-tokens.md`** — 13 biến session SQL và 16 biến
+  cookie. Bảy `@@` token đã thấy dùng thật trong mã SP2422 (`@@unit`, `@@language`, `@@userID`,
+  `@@queryParameter`, `@@table`, `@@stt_rec`); phần còn lại đánh dấu nguồn là tài liệu.
+  Kèm hai bẫy chính tả có thật: `@@copping` hai chữ `p`, và `@@language` tài liệu ghi `V`/`E`
+  hoa nhưng code so bằng chữ thường.
+
+### Sửa — `PH81` không phải tên bảng; `naming.md` và `vouchers.md` từng để người đọc hiểu nhầm
+
+Mục III.5.1 của tài liệu nói bảng chứng từ phân kỳ có dạng `M81$yyyyMM`/`D81$yyyyMM`/
+`I81$yyyyMM`/`C81$000000`. Kiểm trên DB thật thì **bảng `PH81` và `CT81` không tồn tại** —
+`m81$202601` và `c81$000000` thì có; toàn db chỉ có 13 bảng tên `ph*`.
+
+- `dmct.m_phdbf`/`m_ctdbf` là **tên logic thời DBF**, không phải luôn là tên bảng. Dạng **có
+  số** (`PH81`, `PH31`) ⇒ bốn bảng vật lý `m`/`d`/`i`/`c` + `$yyyyMM`; dạng **toàn chữ**
+  (`PHSX`, `PHDM`, `DMTS`) ⇒ đúng là tên bảng, không phân kỳ.
+- Xác nhận chéo trong controller: `Grid\APDetail.f:21` khai `table="d31$000000"` và dòng 24
+  khai `<partition table="c31$000000" prime="d31$" inquiry="i31$"/>`, trong khi `dmct` của
+  `PN1` ghi `m_phdbf = PH31`.
+- Bổ sung vai trò bốn bảng (`M` chung · `D` chi tiết · `I` tìm kiếm · `C` truy vấn), khuôn
+  `$000000` không chứa dữ liệu, và yêu cầu tạo index cho tất cả khi thêm loại chứng từ mới.
+- Nhóm toàn chữ chỉ tồn tại nếu phân hệ đó được triển khai: `dmct` khai `PHT1`, `PHWO`,
+  `PHDC1`, `PHEX` nhưng bảng không có vì khách không dùng phân hệ TX/SF/CF.
+- Thêm vào `naming.md`: một màn hình phải khai ở **cả** `wcommand` **và** `command` (db sys),
+  `sysid` hai bảng phải giống nhau, `type = 'D'` cho danh mục và rỗng cho báo cáo.
+- Ghi nhận một giới hạn của tool: `search_content { in: "js" }` trả 0 ngay cả với truy vấn
+  `"function"` trên chương trình đã thử — **kết quả rỗng ở đó không phải bằng chứng không tồn
+  tại**. Đã ghi vào cả `erp-js-api-reference` lẫn catalog.
+
+### Sửa — corpus trả lời sai "sổ kho là bảng nào": `ct70` đã lỗi thời, đúng là `r70$yyyyMM`
+
+Người dùng hỏi *"sổ kho là bảng nào"* và nhận về `ct70`. Sai — `ct70`/`ct90` là di sản, bảng
+chính thức là `r70$yyyyMM`/`r90$yyyyMM`; sổ cái là `r00$yyyyMM` chứ không phải `ct00`.
+
+Đo trên một chương trình FBI SP2422 để xác minh trước khi sửa:
+
+| | Kiểu | Số lượng | Dữ liệu |
+|---|---|---|---|
+| `r00$…` `r70$…` `r90$…` | phân kỳ theo tháng | **37 bảng mỗi loại** | `r00$202608` có 40 dòng |
+| `ct00` | không phân kỳ | 1 | 40 dòng, **trùng đúng nội dung** `r00$202608` |
+| `ct70` `ct90` | không phân kỳ | 1 mỗi cái | **0 dòng** |
+
+Và không có SQL nào trong `Controllers\` nhắc tới `ct00`/`ct70`/`ct90`; stored procedure ghép
+tên động `'r70$' + @period`. Viết `FROM ct70` thì câu lệnh chạy nhưng luôn trả 0 dòng — sai im
+lặng, không có thông báo lỗi nào.
+
+- **Luật mới, phát biểu chung:** hai bảng cùng định nghĩa thì bản **tách kỳ** (`$yyyyMM`) là
+  bản chính thức, bản không hậu tố là di sản. Ghi ở `erp-glossary-reference` → `naming.md`, và
+  nâng thành ràng buộc cứng trong rule `erp-sql-style` §7.2b (bảng Dùng / KHÔNG dùng).
+- **Nối vào luật "tên logic ≠ tên bảng" đã có.** `CT00`/`CT70`/`CT90` trong `dmct.m_phdbf` là
+  giá trị từ điển, cùng loại với `PH81` — bảng thật là `r00`/`r70`/`r90` + `$yyyyMM`. Bảng ánh
+  xạ trong `naming.md` nay có thêm dòng này.
+- **Sửa 4 file:** `naming.md`, `vouchers.md` (cảnh báo ngay ở phần chú giải, vì cột Header của
+  122 dòng bên dưới là giá trị `dmct` thật, không sửa), `erp-sql-reference/business-tables.md`
+  (đảo `r*` lên trước, đánh dấu `ct*` lỗi thời), và mục lục `erp-sql-reference.md`.
+### Sửa — `SP` là "sản phẩm", không phải "Service Pack"; và cách đọc mã phiên bản
+
+`abbreviations.md` đang ghi *"SP = Service Pack"*. Sai. `SP` viết tắt của **"sản phẩm"**, và
+mã `ma_pbsp` là bốn đoạn ghép lại chứ không phải một chuỗi liền.
+
+    FBO   R2   SP   2422
+     │     │    │    └── số hiệu phiên bản
+     │     │    └─────── "sản phẩm"
+     │     └──────────── thiết kế vòng 2 (tuỳ chọn; `HRM` cũng là đoạn tuỳ chọn)
+     └────────────────── dòng sản phẩm
+
+**Quy tắc số: mỗi chữ số là một thành phần, đệm `0` cho đủ bốn.** `SP24` = 2.4.0.0 ·
+`SP242` = 2.4.2.0 · `SP2422` = 2.4.2.2 · `SP224` = 2.2.4.0 · `SP10` = 1.0.0.0. Hệ quả dễ đảo
+ngược nhất: **`SP24` mới hơn `SP224`** dù ít chữ số hơn.
+
+- Ghi ở `erp-glossary-reference` → `abbreviations.md`, mục *Đọc mã phiên bản sản phẩm*, kèm
+  22 mã gặp thật đo trên `nbdmda`.
+- **Ba dạng không khớp quy tắc, ghi là chưa chốt** thay vì tự quy đổi: `FBOSP22621` có **5 chữ
+  số** trong khi quy tắc chỉ cho bốn thành phần; `FBOR2SP20.1` và `FBOR2SP225.5` mang **dấu
+  chấm thật** (đường dẫn FABICO lại ghi `R2SP2255` không chấm); và VITRAC có
+  `ma_pbsp = FBOR2SP224` nhưng `ten_da` ghi **"(SP22.4)"** — người viết đọc hai chữ số đầu
+  thành major `22`, ngược quy tắc.
+- **Bẫy mới ghi lại:** `ma_pbsp` và đường dẫn program **lệch nhau được**. BELGACAM khai
+  `FBOHRMSP2261` nhưng program ở `CustomerPro\FBI\BELGACAM\SP2261` — mã nói FBO, đường dẫn nói
+  FBI. Lấy dòng sản phẩm theo đường dẫn thật.
+- `pm-program-lookup` (v2) nối sang mục giải mã — đó là nơi người ta nhận `sp` lần
+  đầu từ `list_programs`.
+
+### Thêm — hai agent theo TẦNG: `erp-sql-expert` và `erp-xml-expert`, cùng rule định tuyến
+
+Tri thức FBO đã đủ (21 skill, 631 KB) nhưng **không có cửa vào**: 10 agent hiện có đều hình
+dạng *việc* (explorer, customizer, reviewer, glossary), không cái nào là *người phụ trách một
+tầng*. Hỏi một câu backend thì không ai được gọi, model tự chọn giữa 21 skill — đúng cơ chế đã
+đẻ ra câu trả lời "sổ kho → `ct70`".
+
+- **`erp-sql-expert`** — proc, function, bảng, sổ, tùy chọn nghiệp vụ. Giá trị chính là **thứ tự
+  nạp bắt buộc**: `naming.md` (chốt bảng nào) → `options-table.md` (tùy chọn có đổi bảng
+  không) → grep `fsd-objects`/`functions`/`procedures` (logic đã có chưa) → mới áp
+  `erp-sql-style` và viết. Có Write để giao file `.sql`, nhưng **cấm** `allowWrite` trên
+  `query_sql` và cấm ghi vào thư mục chương trình khách.
+- **`erp-xml-expert`** — controller XML, layout, lưới, JavaScript. **Read-only có chủ đích**:
+  thiết kế cách làm rồi giao `erp-builder` thi hành. Bảng tra "việc nào → skill nào", và
+  tách rõ hai skill JS: cần **tên hàm** → `erp-js-api-reference`, cần **dựng luồng** → `erp-js-implement`.
+- **`erp-agent-routing`** (rule, `always: true`, `severity: hard`) — mảnh làm cho hai agent
+  thật sự được gọi. Vào thẳng `4ai-context.md`. Nêu bảng định tuyến đủ 7 lối, và hai bẫy: nạp
+  skill thay cho gọi agent (mất ba bước tra cứu đứng trước), và giao nhầm tầng ("lưới hiện sai
+  định dạng số" nghe như frontend nhưng mặt nạ có thể đến từ bảng `options`).
+- Việc chạm **cả hai tầng** phải giao cả hai theo thứ tự rồi hợp nhất — cấm một agent đoán hộ
+  phần của tầng kia.
+- `erp-explorer` (v2) và `erp-builder` (v2) khai thêm ranh giới: explorer trả lời *"nó ở
+  đâu"*, không trả lời *"làm thế nào"*; customizer là người thi hành bản thiết kế do hai agent
+  tầng giao xuống.
+
+**Kiến trúc giữ nguyên phân vai**: agent cầm *thứ tự và kỷ luật*, skill cầm *nội dung*. Không
+đổ knowledge vào thân agent — `assets.mjs:277` chỉ cho `kind: skill` mang `references/`, và
+531 KB reference sẽ không có chỗ nào để sống.
+
+### Thêm — 5 quy ước SQL mới vào rule `erp-sql-style` (v3), rút từ một ca review thật
+
+Đối chiếu `zc_AutoClosingQuantityWIP.sql` với rule thì rule còn thiếu năm chỗ. Bổ sung, mỗi
+mục kèm cặp SAI/ĐÚNG lấy từ chính file đó:
+
+- **§3.1 — đệm chuỗi dùng `ff_PadL`/`ff_PadR`.** `RIGHT(SPACE(16) + RTRIM(x), 16)` là viết lại
+  hàm đã có; `ff_PadL(@cpItem varchar, @nLen tinyint)` nằm sẵn trong `functions.md`.
+- **§3.2 — đã chuẩn hoá một lần thì không chuẩn hoá lại.** Giá trị đã đệm/cắt lúc nạp vào
+  `#temp` thì lúc so sánh để **trần**; bọc lại `RTRIM` ở cả hai vế vừa vô nghĩa vừa giết index.
+  Quy tắc: chuẩn hoá **ở biên**, so sánh **ở trong**.
+- **§4.1 — `ISNULL` chỉ khi cột thật sự có thể NULL.** Cột đọc thẳng từ bảng `NOT NULL` không
+  bao giờ NULL; `ISNULL` đúng chỗ là vế phải của `LEFT JOIN`. Bọc trong `WHERE` thì mất index
+  y như `RTRIM`.
+- **§4.2 — khử trùng bằng `GROUP BY`, không `DISTINCT`.** Cùng kết quả, nhiều đường thực thi
+  hơn cho optimizer, và đọc rõ ý định hơn khi sau đó còn `SUM`/`MAX`.
+- **§7.2 — `SELECT TOP 0` là BẮT BUỘC**, kể cả khi đã có `RIGHT JOIN … ON 1 = 0`. Hai thứ làm
+  hai việc khác nhau: `RIGHT JOIN` bỏ ràng buộc `NOT NULL`/`IDENTITY`, `TOP 0` bảo đảm không
+  đọc dòng nào. Ví dụ mẫu trong rule trước đây thiếu `TOP 0` — đã sửa.
+- **§7.2a — struct `#temp` dựng TỪ BẢNG THẬT.** Cột đã có ở bảng nghiệp vụ thì mượn kiểu từ đó;
+  gõ tay `CAST('' AS CHAR(16))` là tự chép lại độ dài, sai một ký tự là cắt cụt dữ liệu.
+- Checklist §11 cập nhật theo cả sáu mục.
+
+### Thêm — danh mục `fsd_*`: 29 đối tượng, lớp tiện ích của bộ phận lập trình
+
+`erp-sql-reference` có `ff_`/`fs_`/`Fast*`/`ds_`/`rs_` nhưng **không có `fsd_*`** — trong khi
+code customize gọi chúng liên tục (`fsd_GetSQLInsert`, `fsd_StringToTable`, `fsd_addFields`).
+
+`{REFDIR}/fsd-objects.md` — 29 đối tượng quét từ db thật, đủ chữ ký và kiểu trả về, nhóm theo
+việc: sinh câu lệnh · chuỗi và danh sách · sinh mã tăng dần · ngày và kỳ · DDL và bảng tạm ·
+gộp nhóm và phân quyền. Nêu rõ đây là **lớp customize**, không phải sản phẩm chuẩn — program
+khách khác có thể thiếu, phải kiểm trước bằng `query_sql { object }`.
+
+Một bẫy có thật ghi lại: **`fsd_InsertGroupMulti` và `fsd_InsertGroupMuti` cùng tồn tại**, chữ
+ký giống hệt, tên khác nhau đúng một chữ `l`. Lỗi gõ đã lên production và không sửa được vì có
+code đang gọi bản sai — phải copy nguyên văn tên từ chỗ đang chạy.
+
+### Chốt — `r70` là sổ kho hoá đơn, `r90` là sổ kho thực tế; và `r90` phụ thuộc `m_instock_split`
+
+Chỗ "chưa chốt" nêu ở mục trên đã có câu trả lời, kèm mã nguồn proc báo cáo NXT làm bằng chứng.
+`procedures.md` từng ghi "`r70` tồn hiện thời / `r90` tồn luân chuyển" — sai, đã sửa.
+
+- **Vai trò:** `r70$yyyyMM` = kho **hoá đơn** (sổ sách), `r90$yyyyMM` = kho **thực tế**. Quy ước
+  `@DataType` trong proc báo cáo: **1 = thực tế, 2 = hoá đơn**.
+- **Phát hiện quan trọng hơn: `r90` chỉ có dữ liệu khi `options.m_instock_split = '1'`.**
+  Xác minh trên DB — phân hệ IN, mô tả *"Tách tồn kho sổ sách và thực tế"*, mặc định `1`. Tắt
+  tùy chọn đó thì cả hai luồng dồn vào `r70` và `r90` rỗng. Đó là lý do proc chuẩn viết
+  `IF @DataType <> 1 OR NOT EXISTS(SELECT 1 FROM options WHERE name = 'm_instock_split' AND val = '1')`
+  — vế `OR` là nhánh cho khách không tách sổ, hỏi tồn thực tế vẫn phải lấy từ `r70`.
+  Chỉ `FROM r90$…` là trả 0 dòng, không báo lỗi.
+- **Nâng thành ràng buộc cứng** trong rule `erp-sql-style` §7.2c, kèm khuôn code đầy đủ và nhắc
+  `FastBusiness$Report$GetPhysicsKey` → `@xKey` → `GetCheckKey` cho nhánh thực tế.
+- **`options-table.md` lấy đây làm ví dụ mẫu** cho luận điểm của cả trang: tùy chọn nghiệp vụ
+  không chỉ đổi cách hiển thị, nó đổi **dữ liệu nằm ở bảng nào**.
+- **Ghi thêm một quy ước tên:** trong họ `m_instock_*`, hậu tố `2` = bản dành cho tồn **thực tế**
+  (`m_instock_check2`, `m_instock_view2`, `m_instock_process2`) — **khác** nghĩa của hậu tố `2`
+  ở tên cột (`ten_ct2` = bản tiếng Anh). Cùng con số, hai quy ước.
+- Làm rõ mô tả `FastBusiness$Report$GetPhysicsKey` trong `procedures.md` (trước đây chỉ ghi
+  "Báo cáo — GetPhysicsKey").
+
+### Sửa — rà vai trò 27 skill: phụ thuộc MCP sai, tham chiếu chết, thiếu neo phạm vi
+
+Rà toàn bộ corpus tìm chỗ chồng vai, lồng nhau, sai kind/domain. Năm nhóm đã xử lý.
+
+- **6 skill khai sai phụ thuộc MCP.** Thân chúng gọi `query_database`, `get_xml_entities` —
+  tool của server `user-fastbusiness-mcp`, không phải `4ai-fbo` mà hub khai. Lỗi lọt vào lúc
+  migrate: `requires: [4ai-fbo]` đúng cú pháp nên `check` cho qua, vì check chỉ xác minh id
+  tồn tại trong `servers.json`, không đọc thân file. Đã đổi sang tool thật của `4ai-fbo`:
+  `query_database type=0/1` → `query_sql { object }`, `get_xml_entities` → `resolve_entities`,
+  `read_local_file` → `read_source`, `file_path` (Web.config) → `program`. 9 file, 6 skill.
+- **`search_qlyc` không có tương đương** — `erp-history-search` xoay quanh nó. Không bịa cấu hình
+  server; thay vào đó cảnh báo ngay đầu skill rằng tool này nằm ngoài hub, và **cấm** thay thế
+  bằng `query_sql` tự chế trên `nbphyc` (phân tích một UR là việc của `pm-analyst`).
+- **UR từng có hai chủ.** `pm-ur-routing` (rule luôn-nạp) giao mọi việc UR cho `pm-analyst`,
+  trong khi `erp-history-search` tự nhận "bắt buộc đọc trước". Rule thắng, skill bị bỏ qua. Đã
+  tách nhánh trong rule: **một UR cụ thể** → `pm-analyst`; **lịch sử "đã ai làm chưa"** →
+  `erp-history-search`, tra xong quay lại `pm-analyst` để phân tích.
+- **`erp-skill-author` dạy sai giới hạn.** Nó ghi "Description ≤1024 ký tự" trong khi
+  `schema.mjs` bắt ≤200 — làm theo là bị `check` chặn. Sửa thành ≤200, nói rõ nó **bổ sung**
+  `4ai-asset-author` chứ không thay thế và khi mâu thuẫn thì `4ai-asset-author` thắng.
+  Gỡ link máy-cục-bộ `~/.cursor/skills-cursor/…` và hai tên skill không tồn tại.
+- **7 skill dựng mới không neo vào khách.** `erp-category-create`, `erp-hddv-migrate`,
+  `erp-voucher-data-lookup`, `erp-view-design`, `erp-report-create`, `erp-report-pivot-create`,
+  `erp-einvoice-customize` nhắc ledger/scope/program **0 lần** — dạy dựng màn hình mà không
+  hỏi của khách nào và không để lại vết. Thêm "Bước 0 — Neo vào khách" vào cả bảy, trỏ về
+  `erp-program-scope` và `pm-ledger-discipline`.
+- **Tham chiếu chết.** `fbo-procedure-create-report` không tồn tại nhưng được `erp-report-create` và
+  `erp-report-pivot-create` trỏ tới; đã thay bằng reference thật. Hai tên còn treo
+  (`fbo-einvoice-nd70-identity`, `fbo-nd252`) là hai skill đang kẹt ngoài hub — đánh dấu rõ
+  tại chỗ trỏ thay vì để dangling im lặng.
+- **Bỏ H1 trùng ở 12 asset migrate.** Emitter tự sinh `# {title}`, thân vẫn giữ H1 gốc nên
+  mọi file emit ra có hai H1. Đã cắt.
+
+### Đổi — `erp-sql-style` từ `skill` thành `rule` (v2)
+
+Thân nó mở đầu bằng *"AI Agent **BẮT BUỘC** áp dụng khi viết proc/query mới hoặc sửa SQL hiện
+có"* — đó là định nghĩa của rule, không phải skill. Skill chỉ nạp theo yêu cầu nên chữ "BẮT
+BUỘC" trước đây không có hiệu lực nào.
+
+Nay `kind: rule`, `severity: hard`, `globs: ["**/*.sql", "**/App_Data/Controllers/**"]` — phủ
+cả file `.sql` rời lẫn SQL nhúng trong controller. Cursor emit ra `.cursor/rules/erp-sql-style.mdc`
+tự gắn theo path thay vì một skill chờ được gọi. Bỏ `requires: [4ai-fbo]` (nó không gọi tool
+nào), thêm `see-also: erp-sql-access`. Sync tự prune bản skill cũ ở ba target.
+
+### Sửa — 148 file 4AI sinh ra chưa mang chữ ký; nay có, và có chốt chặn
+
+Bất biến "file do 4AI sinh ra đều phải ký" mới chỉ đúng với file corpus. Đo bằng cách chạy cả
+sáu emitter rồi soi từng file: **832 file text, 148 không có banner** — không cái nào là `.md`
+(corpus vẫn sạch), toàn bộ là **payload runtime chép nguyên văn vào hai gói plugin**:
+`tools/lib/*.mjs`, `mcp/**`, `tools/templates/*.html|css`. Chúng được commit vào repo, nên ai
+mở `plugins/4ai/tools/lib/4ai-sync.mjs` sẽ không có gì báo rằng đó là bản chép và sửa vào đó sẽ bị
+ghi đè ở lần sync sau.
+
+- **`signRuntime(rel, content)` trong `emit/common.mjs`** — chọn cú pháp comment theo đuôi
+  file: `//` cho `.mjs/.js/.cjs/.ts`, `/* */` cho `.css/.scss`, `<!-- -->` cho
+  `.html/.htm/.xml/.xsd`. Gọi ở đúng hai chỗ chép runtime (`plugin`, `cursor-plugin`).
+- **Shebang giữ nguyên dòng 1.** `tools/4ai.mjs`, `mcp/fbo/server.mjs`, `mcp/fbo/selftest.mjs`
+  mở đầu bằng `#!` — banner chèn vào **sau** dòng đó, không phải trước. Đã kiểm cả ba bằng
+  `node --check` trên bản đã ký.
+- **JSON/JSONL không bao giờ bị chèn** — chèn comment vào là phá parser. Chữ ký của chúng đã
+  nằm sẵn ở `.4ai/manifest.json` (đường dẫn + sha256 từng file). 30 file còn lại thuộc nhóm này.
+- **Chốt chặn trong `sync.mjs`**, chạy sau emitter và trước writer: file text nào không thuộc
+  nhóm JSON/JSONL mà thiếu chuỗi `GENERATED BY 4AI` thì sync **dừng với exit 1**, in tối đa 10
+  đường dẫn. Đã xác minh guard không phải code chết — tắt tạm `signRuntime` thì nó bắt đúng 58
+  file của target `plugin` và chặn sync.
+
+Kết quả: 148 → 30 file chưa ký, và 30 file đó là nhóm không mang được comment.
+
+### Thêm — gộp 12 skill viết tay trong `~/.cursor/skills` vào hub
+
+Trước đây hai nguồn chạy song song: hub sinh ra một bộ skill, và một bộ khác viết tay thẳng
+trong Cursor mà Claude Code không bao giờ thấy. Gộp về một nguồn.
+
+- **12 skill vào `assets/skills/erp/`** kèm 42 file reference: `erp-category-create`,
+  `erp-hddv-migrate`, `erp-skill-author`, `erp-view-design`, `erp-einvoice-customize`,
+  `erp-einvoice-nd70-implement`, `erp-report-create`, `erp-report-pivot-create`, `erp-history-search`,
+  `erp-voucher-data-lookup`, `erp-js-implement`, `erp-sql-style`.
+- **Đổi tên hai id** cho hợp `pattern` kebab-case của schema: `fbo_js_skill` →
+  `erp-js-implement`, `fbo_get_data_one_voucher` → `erp-voucher-data-lookup`. Mọi tham chiếu
+  chéo trong thân đã đổi theo.
+- **Viết lại toàn bộ `description`.** Bản gốc dùng block scalar `>-` — `fm.mjs` không hỗ trợ —
+  và dài tới ~450 ký tự, quá hạn 200. Rút gọn giữ nguyên phần "mở khi nào".
+- **Phẳng hoá reference.** `assets.mjs` chỉ nhận `references/<name>.md` một cấp, nên
+  `tran-recipes/APTran.md` → `tran-recipes-APTran.md`; link trong thân đổi sang token
+  `{REFDIR}`. Sửa luôn một link chết có sẵn trong bản gốc (`tran-recipes/README.md`).
+
+### Thêm — `disable-model-invocation` cho kind `skill`
+
+`erp-report-create`, `erp-report-pivot-create`, `erp-voucher-data-lookup` là quy trình dài, chỉ nên chạy khi
+người dùng gọi đích danh. Field mới khai trong `schema.mjs` (bool, chỉ hợp lệ với `skill`) và
+được bốn emitter có khái niệm skill frontmatter ghi xuống: `claude`, `cursor`, `plugin`,
+`cursor-plugin`. Không đụng `vscode`/`antigravity` vì hai dialect đó không có primitive tương
+đương. Đúng một dòng thêm vào mỗi emitter, `schema.mjs` vẫn là nơi duy nhất tên field tồn tại.
+
+### Chưa gộp — hai skill mang payload file nguồn
+
+`fbo-einvoice-nd70-identity` (25 file) và `fbo-nd252` (Script/, Web/) chở theo **file nguồn
+FBO thật** — `.ent`, `.txt`, `.xml`, `.sql` để chép vào chương trình khách. Cơ chế reference
+của hub không nhận được chúng: `REFERENCE_RE` chỉ khớp `.md` một cấp, và `writer.mjs` cưỡng
+chế UTF-8 không BOM + LF — áp lên file nguồn FBO là làm hỏng đúng thứ chúng phải giữ nguyên
+(xem `erp-xml-encoding`). Cần quyết định kiến trúc trước, không lách.
+
+### Sửa — `query_sql` cắt cụt thân proc; `find_controller` sập khi gọi sai tham số
+
+- **Thân proc bị vỡ vụn thành nhiều "row", mỗi row một dòng.** `objectSql()` trước đây chỉ
+  `SELECT definition FROM sys.sql_modules` — cột `nvarchar(MAX)`. Hai lớp hỏng cộng dồn:
+  sqlcmd cắt ÂM THẦM cột kiểu độ dài thay đổi ở 256 ký tự (`-y` mặc định, không tắt được vì
+  xung khắc với `-W`), và mỗi CR/LF trong thân proc bị `execSql()` (tách stdout theo dòng)
+  hiểu nhầm thành một row riêng. Đo trên ca thật (`fsd_SyncPOSHD1`, 11.756 ký tự, 12 dòng):
+  trả về đúng 12 row, mỗi row một dòng — `rows[0].definition` chỉ còn dòng khai báo tham số
+  đầu tiên (39 ký tự), 11 dòng thân hàm còn lại nằm rải rác không ai đọc.
+  - Vá bằng đúng khuôn mẫu đã có ở `tools/lib/forum.mjs` cho `frpost.noi_dung`: cắt mảnh
+    `NVARCHAR(4000)` tường minh (thoát luật cắt của `-y`, chỉ áp cho kiểu MAX) rồi ghép lại ở
+    JS. Khác forum.mjs ở một điểm: đây là MÃ NGUỒN nên không thay CR/LF/TAB bằng dấu cách —
+    mã hoá tạm bằng ký tự vùng riêng tư Unicode (U+E000..U+E002) trước khi cắt, phục hồi lại
+    sau khi ghép ở `ghepDinhNghiaObject()` (tools.mjs). Giữ nguyên tab/xuống dòng của proc gốc.
+  - `query_sql` tự nâng `maxRows` hiệu lực lên tối thiểu `OBJECT_DEF_MAX_CHUNKS` (32 mảnh =
+    128.000 ký tự) khi dùng `object:` trên proc/function — không thì bước chống cắt ở tầng
+    SQL lại bị chính `SET ROWCOUNT` của `maxRows` mặc định (50) cắt tiếp mất một nửa.
+  - Đã kiểm trên DB thật của một chương trình khách: `fsd_SyncPOSHD1` trả đủ 11.756 ký tự,
+    đúng byte-for-byte tab/newline, kết thúc đúng ở `END`; nhánh table/view (không đụng
+    chunking) và `sql:` tự viết không đổi hành vi.
+- **`find_controller` (và mọi tool có `required`) sập với lỗi JS thô khi gọi sai tên tham số.**
+  `server.mjs` gọi thẳng `handler(HUB, params.arguments)`, chưa từng validate theo
+  `inputSchema` đã khai trong `TOOLS` — dù mọi tool đều khai `required`/
+  `additionalProperties: false`. Gọi `find_controller` với `name` thay vì `query` khiến
+  `args.query` là `undefined`, rồi `stripAccents(undefined)` ném
+  `Cannot read properties of undefined (reading 'normalize')` — không nói được tham số nào
+  sai, người gọi phải đoán.
+  - Thêm `validateArgs(toolName, args)` (tools.mjs) chạy TRƯỚC handler, dùng chính
+    `inputSchema` làm nguồn thật: kiểm `required` (coi `''` là thiếu, khớp cách các handler
+    khác đã tự kiểm) và `additionalProperties: false`. Áp dụng cho cả 20 tool, không riêng
+    `find_controller` — lỗi hệ thống, không phải lỗi một tool.
+  - Lỗi giờ rõ ràng: `` Tool `find_controller` thiếu tham số bắt buộc: `query`. Tham số hợp
+    lệ: `program`, `query`, `folder`, `limit`. ``
+
+### Thêm — script SQL gợi ý sinh tự động từ nội dung UR
+
+- **Yêu cầu nào đụng lược đồ thì LUÔN có script.** Mục "Gợi ý tạo bảng / thêm cột" trước đây đọc
+  `u.ddl`/`u.ghiChuDdl` — hai trường chỉ có khi NGƯỜI gõ tay vào payload, mà đường sinh tự động
+  không bao giờ điền. Kết quả: mục đó rỗng ở **mọi** báo cáo máy dựng, kể cả khi UR nói thẳng
+  "Thêm trường Mã vụ việc". `tools/lib/ddl-suggest.mjs` đọc nội dung UR và sinh đặc tả `ddl`.
+  Đo trên NBT: 8 UR đụng lược đồ → 5 script chạy được ngay, 3 script có chỗ trống được đánh dấu.
+- **Ba dữ kiện đều tra từ CHÍNH chương trình khách, không có hằng số nào của hub:**
+  - HỌ BẢNG — đọc thuộc tính `table` trên thẻ gốc controller (`Dir/<sysid>`, `.xml` thắng `.f`).
+    `PRTran → m91$000000`, `FATran → dmts`.
+  - KIỂU CỘT — đếm cột cùng tên đang tồn tại rồi lấy kiểu áp đảo: `ma_vv varchar(16)` có ở 2.965
+    bảng, `ma_bp varchar(16)` ở 3.875, `so_dd varchar(32)` ở 314.
+  - CỘT ĐÃ CÓ CHƯA — có rồi thì việc thật là đưa trường lên form, không phải ALTER; script nói
+    thẳng để không báo nhầm giờ công.
+- **`addColumn` phân biệt bảng phân vùng và bảng đơn.** Hai dạng cùng tồn tại trong một dự án
+  (`m91$` có 38 bảng · `dmts` là bảng đơn). Vòng lặp `LIKE 'dmts$%'` khớp KHÔNG bảng nào, nên
+  script cũ sẽ chạy êm ru mà không thêm cột nào và không ai biết.
+- **Chỉ soi cụm đã được định vị, không quét nhãn trên toàn văn.** Ca thật đầu tiên gặp phải:
+  "Thêm trường Mã vụ việc: lấy từ danh mục vụ việc, **đặt dưới Mã phí**" — `Mã phí` là mốc vị trí
+  trên form, quét toàn văn thì nó thành một câu `ALTER TABLE` thừa.
+- Nhãn trường không có trong từ điển `NHAN_COT` vẫn ra script khung với `<TEN_COT>` chứ không rơi
+  vào im lặng — mức đó mới là mức quan trọng nhất về quy trình. Chỗ chưa chốt liệt kê NGAY TRÊN
+  script, vì một script có `<HO_BANG>` mà không ai cảnh báo thì rất dễ bị copy chạy thẳng.
+- Phạm vi gồm cả **XN**, không riêng DD: XN nghĩa là "đã xác nhận chuyển lập trình" — đúng lúc
+  lập trình viên cần script nhất.
+- Đọc controller qua `readSource()` (Windows-1258 / UTF-8-BOM) chứ không `readFileSync('latin1')`
+  — tên màn hình tiếng Việt trong script từng ra rác.
+
+### Sửa — chấm kinh nghiệm bằng NHỊP (UR/năm), không bằng số đếm thô
+
+- **Số UR nhiều phần lớn vì làm lâu, không vì rành.** Đo trên roster FSD: TRUONGHM 9.547 UR
+  trong 271 tháng, HUYNQ 1.786 UR trong 37 tháng — chênh thâm niên **bảy lần**, nên mọi bảng
+  đếm thô về bản chất là bảng xếp hạng thâm niên. Cả bốn tiêu chí đếm (hiện vật · menu · đầu
+  vào · chủ đề) nay chia cho số năm có mặt trong dữ liệu yêu cầu (`MIN/MAX(nbphyc.ngay_nhap)`).
+  - Mảng mẫu in đổi hẳn thứ hạng: TRUONGHM 275 UR (12,2/năm) → **HUYNQ 176 UR (57,1/năm)**.
+    Trên UR thiết kế mẫu in của NBT, HUYNQ từ ngoài top 3 lên **hạng 1 với 210 điểm**.
+  - Sàn mẫu số `sanNamThamNien = 2`: thâm niên dưới 2 năm vẫn tính bằng 2, để người mới vài
+    tháng không ăn nhịp khổng lồ vì cửa sổ thời gian quá ngắn.
+  - Sàn bão hoà quy về cùng đơn vị (`baoHoaSoUr / sanNamThamNien`). Chấm nhịp mà so với
+    `baoHoaSoUr = 3` — đơn vị UR — thì cả bảng tụt sát 0.
+  - Người thiếu dữ liệu thâm niên dùng **trung vị** của những người có, KHÔNG rơi về số đếm thô:
+    so 300 với 40 là thổi phồng gấp bội và luôn đứng đầu, mà lỗi đó im lặng.
+- **Hiện vật HIẾM không bị phép chia làm hỏng** — đã kiểm riêng vì đây là chỗ dễ vỡ nhất. Người
+  duy nhất từng đụng `zcrptInventoryFGoods` (1 UR trong 8,2 năm) tụt từ 33 xuống 8,2 điểm nhưng
+  **vẫn đứng đầu**, vì bậc bằng chứng xếp trước điểm. Đánh đổi phải nói rõ: với hiện vật chỉ có
+  1–4 UR trong toàn kho, xếp theo nhịp nhiễu — trên UR danh mục chỉ tiêu ngân sách, người làm
+  2 UR trong 3,1 năm vượt người làm 4 UR trong 8,2 năm.
+- `nhanSu.thamNien` là khối dữ kiện mới (`sqlThamNien`). Thiếu nó thì tiêu chí chấm bằng số đếm
+  như cũ và `thieuDuLieu` nói thẳng là "đang xếp theo thâm niên".
+
+### Thêm — chiều CHỦ ĐỀ cho node Request, và meta để tra ngược
+
+- **`node_Request` có meta tra cứu.** Trước đây node chỉ mang `stt_rec`, `fcode1`, `noi_dung`,
+  `tg_dk_th`, `ma_lt1` — tức chỉ tra được khi ĐÃ biết `stt_rec` cần tra, nên kho 31.010 UR đã
+  tích luỹ (nguồn kinh nghiệm duy nhất của phòng) không tìm ngược ra được. Thêm `menu_id`,
+  `sysid`, `hienVat`, `maDaumuc`, `chuDe`. Năm prop này KHÔNG phá luật "quan hệ không lặp thành
+  property": luật đó cấm chép xuống thứ đã có cạnh mang (Project, Status), còn đây là chính nội
+  dung của Request, không node nào khác sở hữu.
+  - Đã cân nhắc thêm cột `noiDungTim` chép sẵn bản không dấu rồi **bỏ**: `noi_dung COLLATE
+    Latin1_General_CI_AI LIKE N'%ngan sach%'` cho không đúng thứ đó, không cần nhân đôi 31 nghìn
+    dòng văn xuôi.
+  - Hai đường ghi node Request (`4ai report` và `4ai graph experience`) dùng CHUNG một hàm
+    `metaRequest()`. Trước đó là hai object literal chép tay và đã lệch sẵn — đường kinh nghiệm
+    không ghi `tg_dk_th`.
+- **`tools/lib/topics.mjs` — từ điển chủ đề đóng.** 13 mảng nghiệp vụ (ngân sách, mẫu in, phân
+  quyền, tài sản/CCDC, kế thừa, import, thuế, tỷ giá, pháp lý…). Rút từ `noi_dung` bằng từ khoá,
+  cộng `ma_daumuc` cho hai nhãn chắc chắn (`02` → mẫu in, `06` → danh mục). CỐ Ý không khớp chữ
+  "danh mục" tự do: câu tả trường nào cũng có nên nhãn đó sẽ dính vào mọi UR — đúng cái bẫy đã
+  gặp ở `menu_id = 01.00.00` và hiện vật `Post01`.
+- **Tiêu chí 4 khi chấm ứng viên: đã làm nhiều UR CÙNG MẢNG.** Nguồn là `node_Request.chuDe`,
+  đọc bằng `sqlKinhNghiemChuDe()`. Cộng điểm (mặc định 50), **không nâng bậc bằng chứng** — chủ
+  đề rộng (đo trên NBT, `vu-viec-phi` dính 13/24 UR) nên cho nó nâng bậc thì gần như ai cũng lên
+  bậc 1 và cột độ tin cậy hết phân biệt được.
+- **`4ai graph topics` — backfill nhãn cho node đã có.** Chạy theo lô 500, mốc "đã xử lý" nằm
+  trong chính dữ liệu (`chuDe IS NULL`) nên ngắt giữa chừng rồi chạy lại là tiếp đúng chỗ cũ. Lượt
+  đầu gắn nhãn cho **30.985 node**: mẫu in 3.716 · kế thừa 3.110 · vụ việc/phí 1.364 · import
+  1.361 · danh mục 1.151 · tài sản 917 · HĐĐT 850 · ngân sách 651 · phân quyền 601.
+- **Người được hướng dẫn playbook chỉ đích danh hiện trên mục phân công.** `nguonLt` của một
+  hướng dẫn khớp UR là một khẳng định của NGƯỜI, và nó nói được thứ không phép đếm nào nói được:
+  đo trên dữ liệu thật, người rành mẫu in đứng **thứ năm** trong bảng đếm đầu mục `02`
+  (TRUONGHM 419 · HUYNQ 364 · CUONGTQ 314 …), người rành ngân sách đứng **thứ ba** trong bảng đếm
+  UR ngân sách. Đếm UR đo khối lượng, không đo tay nghề — nên tên này hiện RIÊNG, **không cộng vào
+  điểm**: trộn khẳng định tay vào thang đếm được là mất dấu cái nào là cái nào.
+- Mục phân công hiện thêm **nhãn mảng** của từng UR, để PM thấy hệ thống đang đọc yêu cầu đó
+  thuộc mảng gì trước khi tin bảng xếp hạng bên dưới.
+
 ### Sửa — `query_sql` là tool của CHƯƠNG TRÌNH KHÁCH, QLDA và đồ thị chỉ còn env + local
 
 - **Mô tả tool khiến agent tưởng `query_sql` dành riêng cho QLDA nên không gọi nó.** Câu mở đầu
@@ -14,7 +526,7 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
   `Web.config` của chính program và **không phải khai cấu hình gì trước**. Field `program` cũng có
   description riêng thay vì `{ type: 'string' }` trống.
 - **Ba nguồn kết nối tách bạch, nói ra đủ ở cả ba nơi agent đọc** (mô tả tool, rule
-  `fbo-sql-via-mcp`, `mcp/servers.json`): program khách → Web.config của chính nó; QLDA → env
+  `erp-sql-access`, `mcp/servers.json`): program khách → Web.config của chính nó; QLDA → env
   `QLDA_APP_CONNECTION`/`QLDA_SYS_CONNECTION` rồi `data/qlda.local.json`; đồ thị 4AI → env
   `GRAPH_4AI_CONNECTION` rồi `graphConnectionString`, và không tra qua `query_sql`.
 - **Bỏ chốt cuối Web.config của QLDA** (`databases.qlda.resolveOrder` mất hai bước `webConfig`).
@@ -71,7 +583,7 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
   `forEmit()` thay token bằng đường dẫn tương đối đúng của từng dialect, nên thân asset viết
   một lần vẫn trỏ đúng ở cả sáu emitter. Cùng một object được dùng cho `emitPaths` lẫn nội
   dung file — hai bên không thể tính ra hai đường dẫn khác nhau.
-- **Skill `fbo-sql-reference`** — danh mục quét từ chương trình FBO chuẩn SP2422 qua
+- **Skill `erp-sql-reference`** — danh mục quét từ chương trình FBO chuẩn SP2422 qua
   `query_sql`: 221 function (`ff_`, `Fast*`, `df_`), 747 stored procedure (`fs_`, `Fast*`,
   `ds_`, `rs_`; đã loại 31 `dt_*` của SQL Server), 93 bảng `sys*` ở cả db `app` và `sys`.
   Mỗi thủ tục kèm cờ tác dụng phụ `IUDTX` (có `INSERT`/`UPDATE`/`DELETE`/`CREATE TABLE`/`EXEC`
