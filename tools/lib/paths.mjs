@@ -18,7 +18,7 @@ export function isAlwaysOn(asset) {
 
 /**
  * @param {object} asset  asset đã applyDefaults
- * @param {'claude'|'cursor'|'vscode'|'antigravity'|'plugin'|'cursor-plugin'} tool
+ * @param {'claude'|'cursor'|'vscode'|'antigravity'} tool
  * @param {{claudeRoot?: string, cursorRoot?: string}} opts
  *        claudeRoot: '.claude' cho project scope, '.' khi dest CHÍNH LÀ ~/.claude
  *        cursorRoot: '.cursor' cho project scope, '.' khi dest CHÍNH LÀ ~/.cursor
@@ -84,25 +84,6 @@ export function emitPaths(asset, tool, opts = {}) {
       // (always_on/glob/model_decision) nằm trong frontmatter, không gộp chung một file.
       return [{ path: `.agents/rules/${id}.md`, mode: 'file' }];
 
-    // Plugin Claude Code — cùng primitive với claude nhưng nằm ở gốc plugin, không
-    // lồng .claude/. Plugin KHÔNG có primitive "context luôn nạp": doctrine và rule
-    // always đều hạ thành skill, như scope user-global vẫn làm.
-    case 'plugin':
-      if (asset.kind === 'agent') return [{ path: `agents/${id}.md`, mode: 'file' }];
-      if (asset.kind === 'command') return [{ path: `commands/${id}.md`, mode: 'file' }];
-      return [{ path: `skills/${id}/SKILL.md`, mode: 'file' }];
-
-    // Plugin Cursor (.cursor-plugin/) — cùng primitive với cursor nhưng nằm ở gốc plugin,
-    // không lồng .cursor/. Cursor plugin có rules/ auto-discover thật (không như Claude
-    // plugin), nên mapping giống hệt case 'cursor' project scope, chỉ bỏ tiền tố .cursor/.
-    case 'cursor-plugin':
-      if (asset.kind === 'agent') return [{ path: `agents/${id}.md`, mode: 'file' }];
-      if (asset.kind === 'command') return [{ path: `commands/${id}.md`, mode: 'file' }];
-      // `skills/` trong gói plugin cũng auto-discover — mỗi thư mục con có `SKILL.md`.
-      if (asset.kind === 'skill') return [{ path: `skills/${id}/SKILL.md`, mode: 'file' }];
-      if (asset.kind === 'doctrine') return [{ path: `rules/00-${id}.mdc`, mode: 'file' }];
-      return [{ path: `rules/${id}.mdc`, mode: 'file' }];
-
     default:
       throw new Error(`tool không rõ: ${tool}`);
   }
@@ -126,12 +107,6 @@ export function mcpPath(tool, opts = {}) {
       return { path: '.vscode/mcp.json', key: 'servers' };
     case 'antigravity':
       return { path: '.agents/mcp_config.json', key: 'mcpServers' };
-    case 'plugin':
-      return { path: '.mcp.json', key: 'mcpServers' };
-    // Cursor plugin auto-discovery quét đúng tên `mcp.json` ở gốc gói (không có dấu chấm
-    // đầu, khác Claude plugin) — xem bảng auto-discovery trong cursor.com/docs/reference/plugins.
-    case 'cursor-plugin':
-      return { path: 'mcp.json', key: 'mcpServers' };
     default:
       return null;
   }

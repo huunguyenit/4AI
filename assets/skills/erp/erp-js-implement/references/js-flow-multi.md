@@ -95,7 +95,7 @@ return
 ```
 
 - `&FlowMultiTagRowRequest;` — parse `@k` → `#tagrow` (include chuẩn, **không viết lại**)
-- SQL phức tạp / UNION: khai biến default một lần (`@empty_v33`, `@zero_19_4`...) — skill `fbo_style_sql`
+- SQL phức tạp / UNION: khai biến default một lần (`@empty_v33`, `@zero_19_4`...) — rule `erp-sql-style`
 - Cột mới cho JS: thêm vào entity `OtherCopyField` **cuối list** (tránh lệch index hardcode)
 
 ## TransferData — gán vào grid cha

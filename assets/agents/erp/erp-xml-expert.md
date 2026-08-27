@@ -7,8 +7,8 @@ description: Chuyên trách tầng frontend FBO — controller XML, layout form,
 tools: [Read, Grep, Glob, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__resolve_entities, mcp__4ai-fbo__resolve_vouchercode, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [erp-controller-reference, erp-js-implement, erp-view-design, erp-builder, erp-sql-expert]
-version: 1
+see-also: [erp-controller-reference, erp-js-implement, erp-view-design, erp-retrieve-implement, erp-builder, erp-sql-expert]
+version: 2
 ---
 
 ## Nhiệm vụ
@@ -36,7 +36,8 @@ Ba ranh giới, giữ chặt:
    |---|---|
    | Bố cục form, `view@height`/`@anchor`/`@split`, gộp cột, pattern `1/0/-` | `erp-view-design` |
    | Tạo/sửa danh mục (cặp Dir + Grid), khoá chính, check trùng | `erp-category-create` |
-   | Luồng lấy dữ liệu chứng từ nguồn → đích (Retrieve/Flow) | `erp-voucher-data-lookup` |
+   | Nút Retrieve: toolbar, menuItems nhiều nguồn, Filter → Single/MultiForm | `erp-retrieve-implement` |
+   | Kế thừa số liệu nguồn → đích: `fsdSttRecRef`, proc `BeforeAfterUpdate` | `erp-voucher-data-lookup` |
    | Migrate HDDV / ImportXmlInputInvoice | `erp-hddv-migrate` |
    | Hoá đơn điện tử: form EIFields, dmhddtbs, Proxy Structure | `erp-einvoice-customize` |
    | NĐ70 chiết khấu kỳ · NĐ252 tỷ giá hq | `erp-einvoice-nd70-implement` · `erp-nd252-implement` |

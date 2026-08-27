@@ -21,6 +21,7 @@ import { runSql, runGraphSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig } from '../../src/database/qlda-metadata.mjs';
 import { loadHolidays, classifyDeadline } from './workdays.mjs';
 import { MA_DAUMUC_DAU_VAO } from './assignee.mjs';
+import { rutChuDe } from './topics.mjs';
 
 const chuan = (v) => String(v ?? '').trim();
 const khop = (a, b) => chuan(a) !== '' && chuan(a).toLowerCase() === chuan(b).toLowerCase();
@@ -136,6 +137,57 @@ FROM dbo.node_ExperienceFact
 WHERE RTRIM(khoaHienVat) IN (${hv}) AND RTRIM(ma_lt1) IN (${nguoi})
 GROUP BY RTRIM(ma_lt1), RTRIM(khoaHienVat)
 ORDER BY COUNT(DISTINCT RTRIM(stt_rec)) DESC`.trim();
+}
+
+/**
+ * Ai đã làm bao nhiêu UR thuộc từng CHỦ ĐỀ — chiều "rành mảng gì", đối xứng với
+ * sqlKinhNghiemHienVat() vốn chỉ đo "đụng màn hình nào".
+ *
+ * Đọc thẳng `node_Request.chuDe` chứ không qua `node_ExperienceFact`: chủ đề là thuộc tính của
+ * CHÍNH yêu cầu, một UR có một bộ chủ đề, trong khi ExperienceFact tách một UR thành nhiều dòng
+ * theo hiện vật. Đếm chủ đề trên bảng đó là nhân số UR lên theo số màn hình bị đụng — người sửa
+ * một yêu cầu chạm 7 chứng từ sẽ được tính 7 lần cho cùng một việc.
+ *
+ * `chuDe` lưu dạng chuỗi phân tách bằng dấu phẩy nên phải khớp bằng LIKE trên chuỗi đã bọc dấu
+ * phẩy hai đầu — `,mau-in,` không bao giờ khớp nhầm `,mau-in-2,`. SQL Server graph không có kiểu
+ * mảng, và tách bảng con chỉ để chứa nhãn là cái giá không đáng cho một cột 400 ký tự.
+ *
+ * Chỉ đếm UR CÓ `ma_lt1` — UR chưa giao không nói được gì về kinh nghiệm của ai.
+ */
+export function sqlKinhNghiemChuDe(chuDes = [], maNvs = []) {
+  const nguoi = maNvs.map((m) => `'${sqlLiteral(m)}'`).join(', ');
+  const nhanh = chuDes.map((c) => `
+SELECT '${sqlLiteral(c)}' AS chuDe, RTRIM(ma_lt1) AS ma_lt1, COUNT(DISTINCT RTRIM(stt_rec)) AS so_ur
+FROM dbo.node_Request
+WHERE RTRIM(ma_lt1) IN (${nguoi})
+  AND ',' + REPLACE(RTRIM(ISNULL(chuDe, '')), ' ', '') + ',' LIKE '%,${sqlLiteral(c)},%'
+GROUP BY RTRIM(ma_lt1)`.trim());
+  return `${nhanh.join('\nUNION ALL\n')}\nORDER BY so_ur DESC`;
+}
+
+/**
+ * Thâm niên: tháng giữa UR đầu tiên và UR gần nhất mỗi người từng đứng tên.
+ *
+ * Cần để đổi "đã làm bao nhiêu UR mảng này" thành "làm bao nhiêu UR mảng này MỖI NĂM". Đo trên
+ * roster FSD, thâm niên lệch nhau bảy lần — TRUONGHM 271 tháng / 9.547 UR, HUYNQ 37 tháng /
+ * 1.786 UR — nên mọi phép đếm thô đều đang xếp hạng theo số năm ngồi ghế, không theo tay nghề.
+ *
+ * `ngay_nhap` là ngày UR được lập, không phải ngày người đó vào công ty; nó chỉ đo khoảng thời
+ * gian người đó CÓ MẶT trong dữ liệu yêu cầu. Đủ dùng cho phép chia này và không phải hỏi HR.
+ * Lưu ý mốc `2004-01-01` của vài người lâu năm nhiều khả năng là dấu vết một lần import dữ liệu
+ * cũ — nó chỉ làm thâm niên DÀI ra, tức làm nhịp của họ NHỎ đi, nên không tạo ra kết quả sai
+ * theo hướng nguy hiểm.
+ */
+export function sqlThamNien(maNvs = []) {
+  const nguoi = maNvs.map((m) => `'${sqlLiteral(m)}'`).join(', ');
+  return `
+SELECT
+  RTRIM(ma_lt1) AS ma_lt1,
+  COUNT(*)      AS tong_ur,
+  DATEDIFF(month, MIN(ngay_nhap), MAX(ngay_nhap)) AS so_thang
+FROM nbphyc
+WHERE RTRIM(ma_lt1) IN (${nguoi}) AND ngay_nhap IS NOT NULL
+GROUP BY RTRIM(ma_lt1)`.trim();
 }
 
 /** Chuẩn hoá dòng roster thô. */
@@ -391,10 +443,56 @@ export function buildNhanSu(hub, args = {}, deps = {}) {
     }
   }
 
+  // Kinh nghiệm theo CHỦ ĐỀ — chiều thứ hai, độc lập với hiện vật. Nguồn là `node_Request.chuDe`
+  // của MỌI UR đã có mặt trong đồ thị (cả đã xong lẫn đang chạy), nên nó lớn dần theo mỗi lần
+  // `4ai report` và `4ai graph experience` chạy. Kho còn mỏng thì mục này rỗng — đúng vậy, không
+  // bịa: chưa đủ dữ liệu để nói ai rành mảng nào thì im lặng hơn là đoán.
+  let kinhNghiemChuDe = [];
+  const chuDeCan = [...new Set(
+    yeuCau.filter((u) => chuan(u.trang_thai) === 'DD').flatMap((u) => rutChuDe(u)),
+  )].sort();
+  if (chuDeCan.length && roster.length) {
+    try {
+      const sqlGraph = deps.runGraphSql ?? runGraphSql;
+      const res = sqlGraph({ sql: sqlKinhNghiemChuDe(chuDeCan, roster.map((n) => n.ma_nv)), maxRows: 5000 });
+      const chuanHoa = tenChinhTac(roster);
+      kinhNghiemChuDe = (res.rows ?? [])
+        .map((r) => ({ ma_lt1: chuanHoa(r.ma_lt1), chuDe: chuan(r.chuDe), so_ur: Number(r.so_ur) || 0 }))
+        .filter((r) => r.ma_lt1 && r.chuDe && r.so_ur > 0);
+    } catch (e) {
+      thieuDuLieu.push(`Không đọc được kinh nghiệm chủ đề từ đồ thị (node_Request.chuDe): ${e.message}`);
+    }
+  }
+
+  // Thâm niên — mẫu số của phép đổi "số UR" thành "UR mỗi năm". Đọc QLDA cùng đường với
+  // lichSuMenu; hỏng thì assignee tự rơi về đếm thô (xem nhipTheoNam ở assignee.mjs).
+  let thamNien = [];
+  if (roster.length && boPhan) {
+    try {
+      const kn = qldaConnection(hub);
+      const res = sqlFn({
+        programPath: kn.programPath, database: kn.database, dbType: 'app',
+        sql: sqlThamNien(roster.map((n) => n.ma_nv)), maxRows: 500,
+      });
+      const chuanHoa = tenChinhTac(roster);
+      thamNien = (res.rows ?? [])
+        .map((r) => ({
+          ma_lt1: chuanHoa(r.ma_lt1),
+          soThang: Number(r.so_thang) || 0,
+          tongUr: Number(r.tong_ur) || 0,
+        }))
+        .filter((r) => r.ma_lt1);
+    } catch (e) {
+      thieuDuLieu.push(`Không đọc được thâm niên từ nbphyc: ${e.message}`);
+    }
+  }
+
   const pmSet = xacDinhPm(roster, args.projects ?? []);
   return {
     boPhan,
     kinhNghiemHienVat,
+    kinhNghiemChuDe,
+    thamNien,
     nguon: 'userinfo2 (DB sys) + nbphyc + nbctdaumuc (DB app) — tải trọng suy từ chính dataset này',
     roster,
     // `ungVien` là hợp đồng mà assignee.mjs đọc; roster giữ nguyên để báo cáo hiển thị tên.

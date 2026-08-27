@@ -8,7 +8,7 @@
 //   .cursor/agents/<id>.md            subagent thật
 //   .cursor/mcp.json                  mcpServers (merge)
 //
-// User scope (cursorRoot='.', globalPolicy 'on-demand-only', dest = ~/.cursor):
+// User scope (cursorRoot='.', target khai scope: 'user', dest = ~/.cursor):
 //   agents/ commands/ rules/ skills/ như trên (không lồng .cursor/), alwaysApply luôn false.
 //   mcp.json — merge MCP user-level (Cursor đọc ~/.cursor/mcp.json).
 //
@@ -46,6 +46,7 @@ function skillFile(asset, body) {
     name: asset.id,
     description: asset.description,
     ...(asset.globs?.length ? { paths: asset.globs } : {}),
+    ...(asset['disable-model-invocation'] ? { 'disable-model-invocation': true } : {}),
   });
   return `${fm}\n${banner(asset)}\n\n# ${asset.title}\n\n${body}${seeAlsoLine(asset)}`;
 }

@@ -60,7 +60,7 @@ Cột *Kind* trống nghĩa là dùng được với mọi kind.
 | `version` | int | ✅ | | ≥1, tăng khi sửa có ý nghĩa |
 | `status` | enum | | | `draft` `active` `deprecated` — mặc định `active` |
 | `owner` | enum | | | `core` `backend` `frontend` `pm` |
-| `targets` | enumArray | | | `claude` `cursor` `vscode` `antigravity` `plugin` `cursor-plugin` — mặc định tất cả |
+| `targets` | enumArray | | | `claude` `cursor` `vscode` `antigravity` — mặc định tất cả |
 | `always` | bool | | | mặc định `true` với doctrine, `false` với phần còn lại |
 | `globs` | stringArray | | | phạm vi kích hoạt theo đường dẫn |
 | `requires` | stringArray | | | id **MCP server** trong `mcp/servers.json`, KHÔNG phải id asset — `check` báo lỗi nếu server không được khai |
@@ -100,11 +100,8 @@ Hai token được thay lúc emit:
 | `{REFDIR}` | đường dẫn tương đối tới thư mục `references/` của chính skill đó, theo layout của từng dialect |
 | `{PMName}` `{PMDept}` | danh tính PM của máy đang chạy sync, đọc từ `data/qlda.local.json` |
 
-Nhờ `{REFDIR}` mà một thân skill viết một lần vẫn trỏ đúng ở cả sáu dialect, dù layout mỗi
+Nhờ `{REFDIR}` mà một thân skill viết một lần vẫn trỏ đúng ở cả bốn dialect, dù layout mỗi
 nơi một khác. Đừng hardcode `references/…` — xem `docs/TARGET-MATRIX.md`.
-
-Token PM **không** bị thay trong bản plugin: plugin là artifact phân phối, đóng cứng danh
-tính người build vào đó là sai với mọi người cài khác.
 
 ## references/
 
@@ -146,5 +143,5 @@ là bài kiểm tra idempotency, và không có test runner nào khác.
 Báo cáo lại: `id`, đường dẫn nguồn, các đường dẫn sẽ emit (lấy từ `node tools/4ai.mjs
 explain <id>`), và kết quả check.
 
-Đừng sửa file generate trong `.claude/` `.cursor/` `.github/` `.agents/` `plugins/` — sync
+Đừng sửa file generate trong `.claude/` `.cursor/` `.github/` `.agents/` — sync
 sẽ refuse. Sửa nguồn trong `assets/` rồi sync lại.

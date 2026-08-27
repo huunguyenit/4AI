@@ -12,7 +12,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { stateFile } from '../../mcp/fbo/lib/index.mjs';
-import { licenseStatus } from '../../mcp/fbo/lib/license.mjs';
 import { findSqlcmd, nguonKetNoi } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadata.mjs';
 
@@ -95,8 +94,6 @@ export function chanDoan(hub) {
     })),
     sqlcmd: findSqlcmd(),
     node: process.version,
-    // Trạng thái giấy phép — chỉ Device ID và tình trạng, không bao giờ kèm chữ ký.
-    giayPhep: licenseStatus(hub),
     qldaPath,
     nguonQlda: qldaPath ? { app: nguonKetNoi(qldaPath, 'app'), sys: nguonKetNoi(qldaPath, 'sys') } : null,
   };
@@ -136,17 +133,7 @@ export function inChanDoan(d, write = (s) => process.stdout.write(s)) {
     }
   }
 
-  const gp = d.giayPhep;
-  const chuaCapPhep = !gp.ok && !gp.sourceHub;
-  write('\nGiấy phép\n');
-  write(`  Device ID       ${gp.deviceId}  (${gp.deviceIdSource})\n`);
-  write(`  ${dau(gp.ok || gp.sourceHub)} Trạng thái    ${gp.sourceHub && !gp.ok ? 'chạy từ mã nguồn hub — không cần giấy phép' : `${gp.state} · ${gp.message}`}\n`);
-  if (chuaCapPhep) {
-    write(`  ↳ Gửi Device ID trên cho Fast Source, nhận file .json rồi:\n`);
-    write('    node tools/4ai.mjs license import <đường-dẫn-file.json>\n');
-  }
-
-  const thieu = !d.pm.maNv || !d.pm.boPhanLt || !d.sqlcmd || chuaCapPhep;
+  const thieu = !d.pm.maNv || !d.pm.boPhanLt || !d.sqlcmd;
   write(thieu
     ? '\nCòn thiếu — chạy `node tools/4ai.mjs setup` để khai.\n\n'
     : '\nĐủ để chạy `report` và các tool tra cứu.\n\n');

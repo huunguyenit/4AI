@@ -7,7 +7,6 @@
 // model bỏ qua được, dữ liệu vắng mặt thì không.
 
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildReviewReportFiles, ddChoPhanTich } from '../tools/lib/review-report.mjs';

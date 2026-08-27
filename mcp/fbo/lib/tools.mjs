@@ -1,4 +1,4 @@
-// tools.mjs — định nghĩa và thi hành 20 tool của 4ai-fbo.
+// tools.mjs — định nghĩa và thi hành 14 tool của 4ai-fbo.
 //
 // Nguyên tắc chung cho mọi tool:
 //  - Không tồn tại thì nói KHÔNG TỒN TẠI. Không đoán, không sinh nội dung thay thế.
@@ -12,9 +12,8 @@ import { buildIndex, openIndex, controllersRoot, indexPathFor, dataRoot, stateRo
 import {
   runSql, objectSql, sqlLiteral, redact,
   duongDanQldaLocal, nguonKetNoi, nguonKetNoiGraph, kiemTraKetNoiGraph, findSqlcmd,
+  OBJECT_DEF_CHUNK, OBJECT_DEF_MAX_CHUNKS, OBJECT_DEF_SENTINELS,
 } from './sql.mjs';
-import { licenseStatus, saveLicense } from './license.mjs';
-import { planReport, executeReport } from '../../../src/workflows/report-workflow.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../../src/database/qlda-metadata.mjs';
 import { fetchReviewDataset } from '../../../tools/lib/review-dataset.mjs';
 import { buildReviewReportFiles, ddChoPhanTich } from '../../../tools/lib/review-report.mjs';
@@ -302,39 +301,6 @@ export const TOOLS = [
     },
   },
   {
-    name: 'plan_report',
-    description:
-      'Phân giải một yêu cầu báo cáo thành metadata + QueryPlan + prompt hoàn chỉnh để BẠN tự viết SQL. Thuần đọc cấu hình, KHÔNG gọi LLM và KHÔNG chạm database. Tự nhận domain: câu hỏi về dự án/yêu cầu (UR)/hạn hoàn thành lấy schema QLDA từ data/qlda.json (DB nghiệp vụ QLDA nội bộ) kể cả khi truyền program của khách; câu hỏi nghiệp vụ lấy schema từ chỉ mục program. Viết SQL xong thì gọi execute_report.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        program: { type: 'string', description: 'Program path hoặc mã dự án nbdmda.ma_da (xem list_programs)' },
-        request: { type: 'string', description: 'Yêu cầu báo cáo bằng tiếng Việt/Anh nguyên bản' },
-        domain: { type: 'string', enum: ['qlda', 'fbo'], description: 'Ép domain, bỏ qua bước tự nhận' },
-        maxRows: { type: 'integer', default: 10000, description: 'Giới hạn số dòng đưa vào QueryPlan' },
-      },
-      required: ['request'],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'execute_report',
-    description:
-      'Chạy câu SELECT do bạn viết từ prompt của plan_report. SQL được đối chiếu lại với ĐÚNG metadata đã chốt ở bước plan (bảng, cột, bảng/cột bị cấm) trước khi thực thi read-only. Sai schema thì trả VALIDATION_FAILED, không có gì chạm database.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        planId: { type: 'string', description: 'Mã planId được trả về từ tool plan_report' },
-        sql: { type: 'string', description: 'Câu SELECT bạn tự viết theo SCHEMA trong prompt của plan' },
-        program: { type: 'string', description: 'Ép nơi chạy — mặc định lấy từ metadata của plan' },
-        database: { type: 'string', description: 'Ép tên database — mặc định lấy từ metadata của plan' },
-        maxRows: { type: 'integer', maximum: 10000 },
-      },
-      required: ['planId', 'sql'],
-      additionalProperties: false,
-    },
-  },
-  {
     name: 'get_review_dataset',
     description:
       'Dataset rà soát UR từ bốn câu SQL cố định (nbphyc, nbctdaumuc, nbcnhanhtda, nbdmda) — không nhận SQL từ caller. Trả projects[] (dự án có UR) và yeuCau[] (mỗi UR kèm daumuc[] + hạn hiệu lực MAX ngay_ht theo giai_doan_da). Lọc project / pmName / pmDept / statusUR, AND; bỏ trống cả ba thì lấy pm.maNv từ qlda.local.json. CLI `4ai report` (không payload) gọi cùng function rồi đổ HTML — đừng ghép payload tay. AI chỉ phân tích UR trang_thai=DD.',
@@ -377,62 +343,9 @@ export const TOOLS = [
     },
   },
   {
-    name: 'playbook_add',
-    description:
-      'Ghi MỘT cách làm vào kho hướng dẫn lập trình thực chiến (node Playbook trong đồ thị 4AI). '
-      + 'Dùng khi lập trình viên vừa kể cách họ đã sửa một màn hình và cách đó đáng để dự án SAU dùng lại. '
-      + 'KHÔNG dùng để chép lại nội dung yêu cầu của khách — cái đó đã nằm ở nbphyc, ghi lại chỉ là nhân bản dữ liệu. '
-      + '`how` phải là CÁC BƯỚC THẬT, đủ để người khác lặp lại được, viết bằng lời của người đã làm; tóm tắt thành '
-      + 'một câu chung chung thì dự án sau đọc xong vẫn không làm được gì. '
-      + 'BẮT BUỘC có ít nhất một neo tra cứu (`sysid` / `menuId` / `bang` / `tags`): đó là đường DUY NHẤT để lần rà '
-      + 'soát sau tìm ra hướng dẫn này — thiếu hết thì nó nằm trong DB mà không ai đọc lại. '
-      + '`sysid` (controller thật, lấy từ describe_controller) đáng tin hơn `menuId` nhiều: menu_id trên UR là số '
-      + 'hiệu BA gõ tay, thường không khớp cây menu thật của khách. Có sysid thì luôn khai sysid. '
-      + '`nguonLt` là mã lập trình viên mà kinh nghiệm ĐẾN TỪ họ — khác với người gõ (tự lấy từ danh tính PM máy này). '
-      + 'Ghi BỔ SUNG, không xoá hướng dẫn nào đã có; gõ lại cùng tiêu đề trong cùng dự án thì SỬA dòng cũ.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        project: { type: 'string', description: 'Mã dự án nbdmda.ma_da nơi cách làm này đã chạy THẬT — đây là xuất xứ, không phải bộ lọc lúc tra cứu' },
-        title: { type: 'string', description: 'Tiêu đề ngắn — dòng dự án sau đọc trước tiên' },
-        how: { type: 'string', description: 'Các bước làm thật, đủ để người khác lặp lại. Xuống dòng được.' },
-        ur: { type: 'string', description: 'nbphyc.stt_rec của UR sinh ra kinh nghiệm này, nếu có' },
-        when: { type: 'string', description: 'Khi nào áp dụng được — điều kiện, phiên bản SP, dạng màn hình' },
-        warn: { type: 'string', description: 'Chỗ dễ sai, thứ không được đụng vào' },
-        sysid: { type: 'string', description: 'Controller thật — neo tra cứu ĐÁNG TIN NHẤT' },
-        menuId: { type: 'string', description: 'menu_id — neo yếu, chỉ dùng khi không xác định được sysid' },
-        bang: { type: 'string', description: 'Tên bảng SQL nếu cách làm xoay quanh một bảng' },
-        tags: { type: 'array', items: { type: 'string' }, description: 'Từ khoá nghiệp vụ, dùng khi không có hiện vật cụ thể nào để neo' },
-        nguonLt: { type: 'string', description: 'Mã lập trình viên mà kinh nghiệm đến từ họ' },
-      },
-      required: ['project', 'title', 'how'],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'playbook_search',
-    description:
-      'Tra kho hướng dẫn lập trình thực chiến. Gọi TRƯỚC khi bắt tay sửa một màn hình FBO: rất có thể người khác '
-      + 'đã làm đúng việc đó ở dự án khác và đã ghi lại cách làm cùng chỗ dễ sập. '
-      + 'Tra bằng `sysid` / `menuId` / `bang` / từ khoá. CỐ Ý KHÔNG có tham số lọc theo dự án: công dụng của kho là '
-      + 'để dự án MỚI dùng lại kinh nghiệm dự án CŨ, lọc theo dự án đang làm thì gần như luôn trả rỗng. '
-      + 'Kết quả rỗng nghĩa là CHƯA AI GHI — không phải là "không có cách làm", đừng diễn giải thành không làm được.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        sysid: { type: 'string', description: 'Controller thật' },
-        menuId: { type: 'string', description: 'menu_id' },
-        bang: { type: 'string', description: 'Tên bảng SQL' },
-        tuKhoa: { type: 'string', description: 'Từ khoá tìm trong tiêu đề / cách làm / bối cảnh / tags' },
-        maxRows: { type: 'integer', maximum: 500, description: 'Giới hạn dòng — mặc định 100' },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
     name: 'set_pm_identity',
     description:
-      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, chạy như plugin thì ghi vào thư mục trạng thái cấp NGƯỜI DÙNG (Windows: %APPDATA%/4ai/data/qlda.local.json), KHÔNG phải gốc gói plugin và KHÔNG phải ${CLAUDE_PLUGIN_DATA} — chỗ đó thuộc về từng phiên Cowork nên mất khi phiên đóng. Gọi tool này NGAY khi list_programs / get_review_dataset / render_review_report báo "CHƯA GÁN PM" — đừng đi hỏi vòng hay tự tra bằng SQL. Hỏi người dùng đúng hai giá trị: `maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên đầy đủ) và `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Không tự đoán, không bịa mã ví dụ, và không viết file bằng Write — đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
+      'Ghi danh tính PM (mã nhân viên + bộ phận lập trình) vào qlda.local.json ở đúng nơi cài đặt — hub thì ghi <hub>/data/qlda.local.json, có FBO_DATA_ROOT thì ghi vào thư mục trạng thái cấp NGƯỜI DÙNG (Windows: %APPDATA%/4ai/data/qlda.local.json) — chỗ dữ liệu theo phiên thuộc về từng phiên Cowork nên mất khi phiên đóng. Gọi tool này NGAY khi list_programs / get_review_dataset / render_review_report báo "CHƯA GÁN PM" — đừng đi hỏi vòng hay tự tra bằng SQL. Hỏi người dùng đúng hai giá trị: `maNv` là MÃ nhân viên dùng trong nbdmda.ma_lt1/2/3 (chuỗi in hoa không dấu, KHÔNG phải họ tên đầy đủ) và `boPhanLt` là mã bộ phận lập trình trong nbphyc.bp_lt. Không tự đoán, không bịa mã ví dụ, và không viết file bằng Write — đường dẫn đúng chỉ tính được ở trong tiến trình MCP.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -444,49 +357,94 @@ export const TOOLS = [
     },
   },
   {
-    name: 'license_status',
-    description:
-      'Trạng thái giấy phép của bản cài này + Device ID của máy. Gọi khi tool khác báo CHƯA KÍCH HOẠT, hoặc khi người dùng hỏi "device id của tôi là gì" / "còn hạn bao lâu". Device ID là chuỗi XXXXX-XXXXX-XXXXX-XXXXX băm từ định danh máy — đưa NGUYÊN VĂN cho người dùng gửi Fast Source. Tool này chạy được cả khi chưa có giấy phép.',
-    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
-  },
-  {
-    name: 'license_activate',
-    description:
-      'Lưu giấy phép Fast Source cấp (nội dung JSON có `payload` và `signature`) vào đúng nơi cài đặt — chạy như plugin thì ghi vào thư mục trạng thái cấp NGƯỜI DÙNG (Windows: %APPDATA%/4ai/data/license.json) — sống lâu hơn một lần cài và một phiên Cowork, nên chỉ phải kích hoạt MỘT lần trên mỗi máy. Đường dẫn này người dùng không sửa tay được nên đây là đường kích hoạt DUY NHẤT ở bề mặt không có shell. Verify chữ ký + Device ID + hạn TRƯỚC khi ghi: không hợp lệ thì không lưu gì cả. Dán nguyên nội dung file khách nhận được, không sửa, không format lại. Tool này chạy được cả khi chưa có giấy phép.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        license: { type: 'string', description: 'Nguyên văn nội dung file .json Fast Source cấp' },
-      },
-      required: ['license'],
-      additionalProperties: false,
-    },
-  },
-  {
     name: 'doctor',
     description:
       'Chẩn đoán BẢN CÀI NÀY: data root đang dùng, đường dẫn file qlda.local.json thật sự được đọc, '
       + 'khoá nào đã khai (chỉ TÊN khoá và có/không — không bao giờ trả giá trị), danh tính PM, nguồn '
-      + 'kết nối app/sys/đồ thị (env | qlda.local.json | Web.config | chưa khai), giấy phép, sqlcmd, thư mục ledger. '
+      + 'kết nối app/sys/đồ thị (env | qlda.local.json | Web.config | chưa khai), sqlcmd, thư mục ledger. '
       + 'Gọi tool này NGAY khi một tool khác báo thiếu cấu hình mà người dùng khẳng định "đã khai rồi" — '
-      + 'gần như luôn là khai nhầm chỗ (một máy có nhiều bản sao qlda.local.json: trong hub, trong thư mục gói '
-      + 'plugin, trong data root; CHỈ bản trong data root được đọc) hoặc đặt biến môi trường sau khi tiến trình '
-      + 'MCP đã khởi động. Đừng đoán, đừng bảo người dùng thử lại nhiều lần — hỏi tool này. '
-      + 'Chạy được cả khi chưa có giấy phép.',
+      + 'gần như luôn là khai nhầm chỗ (một máy có nhiều bản sao qlda.local.json: trong hub, trong data '
+      + 'root; CHỈ bản trong data root được đọc) hoặc đặt biến môi trường sau khi tiến trình '
+      + 'MCP đã khởi động. Đừng đoán, đừng bảo người dùng thử lại nhiều lần — hỏi tool này.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
   },
 ];
 
 /**
- * Các tool phải chạy được KHI CHƯA CÓ giấy phép — nếu không thì người dùng không có đường nào
- * đọc Device ID, kích hoạt, hay chẩn đoán ở bề mặt không có shell. server.mjs đọc danh sách
- * này để quyết định chặn hay không.
+ * Kiểm args theo đúng `inputSchema` đã khai trong TOOLS — chạy TRƯỚC khi gọi handler.
+ *
+ * MCP không có bước validate chuẩn ở tầng giao thức: server.mjs gọi thẳng
+ * `handler(HUB, params.arguments)`. Thiếu bước này thì gọi sai tên tham số (ví dụ `name` thay
+ * vì `query`) rơi thẳng vào handler — lỗi JS bên trong (`Cannot read properties of undefined`)
+ * không nói được tham số nào sai, người gọi phải đoán. Chỉ kiểm `required` và
+ * `additionalProperties: false`: mọi inputSchema trong TOOLS đều phẳng (không object/array
+ * lồng ở cấp property), đủ cho hai kiểm tra đó, không cần một bộ validate JSON Schema đầy đủ.
+ *
+ * Mọi field `required` trong TOOLS đều kiểu string, nên coi `''` là thiếu — nhất quán với cách
+ * handler (ví dụ `resolve_vouchercode`) đã tự kiểm `!code`.
  */
-export const TOOLS_KHONG_CAN_LICENSE = new Set(['license_status', 'license_activate', 'doctor']);
+export function validateArgs(toolName, args) {
+  const tool = TOOLS.find((t) => t.name === toolName);
+  if (!tool) return; // tool không tồn tại đã báo ở nơi gọi (server.mjs)
+  const schema = tool.inputSchema ?? {};
+  const a = args && typeof args === 'object' ? args : {};
+  const props = Object.keys(schema.properties ?? {});
+
+  const thieu = (schema.required ?? []).filter((k) => a[k] === undefined || a[k] === null || a[k] === '');
+  if (thieu.length) {
+    throw new Error(
+      `Tool \`${toolName}\` thiếu tham số bắt buộc: ${thieu.map((k) => `\`${k}\``).join(', ')}. ` +
+      `Tham số hợp lệ: ${props.map((k) => `\`${k}\``).join(', ')}.`);
+  }
+
+  if (schema.additionalProperties === false) {
+    const la = Object.keys(a).filter((k) => !props.includes(k));
+    if (la.length) {
+      throw new Error(
+        `Tool \`${toolName}\` không nhận tham số ${la.map((k) => `\`${k}\``).join(', ')}. ` +
+        `Tham số hợp lệ: ${props.map((k) => `\`${k}\``).join(', ')}.`);
+    }
+  }
+}
 
 // ---------------------------------------------------------------- handlers
 
 const WRITE_SQL = /\b(insert|update|delete|merge|truncate|drop|alter|create|exec|execute|grant|revoke)\b/i;
+
+/**
+ * Ghép mảnh `definition` (proc/function/trigger) do objectSql() cắt ra thành một chuỗi, phục
+ * hồi CR/LF/TAB đã mã hoá tạm bằng ký tự vùng riêng tư — xem OBJECT_DEF_SENTINELS ở sql.mjs.
+ *
+ * Không có bước này thì mỗi xuống dòng trong thân proc bị execSql() (tách stdout theo dòng)
+ * hiểu nhầm thành một row riêng — một proc 12 dòng trả về 12 row, mỗi row một dòng, và caller
+ * chỉ thấy dòng đầu tiên nếu đọc rows[0].definition như một kết quả một-hàng bình thường.
+ *
+ * Kết quả object/NOT_FOUND (không có cả hai cột `manh` và `definition`) trả về y nguyên —
+ * chỉ nhánh proc/function/trigger của objectSql() tạo ra hình dạng cần ghép này.
+ */
+function ghepDinhNghiaObject(res) {
+  if (!res.columns.includes('manh') || !res.columns.includes('definition')) return res;
+
+  const { cr, lf, tab } = OBJECT_DEF_SENTINELS;
+  const sorted = [...res.rows].sort((a, b) => (Number(a.manh) || 0) - (Number(b.manh) || 0));
+  const ghep = sorted.map((r) => r.definition ?? '').join('')
+    .split(cr).join('\r').split(lf).join('\n').split(tab).join('\t');
+  const lenGoc = Number(sorted[0]?.len_definition) || 0;
+  const thieu = lenGoc > ghep.length;
+  const canhBao = thieu
+    ? `Định nghĩa dài ${lenGoc} ký tự nhưng chỉ ghép được ${ghep.length} — vượt trần `
+      + `${OBJECT_DEF_MAX_CHUNKS * OBJECT_DEF_CHUNK} ký tự (mảnh tối đa của objectSql()).`
+    : undefined;
+
+  return {
+    ...res,
+    columns: ['definition'],
+    rowCount: 1,
+    rows: [{ definition: ghep }],
+    truncated: res.truncated || thieu,
+    stderr: [res.stderr, canhBao].filter(Boolean).join(' | ') || undefined,
+  };
+}
 
 export const HANDLERS = {
   list_programs(hub, args = {}) {
@@ -873,15 +831,23 @@ export const HANDLERS = {
         'Nếu thực sự có chủ đích, gọi lại với allowWrite: true — và nêu câu lệnh cho người dùng duyệt trước.');
     }
 
+    // objectSql() cắt definition proc/function thành mảnh OBJECT_DEF_CHUNK ký tự khi rơi vào
+    // nhánh đó — ROWCOUNT phải đủ chứa hết mảnh (OBJECT_DEF_MAX_CHUNKS), không thì bước chống
+    // cắt ở tầng SQL lại bị SET ROWCOUNT của chính maxRows cắt tiếp.
+    const maxRows = args.object
+      ? Math.max(Math.min(args.maxRows ?? 50, 1000), OBJECT_DEF_MAX_CHUNKS)
+      : Math.min(args.maxRows ?? 50, 1000);
+
     try {
-      const res = runSql({
+      let res = runSql({
         programPath,
         sql,
         dbType: args.db ?? 'app',
         database: args.database,
         entity: args.entity,
-        maxRows: Math.min(args.maxRows ?? 50, 1000),
+        maxRows,
       });
+      if (args.object) res = ghepDinhNghiaObject(res);
       return {
         program: programPath,
         database: res.database,
@@ -997,25 +963,7 @@ export const HANDLERS = {
     };
   },
 
-  async plan_report(hub, args) {
-    const programPath = args.program ? resolveProgram(hub, args.program) : null;
-    return await planReport(args.request, {
-      hub,
-      programPath,
-      domain: args.domain,
-      maxRows: args.maxRows,
-    });
-  },
 
-  async execute_report(hub, args) {
-    const programPath = args.program ? resolveProgram(hub, args.program) : null;
-    return await executeReport(args.planId, args.sql, {
-      hub,
-      programPath,
-      database: args.database,
-      maxRows: args.maxRows,
-    });
-  },
 
   get_review_dataset(hub, args = {}) {
     return fetchReviewDataset(hub, args);
@@ -1063,69 +1011,7 @@ export const HANDLERS = {
    * lược ghi chỉ được khai một chỗ. `boSung: true` là bắt buộc — lô một dòng mà dùng chế độ
    * mặc định sẽ xoá sạch hướng dẫn cũ của cùng dự án (xem chú thích ở emitSql).
    */
-  async playbook_add(hub, args = {}) {
-    const { kiemEntry, entryToGraph } = await import('../../../tools/lib/playbook.mjs');
-    const { loadSchema, graphTuObject, validateGraph, emitSql } = await import('../../../tools/lib/graph.mjs');
-    const { runGraphScript } = await import('./sql.mjs');
-    const { pmIdentity } = await import('../../../tools/lib/assets.mjs');
 
-    const entry = {
-      maDa: args.project, sttRec: args.ur, tieuDe: args.title, boiCanh: args.when,
-      cachLam: args.how, canhBao: args.warn, sysid: args.sysid, menuId: args.menuId,
-      bang: args.bang, tags: args.tags ?? [], nguonLt: args.nguonLt,
-    };
-    const loi = kiemEntry(entry);
-    if (loi.length) throw new Error(`Chưa ghi được — ${loi.join(' · ')}`);
-
-    const pm = pmIdentity(hub);
-    const ngay = new Date().toISOString().slice(0, 10);
-    const ket = entryToGraph(entry, { boi: pm.maNv, ngay });
-
-    const schema = loadSchema(hub);
-    const g = graphTuObject(schema, ket);
-    // Request nằm NGOÀI lô: node đó do đường báo cáo nạp, dựng lại ở đây sẽ ghi đè bản đầy đủ.
-    const errs = [...g.errors, ...validateGraph(schema, g, { kindNgoai: ['Request'] })];
-    if (errs.length) throw new Error(`Lỗi đồ thị: ${errs.map((e) => e.message).join('; ')}`);
-
-    // writer.mjs vẫn là nơi duy nhất chạm filesystem output.
-    const rel = path.join('.4ai', 'graph', 'playbook.sql');
-    writeArtifacts({ destRoot: stateRoot(hub),
-      files: [{ relPath: rel, content: emitSql(schema, g, { scopes: ket.scopes, boSung: true }) }] });
-    const r = runGraphScript({ scriptPath: path.join(stateRoot(hub), rel) });
-
-    return {
-      khoa: `${ket.scopes[0]}|${ket.id}`,
-      database: r.database,
-      neo: {
-        sysid: entry.sysid || null, menu_id: entry.menuId || null,
-        bang: entry.bang || null, tags: entry.tags,
-      },
-      note: 'Đã ghi. Lần rà soát sau, mọi UR có cùng sysid/menu_id sẽ thấy hướng dẫn này trong '
-        + 'tab "Gợi ý kỹ thuật" của báo cáo — kể cả ở dự án khác.',
-    };
-  },
-
-  async playbook_search(hub, args = {}) {
-    const { docPlaybook } = await import('../../../tools/lib/playbook.mjs');
-    const { runGraphSql } = await import('./sql.mjs');
-    const rows = docPlaybook({ runGraphSql }, {
-      sysids: args.sysid ? [args.sysid] : [],
-      menuIds: args.menuId ? [args.menuId] : [],
-      bangs: args.bang ? [args.bang] : [],
-      tuKhoa: args.tuKhoa,
-      maxRows: args.maxRows ?? 100,
-      neLoi: false, // tra cứu do người gọi: lỗi phải nổi lên, không giả vờ là kho rỗng
-    });
-    return {
-      soDong: rows.length,
-      huongDan: rows,
-      note: rows.length
-        ? 'Kinh nghiệm, không phải quy định — đọc rồi tự quyết. `ma_da` là nơi cách làm này đã '
-          + 'chạy thật, không phải điều kiện áp dụng.'
-        : 'Kho chưa có dòng nào khớp. Đây KHÔNG phải bằng chứng là việc này không làm được — '
-          + 'chỉ là chưa ai ghi lại. Làm xong thì ghi bằng `playbook_add`.',
-    };
-  },
 
   set_pm_identity(hub, args = {}) {
     const maNv = trimmed(args.maNv);
@@ -1163,36 +1049,7 @@ export const HANDLERS = {
     };
   },
 
-  license_status(hub) {
-    const st = licenseStatus(hub);
-    return {
-      deviceId: st.deviceId,
-      state: st.state,
-      ok: st.ok,
-      message: st.message,
-      file: st.file,
-      ...(st.license ? { license: st.license } : {}),
-      ...(st.conLai != null ? { conLaiNgay: st.conLai } : {}),
-      ...(st.sourceHub ? { sourceHub: true } : {}),
-      hint: st.ok
-        ? 'Không cần làm gì thêm.'
-        : `Đưa Device ID ${st.deviceId} cho người dùng gửi Fast Source. Nhận được file JSON thì gọi `
-          + 'license_activate({ license: "<nguyên văn nội dung file>" }). KHÔNG tự tạo hay đoán nội dung giấy phép.',
-    };
-  },
 
-  license_activate(hub, args = {}) {
-    const text = String(args.license ?? '').trim();
-    if (!text) throw new Error('Thiếu `license` — dán nguyên văn nội dung file .json Fast Source cấp.');
-    // saveLicense verify trước rồi mới ghi; không hợp lệ thì nó ném lỗi và không để lại file.
-    const kq = saveLicense(hub, text);
-    return {
-      file: kq.file,
-      license: kq.license,
-      ...(kq.conLai != null ? { conLaiNgay: kq.conLai } : {}),
-      note: 'Đã kích hoạt. Các tool khác dùng được ngay lần gọi tiếp theo — không cần khởi động lại MCP server.',
-    };
-  },
 
   /**
    * Bản MCP của `4ai doctor`.
@@ -1231,7 +1088,6 @@ export const HANDLERS = {
     const pmDept = trimmed(cfg?.review?.pm?.boPhanLt);
     const pmDaKhai = !!pmCode && !isPmPlaceholder(pmCode);
 
-    const st = licenseStatus(hub);
     const nguonGraph = nguonKetNoiGraph();
     const graph = kiemTraKetNoiGraph();
 
@@ -1250,7 +1106,7 @@ export const HANDLERS = {
     }
     if (nguonGraph === 'chưa khai') {
       goiY.push(`Đồ thị năng lực chưa dùng được: thêm khoá \`graphConnectionString\` vào ĐÚNG file \`${fileCauHinh}\`. `
-        + 'Bản sao `qlda.local.json` nằm trong hub hay trong thư mục gói plugin KHÔNG được đọc — đây là kiểu khai nhầm chỗ hay gặp nhất.');
+        + 'Bản sao `qlda.local.json` nằm ngoài data root KHÔNG được đọc — đây là kiểu khai nhầm chỗ hay gặp nhất.');
     }
     if (nguonGraph === 'env') {
       goiY.push('Kết nối đồ thị đang lấy từ biến môi trường. Biến này được chụp lúc tiến trình MCP khởi động: '
@@ -1259,7 +1115,6 @@ export const HANDLERS = {
     // Đã khai ≠ dùng được. Không có nhánh này thì doctor báo "graph: env" trong khi mọi truy vấn
     // đồ thị vẫn ném lỗi — đúng kiểu chẩn đoán nói "ổn" ngay lúc hỏng.
     if (nguonGraph !== 'chưa khai' && !graph.ok) goiY.push(graph.loi);
-    if (!st.ok) goiY.push(st.message);
     if (!findSqlcmd()) {
       goiY.push('Không tìm thấy `sqlcmd` trên máy này — mọi tool phải truy vấn SQL sẽ hỏng, kể cả khi cấu hình kết nối đã đúng.');
     }
@@ -1267,9 +1122,9 @@ export const HANDLERS = {
     return {
       caiDat: {
         hub,
-        // dataRoot: index dựng lại được, có thể mất theo phiên. stateRoot: giấy phép + cấu hình
-        // + ledger, phải sống lâu hơn phiên và lần cài. Hai giá trị này khác nhau khi chạy như
-        // plugin — in cả hai để không ai phải đoán thứ gì nằm ở đâu.
+        // dataRoot: index dựng lại được, có thể mất theo phiên. stateRoot: cấu hình + ledger,
+        // phải sống lâu hơn phiên. Hai giá trị này khác nhau khi FBO_DATA_ROOT được đặt — in
+        // cả hai để không ai phải đoán thứ gì nằm ở đâu.
         dataRoot: dataRoot(hub),
         stateRoot: stateRoot(hub),
         fileCauHinh,
@@ -1289,12 +1144,6 @@ export const HANDLERS = {
         graphSanSang: graph.ok,
       },
       sqlcmd: findSqlcmd() ? 'có' : 'không tìm thấy',
-      giayPhep: {
-        deviceId: st.deviceId,
-        state: st.state,
-        ok: st.ok,
-        ...(st.conLai != null ? { conLaiNgay: st.conLai } : {}),
-      },
       goiY,
       note: 'Tool này không bao giờ trả connection string, user hay password — chỉ tên nguồn và tên khoá.',
     };

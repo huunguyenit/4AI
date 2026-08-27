@@ -94,9 +94,13 @@ Một UR sinh ra **nhiều** ExperienceFact. UR ví dụ ở trên cho 3 dòng t
 dòng nào trên menu hệ thống.
 
 **Vì sao phân giải được mà không cần đoán mò**: tên hiện vật của FBO là **từ vựng đóng** — mã
-chứng từ, tên menu (`bar`), tên bảng, `sysid` đều là tập hữu hạn đã có sẵn trong
-`data/fbo-capability.json`, `data/fbo-database.json` và chỉ mục controller. Dò một câu tiếng
-Việt để tìm token thuộc tập đóng là việc xác định, không phải suy đoán. Cái KHÔNG xác định được
+chứng từ, tên menu (`bar`), tên bảng, `sysid` đều là tập hữu hạn, đọc ra được từ chỉ mục
+controller và từ chính DB của program. Dò một câu tiếng Việt để tìm token thuộc tập đóng là
+việc xác định, không phải suy đoán.
+
+> Hai file từ điển dựng sẵn `data/fbo-capability.json` và `data/fbo-database.json` từng được
+> tính là nguồn cho bước này, nhưng chưa dòng code nào nạp chúng nên đã xoá cùng đợt dọn dead
+> code. Cần lại thì dựng từ chỉ mục, đừng chép tay. Cái KHÔNG xác định được
 là **"sửa cái gì / sửa chỗ nào"** — đó là ngữ nghĩa tự do.
 
 > **ĐÃ CHỐT sau khi quét dữ liệu thật** (xem mục đo bên dưới): thiết kế **lai**.

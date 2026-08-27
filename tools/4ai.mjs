@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 import { HUB, loadAssets, loadTargets, readJson, resolveMcpServers, scanSecrets, ledgerRoot } from './lib/assets.mjs';
 import { skeleton, KINDS, SCOPES, validateNaming } from './lib/schema.mjs';
 import { stringifyFrontmatter } from './lib/fm.mjs';
-import { emitPaths, isAlwaysOn, mcpPath } from './lib/paths.mjs';
+import { emitPaths, isAlwaysOn } from './lib/paths.mjs';
 import { auditLedger } from './lib/ledger-audit.mjs';
 
 const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
@@ -15,8 +15,6 @@ const USAGE = `4AI — hub trợ lý AI cho FBO. Cách dùng:
   node tools/4ai.mjs setup              khai danh tính PM + chuỗi kết nối vào qlda.local.json
                                         (gõ trong terminal của bạn — giá trị KHÔNG đi qua model AI)
   node tools/4ai.mjs doctor             chẩn đoán: hub + sqlcmd + PM + nguồn kết nối. Không ghi
-  node tools/4ai.mjs license            trạng thái giấy phép + Device ID của máy này
-                                        id | import <file.json> | path | keygen | issue
   node tools/4ai.mjs check              validate hub. Exit 0/1. Không bao giờ ghi
   node tools/4ai.mjs list               bảng asset [--kind K] [--domain D] [--json]
   node tools/4ai.mjs explain <id>       asset này emit ra đường dẫn nào, theo từng tool
@@ -89,32 +87,6 @@ async function cmdDoctor(opts) {
 async function cmdSetup() {
   const { chaySetup } = await import('./lib/setup.mjs');
   process.exit(await chaySetup(HUB));
-}
-
-// ---------------------------------------------------------------- license
-
-async function cmdLicense(sub, rest, opts) {
-  const { runLicense } = await import('./lib/license-cli.mjs');
-  process.exit(runLicense(HUB, sub, rest, opts));
-}
-
-/**
- * Cổng giấy phép cho các lệnh RUNTIME — thứ đi theo gói phân phối và tạo ra giá trị cho
- * người dùng cuối (`report`, `serve`, `graph`).
- *
- * KHÔNG chặn compiler (`check`, `sync`, `list`, `explain`, `new`, `targets`) và không chặn
- * chẩn đoán (`doctor`, `setup`): chúng chỉ có nghĩa khi có mã nguồn hub trong tay, mà ai có
- * hub thì giấy phép không còn là hàng rào gì. Chặn chúng chỉ tổ làm người phát triển kẹt.
- *
- * `requireLicense` tự bỏ qua khi đang chạy từ chính repo hub — xem isSourceHub().
- */
-async function chanGiayPhep(lenh) {
-  const { requireLicense } = await import('../mcp/fbo/lib/license.mjs');
-  try {
-    requireLicense(HUB, { what: lenh });
-  } catch (e) {
-    fail(e.message);
-  }
 }
 
 function cmdCheck(opts, { exit = true } = {}) {
@@ -896,17 +868,6 @@ const { values, positionals } = parseArgs({
     tags: { type: 'string' },
     from: { type: 'string' },
     confidence: { type: 'string' },
-    // license issue/keygen
-    device: { type: 'string' },
-    to: { type: 'string' },
-    days: { type: 'string' },
-    expires: { type: 'string' },
-    forever: { type: 'boolean', default: false },
-    key: { type: 'string' },
-    kid: { type: 'string' },
-    note: { type: 'string' },
-    out: { type: 'string' },
-    'license-id': { type: 'string' },
   },
 });
 
@@ -934,21 +895,15 @@ switch (cmd) {
     cmdNew(rest[0], rest[1], values); break;
   case 'targets':
     cmdTargets(values); break;
-  case 'license':
-    await cmdLicense(rest[0], rest.slice(1), values); break;
   case 'graph':
-    await chanGiayPhep('graph');
     await cmdGraph(rest[0] ?? 'build', { ...values, dryRun: values['dry-run'] }); break;
   case 'report':
-    await chanGiayPhep('report');
     await cmdReport(rest[0], { ...values, dryRun: values['dry-run'], project: values.project, dept: values.dept }); break;
   case 'sync':
     await cmdSync({ ...values, dryRun: values['dry-run'] }); break;
   case 'serve':
-    await chanGiayPhep('serve');
     await cmdServe(rest, values); break;
   case 'playbook':
-    await chanGiayPhep('playbook');
     await cmdPlaybook(rest[0] ?? 'search', { ...values, dryRun: values['dry-run'] }, rest.slice(1)); break;
   default:
     fail(`lệnh không rõ: ${cmd}\n${USAGE}`);

@@ -104,6 +104,8 @@
       "capNhatLuc": "DATETIME2(0)",
       "capNhatBoi": "NVARCHAR(64)",
       "hienVat": "NVARCHAR(MAX)",
+      "chuDe": "NVARCHAR(400)",
+      "maDaumuc": "NVARCHAR(400)",
       "hanhDong": "NVARCHAR(400)",
       "viTri": "NVARCHAR(400)",
       "truong": "NVARCHAR(MAX)",
@@ -152,8 +154,11 @@
     "Request": {
       "key": "stt_rec",
       "keyNote": "nbphyc.stt_rec, char(13) — luôn RTRIM. Bền qua mọi lần đổi nội dung; fcode1 chỉ là nhãn hiển thị, có thể đổi.",
-      "props": ["stt_rec", "fcode1", "noi_dung", "tg_dk_th", "tg_ht", "ma_lt1"],
+      "props": ["stt_rec", "fcode1", "noi_dung", "tg_dk_th", "tg_ht", "ma_lt1", "menu_id", "sysid", "hienVat", "maDaumuc", "chuDe"],
       "propsNote": "KHÔNG có ma_da/giai_doan_da/trang_thai/tlks_yn trên node này — những thứ đó là QUAN HỆ (BELONGS_TO/IN_PHASE/HAS_STATUS/HAS_EVIDENCE), không phải property lặp lại. Đây là điểm khác so với v1 của lược đồ này.",
+      "metaTraCuuNote": "Năm prop cuối (`menu_id`, `sysid`, `hienVat`, `maDaumuc`, `chuDe`) là META TRA CỨU, thêm ở v3 — chúng KHÔNG phá luật trên. Luật đó cấm lặp lại QUAN HỆ (một Request thuộc về đúng một Project, đang ở đúng một Status — chép xuống prop là đẻ ra hai nguồn sự thật cho cùng một sự kiện). Sáu cái này ngược lại: chúng mô tả CHÍNH nội dung của Request, không có node nào khác sở hữu chúng, và không có cạnh nào đang mang cùng thông tin. Không có chúng thì node Request chỉ tra được bằng `stt_rec` — tức là chỉ tra được khi ĐÃ biết cần tra cái gì, nên kho UR đã xong (nguồn kinh nghiệm duy nhất của phòng) không tìm ngược ra được.",
+      "chuDeNote": "Mã chủ đề nghiệp vụ, phân tách bằng dấu phẩy, rút bằng từ điển ĐÓNG ở tools/lib/topics.mjs. Đây là chiều 'việc này VỀ CÁI GÌ' — khác hẳn `sysid`/`menu_id` vốn chỉ nói 'việc này ĐỤNG VÀO ĐÂU'. Cần chiều này vì đo được rằng đếm hiện vật không tìm ra người rành một mảng: mẫu in đếm theo `ma_daumuc=02` ra TRUONGHM 419 trên HUYNQ 364, ngân sách đếm trên `BudgetArticle` ra HOATV thứ tư — cả hai đều không phải người thật sự mạnh mảng đó. Nhãn chủ đề là thứ để PM khai tay bám vào, và để tra 'ai đã làm nhiều UR mảng này'.",
+      "timVanBanNote": "Tìm không dấu trên `noi_dung` KHÔNG cần cột nhân bản: dùng `noi_dung COLLATE Latin1_General_CI_AI LIKE N'%ngan sach%'` — collation accent-insensitive của SQL Server lo phần bỏ dấu. Đã cân nhắc thêm cột `noiDungTim` chép sẵn bản không dấu rồi BỎ: nó nhân đôi 31 nghìn dòng văn xuôi để mua một thứ collation đã cho không. Hạn chế duy nhất còn lại là `đ`/`Đ` (chữ cái riêng, collation không gộp về `d`) — chấp nhận được, gõ `đ` hay `d` đều ra khi từ khoá không chứa nó.",
       "sqlTable": "node_Request"
     },
     "ScopeEvidence": {

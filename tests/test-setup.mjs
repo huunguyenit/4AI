@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test-setup.mjs — khai báo cấu hình cục bộ, chẩn đoán runtime, và đường dẫn plugin.
+// test-setup.mjs — khai báo cấu hình cục bộ, chẩn đoán runtime.
 // KHÔNG đụng vào qlda.local.json thật: mọi thứ ghi vào thư mục tạm qua FBO_DATA_ROOT.
 
 import fs from 'node:fs';
@@ -100,20 +100,8 @@ const batDuoc = scanSecrets({ hub: hubTam });
 ok('qlda.json (được commit) -> VẪN BẮT', batDuoc.length === 1 && batDuoc[0].file.includes('qlda.json'),
   JSON.stringify(batDuoc.map((h) => h.file)));
 
-process.stdout.write('\n=== .mcp.json của plugin phải dùng token, không phải đường dẫn máy dev ===\n');
-// Gói xuất xưởng mang cứng đường dẫn máy sinh ra nó thì ai cài về cũng không chạy được.
-const mcp = JSON.parse(fs.readFileSync(path.join(ROOT, 'plugins', '4ai', '.mcp.json'), 'utf8'));
-const srv = mcp.mcpServers['4ai-fbo'];
-const nhu = JSON.stringify(srv);
-ok('args dùng ${CLAUDE_PLUGIN_ROOT}', srv.args.every((a) => !path.isAbsolute(a)) && nhu.includes('CLAUDE_PLUGIN_ROOT'));
-ok('KHÔNG còn đường dẫn tuyệt đối của máy dev', !/[A-Z]:[\\/]|^\\\\/i.test(nhu.replace(/\$\{[^}]+\}/g, '')),
-  nhu);
-ok('command là lệnh trần (máy người cài tự phân giải qua PATH)',
-  !/[\\/]/.test(srv.command), srv.command);
-ok('Index ghi ra ${CLAUDE_PLUGIN_DATA} để sống sót update',
-  srv.env?.FBO_DATA_ROOT === '${CLAUDE_PLUGIN_DATA}');
-
-// Target cục bộ thì NGƯỢC LẠI: phải là đường dẫn thật, không được để token.
+process.stdout.write('\n=== .mcp.json cục bộ phải giải ra đường dẫn thật ===\n');
+// Token `{{HUB}}` phải được giải trước khi ghi — để sót là MCP server không khởi động nổi.
 const cucBo = path.join(ROOT, '.mcp.json');
 if (fs.existsSync(cucBo)) {
   const s = JSON.stringify(JSON.parse(fs.readFileSync(cucBo, 'utf8')));

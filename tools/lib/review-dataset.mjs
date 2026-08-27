@@ -16,6 +16,11 @@ import { buildNhanSu, pmCuaDuAn } from './staffing.mjs';
 import { fetchForum } from './forum.mjs';
 import { sqlTuDien, buildTuDien, rutHienVat } from './experience-extract.mjs';
 import { doiChieuCanCu, deXuatTuCanCu } from './evidence.mjs';
+import { goiYDdl, loaiThayDoiLuocDo, rutCotDeXuat } from './ddl-suggest.mjs';
+import { scanController } from '../../mcp/fbo/lib/xmlscan.mjs';
+import { readSource } from '../../mcp/fbo/lib/encoding.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export const STATUS_MAC_DINH = ['DD', 'XN', 'TH'];
 
@@ -491,6 +496,9 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
   // và mọi UR rơi về thang menu_id — thang mà đo trên dữ liệu thật chỉ phân giải được 1/25.
   ganHienVat(hub, merged, deps);
 
+  // Script SQL gợi ý cho UR đụng lược đồ — sau ganHienVat vì cả hai cùng đi vào chương trình khách.
+  ganDdl(hub, merged, deps);
+
   // Nhân sự đi kèm dataset chứ không phải tuỳ chọn khai tay: `4ai report` không nhận payload
   // từ agent nữa, nên nếu chỗ này không dựng thì KHÔNG CÒN đường nào để mục gợi ý phân công
   // có dữ liệu. Lỗi ở đây không đánh sập báo cáo — buildNhanSu ghi lý do vào `thieuDuLieu`.
@@ -635,6 +643,11 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
       ...(u.canCuTep ? { canCuTep: u.canCuTep } : {}),
       ...(u.deXuat ? { deXuat: u.deXuat } : {}),
       ...(u.tepDinhKem?.length ? { tepDinhKem: u.tepDinhKem } : {}),
+      // Đặc tả script SQL suy từ nội dung UR — xem ddl-suggest.mjs. `ddl` là MẢNG (một UR có thể
+      // xin nhiều cột); report.mjs nhận cả mảng lẫn object đơn của payload viết tay.
+      ...(u.ddl?.length ? { ddl: u.ddl } : {}),
+      ...(u.ddlChuaChot?.length ? { ddlChuaChot: u.ddlChuaChot } : {}),
+      ...(u.loaiThayDoiLuocDo ? { loaiThayDoiLuocDo: u.loaiThayDoiLuocDo } : {}),
       // Nội dung topic forum (chỉ UR ở DD có link) — với UR chỉ ghi "update theo link forum"
       // thì đây mới là yêu cầu thật. Xem forum.mjs.
       ...(u.forum?.length ? { forum: u.forum } : {}),
@@ -657,4 +670,151 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
     },
     byProject,
   };
+}
+
+/**
+ * Gắn `ddl` (đặc tả script) cho UR ở DD có đụng tới lược đồ.
+ *
+ * Ba dữ kiện phải tra, cả ba đều từ CHÍNH chương trình của khách — không cái nào suy từ hằng số
+ * trong hub:
+ *   1. HỌ BẢNG — đọc thuộc tính `table` trên thẻ gốc của controller (`Dir/<sysid>`). Đo trên NBT:
+ *      `PRTran → m91$000000` (phân vùng), `FATran → dmts` (bảng đơn). Hai dạng cùng tồn tại trong
+ *      một dự án nên phải phân biệt, xem `phanVung` ở ddl.mjs.
+ *   2. KIỂU CỘT — đếm cột cùng tên đang tồn tại trên DB đó, lấy kiểu áp đảo. `ma_vv varchar(16)`
+ *      có ở 2.965 bảng thì cột mới phải là `varchar(16)`, không phải kiểu ai đó nhớ được.
+ *   3. CỘT ĐÃ CÓ CHƯA — có rồi thì việc thật là đưa trường lên form, không phải ALTER.
+ *
+ * Chương trình không với tới được thì UR vẫn có script, chỉ là có chỗ trống được đánh dấu —
+ * xem goiYDdl(). Không ném lỗi: một khách mất kết nối không được phép làm hỏng báo cáo khách khác.
+ */
+function ganDdl(hub, merged, deps = {}) {
+  const sqlFn = deps.runSql ?? runSql;
+  const theoDuAn = new Map();
+  for (const u of merged.yeuCau) {
+    // DD **và** XN. Khác các phép rút khác vốn chỉ phục vụ cổng duyệt của PM: XN nghĩa là "đã xác
+    // nhận chuyển lập trình" — đúng lúc lập trình viên cần script nhất, mà lọc mỗi DD thì họ không
+    // bao giờ nhìn thấy nó. TH trở đi thì việc đã đang chạy, script tới lúc đó là muộn.
+    if (!['DD', 'XN'].includes(trimmed(u.trang_thai))) continue;
+    if (!loaiThayDoiLuocDo(u)) continue;
+    const maDa = trimmed(u.ma_da);
+    if (!maDa) continue;
+    if (!theoDuAn.has(maDa)) theoDuAn.set(maDa, []);
+    theoDuAn.get(maDa).push(u);
+  }
+  if (!theoDuAn.size) return;
+
+  const duAn = new Map((merged.projects ?? []).map((p) => [trimmed(p.ma_da), p]));
+
+  for (const [maDa, urs] of theoDuAn) {
+    const programPath = trimmed(duAn.get(maDa)?.programPath);
+    let bangTheoSysid = new Map();
+    let kieuTheoCot = {};
+    let soBangTheoHo = new Map();
+    let coSanTheoHoCot = new Set();
+
+    const cotCan = [...new Set(urs.flatMap((u) => rutCotDeXuat(u)).map((c) => c.cot))];
+
+    if (programPath) {
+      try { bangTheoSysid = docBangCuaController(programPath, urs.map((u) => trimmed(u.sysid))); }
+      catch { /* không đọc được thư mục Controllers — để trống, goiYDdl tự đánh dấu */ }
+    }
+    if (programPath && cotCan.length) {
+      try {
+        const res = sqlFn({ programPath, dbType: 'app', sql: sqlKieuCot(cotCan), maxRows: 500 });
+        for (const r of res.rows ?? []) {
+          const cot = trimmed(r.COLUMN_NAME).toLowerCase();
+          const soBang = Number(r.so_bang) || 0;
+          if (!cot || soBang <= (kieuTheoCot[cot]?.soBang ?? 0)) continue;
+          const len = r.len === null || r.len === undefined || String(r.len).trim() === '' ? '' : `(${trimmed(r.len)})`;
+          kieuTheoCot[cot] = { kieu: `${trimmed(r.DATA_TYPE)}${len}`, soBang };
+        }
+      } catch { /* không hỏi được DB khách — kiểu để trống, script có chỗ `<KIEU>` */ }
+    }
+
+    const hoCan = [...new Set([...bangTheoSysid.values()].map((b) => b.family).filter(Boolean))];
+    if (programPath && hoCan.length) {
+      try {
+        const res = sqlFn({ programPath, dbType: 'app', sql: sqlHoBang(hoCan, cotCan), maxRows: 2000 });
+        for (const r of res.rows ?? []) {
+          const ho = trimmed(r.ho);
+          soBangTheoHo.set(ho, Number(r.so_bang) || 0);
+          for (const cot of trimmed(r.cot_da_co).split(',').map((x) => x.trim()).filter(Boolean)) {
+            coSanTheoHoCot.add(`${ho}|${cot.toLowerCase()}`);
+          }
+        }
+      } catch { /* không đo được họ bảng — bỏ phần `soBang`, script vẫn đúng */ }
+    }
+
+    for (const u of urs) {
+      const b = bangTheoSysid.get(trimmed(u.sysid)) ?? {};
+      const coSan = {};
+      for (const c of cotCan) coSan[c] = b.family ? coSanTheoHoCot.has(`${b.family}|${c}`) : false;
+      const { loai, ddl, chuaChot } = goiYDdl(u, {
+        family: b.family, nhan: b.nhan, phanVung: b.phanVung,
+        soBangHo: b.family ? soBangTheoHo.get(b.family) : undefined,
+        kieuTheoCot, coSanTheoCot: coSan,
+      });
+      if (loai) u.loaiThayDoiLuocDo = loai;
+      if (ddl.length) u.ddl = ddl;
+      if (chuaChot.length) u.ddlChuaChot = chuaChot;
+    }
+  }
+}
+
+/** Kiểu áp đảo của từng cột, đếm trên chính DB app của khách. */
+export function sqlKieuCot(cots = []) {
+  const list = cots.map((c) => `'${sqlLiteral(c)}'`).join(', ');
+  return `
+SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH AS len, COUNT(*) AS so_bang
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE COLUMN_NAME IN (${list})
+GROUP BY COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+ORDER BY COLUMN_NAME, COUNT(*) DESC`.trim();
+}
+
+/** Mỗi họ bảng có bao nhiêu bảng, và trong đó cột nào đã tồn tại sẵn. */
+export function sqlHoBang(hos = [], cots = []) {
+  const cotList = cots.length ? cots.map((c) => `'${sqlLiteral(c)}'`).join(', ') : "''";
+  const nhanh = hos.map((h) => `
+SELECT '${sqlLiteral(h)}' AS ho,
+       (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE '${sqlLiteral(h)}$%') AS so_bang,
+       ISNULL((SELECT STUFF((SELECT DISTINCT ',' + c.COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS c
+               WHERE c.TABLE_NAME LIKE '${sqlLiteral(h)}$%' AND c.COLUMN_NAME IN (${cotList})
+               FOR XML PATH('')), 1, 1, '')), '') AS cot_da_co`.trim());
+  return nhanh.join('\nUNION ALL\n');
+}
+
+/**
+ * `sysid` → họ bảng, đọc từ controller của chương trình khách.
+ *
+ * Ưu tiên `Dir/` — đó là màn hình NHẬP LIỆU, nơi khai bảng thật; `Grid`/`Filter` chỉ đọc lại.
+ * Trong cùng thư mục, `.xml` (bản customize) thắng `.f` (bản chuẩn), đúng mô hình runtime FBO.
+ * Giá trị còn là entity chưa phân giải (`&Tag;`) thì coi như CHƯA BIẾT — trả về rỗng để goiYDdl
+ * đánh dấu, không mang nguyên chuỗi đó vào script.
+ */
+function docBangCuaController(programPath, sysids = []) {
+  const root = path.join(programPath, 'App_Data', 'Controllers');
+  const ra = new Map();
+  const uu = ['Dir', 'Grid', 'Filter'];
+  for (const sysid of [...new Set(sysids.map(trimmed).filter(Boolean))]) {
+    let found = null;
+    for (const folder of uu) {
+      for (const ext of ['xml', 'f']) {
+        const p = path.join(root, folder, `${sysid}.${ext}`);
+        if (!fs.existsSync(p)) continue;
+        // Đọc qua readSource(), KHÔNG readFileSync('latin1'): nguồn FBO có thể là Windows-1258
+        // hoặc UTF-8 có BOM (xem mcp/fbo/lib/encoding.mjs). Đọc latin1 thì tên màn hình tiếng Việt
+        // ra rác — đã thấy "tÃ i sáº£n cá» Äá»nh" trong script sinh ra.
+        const r = scanController(readSource(p).text, folder);
+        const bang = trimmed(r.table);
+        if (!bang || /[&;]/.test(bang)) continue;
+        const [ho] = bang.split('$');
+        found = { family: ho, phanVung: bang.includes('$'), nhan: trimmed(r.titleVi) || sysid };
+        break;
+      }
+      if (found) break;
+    }
+    if (found) ra.set(sysid, found);
+  }
+  return ra;
 }

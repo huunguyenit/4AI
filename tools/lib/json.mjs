@@ -45,17 +45,6 @@ export function getPath(obj, dotted) {
   return cur;
 }
 
-/** Gán giá trị theo đường dẫn "a.b.c", tạo object trung gian nếu thiếu. */
-export function setPath(obj, dotted, value) {
-  const parts = dotted.split('.');
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (!isPlainObject(cur[parts[i]])) cur[parts[i]] = {};
-    cur = cur[parts[i]];
-  }
-  cur[parts[parts.length - 1]] = value;
-}
-
 /** Xoá key theo đường dẫn; trả về true nếu có gì đó bị xoá. */
 export function deletePath(obj, dotted) {
   const parts = dotted.split('.');

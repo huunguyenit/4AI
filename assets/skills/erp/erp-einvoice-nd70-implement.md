@@ -6,7 +6,7 @@ domain: erp
 description: NĐ70 phần chiết khấu kỳ trên HĐĐT — so_bk, ngay_bk, tính chất dòng 3, VoucherType 9, Proxy ListNumber/ListDate. Patch thẳng Dir/{Tran} + dmhddtbs + Customize. Không dùng cho phần CCCD.
 requires: [4ai-fbo]
 see-also: [erp-einvoice-customize]
-version: 1
+version: 3
 ---
 > **NĐ70 có 2 phần:** skill này = **chiết khấu kỳ**. CCCD / hộ chiếu / tab Định danh →
 > `fbo-einvoice-nd70-identity`.
@@ -82,7 +82,7 @@ Chi tiết payload: [reference-payload.md]({REFDIR}/reference-payload.md). Ví d
 - [ ] 5. ALTER cột (mọi partition m**$ + wrk*) — script giao NSD
 - [ ] 6. dmhddtbs merge so_bk, ngay_bk (master). Customize: VoucherType 9 + detail tính chất 3 + số dương
 - [ ] 7. Proxy Invoices + Adjust + Replace: ListNumber, ListDate, VoucherType — chỉ thêm nếu thiếu
-- [ ] 8. Giao file .sql — không EXEC
+- [ ] 8. Ghi .sql ra D:\Fast Script\{TenDuAn}\{App|Sys} rồi giao — không EXEC
 ```
 
 ---
@@ -94,8 +94,9 @@ Chi tiết payload: [reference-payload.md]({REFDIR}/reference-payload.md). Ví d
 3. `dmhddtbs`: prepend / merge. Cấm `DELETE` rồi `INSERT` nếu dự án đã customize.
 4. Customize: đọc body hiện có → chèn khối CKTM → `ALTER PROC` một body. Cấm wrapper `_Base`.
 5. Số dương: khi NSD nhập dương, payload detail không đổi dấu thành âm.
-6. SQL: giao script; **không** deploy cho đến khi NSD yêu cầu.
-7. Sửa XML bằng StrReplace; giữ encoding/BOM/CRLF gốc.
+6. SQL: ghi script ra `D:\Fast Script\{TenDuAn}\{App|Sys}` — **không bao giờ** trong thư
+   mục program (rule `erp-sql-script-location`); **không** deploy cho đến khi NSD yêu cầu.
+7. Sửa XML **theo từng khối**, không rewrite cả file; giữ encoding/BOM/CRLF gốc.
 
 ---
 

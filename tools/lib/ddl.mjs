@@ -148,15 +148,33 @@ export function voucherFamily(spec) {
  *          soBang?:number, slotTrong?:string[], canhBao?:string[]}} spec
  */
 export function addColumn(spec) {
-  const { family, column, type, nhan, ma, sysid, soBang, slotTrong = [], canhBao = [] } = spec;
+  const { family, column, type, nhan, ma, sysid, soBang, slotTrong = [], canhBao = [],
+    phanVung = true } = spec;
   if (!family) throw new Error('addColumn: thiếu `family` (vd m31)');
   if (!column) throw new Error('addColumn: thiếu `column`');
   if (!type) throw new Error(`addColumn \`${column}\`: thiếu \`type\``);
   if (/\$/.test(family)) {
     throw new Error(`addColumn: \`family\` phải là tiền tố không có \`$\` (vd m31), nhận được ${family}`);
   }
+
+  // Bảng KHÔNG phân vùng — danh mục (`dmts`, `dmkh`…) là một bảng đơn, không có họ `$`.
+  // Phân biệt bắt buộc: vòng lặp `LIKE 'dmts$%'` bên dưới khớp KHÔNG BẢNG NÀO, nên script chạy
+  // êm ru mà không thêm cột nào và không ai biết. Đo trên NBT: controller `FATran` trỏ thẳng
+  // `dmts`, còn `PRTran` trỏ `m91$000000` — hai dạng cùng xuất hiện trong một dự án.
+  if (!phanVung) {
+    return block('app', [
+      `Thêm cột \`${column}\` ${type} vào bảng \`${family}\`${nhan ? ` — ${nhan}` : ''}${ma ? ` (${ma}` : ''}${sysid ? ` / ${sysid}` : ''}${ma ? ')' : ''}.`,
+      `\`${family}\` là bảng ĐƠN, không phân vùng theo kỳ — chỉ một câu ALTER, không có họ \`$\`.`,
+      ...(slotTrong.length ? [`Cân nhắc trưng dụng slot dự phòng sẵn có: ${slotTrong.join(', ')}.`] : []),
+      'Script idempotent: đã có cột thì bỏ qua.',
+      ...canhBao,
+    ], [
+      `IF COL_LENGTH('${family}', '${column}') IS NULL`,
+      `  ALTER TABLE ${family} ADD ${column} ${type} NULL`,
+    ]);
+  }
   const header = [
-    `Thêm cột \`${column}\` ${type} vào ${nhan ?? family}${ma ? ` (${ma}` : ''}${sysid ? ` / ${sysid}` : ''}${ma ? ')' : ''}.`,
+    `Thêm cột \`${column}\` ${type} vào họ bảng \`${family}$\`${nhan ? ` — ${nhan}` : ''}${ma ? ` (${ma}` : ''}${sysid ? ` / ${sysid}` : ''}${ma ? ')' : ''}.`,
     ...(soBang ? [`Họ bảng ${family}$ hiện có ${soBang} bảng (000000 + partition + log) → ALTER phải áp cho TẤT CẢ, không chỉ $000000.`] : []),
     ...(slotTrong.length ? [
       `Cân nhắc TRƯNG DỤNG slot dự phòng sẵn có thay vì thêm cột mới: ${slotTrong.join(', ')}.`,
@@ -196,4 +214,3 @@ export function renderDdl(spec) {
   return fn(spec);
 }
 
-export const DDL_KINDS = Object.keys(KIND);

@@ -7,6 +7,12 @@
       "sourceVersion": 2
     },
     {
+      "path": ".agents/agents/erp-deploy-auditor.md",
+      "sha256": "55bab9b5840b37f786c1f46749f32bfbd53c457aeb0402399d23e80d4affb68d",
+      "sourceId": "erp-deploy-auditor",
+      "sourceVersion": 3
+    },
+    {
       "path": ".agents/agents/erp-explorer.md",
       "sha256": "02cfe995cb9c6452204edf70b2d08d0dccee804ad81d436b5256942b0b63066a",
       "sourceId": "erp-explorer",
@@ -26,15 +32,15 @@
     },
     {
       "path": ".agents/agents/erp-sql-expert.md",
-      "sha256": "190641b3b781a69b02a3ab3fe12d4b74a171302a7186b427a1702e91f8352d59",
+      "sha256": "89f8b476c1738b0c6badfa6faa64993151174f3319b8116204564cae05ec7b3f",
       "sourceId": "erp-sql-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/agents/erp-xml-expert.md",
-      "sha256": "c2360607a79aacda3145097832e8c239600ed89d9fbffea799d56d76121d0e13",
+      "sha256": "647aaf34817ccdb77574e302287ec7634ec20d1c60f066246ac849620d0feac2",
       "sourceId": "erp-xml-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/agents/pm-analyst.md",
@@ -62,14 +68,26 @@
     },
     {
       "path": ".agents/rules/erp-agent-routing.md",
-      "sha256": "33225a2a9cef4ad2ed3e646d179c732b5cff2ccf4bfcf990a5c6068ec01a89ba",
+      "sha256": "ecc530197f64ae4013616462048fcd4d2198a8d7fbb3f013319126c693e09b50",
       "sourceId": "erp-agent-routing",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/rules/erp-doctrine.md",
       "sha256": "33ed0c32815db94e82d5c4b8f2a9b9499bee0601aac6c7ea5e4dab41313f24ca",
       "sourceId": "erp-doctrine",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/rules/erp-edit-tooling.md",
+      "sha256": "6735a9348a0e414abaa45332d53d431d8c80375d9dbe3a8b1ca61e05e8d3e764",
+      "sourceId": "erp-edit-tooling",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/rules/erp-js-naming.md",
+      "sha256": "fd1dec1ca7b1c419d78dea6683fb42e8abd97ca307db3cd5867f1fc925fe3330",
+      "sourceId": "erp-js-naming",
       "sourceVersion": 1
     },
     {
@@ -91,10 +109,22 @@
       "sourceVersion": 2
     },
     {
+      "path": ".agents/rules/erp-sql-schema-check.md",
+      "sha256": "2e5b895b20509e635a65891bc98592d7577d415d371ec50182c76bfd26d13861",
+      "sourceId": "erp-sql-schema-check",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/rules/erp-sql-script-location.md",
+      "sha256": "8edfa2bf96072fc3ec85fd3bf77c1d930189ee6b3b853409d6535f1639c66596",
+      "sourceId": "erp-sql-script-location",
+      "sourceVersion": 1
+    },
+    {
       "path": ".agents/rules/erp-sql-style.md",
-      "sha256": "a4b7403f83e7903d380b9b82b205fd5406e361460e84adbf151aa2df31ffb78f",
+      "sha256": "392edc03d12efaafa5956e126739783b90cbb02405e6b52f02e55286af365d1e",
       "sourceId": "erp-sql-style",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".agents/rules/erp-xml-encoding.md",
@@ -158,27 +188,27 @@
     },
     {
       "path": ".agents/skills/erp-category-create/SKILL.md",
-      "sha256": "173c74fbedf722cccf6c3fa8128ab80fb35a4c9488396ab5d1b6eec72211df25",
+      "sha256": "84e57ce2d56d5beeb9fe52c0d0bb1a6979f994186e74479511d161ad9140deaa",
       "sourceId": "erp-category-create",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-category-create/references/check-trung.md",
-      "sha256": "a289343388a7019826ce5e55064caba1df494a2353ede74afb70dce8e4f72179",
+      "sha256": "5704d07614831ddf3446546c79104f249b87117d2e51bc15b2ff29895c74b94c",
       "sourceId": "erp-category-create#check-trung",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-category-create/references/database.md",
-      "sha256": "de7e8688b67ee81cd76f480cbb35a26652d5074b089e7d1623502593aa25eb92",
+      "sha256": "0bf0cf722e6e41dbf6b480c5c77afb42c5dd63247beb38dd2141c10ed65d5eb7",
       "sourceId": "erp-category-create#database",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-category-create/references/xml-structure.md",
-      "sha256": "7f91750deeb374cd24c0b7790a7e4fa7e9aad6cb279cdfa6ade79e5b7fd0f700",
+      "sha256": "fcc881d76e3c17791d42200b5e864e587d2832b21d809e2a4eba1aaba7cc109f",
       "sourceId": "erp-category-create#xml-structure",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-controller-reference/SKILL.md",
@@ -194,39 +224,39 @@
     },
     {
       "path": ".agents/skills/erp-einvoice-customize/SKILL.md",
-      "sha256": "a393fd55d958f9ca6473e7d75d62978c1fbd4a1602d92ff5d3d8fccb3e3e00ff",
+      "sha256": "e2d716b20fc3bbd6d079fd472325fc44fdcd84c69ec9ef9e911250a98bd1f96d",
       "sourceId": "erp-einvoice-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-einvoice-customize/references/examples-ur.md",
-      "sha256": "24c071894e446bf139d9046d84cf820d1e16bc0b01573ddcc4c4ca2398b9e371",
+      "sha256": "10c7745b91a7060ed8123d7d3bce175ae5cdd7277bddb34c9342cfdaccec21c8",
       "sourceId": "erp-einvoice-customize#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-einvoice-customize/references/reference-customize.md",
-      "sha256": "85a27e128e171f84e6b3dbca4f41ffd9db4d46c5bba0298e749755a5147501d9",
+      "sha256": "74cf528e7b8030142c2955c1efed55601a1526b7bcfc4b78ea1b4bd8349f7188",
       "sourceId": "erp-einvoice-customize#reference-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-einvoice-nd70-implement/SKILL.md",
-      "sha256": "e3f227d0e611e8f2d41dd1601e9ce3846abe34c5d6ba1ec721217f0b1140fe1a",
+      "sha256": "52232a347f518e8aad13c567ba8edbf64df18e93b85cea3b3f8135311f8167fb",
       "sourceId": "erp-einvoice-nd70-implement",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-einvoice-nd70-implement/references/examples-ur.md",
-      "sha256": "d71c73873b39f5101415d0336f35e762faee3e3b670b92c7e072efaf28a24e1f",
+      "sha256": "7ab5f3a9a67a37e017b9b972159006ae994c876e20ff641f0174d90ecca924bf",
       "sourceId": "erp-einvoice-nd70-implement#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-einvoice-nd70-implement/references/reference-payload.md",
-      "sha256": "9ef4fb66560c23256196144a1c478f82985861670b9c70864dfe916517ef302f",
+      "sha256": "87dc3c14a4c44a5f4873e8766c747acd3e1d52ed921fbf5b3aee467c8654b124",
       "sourceId": "erp-einvoice-nd70-implement#reference-payload",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-glossary-reference/SKILL.md",
@@ -260,99 +290,99 @@
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/SKILL.md",
-      "sha256": "2b089ada6e68384f226588218fa917d2fc86525ea3804a13191b68135d06ba60",
+      "sha256": "9e7f872ad6e13c247f7a837350702862c830350d501a19207a98eb3aadae589f",
       "sourceId": "erp-hddv-migrate",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/reference.md",
-      "sha256": "8c99df9d2da6892720bf0e71f53bd5942fc2fcf2e49e917446f7e158c0b69caa",
+      "sha256": "09d6b48f894b8a64e793484733d94a69679434b8dacdddbdc48cf80efb4ee970",
       "sourceId": "erp-hddv-migrate#reference",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-APTran.md",
-      "sha256": "003eb9cb92c811da6933a6b2d65628177455ef67b9fb36ede9e63ed479b80be9",
+      "sha256": "878e9752e44c6a53d8ddae00028fd85b21b5a2f8d3411f6020f2997f52b72085",
       "sourceId": "erp-hddv-migrate#tran-recipes-APTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-ASTran.md",
-      "sha256": "37c4877402c0c4f7c67d7a55fe034f03cad786600a81b0b4df1d2225209f4e05",
+      "sha256": "5e429105e4548055a46be194b9b371cdbcb085bba644a823cfb044bf7afa8416",
       "sourceId": "erp-hddv-migrate#tran-recipes-ASTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-GLTran.md",
-      "sha256": "22d59c836efb82f7c4e269b93a6313c51c01a2358234b88e740ec0c2af6845bc",
+      "sha256": "cad321ae60096acd0b6f0f996952791c8cfeaed61b755a04fd94c46a2b163663",
       "sourceId": "erp-hddv-migrate#tran-recipes-GLTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-JPTran.md",
-      "sha256": "ff714742a6a123cb57ef9dac6b3b765d79e604ffc33d0dc44a2f068cdd3d885d",
+      "sha256": "17bf0fa49371db7dfc7a1a5517c057ba64a485eebc897bd3ae1cd85f25e81917",
       "sourceId": "erp-hddv-migrate#tran-recipes-JPTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PATran.md",
-      "sha256": "0cd6f57fa586680328f94be9184deb6d77321ad8a21f6e26aa5e53ae754a0998",
+      "sha256": "f3516071e83d5670df21b4c7fa30a67da0c69c668a30b50ff3a2e922dd7b6f1e",
       "sourceId": "erp-hddv-migrate#tran-recipes-PATran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PFTran.md",
-      "sha256": "5f42eb9098dc25c62b186b5eab9e7ee04aa609fc425337d00f97554ef9ecc965",
+      "sha256": "61bfa50eceb7f424e0dc9aa1324f1feabde655142e6ce68d3db50e14b0a4b056",
       "sourceId": "erp-hddv-migrate#tran-recipes-PFTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PGTran.md",
-      "sha256": "439f5483513f74d01af2b272ecb1c4be68ef58f3fedde5cfcc87d1b9c123ca8e",
+      "sha256": "b4351c68ad3594defea8d21564bc580515522837a35e03396943b6d0a4350776",
       "sourceId": "erp-hddv-migrate#tran-recipes-PGTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PSTran.md",
-      "sha256": "349f68ac3707fa304e17ece3f90d25fa431e543b9f8031908cb692bde3cc04f6",
+      "sha256": "1f207cefa0fcff66baca0d791e157bbb691eadfa1e43673aa7fc08a6aaee6fcb",
       "sourceId": "erp-hddv-migrate#tran-recipes-PSTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PVTran.md",
-      "sha256": "522b689d2ed6f0fe86a395a3efd39a2ada944ac815834b83f90c439b6a7b68a0",
+      "sha256": "65954ba024b006244921528bc7f46f05bab91258ba8e8e51b38fc6095d4af116",
       "sourceId": "erp-hddv-migrate#tran-recipes-PVTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-PXTran.md",
-      "sha256": "30ac9a354c66c42978bdda3113dbcfab38e4909bd8612e59657a710262e9de0a",
+      "sha256": "1d59234dab455035e54c2eab5fc4c6205d0c33394e865e39f3c9c91d5c0a1d77",
       "sourceId": "erp-hddv-migrate#tran-recipes-PXTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-hddv-migrate/references/tran-recipes-list-vs-script.md",
-      "sha256": "c0d1877e0185ef08c9d26a029e2446c2dbf8f91d0598ed9a31fc263aa87bb2cc",
+      "sha256": "f0430eb467434e6af0d327f01a1605018c36e5615dd5b74fa49c287d19ef043f",
       "sourceId": "erp-hddv-migrate#tran-recipes-list-vs-script",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-history-search/SKILL.md",
-      "sha256": "11ee730c631b8223839660246b7297e245d32db96f142612fe332d2541831b55",
+      "sha256": "ac0829335de270f8c7c14354573dd3886a2492e8bb8ba13b9057c50cb12884a6",
       "sourceId": "erp-history-search",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-history-search/references/reference-search-qlyc.md",
-      "sha256": "224dbfb8aaed716bc544cca200ede76289dc9632c0243ccee174ef30d2165914",
+      "sha256": "c4282ea1313da71a6fae59829628f82d5e484ffa30467cf51e7d33047d1ccdf2",
       "sourceId": "erp-history-search#reference-search-qlyc",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-history-search/references/reference-trace-files.md",
-      "sha256": "d30c87ba59cc175be6aefa99b21e9e2b829c5410439b69a5de2fa5c1e86862ca",
+      "sha256": "45301b5ec1ffe2e77def27092eb559c1e626e51996aa0f6100c0bd21a1cf9078",
       "sourceId": "erp-history-search#reference-trace-files",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-api-reference/SKILL.md",
@@ -368,81 +398,87 @@
     },
     {
       "path": ".agents/skills/erp-js-implement/SKILL.md",
-      "sha256": "f251a902c9c40c38909108fb037aa37e80e2e575115cca102b5ce5d871cba064",
+      "sha256": "8aacc33f7183f5f82142b0dc7176bc887bda2e29e19880b01b95076b55c823df",
       "sourceId": "erp-js-implement",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/examples-flow-multi-fa.md",
-      "sha256": "dee0930a2b61aae9043c740833327c5c35fd9231e6d78b13889b2688daeb99c2",
+      "sha256": "c4d18874b5ebe4f5a7267bf565cead9546c3ba05d1cec2a1f50769b96c402f66",
       "sourceId": "erp-js-implement#examples-flow-multi-fa",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/examples-load-vv.md",
-      "sha256": "ea4f16b0f4aacc75a8a710335403ca9cb6f1a675373f227d1d27164df20343a2",
+      "sha256": "2b93defde8c90dc38733343ddcdfb5caf8d6ee74a4eb41aa91806bd085d5f6c2",
       "sourceId": "erp-js-implement#examples-load-vv",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-flow-multi.md",
-      "sha256": "95c5716dbe8e481ff69fff8c990bbc4660dd69934cc9ac9dd4a271b2ec523811",
+      "sha256": "29741ab4a0b09dbf719d9c87e6b61403121e36c472ea0ebf15407806a455865c",
       "sourceId": "erp-js-implement#js-flow-multi",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-grid-clear.md",
-      "sha256": "f42a5397a416fdbb7aac2cfab6ced581d42863c37cfd4c43b909f324aa757715",
+      "sha256": "2120db8cdd634bda810adbf09124a2ebb8c1e8e825ee69e545345b36e50224b2",
       "sourceId": "erp-js-implement#js-grid-clear",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-grid-fill.md",
-      "sha256": "3eb5a57432e498ddec1722ef5d37b3fc2caef4aafa47b0bc27ad5da347391fa4",
+      "sha256": "14cfd3ef6358d9eb373d9c40898b78c5e4a9f72209dc76ae7fdf4e945bfb1bda",
       "sourceId": "erp-js-implement#js-grid-fill",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-grid-row-disabled.md",
-      "sha256": "4f819e454e9a42bd23a577e0276df4f2848ede7192026a1c277e93408f5218e3",
+      "sha256": "7e633a7bc350265c824fb7c90c343d8c87294d9a25182f8e1719f04dcba5ec8f",
       "sourceId": "erp-js-implement#js-grid-row-disabled",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-request-deferred.md",
-      "sha256": "da232d839269d9fda51a5ba18bd5c73cfb63aa18369e4d316d939e267b814816",
+      "sha256": "37ed4e635ee052a59066e5b3f7c1380d56393edc410b96b1433913c5e5b6c9df",
       "sourceId": "erp-js-implement#js-request-deferred",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/js-request.md",
-      "sha256": "aa83d8c3170d7a6c6fb7f0f4891db972f0e06fa1dffb6ebac782b685fd7e5ffe",
+      "sha256": "165ee95b90399c5aab0b3ece24ec8b9636bb74a91dca2f6de18c411c9d6012c4",
       "sourceId": "erp-js-implement#js-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/naming.md",
-      "sha256": "95fb521c549f4cf2a6632da0ada88ba16c643c5324d13f514a3e8ce7fac37738",
+      "sha256": "acdb510127113487124573165da01c50b276e61cd371cd45ed7751c3939315e2",
       "sourceId": "erp-js-implement#naming",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/warnings.md",
-      "sha256": "f485c887090b98dd8f457ee952492bf81d0dfe98bee2465bcf2007b04c578725",
+      "sha256": "e4f83be75213c7f4c54cd3dbdd0ee7340663f4d6e288f235f7ed145d45d76b16",
       "sourceId": "erp-js-implement#warnings",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-js-implement/references/xml-request.md",
-      "sha256": "1b0b212af76db64984e11c2943a40ccddcf8db6e529aacc202dd728011ae8b5f",
+      "sha256": "f8ee6b1b63bca369bfbc3c8e0d9dd0cdcf7fd94feb75d555cd6c5e0b6ff84e5a",
       "sourceId": "erp-js-implement#xml-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-navigation-lookup/SKILL.md",
-      "sha256": "30e2eafc315aa6233e03c379b6f5591e27c179c85530e64a71213647f4c81d8d",
+      "sha256": "9e1c9b9cf9733edde6720d0248cc4558e4875fbd84f4de64e3031b5253d1578b",
       "sourceId": "erp-navigation-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".agents/skills/erp-navigation-lookup/references/query-intent-map.md",
+      "sha256": "26173b03a56c46102896f7de4ff862288acf5cbf80bc9e3bd51093c95f0d9194",
+      "sourceId": "erp-navigation-lookup#query-intent-map",
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-nd252-implement/SKILL.md",
@@ -508,6 +544,36 @@
       "path": ".agents/skills/erp-report-pivot-create/references/reference-pivot.md",
       "sha256": "0b170d0de25cf7d7729f728eb804bfeb5bac316dd27a0820fe1231365176a439",
       "sourceId": "erp-report-pivot-create#reference-pivot",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/erp-retrieve-implement/SKILL.md",
+      "sha256": "d2c3dc66eae1985aa32dbc83ff223616ac8629c5817109334ec72b9d8d13cc68",
+      "sourceId": "erp-retrieve-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/erp-retrieve-implement/references/filter-multi.md",
+      "sha256": "3d96d4cb00c7fd3eba54e15b24d0baf5e56f650516ad3bc10c1219f48365d973",
+      "sourceId": "erp-retrieve-implement#filter-multi",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/erp-retrieve-implement/references/filter-single.md",
+      "sha256": "13aba82ffda9433ec133b1754a7ef8a0d37f57161044f3df10157941356b4bd9",
+      "sourceId": "erp-retrieve-implement#filter-single",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/erp-retrieve-implement/references/script-dispatch.md",
+      "sha256": "ff93b689c7693ed6204201b6afa5e5f8ab102408e8ac331dfea831cf72b89817",
+      "sourceId": "erp-retrieve-implement#script-dispatch",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".agents/skills/erp-retrieve-implement/references/toolbar-menu.md",
+      "sha256": "4b9e201cbca7bff542bbdd21fd7e257e9ee85a3e56722f39b5f3034824eb0902",
+      "sourceId": "erp-retrieve-implement#toolbar-menu",
       "sourceVersion": 1
     },
     {
@@ -578,39 +644,45 @@
     },
     {
       "path": ".agents/skills/erp-view-design/SKILL.md",
-      "sha256": "36b1357253d7ae27f13f153b8378c7c7490522701b9d49bf799a2938a646138c",
+      "sha256": "2422633ec177df031f14cad6d457fa9314d632834e388253f346ff1fb277b8fb",
       "sourceId": "erp-view-design",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-view-design/references/reference-item-value.md",
-      "sha256": "271ee5ba4df6c2df6889e0dbc6398e8a50f08a005347d410f09de2c2ecaae182",
+      "sha256": "fe54913cf5fb80382f56938e07cc2f838acad7f56d0937ff8a617761cf3e31fb",
       "sourceId": "erp-view-design#reference-item-value",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".agents/skills/erp-view-design/references/reference-render-pipeline.md",
+      "sha256": "debc3c5bd2960024381a45f0751e0b765b7d2d19aa61766d62d17b0d8d70f267",
+      "sourceId": "erp-view-design#reference-render-pipeline",
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-view-design/references/reference-view-attrs.md",
-      "sha256": "a2b1b757085477d9cfee0d06da04d20a0bb910ddd796ec6b304f070f96337c04",
+      "sha256": "d6c510581895e193c2122e71c2b04468f8ad1b7b639a85eda4ead114ecc59e04",
       "sourceId": "erp-view-design#reference-view-attrs",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".agents/skills/erp-voucher-data-lookup/SKILL.md",
-      "sha256": "b064fd1a210355ae2e6ebb6dc59f88d797b0acf5d3607464d9ee361fa6996e5a",
+      "sha256": "8fc3765f91384686d1800d50060d9dae0b1adfddabf66ca15dead615fba2698b",
       "sourceId": "erp-voucher-data-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-voucher-data-lookup/references/reference-example-pqadms.md",
-      "sha256": "1f426643863eeaaed2883ef6d5ed8ab6a775b7452689ebe1fe51ada6fb0df8b7",
+      "sha256": "2bf1ba4166d57fa89a90c90d5825e7bf82d1ecb5334d0b795842f0bc2ccbbeb6",
       "sourceId": "erp-voucher-data-lookup#reference-example-pqadms",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-voucher-data-lookup/references/reference-mcp.md",
-      "sha256": "e8551e407b638526801aff518eab21f6c703ce08e9fa8b909b127ffea9fe9b43",
+      "sha256": "788d3b1b57be5231abf4808c3e49a51983c60f4aeac40cb3260f4a50980e61ef",
       "sourceId": "erp-voucher-data-lookup#reference-mcp",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/pm-adr-author/SKILL.md",
@@ -620,9 +692,9 @@
     },
     {
       "path": ".agents/skills/pm-deadline-review/SKILL.md",
-      "sha256": "a4600009fd5c1eb886acbed525b1478238607c1541a528a2d3d761b9762975c6",
+      "sha256": "5e4a3b5126d903db74cf46a5d67b4e3a3d9a5ab752ae7f0c9876383c38fe4394",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".agents/skills/pm-graph-maintain/SKILL.md",
@@ -680,9 +752,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "30258e34ff509ef75475ba2e40cc5d33a10000fdbf56c59fc02212180c575b89",
+      "sha256": "ff8865ba85dd2b9fa1a6eb9d552ad5ca7dbbfae278292b838395a6cd82dd482f",
       "sourceId": "pm-review",
-      "sourceVersion": 11
+      "sourceVersion": 12
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -692,13 +764,19 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "cad4d60cdd3d114b90336140dab9606e6dda722576d82c933890d69e13c3876c"
+      "sha256": "e4f6651d8ba955b464f9c959942342deb73fe7d14e508733047790c8f958e84f"
     },
     {
       "path": ".claude/agents/erp-builder.md",
       "sha256": "4fa0a7bb313ff9e5c117739d8af28be7bd8d2b46c394bf02472f519e3169840f",
       "sourceId": "erp-builder",
       "sourceVersion": 2
+    },
+    {
+      "path": ".claude/agents/erp-deploy-auditor.md",
+      "sha256": "e3b2b260ee772c6cb72084541a8b05959fc0bfd56a3b5e0672dbf022be2a740a",
+      "sourceId": "erp-deploy-auditor",
+      "sourceVersion": 3
     },
     {
       "path": ".claude/agents/erp-explorer.md",
@@ -720,15 +798,15 @@
     },
     {
       "path": ".claude/agents/erp-sql-expert.md",
-      "sha256": "f4155e62f2a108a38ee48d8ec8db70dde956a5ac1482dbbc8a0420b4cc1eb9e8",
+      "sha256": "10910b94bf36bca18c4f41e4b6aadf6532995e81b31d043d707acbb36eaf90f3",
       "sourceId": "erp-sql-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/agents/erp-xml-expert.md",
-      "sha256": "eb888410bd90736407915d5e1f1d91e35bf3d2245aa7f92e39059e40273c1e6e",
+      "sha256": "bb5dbb5b79b3d8808672200de8c1961a25c9b269b822cae5e9cdda81c5ef232e",
       "sourceId": "erp-xml-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/agents/pm-analyst.md",
@@ -810,9 +888,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "5666cb6deb025de163b4e2eb6f0b01cf7cbd52875892aae1c0024ca8849ab83d",
+      "sha256": "9d44546a64e7a3b558ec4f49ccfbb22b9829a1af5ed8b19abac451ff4502171f",
       "sourceId": "pm-review",
-      "sourceVersion": 11
+      "sourceVersion": 12
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -828,27 +906,27 @@
     },
     {
       "path": ".claude/skills/erp-category-create/SKILL.md",
-      "sha256": "173c74fbedf722cccf6c3fa8128ab80fb35a4c9488396ab5d1b6eec72211df25",
+      "sha256": "84e57ce2d56d5beeb9fe52c0d0bb1a6979f994186e74479511d161ad9140deaa",
       "sourceId": "erp-category-create",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-category-create/references/check-trung.md",
-      "sha256": "a289343388a7019826ce5e55064caba1df494a2353ede74afb70dce8e4f72179",
+      "sha256": "5704d07614831ddf3446546c79104f249b87117d2e51bc15b2ff29895c74b94c",
       "sourceId": "erp-category-create#check-trung",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-category-create/references/database.md",
-      "sha256": "de7e8688b67ee81cd76f480cbb35a26652d5074b089e7d1623502593aa25eb92",
+      "sha256": "0bf0cf722e6e41dbf6b480c5c77afb42c5dd63247beb38dd2141c10ed65d5eb7",
       "sourceId": "erp-category-create#database",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-category-create/references/xml-structure.md",
-      "sha256": "7f91750deeb374cd24c0b7790a7e4fa7e9aad6cb279cdfa6ade79e5b7fd0f700",
+      "sha256": "fcc881d76e3c17791d42200b5e864e587d2832b21d809e2a4eba1aaba7cc109f",
       "sourceId": "erp-category-create#xml-structure",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-controller-reference/SKILL.md",
@@ -863,40 +941,46 @@
       "sourceVersion": 1
     },
     {
-      "path": ".claude/skills/erp-einvoice-customize/SKILL.md",
-      "sha256": "a393fd55d958f9ca6473e7d75d62978c1fbd4a1602d92ff5d3d8fccb3e3e00ff",
-      "sourceId": "erp-einvoice-customize",
+      "path": ".claude/skills/erp-edit-tooling/SKILL.md",
+      "sha256": "6efa0531da3880b101aca50d8897feab8610b547630dd2bf488180010f1637ac",
+      "sourceId": "erp-edit-tooling",
       "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/erp-einvoice-customize/SKILL.md",
+      "sha256": "e2d716b20fc3bbd6d079fd472325fc44fdcd84c69ec9ef9e911250a98bd1f96d",
+      "sourceId": "erp-einvoice-customize",
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-einvoice-customize/references/examples-ur.md",
-      "sha256": "24c071894e446bf139d9046d84cf820d1e16bc0b01573ddcc4c4ca2398b9e371",
+      "sha256": "10c7745b91a7060ed8123d7d3bce175ae5cdd7277bddb34c9342cfdaccec21c8",
       "sourceId": "erp-einvoice-customize#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-einvoice-customize/references/reference-customize.md",
-      "sha256": "85a27e128e171f84e6b3dbca4f41ffd9db4d46c5bba0298e749755a5147501d9",
+      "sha256": "74cf528e7b8030142c2955c1efed55601a1526b7bcfc4b78ea1b4bd8349f7188",
       "sourceId": "erp-einvoice-customize#reference-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-einvoice-nd70-implement/SKILL.md",
-      "sha256": "e3f227d0e611e8f2d41dd1601e9ce3846abe34c5d6ba1ec721217f0b1140fe1a",
+      "sha256": "52232a347f518e8aad13c567ba8edbf64df18e93b85cea3b3f8135311f8167fb",
       "sourceId": "erp-einvoice-nd70-implement",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-einvoice-nd70-implement/references/examples-ur.md",
-      "sha256": "d71c73873b39f5101415d0336f35e762faee3e3b670b92c7e072efaf28a24e1f",
+      "sha256": "7ab5f3a9a67a37e017b9b972159006ae994c876e20ff641f0174d90ecca924bf",
       "sourceId": "erp-einvoice-nd70-implement#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-einvoice-nd70-implement/references/reference-payload.md",
-      "sha256": "9ef4fb66560c23256196144a1c478f82985861670b9c70864dfe916517ef302f",
+      "sha256": "87dc3c14a4c44a5f4873e8766c747acd3e1d52ed921fbf5b3aee467c8654b124",
       "sourceId": "erp-einvoice-nd70-implement#reference-payload",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-glossary-reference/SKILL.md",
@@ -930,99 +1014,99 @@
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/SKILL.md",
-      "sha256": "2b089ada6e68384f226588218fa917d2fc86525ea3804a13191b68135d06ba60",
+      "sha256": "9e7f872ad6e13c247f7a837350702862c830350d501a19207a98eb3aadae589f",
       "sourceId": "erp-hddv-migrate",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/reference.md",
-      "sha256": "8c99df9d2da6892720bf0e71f53bd5942fc2fcf2e49e917446f7e158c0b69caa",
+      "sha256": "09d6b48f894b8a64e793484733d94a69679434b8dacdddbdc48cf80efb4ee970",
       "sourceId": "erp-hddv-migrate#reference",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-APTran.md",
-      "sha256": "003eb9cb92c811da6933a6b2d65628177455ef67b9fb36ede9e63ed479b80be9",
+      "sha256": "878e9752e44c6a53d8ddae00028fd85b21b5a2f8d3411f6020f2997f52b72085",
       "sourceId": "erp-hddv-migrate#tran-recipes-APTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-ASTran.md",
-      "sha256": "37c4877402c0c4f7c67d7a55fe034f03cad786600a81b0b4df1d2225209f4e05",
+      "sha256": "5e429105e4548055a46be194b9b371cdbcb085bba644a823cfb044bf7afa8416",
       "sourceId": "erp-hddv-migrate#tran-recipes-ASTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-GLTran.md",
-      "sha256": "22d59c836efb82f7c4e269b93a6313c51c01a2358234b88e740ec0c2af6845bc",
+      "sha256": "cad321ae60096acd0b6f0f996952791c8cfeaed61b755a04fd94c46a2b163663",
       "sourceId": "erp-hddv-migrate#tran-recipes-GLTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-JPTran.md",
-      "sha256": "ff714742a6a123cb57ef9dac6b3b765d79e604ffc33d0dc44a2f068cdd3d885d",
+      "sha256": "17bf0fa49371db7dfc7a1a5517c057ba64a485eebc897bd3ae1cd85f25e81917",
       "sourceId": "erp-hddv-migrate#tran-recipes-JPTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PATran.md",
-      "sha256": "0cd6f57fa586680328f94be9184deb6d77321ad8a21f6e26aa5e53ae754a0998",
+      "sha256": "f3516071e83d5670df21b4c7fa30a67da0c69c668a30b50ff3a2e922dd7b6f1e",
       "sourceId": "erp-hddv-migrate#tran-recipes-PATran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PFTran.md",
-      "sha256": "5f42eb9098dc25c62b186b5eab9e7ee04aa609fc425337d00f97554ef9ecc965",
+      "sha256": "61bfa50eceb7f424e0dc9aa1324f1feabde655142e6ce68d3db50e14b0a4b056",
       "sourceId": "erp-hddv-migrate#tran-recipes-PFTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PGTran.md",
-      "sha256": "439f5483513f74d01af2b272ecb1c4be68ef58f3fedde5cfcc87d1b9c123ca8e",
+      "sha256": "b4351c68ad3594defea8d21564bc580515522837a35e03396943b6d0a4350776",
       "sourceId": "erp-hddv-migrate#tran-recipes-PGTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PSTran.md",
-      "sha256": "349f68ac3707fa304e17ece3f90d25fa431e543b9f8031908cb692bde3cc04f6",
+      "sha256": "1f207cefa0fcff66baca0d791e157bbb691eadfa1e43673aa7fc08a6aaee6fcb",
       "sourceId": "erp-hddv-migrate#tran-recipes-PSTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PVTran.md",
-      "sha256": "522b689d2ed6f0fe86a395a3efd39a2ada944ac815834b83f90c439b6a7b68a0",
+      "sha256": "65954ba024b006244921528bc7f46f05bab91258ba8e8e51b38fc6095d4af116",
       "sourceId": "erp-hddv-migrate#tran-recipes-PVTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-PXTran.md",
-      "sha256": "30ac9a354c66c42978bdda3113dbcfab38e4909bd8612e59657a710262e9de0a",
+      "sha256": "1d59234dab455035e54c2eab5fc4c6205d0c33394e865e39f3c9c91d5c0a1d77",
       "sourceId": "erp-hddv-migrate#tran-recipes-PXTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-hddv-migrate/references/tran-recipes-list-vs-script.md",
-      "sha256": "c0d1877e0185ef08c9d26a029e2446c2dbf8f91d0598ed9a31fc263aa87bb2cc",
+      "sha256": "f0430eb467434e6af0d327f01a1605018c36e5615dd5b74fa49c287d19ef043f",
       "sourceId": "erp-hddv-migrate#tran-recipes-list-vs-script",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-history-search/SKILL.md",
-      "sha256": "11ee730c631b8223839660246b7297e245d32db96f142612fe332d2541831b55",
+      "sha256": "ac0829335de270f8c7c14354573dd3886a2492e8bb8ba13b9057c50cb12884a6",
       "sourceId": "erp-history-search",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-history-search/references/reference-search-qlyc.md",
-      "sha256": "224dbfb8aaed716bc544cca200ede76289dc9632c0243ccee174ef30d2165914",
+      "sha256": "c4282ea1313da71a6fae59829628f82d5e484ffa30467cf51e7d33047d1ccdf2",
       "sourceId": "erp-history-search#reference-search-qlyc",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-history-search/references/reference-trace-files.md",
-      "sha256": "d30c87ba59cc175be6aefa99b21e9e2b829c5410439b69a5de2fa5c1e86862ca",
+      "sha256": "45301b5ec1ffe2e77def27092eb559c1e626e51996aa0f6100c0bd21a1cf9078",
       "sourceId": "erp-history-search#reference-trace-files",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-api-reference/SKILL.md",
@@ -1038,74 +1122,80 @@
     },
     {
       "path": ".claude/skills/erp-js-implement/SKILL.md",
-      "sha256": "f251a902c9c40c38909108fb037aa37e80e2e575115cca102b5ce5d871cba064",
+      "sha256": "8aacc33f7183f5f82142b0dc7176bc887bda2e29e19880b01b95076b55c823df",
       "sourceId": "erp-js-implement",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/examples-flow-multi-fa.md",
-      "sha256": "dee0930a2b61aae9043c740833327c5c35fd9231e6d78b13889b2688daeb99c2",
+      "sha256": "c4d18874b5ebe4f5a7267bf565cead9546c3ba05d1cec2a1f50769b96c402f66",
       "sourceId": "erp-js-implement#examples-flow-multi-fa",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/examples-load-vv.md",
-      "sha256": "ea4f16b0f4aacc75a8a710335403ca9cb6f1a675373f227d1d27164df20343a2",
+      "sha256": "2b93defde8c90dc38733343ddcdfb5caf8d6ee74a4eb41aa91806bd085d5f6c2",
       "sourceId": "erp-js-implement#examples-load-vv",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-flow-multi.md",
-      "sha256": "95c5716dbe8e481ff69fff8c990bbc4660dd69934cc9ac9dd4a271b2ec523811",
+      "sha256": "29741ab4a0b09dbf719d9c87e6b61403121e36c472ea0ebf15407806a455865c",
       "sourceId": "erp-js-implement#js-flow-multi",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-grid-clear.md",
-      "sha256": "f42a5397a416fdbb7aac2cfab6ced581d42863c37cfd4c43b909f324aa757715",
+      "sha256": "2120db8cdd634bda810adbf09124a2ebb8c1e8e825ee69e545345b36e50224b2",
       "sourceId": "erp-js-implement#js-grid-clear",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-grid-fill.md",
-      "sha256": "3eb5a57432e498ddec1722ef5d37b3fc2caef4aafa47b0bc27ad5da347391fa4",
+      "sha256": "14cfd3ef6358d9eb373d9c40898b78c5e4a9f72209dc76ae7fdf4e945bfb1bda",
       "sourceId": "erp-js-implement#js-grid-fill",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-grid-row-disabled.md",
-      "sha256": "4f819e454e9a42bd23a577e0276df4f2848ede7192026a1c277e93408f5218e3",
+      "sha256": "7e633a7bc350265c824fb7c90c343d8c87294d9a25182f8e1719f04dcba5ec8f",
       "sourceId": "erp-js-implement#js-grid-row-disabled",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-request-deferred.md",
-      "sha256": "da232d839269d9fda51a5ba18bd5c73cfb63aa18369e4d316d939e267b814816",
+      "sha256": "37ed4e635ee052a59066e5b3f7c1380d56393edc410b96b1433913c5e5b6c9df",
       "sourceId": "erp-js-implement#js-request-deferred",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/js-request.md",
-      "sha256": "aa83d8c3170d7a6c6fb7f0f4891db972f0e06fa1dffb6ebac782b685fd7e5ffe",
+      "sha256": "165ee95b90399c5aab0b3ece24ec8b9636bb74a91dca2f6de18c411c9d6012c4",
       "sourceId": "erp-js-implement#js-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/naming.md",
-      "sha256": "95fb521c549f4cf2a6632da0ada88ba16c643c5324d13f514a3e8ce7fac37738",
+      "sha256": "acdb510127113487124573165da01c50b276e61cd371cd45ed7751c3939315e2",
       "sourceId": "erp-js-implement#naming",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/warnings.md",
-      "sha256": "f485c887090b98dd8f457ee952492bf81d0dfe98bee2465bcf2007b04c578725",
+      "sha256": "e4f83be75213c7f4c54cd3dbdd0ee7340663f4d6e288f235f7ed145d45d76b16",
       "sourceId": "erp-js-implement#warnings",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-js-implement/references/xml-request.md",
-      "sha256": "1b0b212af76db64984e11c2943a40ccddcf8db6e529aacc202dd728011ae8b5f",
+      "sha256": "f8ee6b1b63bca369bfbc3c8e0d9dd0cdcf7fd94feb75d555cd6c5e0b6ff84e5a",
       "sourceId": "erp-js-implement#xml-request",
+      "sourceVersion": 2
+    },
+    {
+      "path": ".claude/skills/erp-js-naming/SKILL.md",
+      "sha256": "2167b1d14f2abc0f95bb5fd087151ce77bf03640abdb9627db8e566fc5a61c8f",
+      "sourceId": "erp-js-naming",
       "sourceVersion": 1
     },
     {
@@ -1116,9 +1206,15 @@
     },
     {
       "path": ".claude/skills/erp-navigation-lookup/SKILL.md",
-      "sha256": "30e2eafc315aa6233e03c379b6f5591e27c179c85530e64a71213647f4c81d8d",
+      "sha256": "9e1c9b9cf9733edde6720d0248cc4558e4875fbd84f4de64e3031b5253d1578b",
       "sourceId": "erp-navigation-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".claude/skills/erp-navigation-lookup/references/query-intent-map.md",
+      "sha256": "26173b03a56c46102896f7de4ff862288acf5cbf80bc9e3bd51093c95f0d9194",
+      "sourceId": "erp-navigation-lookup#query-intent-map",
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-nd252-implement/SKILL.md",
@@ -1187,6 +1283,36 @@
       "sourceVersion": 1
     },
     {
+      "path": ".claude/skills/erp-retrieve-implement/SKILL.md",
+      "sha256": "d2c3dc66eae1985aa32dbc83ff223616ac8629c5817109334ec72b9d8d13cc68",
+      "sourceId": "erp-retrieve-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/erp-retrieve-implement/references/filter-multi.md",
+      "sha256": "3d96d4cb00c7fd3eba54e15b24d0baf5e56f650516ad3bc10c1219f48365d973",
+      "sourceId": "erp-retrieve-implement#filter-multi",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/erp-retrieve-implement/references/filter-single.md",
+      "sha256": "13aba82ffda9433ec133b1754a7ef8a0d37f57161044f3df10157941356b4bd9",
+      "sourceId": "erp-retrieve-implement#filter-single",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/erp-retrieve-implement/references/script-dispatch.md",
+      "sha256": "ff93b689c7693ed6204201b6afa5e5f8ab102408e8ac331dfea831cf72b89817",
+      "sourceId": "erp-retrieve-implement#script-dispatch",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".claude/skills/erp-retrieve-implement/references/toolbar-menu.md",
+      "sha256": "4b9e201cbca7bff542bbdd21fd7e257e9ee85a3e56722f39b5f3034824eb0902",
+      "sourceId": "erp-retrieve-implement#toolbar-menu",
+      "sourceVersion": 1
+    },
+    {
       "path": ".claude/skills/erp-rollout-execute/SKILL.md",
       "sha256": "9d0d971387aca1ea3745899de7de5d88a9e6b5c046be7b10ffee11bfe04edfe7",
       "sourceId": "erp-rollout-execute",
@@ -1247,10 +1373,16 @@
       "sourceVersion": 3
     },
     {
+      "path": ".claude/skills/erp-sql-schema-check/SKILL.md",
+      "sha256": "62cfe71ceb69faada5490f7a78b2a0f01300cc25c6f71b8b3b638070f883be76",
+      "sourceId": "erp-sql-schema-check",
+      "sourceVersion": 1
+    },
+    {
       "path": ".claude/skills/erp-sql-style/SKILL.md",
-      "sha256": "9a63f202a2e71373020482b47eed671633500e0e6e3ced62b0dda3b0b52884ad",
+      "sha256": "78d2da53c3075d2b5da2639a5bf24edd1f7c8cc526870c094bbc8bb199f92e62",
       "sourceId": "erp-sql-style",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".claude/skills/erp-table-propose/SKILL.md",
@@ -1260,39 +1392,45 @@
     },
     {
       "path": ".claude/skills/erp-view-design/SKILL.md",
-      "sha256": "36b1357253d7ae27f13f153b8378c7c7490522701b9d49bf799a2938a646138c",
+      "sha256": "2422633ec177df031f14cad6d457fa9314d632834e388253f346ff1fb277b8fb",
       "sourceId": "erp-view-design",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-view-design/references/reference-item-value.md",
-      "sha256": "271ee5ba4df6c2df6889e0dbc6398e8a50f08a005347d410f09de2c2ecaae182",
+      "sha256": "fe54913cf5fb80382f56938e07cc2f838acad7f56d0937ff8a617761cf3e31fb",
       "sourceId": "erp-view-design#reference-item-value",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".claude/skills/erp-view-design/references/reference-render-pipeline.md",
+      "sha256": "debc3c5bd2960024381a45f0751e0b765b7d2d19aa61766d62d17b0d8d70f267",
+      "sourceId": "erp-view-design#reference-render-pipeline",
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-view-design/references/reference-view-attrs.md",
-      "sha256": "a2b1b757085477d9cfee0d06da04d20a0bb910ddd796ec6b304f070f96337c04",
+      "sha256": "d6c510581895e193c2122e71c2b04468f8ad1b7b639a85eda4ead114ecc59e04",
       "sourceId": "erp-view-design#reference-view-attrs",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".claude/skills/erp-voucher-data-lookup/SKILL.md",
-      "sha256": "09a535b6bebb356cb0bf230cdd2519a704702b95b21335bd26302701ded18cf8",
+      "sha256": "2b0b7a4ebb3579e928b5f6259fdf2853876fe172723fb962b4e473ca64875151",
       "sourceId": "erp-voucher-data-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-voucher-data-lookup/references/reference-example-pqadms.md",
-      "sha256": "1f426643863eeaaed2883ef6d5ed8ab6a775b7452689ebe1fe51ada6fb0df8b7",
+      "sha256": "2bf1ba4166d57fa89a90c90d5825e7bf82d1ecb5334d0b795842f0bc2ccbbeb6",
       "sourceId": "erp-voucher-data-lookup#reference-example-pqadms",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-voucher-data-lookup/references/reference-mcp.md",
-      "sha256": "e8551e407b638526801aff518eab21f6c703ce08e9fa8b909b127ffea9fe9b43",
+      "sha256": "788d3b1b57be5231abf4808c3e49a51983c60f4aeac40cb3260f4a50980e61ef",
       "sourceId": "erp-voucher-data-lookup#reference-mcp",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".claude/skills/erp-xml-encoding/SKILL.md",
@@ -1320,9 +1458,9 @@
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "a4600009fd5c1eb886acbed525b1478238607c1541a528a2d3d761b9762975c6",
+      "sha256": "5e4a3b5126d903db74cf46a5d67b4e3a3d9a5ab752ae7f0c9876383c38fe4394",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".claude/skills/pm-graph-maintain/SKILL.md",
@@ -1355,6 +1493,12 @@
       "sourceVersion": 2
     },
     {
+      "path": ".cursor/agents/erp-deploy-auditor.md",
+      "sha256": "4ca0c74981ddad747f9b51d85c1ec78bf13dc570bbda416a5005b3053db5bfb8",
+      "sourceId": "erp-deploy-auditor",
+      "sourceVersion": 3
+    },
+    {
       "path": ".cursor/agents/erp-explorer.md",
       "sha256": "f3e43c5f96b29ec4c9e73752ce10a920d484620cd4fca4794ef147f9bdfe91ce",
       "sourceId": "erp-explorer",
@@ -1374,15 +1518,15 @@
     },
     {
       "path": ".cursor/agents/erp-sql-expert.md",
-      "sha256": "c6d9a53720584efff2c62c6552a3a99a6a14fc2512a16dd95124ce359f0b2730",
+      "sha256": "3820b9df7ae53140ad1f29135b8b16a0a83fe3bfa4d9dce149a1d54773320db9",
       "sourceId": "erp-sql-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/agents/erp-xml-expert.md",
-      "sha256": "15aea16b76778743d1c1822dd4e359b005222ac0eebd10e0fd97f065406c10e3",
+      "sha256": "bca2e8b3401f00d7cfedd8b14fd688fe8ef4a5d6ef96993fbb3bf019f4444efc",
       "sourceId": "erp-xml-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/agents/pm-analyst.md",
@@ -1464,9 +1608,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "719aa89afe530c4017c40d72bab2d0ab73460ca79c77d29ea4108d7425da7974",
+      "sha256": "f1b9c95320d37c6af8fa704a329f783844157e2a826c203da1b4afaa60570dde",
       "sourceId": "pm-review",
-      "sourceVersion": 11
+      "sourceVersion": 12
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -1494,8 +1638,20 @@
     },
     {
       "path": ".cursor/rules/erp-agent-routing.mdc",
-      "sha256": "d611035a7c2070f94f9661bb5faefc0188d9e089e6133dcbef6095f469f5daff",
+      "sha256": "44c575d74169aea9e98f73a7c2ae5151f66976209acd1533f50987e0b0e6c80c",
       "sourceId": "erp-agent-routing",
+      "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/rules/erp-edit-tooling.mdc",
+      "sha256": "f67f0e5c4242fdd147c711ae10dd845921a50a18d1e0039819a6563b9d046c66",
+      "sourceId": "erp-edit-tooling",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/erp-js-naming.mdc",
+      "sha256": "ca17e330eb48097fb6920f3ad85550890c82d498ef41231fed21aeaf23a3a63e",
+      "sourceId": "erp-js-naming",
       "sourceVersion": 1
     },
     {
@@ -1517,10 +1673,22 @@
       "sourceVersion": 2
     },
     {
+      "path": ".cursor/rules/erp-sql-schema-check.mdc",
+      "sha256": "e8bcac3310064c77fd3ad0e3480d491aecab6cdfaaa7d31cf012fb840ec6f407",
+      "sourceId": "erp-sql-schema-check",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/rules/erp-sql-script-location.mdc",
+      "sha256": "c956e6fbf6c03fa1d3b56373daf2c75309a7f1409365685acb988a6f0a1e1004",
+      "sourceId": "erp-sql-script-location",
+      "sourceVersion": 1
+    },
+    {
       "path": ".cursor/rules/erp-sql-style.mdc",
-      "sha256": "41611ae6fcd60b59ed45ef51a6dc3cd37437c23f08907822e35b51273f75a575",
+      "sha256": "e87a3e20a920c119a5fe23bc818bfe225cdb4337699c4201395199aee6bce699",
       "sourceId": "erp-sql-style",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".cursor/rules/erp-xml-encoding.mdc",
@@ -1584,27 +1752,27 @@
     },
     {
       "path": ".cursor/skills/erp-category-create/SKILL.md",
-      "sha256": "173c74fbedf722cccf6c3fa8128ab80fb35a4c9488396ab5d1b6eec72211df25",
+      "sha256": "84e57ce2d56d5beeb9fe52c0d0bb1a6979f994186e74479511d161ad9140deaa",
       "sourceId": "erp-category-create",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-category-create/references/check-trung.md",
-      "sha256": "a289343388a7019826ce5e55064caba1df494a2353ede74afb70dce8e4f72179",
+      "sha256": "5704d07614831ddf3446546c79104f249b87117d2e51bc15b2ff29895c74b94c",
       "sourceId": "erp-category-create#check-trung",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-category-create/references/database.md",
-      "sha256": "de7e8688b67ee81cd76f480cbb35a26652d5074b089e7d1623502593aa25eb92",
+      "sha256": "0bf0cf722e6e41dbf6b480c5c77afb42c5dd63247beb38dd2141c10ed65d5eb7",
       "sourceId": "erp-category-create#database",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-category-create/references/xml-structure.md",
-      "sha256": "7f91750deeb374cd24c0b7790a7e4fa7e9aad6cb279cdfa6ade79e5b7fd0f700",
+      "sha256": "fcc881d76e3c17791d42200b5e864e587d2832b21d809e2a4eba1aaba7cc109f",
       "sourceId": "erp-category-create#xml-structure",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-controller-reference/SKILL.md",
@@ -1620,39 +1788,39 @@
     },
     {
       "path": ".cursor/skills/erp-einvoice-customize/SKILL.md",
-      "sha256": "a393fd55d958f9ca6473e7d75d62978c1fbd4a1602d92ff5d3d8fccb3e3e00ff",
+      "sha256": "e2d716b20fc3bbd6d079fd472325fc44fdcd84c69ec9ef9e911250a98bd1f96d",
       "sourceId": "erp-einvoice-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-einvoice-customize/references/examples-ur.md",
-      "sha256": "24c071894e446bf139d9046d84cf820d1e16bc0b01573ddcc4c4ca2398b9e371",
+      "sha256": "10c7745b91a7060ed8123d7d3bce175ae5cdd7277bddb34c9342cfdaccec21c8",
       "sourceId": "erp-einvoice-customize#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-einvoice-customize/references/reference-customize.md",
-      "sha256": "85a27e128e171f84e6b3dbca4f41ffd9db4d46c5bba0298e749755a5147501d9",
+      "sha256": "74cf528e7b8030142c2955c1efed55601a1526b7bcfc4b78ea1b4bd8349f7188",
       "sourceId": "erp-einvoice-customize#reference-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-einvoice-nd70-implement/SKILL.md",
-      "sha256": "e3f227d0e611e8f2d41dd1601e9ce3846abe34c5d6ba1ec721217f0b1140fe1a",
+      "sha256": "52232a347f518e8aad13c567ba8edbf64df18e93b85cea3b3f8135311f8167fb",
       "sourceId": "erp-einvoice-nd70-implement",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-einvoice-nd70-implement/references/examples-ur.md",
-      "sha256": "d71c73873b39f5101415d0336f35e762faee3e3b670b92c7e072efaf28a24e1f",
+      "sha256": "7ab5f3a9a67a37e017b9b972159006ae994c876e20ff641f0174d90ecca924bf",
       "sourceId": "erp-einvoice-nd70-implement#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-einvoice-nd70-implement/references/reference-payload.md",
-      "sha256": "9ef4fb66560c23256196144a1c478f82985861670b9c70864dfe916517ef302f",
+      "sha256": "87dc3c14a4c44a5f4873e8766c747acd3e1d52ed921fbf5b3aee467c8654b124",
       "sourceId": "erp-einvoice-nd70-implement#reference-payload",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-glossary-reference/SKILL.md",
@@ -1686,99 +1854,99 @@
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/SKILL.md",
-      "sha256": "2b089ada6e68384f226588218fa917d2fc86525ea3804a13191b68135d06ba60",
+      "sha256": "9e7f872ad6e13c247f7a837350702862c830350d501a19207a98eb3aadae589f",
       "sourceId": "erp-hddv-migrate",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/reference.md",
-      "sha256": "8c99df9d2da6892720bf0e71f53bd5942fc2fcf2e49e917446f7e158c0b69caa",
+      "sha256": "09d6b48f894b8a64e793484733d94a69679434b8dacdddbdc48cf80efb4ee970",
       "sourceId": "erp-hddv-migrate#reference",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-APTran.md",
-      "sha256": "003eb9cb92c811da6933a6b2d65628177455ef67b9fb36ede9e63ed479b80be9",
+      "sha256": "878e9752e44c6a53d8ddae00028fd85b21b5a2f8d3411f6020f2997f52b72085",
       "sourceId": "erp-hddv-migrate#tran-recipes-APTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-ASTran.md",
-      "sha256": "37c4877402c0c4f7c67d7a55fe034f03cad786600a81b0b4df1d2225209f4e05",
+      "sha256": "5e429105e4548055a46be194b9b371cdbcb085bba644a823cfb044bf7afa8416",
       "sourceId": "erp-hddv-migrate#tran-recipes-ASTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-GLTran.md",
-      "sha256": "22d59c836efb82f7c4e269b93a6313c51c01a2358234b88e740ec0c2af6845bc",
+      "sha256": "cad321ae60096acd0b6f0f996952791c8cfeaed61b755a04fd94c46a2b163663",
       "sourceId": "erp-hddv-migrate#tran-recipes-GLTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-JPTran.md",
-      "sha256": "ff714742a6a123cb57ef9dac6b3b765d79e604ffc33d0dc44a2f068cdd3d885d",
+      "sha256": "17bf0fa49371db7dfc7a1a5517c057ba64a485eebc897bd3ae1cd85f25e81917",
       "sourceId": "erp-hddv-migrate#tran-recipes-JPTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PATran.md",
-      "sha256": "0cd6f57fa586680328f94be9184deb6d77321ad8a21f6e26aa5e53ae754a0998",
+      "sha256": "f3516071e83d5670df21b4c7fa30a67da0c69c668a30b50ff3a2e922dd7b6f1e",
       "sourceId": "erp-hddv-migrate#tran-recipes-PATran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PFTran.md",
-      "sha256": "5f42eb9098dc25c62b186b5eab9e7ee04aa609fc425337d00f97554ef9ecc965",
+      "sha256": "61bfa50eceb7f424e0dc9aa1324f1feabde655142e6ce68d3db50e14b0a4b056",
       "sourceId": "erp-hddv-migrate#tran-recipes-PFTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PGTran.md",
-      "sha256": "439f5483513f74d01af2b272ecb1c4be68ef58f3fedde5cfcc87d1b9c123ca8e",
+      "sha256": "b4351c68ad3594defea8d21564bc580515522837a35e03396943b6d0a4350776",
       "sourceId": "erp-hddv-migrate#tran-recipes-PGTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PSTran.md",
-      "sha256": "349f68ac3707fa304e17ece3f90d25fa431e543b9f8031908cb692bde3cc04f6",
+      "sha256": "1f207cefa0fcff66baca0d791e157bbb691eadfa1e43673aa7fc08a6aaee6fcb",
       "sourceId": "erp-hddv-migrate#tran-recipes-PSTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PVTran.md",
-      "sha256": "522b689d2ed6f0fe86a395a3efd39a2ada944ac815834b83f90c439b6a7b68a0",
+      "sha256": "65954ba024b006244921528bc7f46f05bab91258ba8e8e51b38fc6095d4af116",
       "sourceId": "erp-hddv-migrate#tran-recipes-PVTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-PXTran.md",
-      "sha256": "30ac9a354c66c42978bdda3113dbcfab38e4909bd8612e59657a710262e9de0a",
+      "sha256": "1d59234dab455035e54c2eab5fc4c6205d0c33394e865e39f3c9c91d5c0a1d77",
       "sourceId": "erp-hddv-migrate#tran-recipes-PXTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-hddv-migrate/references/tran-recipes-list-vs-script.md",
-      "sha256": "c0d1877e0185ef08c9d26a029e2446c2dbf8f91d0598ed9a31fc263aa87bb2cc",
+      "sha256": "f0430eb467434e6af0d327f01a1605018c36e5615dd5b74fa49c287d19ef043f",
       "sourceId": "erp-hddv-migrate#tran-recipes-list-vs-script",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-history-search/SKILL.md",
-      "sha256": "11ee730c631b8223839660246b7297e245d32db96f142612fe332d2541831b55",
+      "sha256": "ac0829335de270f8c7c14354573dd3886a2492e8bb8ba13b9057c50cb12884a6",
       "sourceId": "erp-history-search",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-history-search/references/reference-search-qlyc.md",
-      "sha256": "224dbfb8aaed716bc544cca200ede76289dc9632c0243ccee174ef30d2165914",
+      "sha256": "c4282ea1313da71a6fae59829628f82d5e484ffa30467cf51e7d33047d1ccdf2",
       "sourceId": "erp-history-search#reference-search-qlyc",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-history-search/references/reference-trace-files.md",
-      "sha256": "d30c87ba59cc175be6aefa99b21e9e2b829c5410439b69a5de2fa5c1e86862ca",
+      "sha256": "45301b5ec1ffe2e77def27092eb559c1e626e51996aa0f6100c0bd21a1cf9078",
       "sourceId": "erp-history-search#reference-trace-files",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-api-reference/SKILL.md",
@@ -1794,81 +1962,87 @@
     },
     {
       "path": ".cursor/skills/erp-js-implement/SKILL.md",
-      "sha256": "f251a902c9c40c38909108fb037aa37e80e2e575115cca102b5ce5d871cba064",
+      "sha256": "8aacc33f7183f5f82142b0dc7176bc887bda2e29e19880b01b95076b55c823df",
       "sourceId": "erp-js-implement",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/examples-flow-multi-fa.md",
-      "sha256": "dee0930a2b61aae9043c740833327c5c35fd9231e6d78b13889b2688daeb99c2",
+      "sha256": "c4d18874b5ebe4f5a7267bf565cead9546c3ba05d1cec2a1f50769b96c402f66",
       "sourceId": "erp-js-implement#examples-flow-multi-fa",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/examples-load-vv.md",
-      "sha256": "ea4f16b0f4aacc75a8a710335403ca9cb6f1a675373f227d1d27164df20343a2",
+      "sha256": "2b93defde8c90dc38733343ddcdfb5caf8d6ee74a4eb41aa91806bd085d5f6c2",
       "sourceId": "erp-js-implement#examples-load-vv",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-flow-multi.md",
-      "sha256": "95c5716dbe8e481ff69fff8c990bbc4660dd69934cc9ac9dd4a271b2ec523811",
+      "sha256": "29741ab4a0b09dbf719d9c87e6b61403121e36c472ea0ebf15407806a455865c",
       "sourceId": "erp-js-implement#js-flow-multi",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-grid-clear.md",
-      "sha256": "f42a5397a416fdbb7aac2cfab6ced581d42863c37cfd4c43b909f324aa757715",
+      "sha256": "2120db8cdd634bda810adbf09124a2ebb8c1e8e825ee69e545345b36e50224b2",
       "sourceId": "erp-js-implement#js-grid-clear",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-grid-fill.md",
-      "sha256": "3eb5a57432e498ddec1722ef5d37b3fc2caef4aafa47b0bc27ad5da347391fa4",
+      "sha256": "14cfd3ef6358d9eb373d9c40898b78c5e4a9f72209dc76ae7fdf4e945bfb1bda",
       "sourceId": "erp-js-implement#js-grid-fill",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-grid-row-disabled.md",
-      "sha256": "4f819e454e9a42bd23a577e0276df4f2848ede7192026a1c277e93408f5218e3",
+      "sha256": "7e633a7bc350265c824fb7c90c343d8c87294d9a25182f8e1719f04dcba5ec8f",
       "sourceId": "erp-js-implement#js-grid-row-disabled",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-request-deferred.md",
-      "sha256": "da232d839269d9fda51a5ba18bd5c73cfb63aa18369e4d316d939e267b814816",
+      "sha256": "37ed4e635ee052a59066e5b3f7c1380d56393edc410b96b1433913c5e5b6c9df",
       "sourceId": "erp-js-implement#js-request-deferred",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/js-request.md",
-      "sha256": "aa83d8c3170d7a6c6fb7f0f4891db972f0e06fa1dffb6ebac782b685fd7e5ffe",
+      "sha256": "165ee95b90399c5aab0b3ece24ec8b9636bb74a91dca2f6de18c411c9d6012c4",
       "sourceId": "erp-js-implement#js-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/naming.md",
-      "sha256": "95fb521c549f4cf2a6632da0ada88ba16c643c5324d13f514a3e8ce7fac37738",
+      "sha256": "acdb510127113487124573165da01c50b276e61cd371cd45ed7751c3939315e2",
       "sourceId": "erp-js-implement#naming",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/warnings.md",
-      "sha256": "f485c887090b98dd8f457ee952492bf81d0dfe98bee2465bcf2007b04c578725",
+      "sha256": "e4f83be75213c7f4c54cd3dbdd0ee7340663f4d6e288f235f7ed145d45d76b16",
       "sourceId": "erp-js-implement#warnings",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-js-implement/references/xml-request.md",
-      "sha256": "1b0b212af76db64984e11c2943a40ccddcf8db6e529aacc202dd728011ae8b5f",
+      "sha256": "f8ee6b1b63bca369bfbc3c8e0d9dd0cdcf7fd94feb75d555cd6c5e0b6ff84e5a",
       "sourceId": "erp-js-implement#xml-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-navigation-lookup/SKILL.md",
-      "sha256": "30e2eafc315aa6233e03c379b6f5591e27c179c85530e64a71213647f4c81d8d",
+      "sha256": "9e1c9b9cf9733edde6720d0248cc4558e4875fbd84f4de64e3031b5253d1578b",
       "sourceId": "erp-navigation-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/skills/erp-navigation-lookup/references/query-intent-map.md",
+      "sha256": "26173b03a56c46102896f7de4ff862288acf5cbf80bc9e3bd51093c95f0d9194",
+      "sourceId": "erp-navigation-lookup#query-intent-map",
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-nd252-implement/SKILL.md",
@@ -1934,6 +2108,36 @@
       "path": ".cursor/skills/erp-report-pivot-create/references/reference-pivot.md",
       "sha256": "0b170d0de25cf7d7729f728eb804bfeb5bac316dd27a0820fe1231365176a439",
       "sourceId": "erp-report-pivot-create#reference-pivot",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/erp-retrieve-implement/SKILL.md",
+      "sha256": "d2c3dc66eae1985aa32dbc83ff223616ac8629c5817109334ec72b9d8d13cc68",
+      "sourceId": "erp-retrieve-implement",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/erp-retrieve-implement/references/filter-multi.md",
+      "sha256": "3d96d4cb00c7fd3eba54e15b24d0baf5e56f650516ad3bc10c1219f48365d973",
+      "sourceId": "erp-retrieve-implement#filter-multi",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/erp-retrieve-implement/references/filter-single.md",
+      "sha256": "13aba82ffda9433ec133b1754a7ef8a0d37f57161044f3df10157941356b4bd9",
+      "sourceId": "erp-retrieve-implement#filter-single",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/erp-retrieve-implement/references/script-dispatch.md",
+      "sha256": "ff93b689c7693ed6204201b6afa5e5f8ab102408e8ac331dfea831cf72b89817",
+      "sourceId": "erp-retrieve-implement#script-dispatch",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".cursor/skills/erp-retrieve-implement/references/toolbar-menu.md",
+      "sha256": "4b9e201cbca7bff542bbdd21fd7e257e9ee85a3e56722f39b5f3034824eb0902",
+      "sourceId": "erp-retrieve-implement#toolbar-menu",
       "sourceVersion": 1
     },
     {
@@ -2004,39 +2208,45 @@
     },
     {
       "path": ".cursor/skills/erp-view-design/SKILL.md",
-      "sha256": "36b1357253d7ae27f13f153b8378c7c7490522701b9d49bf799a2938a646138c",
+      "sha256": "2422633ec177df031f14cad6d457fa9314d632834e388253f346ff1fb277b8fb",
       "sourceId": "erp-view-design",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-view-design/references/reference-item-value.md",
-      "sha256": "271ee5ba4df6c2df6889e0dbc6398e8a50f08a005347d410f09de2c2ecaae182",
+      "sha256": "fe54913cf5fb80382f56938e07cc2f838acad7f56d0937ff8a617761cf3e31fb",
       "sourceId": "erp-view-design#reference-item-value",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".cursor/skills/erp-view-design/references/reference-render-pipeline.md",
+      "sha256": "debc3c5bd2960024381a45f0751e0b765b7d2d19aa61766d62d17b0d8d70f267",
+      "sourceId": "erp-view-design#reference-render-pipeline",
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-view-design/references/reference-view-attrs.md",
-      "sha256": "a2b1b757085477d9cfee0d06da04d20a0bb910ddd796ec6b304f070f96337c04",
+      "sha256": "d6c510581895e193c2122e71c2b04468f8ad1b7b639a85eda4ead114ecc59e04",
       "sourceId": "erp-view-design#reference-view-attrs",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".cursor/skills/erp-voucher-data-lookup/SKILL.md",
-      "sha256": "09a535b6bebb356cb0bf230cdd2519a704702b95b21335bd26302701ded18cf8",
+      "sha256": "2b0b7a4ebb3579e928b5f6259fdf2853876fe172723fb962b4e473ca64875151",
       "sourceId": "erp-voucher-data-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-voucher-data-lookup/references/reference-example-pqadms.md",
-      "sha256": "1f426643863eeaaed2883ef6d5ed8ab6a775b7452689ebe1fe51ada6fb0df8b7",
+      "sha256": "2bf1ba4166d57fa89a90c90d5825e7bf82d1ecb5334d0b795842f0bc2ccbbeb6",
       "sourceId": "erp-voucher-data-lookup#reference-example-pqadms",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/erp-voucher-data-lookup/references/reference-mcp.md",
-      "sha256": "e8551e407b638526801aff518eab21f6c703ce08e9fa8b909b127ffea9fe9b43",
+      "sha256": "788d3b1b57be5231abf4808c3e49a51983c60f4aeac40cb3260f4a50980e61ef",
       "sourceId": "erp-voucher-data-lookup#reference-mcp",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/pm-adr-author/SKILL.md",
@@ -2046,9 +2256,9 @@
     },
     {
       "path": ".cursor/skills/pm-deadline-review/SKILL.md",
-      "sha256": "c1d6a37f040672b591f05861d3c6a355132b8b5c96e649ad07c9e4e33230bd40",
+      "sha256": "b2b492e135c29c95d4f2bfa95f6975afac6dfc1ac24201497d80813768c62a7d",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".cursor/skills/pm-graph-maintain/SKILL.md",
@@ -2081,6 +2291,12 @@
       "sourceVersion": 2
     },
     {
+      "path": ".github/chatmodes/erp-deploy-auditor.chatmode.md",
+      "sha256": "4461a8acbcfa690a91135dddfa3e2c524e15dfea45a3d5cc621fa68dc49c3fd8",
+      "sourceId": "erp-deploy-auditor",
+      "sourceVersion": 3
+    },
+    {
       "path": ".github/chatmodes/erp-explorer.chatmode.md",
       "sha256": "26625c54d29944936f1042c4863703111a59c266238a5cea97b2b1ad5797b101",
       "sourceId": "erp-explorer",
@@ -2100,15 +2316,15 @@
     },
     {
       "path": ".github/chatmodes/erp-sql-expert.chatmode.md",
-      "sha256": "8373786fd99852bc878c38002bd1dafe2a98104a6fdc5bf30f50cafc5b7ab9c5",
+      "sha256": "0ad0a77af28c29be426c8d92c3f75d3bc1a31f64916168ed70093518fe61b132",
       "sourceId": "erp-sql-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/chatmodes/erp-xml-expert.chatmode.md",
-      "sha256": "6da58c57a2f6c5d237973754cf687d9489120aa3d595cee1b353f0ae4026be77",
+      "sha256": "59e3abbf8e3d0f3486d604ac672e24bc209149c3879ced4b2d06b8a5b0cf18e7",
       "sourceId": "erp-xml-expert",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/chatmodes/pm-analyst.chatmode.md",
@@ -2130,13 +2346,13 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "64cd039202d4cf9e989fa7361b0cc777752a10872c0648b2b2c2587d473513b5"
+      "sha256": "e49caef00130a2489b56e929cf2bfcf1290fe5020f6df7fff1152e2fef62e41b"
     },
     {
       "path": ".github/instructions/erp-category-create.instructions.md",
-      "sha256": "74a485f161d8ae7945c00d7787f7e0776ec24e1468c927d1573035c8b77f95be",
+      "sha256": "27fbe7df8fd3ba4d9aabefb80717aca609d71b477b1aa1774b785e2023b988b3",
       "sourceId": "erp-category-create",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/erp-controller-reference.instructions.md",
@@ -2151,16 +2367,22 @@
       "sourceVersion": 1
     },
     {
-      "path": ".github/instructions/erp-einvoice-customize.instructions.md",
-      "sha256": "e824d672928981cbbc23e8fc11b261400282b88e0630056550d98c40cff953b3",
-      "sourceId": "erp-einvoice-customize",
+      "path": ".github/instructions/erp-edit-tooling.instructions.md",
+      "sha256": "48ee41b0538f2f34199bfa2f06246b0009a20e9fa52897d37d84847883137ad2",
+      "sourceId": "erp-edit-tooling",
       "sourceVersion": 1
     },
     {
+      "path": ".github/instructions/erp-einvoice-customize.instructions.md",
+      "sha256": "c0d969c1230be2eac73335a74fe3e684f442fcc0491b3795041b380c03cc29b5",
+      "sourceId": "erp-einvoice-customize",
+      "sourceVersion": 3
+    },
+    {
       "path": ".github/instructions/erp-einvoice-nd70-implement.instructions.md",
-      "sha256": "76c9f0406cd69fe9c7ac602638273f649a9ac2ad7a9db4f83b2e937f9db337cc",
+      "sha256": "bcd3b2b536863f2ddbdaf6e29da244f6a25c8440aed1ca22a57c73a15b59d6ac",
       "sourceId": "erp-einvoice-nd70-implement",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/erp-glossary-reference.instructions.md",
@@ -2170,15 +2392,15 @@
     },
     {
       "path": ".github/instructions/erp-hddv-migrate.instructions.md",
-      "sha256": "3677351cd53e6435bddf1fa94c3ca975200d97219fa37592c50144898579da54",
+      "sha256": "e7e3064fd287ce68dfe07c2c0f0af7d65a670e74e134a55f9ac7306d5b9a49a2",
       "sourceId": "erp-hddv-migrate",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/erp-history-search.instructions.md",
-      "sha256": "1af72b556f248959b36cb53c49e41855fc9961797387cd2b0ab74ce91323f1f0",
+      "sha256": "780583efb3657d684c5b72875597d38a710eb5b5d8fe16be0092614b87a73cfa",
       "sourceId": "erp-history-search",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/erp-js-api-reference.instructions.md",
@@ -2188,8 +2410,14 @@
     },
     {
       "path": ".github/instructions/erp-js-implement.instructions.md",
-      "sha256": "bfb09e30c6cc77559236b0f996769caeb47549fd8ac7442f9d600158162e125d",
+      "sha256": "f1e0204ceae9ef19c31a717286bdc91bfdf838dd202bbc9aba299355301c6c9e",
       "sourceId": "erp-js-implement",
+      "sourceVersion": 2
+    },
+    {
+      "path": ".github/instructions/erp-js-naming.instructions.md",
+      "sha256": "e9d9e91ec1fb8775c7e6a1187efbc1cb1d511f00690c225ec0d3f82eb10de1c9",
+      "sourceId": "erp-js-naming",
       "sourceVersion": 1
     },
     {
@@ -2200,9 +2428,9 @@
     },
     {
       "path": ".github/instructions/erp-navigation-lookup.instructions.md",
-      "sha256": "8a4227688a44825bcb0757dde5be21855efb4eb775ef8ea45fff010edf44d86f",
+      "sha256": "4cbf2dde9bb484b3c645448da01e86cb0b92c5ba96d95ab982113f1705de76e2",
       "sourceId": "erp-navigation-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/erp-nd252-implement.instructions.md",
@@ -2226,6 +2454,12 @@
       "path": ".github/instructions/erp-report-pivot-create.instructions.md",
       "sha256": "39e2cb6493c1278b33a5b1428848f7fb6ba6721a15aee86117200320996099c6",
       "sourceId": "erp-report-pivot-create",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/erp-retrieve-implement.instructions.md",
+      "sha256": "fece4f1569b7815cf5635d9cce42f63c6a0bc6308ec2523b8eb94da975499f9a",
+      "sourceId": "erp-retrieve-implement",
       "sourceVersion": 1
     },
     {
@@ -2253,10 +2487,16 @@
       "sourceVersion": 3
     },
     {
+      "path": ".github/instructions/erp-sql-schema-check.instructions.md",
+      "sha256": "34fa0784dab976f21efebe38d77a0196c3c88cad67e3558d038908166435db21",
+      "sourceId": "erp-sql-schema-check",
+      "sourceVersion": 1
+    },
+    {
       "path": ".github/instructions/erp-sql-style.instructions.md",
-      "sha256": "2cddb172e882f0bf78ea8722ac7721db418cbc13bc9f5a0c5d8de85bcbe467f6",
+      "sha256": "3b0f0221fc1ede081ea09db2ba835323bf4e5fefc8c6b183f3dd67e65355e5c4",
       "sourceId": "erp-sql-style",
-      "sourceVersion": 3
+      "sourceVersion": 4
     },
     {
       "path": ".github/instructions/erp-table-propose.instructions.md",
@@ -2266,15 +2506,15 @@
     },
     {
       "path": ".github/instructions/erp-view-design.instructions.md",
-      "sha256": "30d723e6d3f64d2c63282059834dfd75b8198e86091fc8c755866fa01ffb45c1",
+      "sha256": "48fde827b6450d405d89b0d34235b17301ba597b69df8155421f9fd12299bbbe",
       "sourceId": "erp-view-design",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/erp-voucher-data-lookup.instructions.md",
-      "sha256": "6aa1eb2137d940866a4e06558f3af7b706672b2263fc70e94f615d24c8776b97",
+      "sha256": "a4d5a60ae285dcb48edd0f95da84d8fe0b4b32cfaac17d1041193d979da0d00b",
       "sourceId": "erp-voucher-data-lookup",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/erp-xml-encoding.instructions.md",
@@ -2302,9 +2542,9 @@
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "68b6e1cec9f85cca50392bd65b579796775489033ec2d8f80717998be400a1f5",
+      "sha256": "76e49d2c0855efa918e64586b4828c342087ad1ce107a71642d2b87edb4ba1d4",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".github/instructions/pm-graph-maintain.instructions.md",
@@ -2332,45 +2572,45 @@
     },
     {
       "path": ".github/instructions/references/erp-category-create/check-trung.md",
-      "sha256": "a289343388a7019826ce5e55064caba1df494a2353ede74afb70dce8e4f72179",
+      "sha256": "5704d07614831ddf3446546c79104f249b87117d2e51bc15b2ff29895c74b94c",
       "sourceId": "erp-category-create#check-trung",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-category-create/database.md",
-      "sha256": "de7e8688b67ee81cd76f480cbb35a26652d5074b089e7d1623502593aa25eb92",
+      "sha256": "0bf0cf722e6e41dbf6b480c5c77afb42c5dd63247beb38dd2141c10ed65d5eb7",
       "sourceId": "erp-category-create#database",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-category-create/xml-structure.md",
-      "sha256": "7f91750deeb374cd24c0b7790a7e4fa7e9aad6cb279cdfa6ade79e5b7fd0f700",
+      "sha256": "fcc881d76e3c17791d42200b5e864e587d2832b21d809e2a4eba1aaba7cc109f",
       "sourceId": "erp-category-create#xml-structure",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-einvoice-customize/examples-ur.md",
-      "sha256": "24c071894e446bf139d9046d84cf820d1e16bc0b01573ddcc4c4ca2398b9e371",
+      "sha256": "10c7745b91a7060ed8123d7d3bce175ae5cdd7277bddb34c9342cfdaccec21c8",
       "sourceId": "erp-einvoice-customize#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/references/erp-einvoice-customize/reference-customize.md",
-      "sha256": "85a27e128e171f84e6b3dbca4f41ffd9db4d46c5bba0298e749755a5147501d9",
+      "sha256": "74cf528e7b8030142c2955c1efed55601a1526b7bcfc4b78ea1b4bd8349f7188",
       "sourceId": "erp-einvoice-customize#reference-customize",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/references/erp-einvoice-nd70-implement/examples-ur.md",
-      "sha256": "d71c73873b39f5101415d0336f35e762faee3e3b670b92c7e072efaf28a24e1f",
+      "sha256": "7ab5f3a9a67a37e017b9b972159006ae994c876e20ff641f0174d90ecca924bf",
       "sourceId": "erp-einvoice-nd70-implement#examples-ur",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/references/erp-einvoice-nd70-implement/reference-payload.md",
-      "sha256": "9ef4fb66560c23256196144a1c478f82985861670b9c70864dfe916517ef302f",
+      "sha256": "87dc3c14a4c44a5f4873e8766c747acd3e1d52ed921fbf5b3aee467c8654b124",
       "sourceId": "erp-einvoice-nd70-implement#reference-payload",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/references/erp-glossary-reference/abbreviations.md",
@@ -2398,87 +2638,87 @@
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/reference.md",
-      "sha256": "8c99df9d2da6892720bf0e71f53bd5942fc2fcf2e49e917446f7e158c0b69caa",
+      "sha256": "09d6b48f894b8a64e793484733d94a69679434b8dacdddbdc48cf80efb4ee970",
       "sourceId": "erp-hddv-migrate#reference",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-APTran.md",
-      "sha256": "003eb9cb92c811da6933a6b2d65628177455ef67b9fb36ede9e63ed479b80be9",
+      "sha256": "878e9752e44c6a53d8ddae00028fd85b21b5a2f8d3411f6020f2997f52b72085",
       "sourceId": "erp-hddv-migrate#tran-recipes-APTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-ASTran.md",
-      "sha256": "37c4877402c0c4f7c67d7a55fe034f03cad786600a81b0b4df1d2225209f4e05",
+      "sha256": "5e429105e4548055a46be194b9b371cdbcb085bba644a823cfb044bf7afa8416",
       "sourceId": "erp-hddv-migrate#tran-recipes-ASTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-GLTran.md",
-      "sha256": "22d59c836efb82f7c4e269b93a6313c51c01a2358234b88e740ec0c2af6845bc",
+      "sha256": "cad321ae60096acd0b6f0f996952791c8cfeaed61b755a04fd94c46a2b163663",
       "sourceId": "erp-hddv-migrate#tran-recipes-GLTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-JPTran.md",
-      "sha256": "ff714742a6a123cb57ef9dac6b3b765d79e604ffc33d0dc44a2f068cdd3d885d",
+      "sha256": "17bf0fa49371db7dfc7a1a5517c057ba64a485eebc897bd3ae1cd85f25e81917",
       "sourceId": "erp-hddv-migrate#tran-recipes-JPTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PATran.md",
-      "sha256": "0cd6f57fa586680328f94be9184deb6d77321ad8a21f6e26aa5e53ae754a0998",
+      "sha256": "f3516071e83d5670df21b4c7fa30a67da0c69c668a30b50ff3a2e922dd7b6f1e",
       "sourceId": "erp-hddv-migrate#tran-recipes-PATran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PFTran.md",
-      "sha256": "5f42eb9098dc25c62b186b5eab9e7ee04aa609fc425337d00f97554ef9ecc965",
+      "sha256": "61bfa50eceb7f424e0dc9aa1324f1feabde655142e6ce68d3db50e14b0a4b056",
       "sourceId": "erp-hddv-migrate#tran-recipes-PFTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PGTran.md",
-      "sha256": "439f5483513f74d01af2b272ecb1c4be68ef58f3fedde5cfcc87d1b9c123ca8e",
+      "sha256": "b4351c68ad3594defea8d21564bc580515522837a35e03396943b6d0a4350776",
       "sourceId": "erp-hddv-migrate#tran-recipes-PGTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PSTran.md",
-      "sha256": "349f68ac3707fa304e17ece3f90d25fa431e543b9f8031908cb692bde3cc04f6",
+      "sha256": "1f207cefa0fcff66baca0d791e157bbb691eadfa1e43673aa7fc08a6aaee6fcb",
       "sourceId": "erp-hddv-migrate#tran-recipes-PSTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PVTran.md",
-      "sha256": "522b689d2ed6f0fe86a395a3efd39a2ada944ac815834b83f90c439b6a7b68a0",
+      "sha256": "65954ba024b006244921528bc7f46f05bab91258ba8e8e51b38fc6095d4af116",
       "sourceId": "erp-hddv-migrate#tran-recipes-PVTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-PXTran.md",
-      "sha256": "30ac9a354c66c42978bdda3113dbcfab38e4909bd8612e59657a710262e9de0a",
+      "sha256": "1d59234dab455035e54c2eab5fc4c6205d0c33394e865e39f3c9c91d5c0a1d77",
       "sourceId": "erp-hddv-migrate#tran-recipes-PXTran",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-hddv-migrate/tran-recipes-list-vs-script.md",
-      "sha256": "c0d1877e0185ef08c9d26a029e2446c2dbf8f91d0598ed9a31fc263aa87bb2cc",
+      "sha256": "f0430eb467434e6af0d327f01a1605018c36e5615dd5b74fa49c287d19ef043f",
       "sourceId": "erp-hddv-migrate#tran-recipes-list-vs-script",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-history-search/reference-search-qlyc.md",
-      "sha256": "224dbfb8aaed716bc544cca200ede76289dc9632c0243ccee174ef30d2165914",
+      "sha256": "c4282ea1313da71a6fae59829628f82d5e484ffa30467cf51e7d33047d1ccdf2",
       "sourceId": "erp-history-search#reference-search-qlyc",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-history-search/reference-trace-files.md",
-      "sha256": "d30c87ba59cc175be6aefa99b21e9e2b829c5410439b69a5de2fa5c1e86862ca",
+      "sha256": "45301b5ec1ffe2e77def27092eb559c1e626e51996aa0f6100c0bd21a1cf9078",
       "sourceId": "erp-history-search#reference-trace-files",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-api-reference/form-grid-api.md",
@@ -2488,69 +2728,75 @@
     },
     {
       "path": ".github/instructions/references/erp-js-implement/examples-flow-multi-fa.md",
-      "sha256": "dee0930a2b61aae9043c740833327c5c35fd9231e6d78b13889b2688daeb99c2",
+      "sha256": "c4d18874b5ebe4f5a7267bf565cead9546c3ba05d1cec2a1f50769b96c402f66",
       "sourceId": "erp-js-implement#examples-flow-multi-fa",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/examples-load-vv.md",
-      "sha256": "ea4f16b0f4aacc75a8a710335403ca9cb6f1a675373f227d1d27164df20343a2",
+      "sha256": "2b93defde8c90dc38733343ddcdfb5caf8d6ee74a4eb41aa91806bd085d5f6c2",
       "sourceId": "erp-js-implement#examples-load-vv",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-flow-multi.md",
-      "sha256": "95c5716dbe8e481ff69fff8c990bbc4660dd69934cc9ac9dd4a271b2ec523811",
+      "sha256": "29741ab4a0b09dbf719d9c87e6b61403121e36c472ea0ebf15407806a455865c",
       "sourceId": "erp-js-implement#js-flow-multi",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-grid-clear.md",
-      "sha256": "f42a5397a416fdbb7aac2cfab6ced581d42863c37cfd4c43b909f324aa757715",
+      "sha256": "2120db8cdd634bda810adbf09124a2ebb8c1e8e825ee69e545345b36e50224b2",
       "sourceId": "erp-js-implement#js-grid-clear",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-grid-fill.md",
-      "sha256": "3eb5a57432e498ddec1722ef5d37b3fc2caef4aafa47b0bc27ad5da347391fa4",
+      "sha256": "14cfd3ef6358d9eb373d9c40898b78c5e4a9f72209dc76ae7fdf4e945bfb1bda",
       "sourceId": "erp-js-implement#js-grid-fill",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-grid-row-disabled.md",
-      "sha256": "4f819e454e9a42bd23a577e0276df4f2848ede7192026a1c277e93408f5218e3",
+      "sha256": "7e633a7bc350265c824fb7c90c343d8c87294d9a25182f8e1719f04dcba5ec8f",
       "sourceId": "erp-js-implement#js-grid-row-disabled",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-request-deferred.md",
-      "sha256": "da232d839269d9fda51a5ba18bd5c73cfb63aa18369e4d316d939e267b814816",
+      "sha256": "37ed4e635ee052a59066e5b3f7c1380d56393edc410b96b1433913c5e5b6c9df",
       "sourceId": "erp-js-implement#js-request-deferred",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/js-request.md",
-      "sha256": "aa83d8c3170d7a6c6fb7f0f4891db972f0e06fa1dffb6ebac782b685fd7e5ffe",
+      "sha256": "165ee95b90399c5aab0b3ece24ec8b9636bb74a91dca2f6de18c411c9d6012c4",
       "sourceId": "erp-js-implement#js-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/naming.md",
-      "sha256": "95fb521c549f4cf2a6632da0ada88ba16c643c5324d13f514a3e8ce7fac37738",
+      "sha256": "acdb510127113487124573165da01c50b276e61cd371cd45ed7751c3939315e2",
       "sourceId": "erp-js-implement#naming",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/warnings.md",
-      "sha256": "f485c887090b98dd8f457ee952492bf81d0dfe98bee2465bcf2007b04c578725",
+      "sha256": "e4f83be75213c7f4c54cd3dbdd0ee7340663f4d6e288f235f7ed145d45d76b16",
       "sourceId": "erp-js-implement#warnings",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-js-implement/xml-request.md",
-      "sha256": "1b0b212af76db64984e11c2943a40ccddcf8db6e529aacc202dd728011ae8b5f",
+      "sha256": "f8ee6b1b63bca369bfbc3c8e0d9dd0cdcf7fd94feb75d555cd6c5e0b6ff84e5a",
       "sourceId": "erp-js-implement#xml-request",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".github/instructions/references/erp-navigation-lookup/query-intent-map.md",
+      "sha256": "26173b03a56c46102896f7de4ff862288acf5cbf80bc9e3bd51093c95f0d9194",
+      "sourceId": "erp-navigation-lookup#query-intent-map",
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-program-config-lookup/options-table.md",
@@ -2595,6 +2841,30 @@
       "sourceVersion": 1
     },
     {
+      "path": ".github/instructions/references/erp-retrieve-implement/filter-multi.md",
+      "sha256": "3d96d4cb00c7fd3eba54e15b24d0baf5e56f650516ad3bc10c1219f48365d973",
+      "sourceId": "erp-retrieve-implement#filter-multi",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/erp-retrieve-implement/filter-single.md",
+      "sha256": "13aba82ffda9433ec133b1754a7ef8a0d37f57161044f3df10157941356b4bd9",
+      "sourceId": "erp-retrieve-implement#filter-single",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/erp-retrieve-implement/script-dispatch.md",
+      "sha256": "ff93b689c7693ed6204201b6afa5e5f8ab102408e8ac331dfea831cf72b89817",
+      "sourceId": "erp-retrieve-implement#script-dispatch",
+      "sourceVersion": 1
+    },
+    {
+      "path": ".github/instructions/references/erp-retrieve-implement/toolbar-menu.md",
+      "sha256": "4b9e201cbca7bff542bbdd21fd7e257e9ee85a3e56722f39b5f3034824eb0902",
+      "sourceId": "erp-retrieve-implement#toolbar-menu",
+      "sourceVersion": 1
+    },
+    {
       "path": ".github/instructions/references/erp-skill-author/reference-patterns.md",
       "sha256": "ae69dc70e6d192feb16615b0df8b161863372bee2186ad69ed738d70bbd2566a",
       "sourceId": "erp-skill-author#reference-patterns",
@@ -2632,27 +2902,33 @@
     },
     {
       "path": ".github/instructions/references/erp-view-design/reference-item-value.md",
-      "sha256": "271ee5ba4df6c2df6889e0dbc6398e8a50f08a005347d410f09de2c2ecaae182",
+      "sha256": "fe54913cf5fb80382f56938e07cc2f838acad7f56d0937ff8a617761cf3e31fb",
       "sourceId": "erp-view-design#reference-item-value",
-      "sourceVersion": 1
+      "sourceVersion": 2
+    },
+    {
+      "path": ".github/instructions/references/erp-view-design/reference-render-pipeline.md",
+      "sha256": "debc3c5bd2960024381a45f0751e0b765b7d2d19aa61766d62d17b0d8d70f267",
+      "sourceId": "erp-view-design#reference-render-pipeline",
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-view-design/reference-view-attrs.md",
-      "sha256": "a2b1b757085477d9cfee0d06da04d20a0bb910ddd796ec6b304f070f96337c04",
+      "sha256": "d6c510581895e193c2122e71c2b04468f8ad1b7b639a85eda4ead114ecc59e04",
       "sourceId": "erp-view-design#reference-view-attrs",
-      "sourceVersion": 1
+      "sourceVersion": 2
     },
     {
       "path": ".github/instructions/references/erp-voucher-data-lookup/reference-example-pqadms.md",
-      "sha256": "1f426643863eeaaed2883ef6d5ed8ab6a775b7452689ebe1fe51ada6fb0df8b7",
+      "sha256": "2bf1ba4166d57fa89a90c90d5825e7bf82d1ecb5334d0b795842f0bc2ccbbeb6",
       "sourceId": "erp-voucher-data-lookup#reference-example-pqadms",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/instructions/references/erp-voucher-data-lookup/reference-mcp.md",
-      "sha256": "e8551e407b638526801aff518eab21f6c703ce08e9fa8b909b127ffea9fe9b43",
+      "sha256": "788d3b1b57be5231abf4808c3e49a51983c60f4aeac40cb3260f4a50980e61ef",
       "sourceId": "erp-voucher-data-lookup#reference-mcp",
-      "sourceVersion": 1
+      "sourceVersion": 3
     },
     {
       "path": ".github/prompts/erp-customize.prompt.md",
@@ -2686,9 +2962,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "fef5cf6fb70c6a3ec4a7316c766558b72a32366eae316cbd3fd92482a2f0208c",
+      "sha256": "f78ca7fbef04bf5b795432c2925cf2d09bf440a324385875deb55c81fe375661",
       "sourceId": "pm-review",
-      "sourceVersion": 11
+      "sourceVersion": 12
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -2709,7 +2985,7 @@
     },
     {
       "createdByUs": true,
-      "ownedCanonical": "[[\"4ai-fbo\"],[\"mcp__4ai-fbo__list_programs\",\"mcp__4ai-fbo__index_program\",\"mcp__4ai-fbo__find_controller\",\"mcp__4ai-fbo__describe_controller\",\"mcp__4ai-fbo__list_related\",\"mcp__4ai-fbo__resolve_entities\",\"mcp__4ai-fbo__search_content\",\"mcp__4ai-fbo__read_source\",\"mcp__4ai-fbo__resolve_vouchercode\",\"mcp__4ai-fbo__plan_report\",\"mcp__4ai-fbo__license_status\"]]",
+      "ownedCanonical": "[[\"4ai-fbo\"],[\"mcp__4ai-fbo__list_programs\",\"mcp__4ai-fbo__index_program\",\"mcp__4ai-fbo__find_controller\",\"mcp__4ai-fbo__describe_controller\",\"mcp__4ai-fbo__list_related\",\"mcp__4ai-fbo__resolve_entities\",\"mcp__4ai-fbo__search_content\",\"mcp__4ai-fbo__read_source\",\"mcp__4ai-fbo__resolve_vouchercode\"]]",
       "ownedKeys": [
         "enabledMcpjsonServers",
         "permissions.allow"
@@ -2742,6 +3018,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-24T04:32:13.041Z",
+  "syncedAt": "2026-08-25T07:55:46.366Z",
   "target": "4ai"
 }

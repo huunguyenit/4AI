@@ -6,7 +6,7 @@ domain: pm
 description: Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái DD — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL. Bỏ trống = TOÀN BỘ dự án.
 requires: [4ai-fbo]
 see-also: [pm-graph-maintain, pm-ledger-maintain, pm-program-lookup, pm-analyst]
-version: 12
+version: 13
 ---
 
 ## Việc này làm gì
@@ -17,7 +17,6 @@ Quy trình **PM deadline reviewer**. Đầu vào là một mã dự án (hoặc 
 2. **AI** chỉ phân tích UR `trang_thai = DD` (cổng PM): tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất `XN`/`TA`/`KL`.
 
 Bạn **chỉ ĐỀ XUẤT** thay đổi trạng thái — không bao giờ tự `UPDATE nbphyc`.
-Không dùng `plan_report` / `execute_report` cho luồng này.
 
 ## Bước 1 — sinh báo cáo (code)
 

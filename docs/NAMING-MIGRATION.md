@@ -129,5 +129,5 @@ Ba asset **đổi kind** — chúng là quy trình, không phải vai:
 - ~~`globalPolicy` là field chết~~ — đã xoá khỏi `targets.local.json` và khỏi comment hai
   emitter. `sync --dry-run` sau khi xoá vẫn 0 thay đổi ở `user-cursor-global`, đúng như dự đoán.
 - `erp-skill-author` và `4ai-asset-author` chồng trách nhiệm — cân nhắc gộp ở đợt 5.
-- README đếm sai số asset trong gói plugin (`26 skill`, thực tế thư mục plugin đang có 42).
-  Số đúng chỉ biết sau khi sync thật ở đợt 5 — đừng đoán, đếm rồi sửa.
+- ~~README đếm sai số asset trong gói plugin~~ — không còn liên quan: đường đóng gói plugin
+  đã gỡ khỏi repo.

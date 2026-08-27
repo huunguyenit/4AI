@@ -154,7 +154,8 @@ Tên field = tên cột SQL = tên trong `dmhddtbs` / tag map.
 - MCP đọc `FastBusiness$EInvoice$Customize` → merge → xuất `ALTER PROC` **một body**.
 - Chèn trước khối check chung (thuế / MST) nếu proc đã có nhánh `ma_ct`.
 - Cấm: `sp_rename` thành `_Base` rồi proc mới gọi lại.
-- Giao file `.sql` cho NSD; không `EXEC`/`ALTER` trên DB trừ khi NSD yêu cầu sau khi review.
+- Ghi file `.sql` ra `D:\Fast Script\{TenDuAn}\{App|Sys}` rồi giao cho NSD — cấm ghi vào thư mục
+  program (rule `erp-sql-script-location`). Không `EXEC`/`ALTER` trên DB trừ khi NSD yêu cầu sau khi review.
 
 ---
 

@@ -64,7 +64,7 @@ export function slugFor(programPath) {
 // Chỗ ghi index tách khỏi chỗ chứa code: khi chạy như plugin, gốc plugin bị ghi đè mỗi
 // lần update nên index phải nằm ngoài (FBO_DATA_ROOT = ${CLAUDE_PLUGIN_DATA}).
 //
-// Dùng cho thứ DỰNG LẠI ĐƯỢC (index sqlite). Thứ không dựng lại được — giấy phép, cấu hình,
+// Dùng cho thứ DỰNG LẠI ĐƯỢC (index sqlite). Thứ không dựng lại được — cấu hình,
 // ledger — dùng `stateRoot()` bên dưới.
 export function dataRoot(hub) {
   return process.env.FBO_DATA_ROOT || hub;
@@ -78,11 +78,11 @@ function thuMucNguoiDung() {
 }
 
 /**
- * Gốc cho trạng thái PHẢI SỐNG SÓT: giấy phép, `data/qlda.local.json`, ledger.
+ * Gốc cho trạng thái PHẢI SỐNG SÓT: `data/qlda.local.json`, ledger.
  *
  * Tách khỏi `dataRoot()` vì `${CLAUDE_PLUGIN_DATA}` không bền như tên gọi gợi ý. Trong Cowork
- * nó nằm trong thư mục CỦA TỪNG PHIÊN: phiên đóng là biến mất cùng giấy phép vừa kích hoạt và
- * cấu hình vừa khai — đo được, không phải suy đoán (một phiên phải kích hoạt lại giấy phép và
+ * nó nằm trong thư mục CỦA TỪNG PHIÊN: phiên đóng là biến mất cùng cấu hình vừa khai — đo
+ * được, không phải suy đoán (một phiên phải
  * khai lại kết nối sau khi phiên trước bị xoá). Index mất thì `index_program` dựng lại; giấy
  * phép mất thì người dùng phải xin lại Fast Source.
  *
@@ -98,7 +98,7 @@ export function stateRoot(hub) {
 /**
  * Đường dẫn một file trạng thái, kèm DI CHUYỂN từ vị trí cũ (`dataRoot`) khi nơi mới chưa có.
  *
- * Không có bước này thì mọi bản cài hiện hữu mất giấy phép và danh tính PM ngay lần chạy đầu
+ * Không có bước này thì mọi bản cài hiện hữu mất danh tính PM ngay lần chạy đầu
  * sau khi cập nhật — đúng thứ thay đổi này sinh ra để tránh. Copy chứ không move: vị trí cũ
  * còn nguyên để bản plugin cũ (nếu người dùng rollback) vẫn chạy được.
  *

@@ -27,9 +27,12 @@ Chức năng kiểu “menu tạo tự động / batch từ danh sách” thư�
 
 Cách tìm tên `{controller}`:
 
-1. Glob `**/*{keyword}*` dưới `Controllers` / `Main` (vd `taoPNA`, `AutoCreate`, từ khóa nghiệp vụ ASCII)
-2. Grep `exec zc_` / `exec rs_` trong Filter/Grid vừa tìm
-3. Đọc title XML khớp mô tả UR
+1. `find_controller(program, query='{keyword}')` — chỉ mục **không dấu**, gõ `taoPNA`, `AutoCreate`
+   hay từ khoá nghiệp vụ đều ra. Chưa index thì `index_program` một lần trước.
+2. `search_content(program, query='exec zc_', in='sql')` — tìm chỗ gọi proc customize
+3. `describe_controller` — đọc title / field khớp mô tả UR
+
+Trang `.aspx` nằm ngoài chỉ mục controller → phần đó mới dùng Glob dưới `{project_root}/Main`.
 
 ---
 
@@ -38,26 +41,30 @@ Cách tìm tên `{controller}`:
 | Bước | Tool / hành động |
 |------|------------------|
 | 1 | Từ XML: lấy tên proc trong `Loading` / `Inserting` / `response` |
-| 2 | MCP `query_sql { program, object }` → object definition |
-| 3 | `query_type=1`: `sys.objects` / `definition LIKE '%{proc}%'` tìm proc phụ |
+| 2 | `query_sql(program, object='{proc}')` → định nghĩa proc |
+| 3 | `query_sql(program, sql=...)` trên `sys.objects` / `definition LIKE '%{proc}%'` → tìm proc phụ |
 
-`file_path` **bắt buộc absolute** tới file trong đúng project (Web.config resolve connection).
+Tham số định danh là **`program`** (đường dẫn program hoặc mã dự án `nbdmda.ma_da`), không phải
+`file_path`. Kết nối tự phân giải từ `Web.config` của chính program đó.
 
-Không Deploy / không ALTER proc trừ khi user yêu cầu rõ.
+Không Deploy / không ALTER proc trừ khi user yêu cầu rõ — `query_sql` chặn câu ghi trừ khi truyền
+`allowWrite: true`, và hàng rào đó có chủ đích.
 
 ---
 
-## Pattern C — FBOGraph / Radar (nếu cần)
+## Pattern C — Đồ thị năng lực (khi cần nhìn rộng hơn một program)
 
-Khi MCP `query_radar` báo Kuzu / FBOGraph chưa build:
+Không có MCP tool đồ thị. Đồ thị của hub là **đồ thị năng lực FBO + mạng rà soát Request**:
+nguồn thật là các file JSONL, chỉ mục là SQL Server graph, dựng bằng
 
-1. Chạy `build_cmd` từ JSON — **dùng `cmd /c`**, `working_directory` local (`C:\Users\Windows 10`), không cwd UNC; build ~7–10 phút, poll đến `exit_code: 0`
-2. Gọi lại `query_radar` với `reference_file` absolute trong project đó
-3. Chỉ dùng 11 template Cypher chuẩn trong User Rule; query ASCII không dấu ưu tiên
+```bash
+node tools/4ai.mjs graph build
+```
 
-Nếu build lâu / fail → fallback Glob + Grep + `query_sql` (Pattern A/B).
+Cách đọc và bảo trì nó: skill `pm-graph-maintain`. Nó trả lời câu hỏi kiểu "năng lực này đã làm ở
+những dự án nào", **không** thay `find_controller` / `search_content` cho câu hỏi trong một program.
 
-**Thuật ngữ:** FBOGraph = đồ thị XML FBO; Radar = MCP tool `query_radar`. Không dùng tên CodeGraph.
+Chưa dựng hoặc dựng lỗi → quay về Pattern A/B, đó vẫn là đường chính.
 
 ---
 

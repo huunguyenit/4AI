@@ -6,7 +6,7 @@ domain: erp
 description: Customize HĐĐT đầu ra — form EIFields, Grid dòng hàng, dmhddtbs (struct_*/detail_*), FastBusiness$EInvoice$Customize, Proxy Structure. Chỉ sửa XML và SQL. Mở khi UR về EInvoice, HD1/HDA.
 requires: [4ai-fbo]
 see-also: [erp-einvoice-nd70-implement, erp-nd252-implement, erp-glossary-reference]
-version: 1
+version: 3
 ---
 Skill vá **payload / form / mẫu XML** hóa đơn điện tử đầu ra — **cả master và dòng hàng (detail)**. Không cài kết nối, không chẩn đoán portal/khóa/`urlEInvoice`.
 
@@ -68,9 +68,9 @@ Tag đã có → **A, không đổi tag Proxy**. Tag mới → B. Cần nhập l
 ```
 - [ ] 1. UR → lớp master / detail → A / B / C (có thể kết hợp)
 - [ ] 2. MCP: dmhddtbs theo ma_ct; body EInvoice$Customize; Dir/{Tran}; Structure Proxy
-- [ ] 3. Vá XML (StrReplace) / SQL (script giao NSD)
+- [ ] 3. Vá XML theo từng khối / SQL (script giao NSD)
 - [ ] 4. Proc: ALTER một body — không wrapper _Base
-- [ ] 5. Giao file .sql — không EXEC
+- [ ] 5. Ghi .sql ra D:\Fast Script\{TenDuAn}\{App|Sys} rồi giao — không EXEC
 ```
 
 ---
@@ -81,8 +81,9 @@ Tag đã có → **A, không đổi tag Proxy**. Tag mới → B. Cần nhập l
 2. Customize: đọc body hiện có → chèn khối → `ALTER PROC` đầy đủ. Cấm `Customize_Base` + proc bọc.
 3. Unicode: giữ comment + `N'...'` tiếng Việt toàn body.
 4. Field / biến local: **snake_case**, khớp tên cột.
-5. Sửa XML bằng StrReplace. View form: `erp-view-design`.
-6. SQL: giao script; **không** deploy cho đến khi NSD yêu cầu.
+5. Sửa XML **theo từng khối**, không rewrite cả file; giữ encoding/BOM/CRLF gốc. View form: `erp-view-design`.
+6. SQL: ghi script ra `D:\Fast Script\{TenDuAn}\{App|Sys}` — **không bao giờ** trong thư
+   mục program (rule `erp-sql-script-location`); **không** deploy cho đến khi NSD yêu cầu.
 
 ---
 

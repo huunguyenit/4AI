@@ -1,0 +1,76 @@
+---
+id: erp-sql-script-location
+title: SQL scripts live outside the customer program
+kind: rule
+domain: erp
+description: File .sql BẮT BUỘC lưu ở D:\Fast Script\{TenDuAn}\{App|Sys}, KHÔNG BAO GIỜ trong thư mục program của khách — program là thư mục web chạy trên internet, .sql nằm trong đó là đường lộ.
+severity: hard
+always: true
+requires: [4ai-fbo]
+see-also: [erp-sql-expert, erp-deploy-auditor, erp-table-propose]
+version: 1
+---
+
+## Vì sao
+
+Thư mục program là **thư mục web đang chạy**, có mặt trên internet. Một file `.sql` đặt trong
+đó là toàn bộ cấu trúc bảng, tên cột, logic proc và có khi cả dữ liệu mẫu — phát tán qua một
+URL đoán được, không cần xâm nhập gì.
+
+Đây là chuẩn bảo mật, không phải sở thích sắp xếp. Nó đứng độc lập với `erp-sql-access`
+(rule đó lo credential; rule này lo hiện vật trên đĩa).
+
+## Quy tắc
+
+**BẮT BUỘC** ghi mọi file `.sql` vào:
+
+    D:\Fast Script\{TenDuAn}\App      -- script chạy trên database nghiệp vụ
+    D:\Fast Script\{TenDuAn}\Sys      -- script chạy trên database hệ thống
+
+**KHÔNG ĐƯỢC** ghi `.sql` vào bất kỳ đường dẫn nào nằm dưới thư mục program của khách — kể cả
+`Script\`, `Store\`, `SQL\`, một thư mục tạm, hay cạnh chính controller đang sửa. Người dùng
+bảo "cứ để cạnh file XML cho tiện" thì nêu rule này rồi ghi ra `D:\Fast Script\` — tiện không
+đổi được chuẩn bảo mật.
+
+**KHÔNG ĐƯỢC** đọc `.sql` từ trong program rồi coi như hợp lệ. Thấy `.sql` dưới program là
+**phát hiện phải báo**, không phải nguồn để dùng.
+
+## `{TenDuAn}` lấy ở đâu
+
+Program path có dạng:
+
+    \\<host>\CustomerPro\<dòng SP>\<TenDuAn>\<PhienBan>\
+    \\172.168.5.14\CustomerPro\FBO\TFR-SP21\SP21\
+
+| Đoạn | Là gì | Dùng vào |
+|---|---|---|
+| `TFR-SP21` | **tên dự án** — áp chót | `D:\Fast Script\TFR-SP21\{App\|Sys}` |
+| `SP21` | **phiên bản dự án** — đoạn cuối | gốc đường dẫn web trong manifest |
+
+Lấy program path bằng `list_programs`. **Đừng** suy tên dự án từ tên thư mục workspace đang
+mở — hai thứ đó trùng nhau chỉ do tình cờ.
+
+Chưa chắc đoạn nào là tên dự án thì hỏi, đừng đoán: ghi nhầm thư mục nghĩa là đợt sau không
+ai tìm thấy script.
+
+## Ví dụ
+
+Program `\\172.168.5.14\CustomerPro\FBO\TFR-SP21\SP21\`, thêm cột trên db nghiệp vụ:
+
+    ✅  D:\Fast Script\TFR-SP21\App\01 Data.sql
+    ❌  \\172.168.5.14\CustomerPro\FBO\TFR-SP21\Script\App\01 Data.sql
+    ❌  \\172.168.5.14\CustomerPro\FBO\TFR-SP21\SP21\App_Data\Controllers\Dir\zcdmlhdv.sql
+    ❌  .\01 Data.sql        (workspace đang mở CHÍNH LÀ program — đây là ca hay sai nhất)
+
+Ca cuối là ca hay sai nhất: thư mục làm việc mặc định thường chính là program, nên ghi file
+bằng đường dẫn tương đối là rơi thẳng vào chỗ bị cấm. Luôn ghi bằng **đường dẫn tuyệt đối**
+bắt đầu bằng `D:\Fast Script\`.
+
+## Bẫy
+
+- Chưa có `D:\Fast Script\{TenDuAn}\App` thì **tạo thư mục**, không phải rơi về program.
+- Script cũ đã lỡ nằm trong program: **không tự di chuyển, không tự xoá** (rule read-only của
+  agent nào thì agent đó giữ). Nêu ra cho người dùng quyết — nhưng không đưa nó vào diện
+  "hợp lệ" chỉ vì nó đang tồn tại ở đó.
+- Rule này nói **chỗ lưu**, không nói được phép chạy. Chạy `.sql` vẫn theo `erp-sql-access`:
+  giao script cho người duyệt, `query_sql` chặn câu ghi trừ khi `allowWrite: true`.

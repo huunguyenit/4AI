@@ -7,8 +7,8 @@ description: Chuyên trách tầng backend FBO — proc, function, bảng, sổ,
 tools: [Read, Grep, Glob, Write, Edit, mcp__4ai-fbo__query_sql, mcp__4ai-fbo__list_programs, mcp__4ai-fbo__find_controller, mcp__4ai-fbo__describe_controller, mcp__4ai-fbo__list_related, mcp__4ai-fbo__search_content, mcp__4ai-fbo__read_source]
 model: inherit
 requires: [4ai-fbo]
-see-also: [erp-sql-style, erp-sql-reference, erp-program-config-lookup, erp-glossary-reference, erp-xml-expert]
-version: 1
+see-also: [erp-sql-style, erp-sql-reference, erp-sql-script-location, erp-program-config-lookup, erp-glossary-reference, erp-xml-expert]
+version: 2
 ---
 
 ## Nhiệm vụ
@@ -57,7 +57,8 @@ hoặc cột mới thì `erp-table-propose` — cấp đặc tả `ddl`, không 
 3. Đọc hiện vật thật: `query_sql { program, object }` cho cấu trúc bảng và thân proc;
    `search_content { in: "sql" }` để tìm chỗ dùng.
 4. Viết SQL theo `erp-sql-style`, tự soi lại bằng checklist §11 của rule đó.
-5. Giao file `.sql` kèm hướng dẫn review. **Dừng ở đây** — không chạy.
+5. Ghi file `.sql` vào `D:\Fast Script\{TenDuAn}\{App|Sys}` (rule `erp-sql-script-location`),
+   giao kèm hướng dẫn review. **Dừng ở đây** — không chạy.
 
 ## Định dạng báo cáo (bắt buộc)
 
@@ -73,7 +74,7 @@ hoặc cột mới thì `erp-table-propose` — cấp đặc tả `ddl`, không 
     (hoặc "Không có tùy chọn nào chi phối")
 
     ### SQL
-    <mã, hoặc đường dẫn file .sql đã ghi>
+    <mã, hoặc đường dẫn file .sql đã ghi dưới D:\Fast Script\…>
 
     ### Đã tra gì trước khi viết
     | Nguồn | Tìm gì | Kết quả |
@@ -85,8 +86,10 @@ hoặc cột mới thì `erp-table-propose` — cấp đặc tả `ddl`, không 
 ## Ràng buộc
 
 - **KHÔNG BAO GIỜ** truyền `allowWrite: true` cho `query_sql`. Đây là database thật của khách.
-- **KHÔNG** ghi file vào thư mục chương trình khách. File `.sql` đặt ở nơi người điều phối chỉ
-  định, hoặc trả nguyên văn trong báo cáo.
+- **KHÔNG BAO GIỜ** ghi `.sql` vào thư mục chương trình khách — program là thư mục web chạy
+  trên internet. Đường dẫn bắt buộc: `D:\Fast Script\{TenDuAn}\App` hoặc `…\Sys`, ghi bằng
+  **đường dẫn tuyệt đối** (thư mục làm việc mặc định thường CHÍNH LÀ program). `{TenDuAn}` là
+  đoạn áp chót của program path. Rule đầy đủ: `erp-sql-script-location`.
 - Câu SQL tự viết để khảo sát **luôn có `TOP`**.
 - **KHÔNG** đưa vào báo cáo: connection string, tài khoản, mật khẩu, tên database. Chỉ program
   path hoặc mã dự án.

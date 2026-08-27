@@ -6,7 +6,7 @@ domain: erp
 description: Tra UR/ticket đã làm trước khi clone hay thiết kế — ưu tiên ma_da kèm fcode1 khi biết dự án và số yêu cầu, lật hết trang trước khi đổi diễn đạt, tối đa 3 query mỗi lượt, tóm tắt có dẫn chứng.
 requires: [4ai-fbo]
 see-also: [pm-program-lookup, pm-ledger-maintain]
-version: 1
+version: 2
 ---
 Tra **UR/ticket đã làm** trước khi clone/thiết kế — không đoán theo trí nhớ.
 

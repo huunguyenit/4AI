@@ -2,7 +2,7 @@
 
 Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự động (agents) **tập trung cho FBO/FBI** — viết một lần, dùng trên tất cả platform: **Claude Code, Cursor, Antigravity** và VSCode/Copilot.
 
-> **Chỉ muốn dùng, không muốn sửa?** Cài bằng một lệnh — xem [Cài đặt](#-cài-đặt).
+> **Mới bắt đầu?** Clone repo rồi chạy `sync` — xem [Cài đặt](#-cài-đặt).
 
 ## 🎯 Tính năng chính
 
@@ -17,40 +17,35 @@ Một bộ quy tắc (rules), hướng dẫn (skills), và tác nhân tự độ
 
 ## 📦 Cài đặt
 
-Chọn theo tool bạn dùng — Claude Code và Cursor mỗi bên có marketplace riêng, không dùng chung
-cơ chế cài.
-
-### Claude Code
-
-Chọn theo việc bạn định làm gì với 4AI.
-
-| | **Cài plugin** | **Clone repo** |
-|---|---|---|
-| Dành cho | Người **dùng** skill/agent/command | Người **sửa** asset trong hub |
-| Cần | Claude Code | Claude Code, Cursor, VSCode hoặc Antigravity |
-| Cập nhật | `/plugin marketplace update` | `git pull` + `sync` |
-| Gồm | Asset + MCP + CLI, tự chứa | Toàn bộ hub, sửa và emit lại được |
-
-### Cách 1 — Cài plugin (khuyến nghị nếu chỉ để dùng)
-
-Chỉ dùng được trên Claude Code. Cài một lệnh, không phải clone gì:
+4AI là một **compiler**, không phải một gói cài sẵn: clone repo, chạy `sync`, nó ghi asset ra
+đúng thư mục config của từng tool (`.claude/`, `.cursor/`, `.github/`, `.agents/`) trong workspace
+bạn chỉ định ở `targets.json`.
 
 ```bash
-/plugin marketplace add huunguyenit/4AI
+git clone https://github.com/huunguyenit/4AI
 ```
 
 ```bash
-/plugin install 4ai@fast-source-4ai
+node tools/4ai.mjs check
 ```
 
-Xong. Gói đã bao gồm sẵn:
-- **45 skill** — doctrine, rule và quy trình ERP/PM, model tự nạp khi task chạm phạm vi
-- **9 agent** — `erp-explorer`, `erp-builder`, `erp-sql-expert`, `pm-analyst`…
-- **7 command** — `/erp-screen-find`, `/erp-diff-review`, `/pm-status`, `/pm-review`…
-- **MCP `4ai-fbo`** — tra cứu controller, phân giải DTD entity, đo phạm vi Include, `query_sql`
-- **CLI `tools/4ai.mjs`** — để nhóm command PM dựng được báo cáo HTML
+```bash
+node tools/4ai.mjs sync --dry-run
+```
+
+Xem kế hoạch ghi rồi bỏ `--dry-run` để ghi thật. Chi tiết ở
+[Quickstart](#quickstart--sửa-một-điều-gì-đó).
 
 Yêu cầu: **Node.js 22+** (MCP dùng `node:sqlite` built-in). Không cần `npm install` — zero dependency.
+
+Hub hiện có (số đếm ra từ `node tools/4ai.mjs check`, đừng chép tay số này):
+
+- **3 doctrine + 15 rule** — nguyên tắc nền và quy tắc kiểm soát chất lượng
+- **30 skill** — quy trình ERP/PM, model tự nạp khi task chạm phạm vi
+- **10 agent** — `erp-explorer`, `erp-builder`, `erp-sql-expert`, `pm-analyst`…
+- **12 command** — `/erp-screen-find`, `/erp-diff-review`, `/pm-status`, `/pm-review`…
+- **MCP `4ai-fbo`** — tra cứu controller, phân giải DTD entity, đo phạm vi Include, `query_sql`
+- **CLI `tools/4ai.mjs`** — để nhóm command PM dựng được báo cáo HTML
 
 > **Bề mặt nào chạy được cái gì.** Claude Code có đủ bốn primitive (skill · agent · command ·
 > MCP). Chat/Cowork **chỉ có skill và MCP**: `/pm-review` không xuất hiện, sub-agent không giao
@@ -59,155 +54,11 @@ Yêu cầu: **Node.js 22+** (MCP dùng `node:sqlite` built-in). Không cần `np
 > `get_review_dataset`: đó là dữ liệu thô, bản tự chế không qua validate payload và không nằm
 > trong ledger.
 
-Cập nhật về sau:
-
-```bash
-/plugin marketplace update
-```
-
-**Index SQLite sống sót qua update.** Nó nằm ở `${CLAUDE_PLUGIN_DATA}` chứ không nằm trong thư
-mục cache của plugin, nên không phải chạy lại `index_program` mỗi lần nâng cấp.
-
-**Lệnh bảo trì hub không có trong plugin** — `/4ai-sync`, `/4ai-doctor`, `/4ai-skill-create`, `/4ai-rule-create`,
-`/4ai-agent-create` chỉ có ý nghĩa khi bạn đang đứng trong repo, nên chúng cố tình bị loại khỏi bản
-phân phối. Cần chúng thì dùng cách 2.
-
-### Cách 2 — Clone repo (khi cần sửa asset)
-
-Xem [Quickstart](#quickstart--sửa-một-điều-gì-đó) bên dưới.
-
-### Cursor
-
-Cursor có **Plugin + Marketplace riêng**, khác cơ chế `/plugin marketplace add` của Claude Code
-— không dùng chung, không thể trỏ Claude Code vào marketplace của Cursor hay ngược lại.
-
-| | **Cài qua Marketplace** | **Clone repo (`sync`)** |
-|---|---|---|
-| Dành cho | Người **dùng**, không cần sửa asset | Người **sửa** asset trong hub |
-| Cần | Cursor + Team Marketplace của tổ chức | Cursor + Node.js 22+ |
-| Cập nhật | Tự động (Auto Refresh) hoặc bấm lại trong Dashboard | `git pull` + `sync` |
-| Gồm | rules + agents + commands + MCP, tự chứa | Toàn bộ hub |
-
-#### Cách A — Team Marketplace từ GitHub
-
-Repo này đã có sẵn `.cursor-plugin/marketplace.json` ở gốc, trỏ vào gói `plugins/4ai-cursor/`
-(dựng bởi `node tools/4ai.mjs sync --target plugin-cursor`, đã commit sẵn) — không cần cấu hình
-thêm gì phía repo.
-
-1. Trong Cursor: **Dashboard → Plugins → Add Marketplace**.
-2. Chọn **Import from Repo**, trỏ vào `https://github.com/huunguyenit/4AI`.
-3. (Tuỳ chọn) bật **Enable Auto Refresh** để marketplace tự cập nhật khi có commit mới lên
-   `main` — cần cài **Cursor GitHub App** cho tổ chức/repo.
-4. Mở **Customize** ở thanh bên → tìm plugin **4ai** → **Install** → chọn scope *project* hoặc
-   *user*.
-
-Gói cài gồm bốn primitive, mỗi cái đúng thư mục Cursor auto-discover: `rules/` (doctrine +
-rule, ra `.mdc` thật với `alwaysApply` đúng khai báo trong hub — **không** hạ xuống thành skill
-như bên Claude), `skills/<id>/SKILL.md` (kèm `references/` nếu có), `agents/`, `commands/`, và
-MCP `4ai-fbo`. Giống hệt hành vi khi `sync` thẳng vào `.cursor/` của một project đã clone.
-
-Yêu cầu: **Node.js 22+** trên máy chạy Cursor (MCP dùng `node:sqlite` built-in).
-
-#### Cách A2 — Public Marketplace (`cursor.com/marketplace/publish`)
-
-Cursor **review thủ công từng plugin và từng bản cập nhật**, và yêu cầu plugin **mã nguồn mở** —
-nghĩa là toàn bộ repo này là nội dung công khai, không riêng thư mục `plugins/4ai-cursor/`.
-
-Vì vậy repo **không chứa** tên database nội bộ, đường dẫn share, tên khách hay mã nhân viên:
-tất cả đã chuyển thành token `{...}` khai ở `data/qlda.local.json` (xem
-[Định danh hạ tầng nội bộ](#3-định-danh-hạ-tầng-nội-bộ--bắt-buộc-setup-hỏi-ngay)). Trước mỗi
-lần nộp bản cập nhật, quét lại:
-
-```bash
-git ls-files | xargs grep -lE "<tên DB nội bộ>|<IP share>|<mã khách>" 2>/dev/null
-```
-
-Nộp tại `cursor.com/marketplace/publish` bằng tài khoản Cursor của tổ chức, trỏ vào repo
-GitHub. Repo phải **public** tại thời điểm review.
-
-> **Index SQLite chưa xác nhận sống sót qua update** như bên Claude Code (`${CLAUDE_PLUGIN_DATA}`)
-> — Cursor chưa có biến tương đương được xác nhận, nên `mcp.json` của gói không set
-> `FBO_DATA_ROOT`: index ghi ngay trong thư mục cài (`${PLUGIN_ROOT}/.4ai/index/`). Cập nhật
-> plugin có thể mất index, phải index lại chương trình. Xem ghi chú đầu
-> `tools/lib/emit/cursor-plugin.mjs`. **Giấy phép chung số phận** — nó nằm ở
-> `${PLUGIN_ROOT}/data/license.json`, mất thì `license import` lại đúng file cũ (giấy phép gắn
-> theo máy, không phải theo lần cài, nên dùng lại được).
-
-#### Cách B — Clone repo (khi cần sửa asset)
-
-Giống Cách 2 của Claude Code ở trên — xem [Quickstart](#quickstart--sửa-một-điều-gì-đó). Sau
-khi `sync`, Cursor đọc trực tiếp `.cursor/rules/`, `.cursor/agents/`, `.cursor/commands/`,
-`.cursor/mcp.json` trong chính repo.
-
-## 🔑 Giấy phép (chỉ với bản cài từ gói plugin)
-
-Gói plugin mang sẵn **public key**; giấy phép là một file JSON **ký bằng private key của Fast
-Source** và **gắn với đúng một máy**. Không có máy chủ kiểm tra, không gọi mạng — máy khách
-thường không ra được Internet, và một MCP server treo vì chờ HTTP còn tệ hơn không có giấy phép.
-
-### Người dùng — ba bước
-
-```bash
-node tools/4ai.mjs license id
-```
-
-1. **Lấy Device ID** — lệnh trên in đúng một dòng dạng `XBZ3E-SQ33C-K8R5F-0Y1TC`. Không có
-   terminal (chat/Cowork) thì bảo trợ lý gọi tool MCP `license_status`. Device ID là **giá trị
-   băm** từ định danh cài đặt HĐH (MachineGuid trên Windows), không lộ tên máy hay địa chỉ MAC.
-2. **Gửi Device ID cho Fast Source** → nhận lại một file `.json`.
-3. **Kích hoạt**:
-
-```bash
-node tools/4ai.mjs license import duong-dan-file.json
-```
-
-   Không có terminal thì: `license_activate({ license: "<dán nguyên nội dung file>" })`. Giấy
-   phép lưu ở **thư mục trạng thái cấp người dùng** — `%APPDATA%\4ai\data\license.json` trên
-   Windows — nên chỉ phải kích hoạt **một lần trên mỗi máy**: sống sót qua update plugin, qua
-   cài lại, và qua từng phiên Cowork. Kích hoạt xong dùng được ngay, **không cần khởi động lại
-   MCP server**.
-
-Xem trạng thái và hạn bất cứ lúc nào: `node tools/4ai.mjs license`.
-
-### Cái gì bị chặn khi chưa kích hoạt
-
-| Bị chặn | Không bị chặn |
-|---|---|
-| Mọi tool MCP tra cứu (`list_programs`, `find_controller`, `query_sql`…) | `license_status`, `license_activate`, `doctor` |
-| `4ai report`, `4ai serve`, `4ai graph` | `4ai check`, `sync`, `list`, `explain`, `targets`, `doctor`, `setup` |
-
-`tools/list` **vẫn** liệt kê đủ tool khi chưa kích hoạt — chặn ở bước gọi chứ không ở lúc khởi
-động, để mỗi lần gọi còn chỗ in ra Device ID và các bước gỡ. Chạy từ **mã nguồn hub** (thư mục
-có `assets/` và `targets.json`) thì không chặn gì: hàng rào này dành cho gói mang đi, ai có repo
-thì đã có toàn bộ mã nguồn.
-
-### Phía Fast Source — cấp giấy phép
-
-```bash
-node tools/4ai.mjs license keygen --kid fs-2026a
-```
-
-Sinh cặp khoá ed25519 một lần. Private key ghi vào `~/.4ai/keys/license-<kid>.pem` (**ngoài
-repo**, quyền 600); lệnh in ra mục public key để dán vào `data/license-public-keys.json` rồi
-`sync` lại để đóng vào gói. Repo **chưa có khoá nào** — gói dựng trước khi dán public key sẽ báo
-"gói thiếu public key" ở mọi máy.
-
-```bash
-node tools/4ai.mjs license issue --device XBZ3E-SQ33C-K8R5F-0Y1TC --to "Công ty ABC" --days 365 --out abc.json
-```
-
-Hạn mặc định **365 ngày**; `--expires YYYY-MM-DD` để chốt ngày, `--forever` để cấp vĩnh viễn —
-phải nói thẳng vì **không thu hồi được** (không có máy chủ kiểm tra). Đổi một chữ trong file đã
-cấp là chữ ký hỏng ngay; nới hạn bằng tay cũng vậy.
-
-> **Đây là hàng rào thương mại, không phải hàng rào an toàn.** Runtime là JavaScript đọc được:
-> ai sửa `mcp/fbo/lib/license.mjs` thì bỏ được kiểm tra. Mục tiêu là "chỉ chạy ở nơi đã được
-> cấp" và để lại vết rõ ràng khi chạy sai chỗ, không phải chống dịch ngược. Mất private key =
-> không cấp thêm được giấy phép cho khoá đó (giấy phép đã cấp vẫn chạy) → sao lưu chỗ an toàn.
+Cập nhật về sau: `git pull` rồi `sync` lại.
 
 ## ⚙️ Cấu hình cục bộ (trước khi tra QLDA / chạy `report`)
 
-Áp dụng cho **cả hai cách cài** — MCP `4ai-fbo` cần biết chuỗi kết nối DB **nội bộ** và danh tính
+MCP `4ai-fbo` cần biết chuỗi kết nối DB **nội bộ** và danh tính
 PM trước khi `list_programs`, `get_review_dataset` hay `node tools/4ai.mjs report` chạy được.
 `query_sql` trên chương trình **khách** thì không chờ bước này: truyền thẳng đường dẫn program là
 chạy, kết nối đọc từ `Web.config` của chính program.
@@ -215,7 +66,7 @@ chạy, kết nối đọc từ `Web.config` của chính program.
 
 ### Cách nhanh nhất — `setup` rồi `doctor`
 
-Mở terminal, chạy hai lệnh (cài plugin thì `cd` vào thư mục plugin trước):
+Mở terminal ở gốc repo, chạy hai lệnh:
 
 ```bash
 node tools/4ai.mjs setup
@@ -256,13 +107,13 @@ set_pm_identity(maNv: "PM01", boPhanLt: "FSD")
 ```
 
 Tool tự ghi vào `data/qlda.local.json` (đã gitignore) ở đúng **state root** (dev: gốc hub;
-plugin: `%APPDATA%\4ai` — xem [Trạng thái nằm ở đâu](#trạng-thái-nằm-ở-đâu)). Các tool khác (`list_programs`,
+bản mang đi: `%APPDATA%\4ai` — xem [Trạng thái nằm ở đâu](#trạng-thái-nằm-ở-đâu)). Các tool khác (`list_programs`,
 `get_review_dataset`, `report`) đọc lại giá trị này ngay lần gọi tiếp theo, không cần khởi động
 lại MCP server. Nhập nhầm dạng token mẫu (`{PMName}`) sẽ bị tool từ chối, không âm thầm nuốt.
 
 ### 3. Định danh hạ tầng nội bộ — **bắt buộc**, `setup` hỏi ngay
 
-Repo này là **mã nguồn mở** (yêu cầu của Cursor Marketplace), nên `data/qlda.json` **không**
+Repo này là **mã nguồn mở**, nên `data/qlda.json` **không**
 chứa tên database hay đường dẫn share của công ty bạn — nó chỉ giữ token `{...}`. Giá trị thật
 do từng máy khai vào `data/qlda.local.json` (đã gitignore):
 
@@ -319,11 +170,11 @@ mà không phải in chuỗi bí mật ra màn hình thì dùng `nguonKetNoi(pro
 
 #### ⚠️ Khai rồi mà vẫn báo chưa khai — hai cái bẫy
 
-**Bẫy 1 — sửa nhầm bản `qlda.local.json`.** Một máy thường có nhiều bản: trong hub, trong thư
-mục **gói plugin đã cài**, trong thư mục dữ liệu của phiên. Chỉ **một** bản được đọc:
-`%APPDATA%\4ai\data\qlda.local.json` khi chạy như plugin, gốc hub khi chạy dev. Copy file cấu
-hình của hub vào thư mục gói plugin là công cốc — không ai đọc nó, và lỗi trông y hệt như chưa
-sửa gì. Không chắc thì hỏi `doctor`, nó in ra đường dẫn thật đang được đọc.
+**Bẫy 1 — sửa nhầm bản `qlda.local.json`.** Một máy thường có nhiều bản: trong hub, trong một
+bản chép mang đi, trong thư mục dữ liệu của phiên. Chỉ **một** bản được đọc:
+`%APPDATA%\4ai\data\qlda.local.json` khi `FBO_DATA_ROOT` được đặt, gốc hub khi chạy dev. Copy
+file cấu hình của hub sang thư mục khác là công cốc — không ai đọc nó, và lỗi trông y hệt như
+chưa sửa gì. Không chắc thì hỏi `doctor`, nó in ra đường dẫn thật đang được đọc.
 
 **Bẫy 2 — đặt biến môi trường sau khi tiến trình đã chạy.** Tiến trình MCP giữ **bản chụp** môi
 trường lúc khởi động. `setx` hay sửa trong System Properties xong mà chưa thoát hẳn ứng dụng
@@ -332,7 +183,7 @@ host (Claude Desktop/Cowork) thì tiến trình đang chạy vẫn dùng giá tr
 
 Không có shell để chạy `doctor` (chat, Cowork) thì gọi **tool MCP `doctor`**: nó trả về data
 root đang dùng, **đường dẫn thật** của file cấu hình được đọc, danh sách **tên khoá** đã khai,
-nguồn kết nối app/sys/đồ thị, giấy phép, sqlcmd — không bao giờ trả giá trị chuỗi kết nối. Một
+nguồn kết nối app/sys/đồ thị, sqlcmd — không bao giờ trả giá trị chuỗi kết nối. Một
 lần gọi tool này thay cho việc thử lại nhiều lần rồi đoán.
 
 ### Trạng thái nằm ở đâu
@@ -341,16 +192,16 @@ Hai gốc, cố ý khác nhau:
 
 | | Gốc | Chứa gì | Mất thì sao |
 |---|---|---|---|
-| **data root** | `FBO_DATA_ROOT` (plugin: `${CLAUDE_PLUGIN_DATA}`), dev: hub | index SQLite | chạy lại `index_program` |
-| **state root** | `FBO_STATE_ROOT`, mặc định `%APPDATA%\4ai` (plugin); dev: hub | `data/license.json`, `data/qlda.local.json`, `ledger/` | phải xin lại giấy phép, khai lại cấu hình |
+| **data root** | `FBO_DATA_ROOT` nếu được đặt, dev: hub | index SQLite | chạy lại `index_program` |
+| **state root** | `FBO_STATE_ROOT`, mặc định `%APPDATA%\4ai` khi có `FBO_DATA_ROOT`; dev: hub | `data/qlda.local.json`, `ledger/` | phải khai lại cấu hình |
 
-Tách ra vì `${CLAUDE_PLUGIN_DATA}` **không bền như tên gọi**: trong Cowork nó nằm trong thư mục
-của **từng phiên**, phiên đóng là mất theo. Trước khi tách, mỗi phiên Cowork mới là một lần kích
-hoạt lại giấy phép và gán lại PM. Index thì dựng lại được nên cứ để nguyên chỗ cũ.
+Tách ra vì thư mục dữ liệu mà host cấp cho `FBO_DATA_ROOT` **không bền**: trong Cowork nó nằm
+trong thư mục của **từng phiên**, phiên đóng là mất theo. Trước khi tách, mỗi phiên Cowork mới
+là một lần gán lại PM. Index thì dựng lại được nên cứ để nguyên chỗ cũ.
 
 Bản cài cũ không mất gì: lần đầu đọc mà state root chưa có file, 4AI **copy** từ data root sang
-(copy chứ không move — rollback về bản plugin cũ vẫn chạy). Muốn chốt chỗ khác (máy nhiều bản
-cài, hoặc chạy test) thì đặt `FBO_STATE_ROOT`.
+(copy chứ không move — rollback về bản cũ vẫn chạy). Muốn chốt chỗ khác (máy nhiều bản cài,
+hoặc chạy test) thì đặt `FBO_STATE_ROOT`.
 
 Ví dụ `data/qlda.local.json` đầy đủ (không commit — đã trong `.gitignore`):
 
@@ -394,9 +245,8 @@ Sau khi `sync`, assets tự động xuất hiện trong thư mục `.claude/`:
 Ví dụ: `/pm-status` hiển thị trạng thái tất cả task trong `ledger/`, phân theo dự án.
 
 ### Cursor
-Cài qua Marketplace hoặc clone+sync — xem [Cài đặt → Cursor](#cursor). Dù cài cách nào, kết quả
-tương đương:
-- **Cursor Rules** → `.cursor/rules/` (hoặc `rules/` trong gói plugin) — chạy mỗi lần gõ, giúp tránh lỗi thường gặp
+Clone repo rồi `sync` — xem [Cài đặt](#-cài-đặt):
+- **Cursor Rules** → `.cursor/rules/` — chạy mỗi lần gõ, giúp tránh lỗi thường gặp
 - **Rules áp dụng:** Không viết SQL tay, luôn dùng `query_sql`; không lộ connection string; dùng `resolve_entities` trước khi sửa XML FBO
 - Cursor hoạt động offline — chuẩn bị tài liệu trước bằng `query_sql` rồi truyền vào prompt
 
@@ -456,49 +306,6 @@ node tools/4ai.mjs explain <asset-id>    # Asset này emit ra file nào
 node tools/4ai.mjs check                  # Validate — exit 0 = OK
 ```
 
-### Dựng lại plugin sau khi sửa asset
-
-Plugin **Claude Code** là phương ngữ thứ năm của compiler, plugin **Cursor** là phương ngữ thứ
-sáu — cả hai không phải thư mục dựng tay, sinh ra từ chính corpus `assets/`, giống hệt `.claude/`
-hay `.cursor/`:
-
-```bash
-node tools/4ai.mjs sync --dry-run --target plugin --target plugin-cursor
-```
-
-```bash
-node tools/4ai.mjs sync --target plugin --target plugin-cursor
-```
-
-(Dựng riêng từng cái thì bỏ `--target` còn lại — `--target plugin` chỉ Claude, `--target
-plugin-cursor` chỉ Cursor.)
-
-Output **được commit** — đây là artifact người khác cài, diff phải nhìn thấy được. Sửa asset mà
-quên dựng lại plugin thì người cài (cả hai bên) vẫn nhận bản cũ.
-
-Những điều hai emitter plugin làm khác các emitter "sync trực tiếp vào workspace" kia:
-
-- **Gói kèm runtime.** `mcp/fbo/`, `src/`, `tools/`, `data/` được chép nguyên văn vào gói. Plugin
-  cấm đường dẫn `../` ra ngoài gốc, nên mọi thứ asset nhắc tới phải nằm trong gói. Layout giữ
-  nguyên so với hub để import tương đối giữa `mcp/fbo/` và `src/` còn đúng.
-- **`*.local.json` không bao giờ đi kèm.** Đó là cấu hình per-máy (`data/qlda.local.json` chứa
-  mã PM và connection string), gitignore và loại khỏi bản phân phối.
-- **Đường dẫn runtime tuyệt đối (node.exe) đổi thành tên lệnh trần**, để máy người cài tự phân
-  giải qua PATH thay vì dùng đường dẫn cứng của máy build.
-
-Hai emitter khác nhau ở đúng một điểm — cách xử lý doctrine/rule:
-
-- **Claude plugin:** không có primitive "context luôn nạp" như `.claude/4ai-context.md` và
-  không có primitive rule theo path — doctrine và rule `always: true` đều hạ thành **skill**
-  (model tự nạp theo `description`), đúng cách scope user-global vẫn làm.
-- **Cursor plugin:** CÓ primitive `rules/` auto-discover thật — doctrine và rule ra file `.mdc`
-  thật với `alwaysApply` đúng khai báo, giống hệt hành vi `sync` trực tiếp vào `.cursor/rules/`.
-  Không có `skills/`: skill-kind asset cũng gộp vào `rules/*.mdc`, nhất quán với live target
-  `cursor` hiện tại (xem `tools/lib/emit/cursor-plugin.mjs`).
-
-Bump version plugin ở `targets.json` → `pluginVersion` (áp cho cả hai target `plugin` và
-`plugin-cursor`), không sửa tay `plugin.json`.
-
 ## 📊 Báo cáo & Template
 
 ### Report Templates — HTML Tự Chứa
@@ -516,37 +323,6 @@ tools/templates/report/
 1. Sửa HTML hoặc CSS
 2. Chạy `check` để validate
 3. Chạy `sync` để áp dụng trên tất cả platform
-
-### Report Workflow — MCP Tool
-
-Hai tool MCP `4ai-fbo`, gọi trực tiếp từ agent (Claude, Cursor) — **không phải lệnh CLI**, không
-có `node tools/4ai.mjs plan-report`/`execute-report`. Dùng khi cần một câu hỏi báo cáo tự do,
-khác với `4ai report` (dataset UR **cố định**, xem [Báo cáo Rà Soát Yêu Cầu](#1-báo-cáo-rà-soát-yêu-cầu-ur-review)
-bên dưới — không nhận SQL tự do):
-
-**Bước 1: `plan_report`** — phân giải yêu cầu, tạo metadata. Thuần đọc cấu hình, KHÔNG gọi LLM
-và KHÔNG chạm database:
-```
-plan_report(request: "Báo cáo rà soát dự án tháng 8")
-```
-Tham số khác: `program` (path hoặc `nbdmda.ma_da`), `domain` (`qlda` | `fbo`, ép domain thay vì
-tự nhận), `maxRows` (mặc định 10000). Output:
-- `queryPlan` — bảng và cột cần truy vấn
-- `metadata` — enum, rule kinh doanh
-- `prompt` — hướng dẫn cho agent tự viết SQL
-- `planId` — dùng trong bước tiếp
-
-**Bước 2: Agent tự viết SQL** — dùng `prompt` từ bước 1 để viết câu SELECT phù hợp.
-
-**Bước 3: `execute_report`** — SQL bạn viết được đối chiếu lại **đúng** metadata đã chốt ở bước
-plan (bảng, cột, bảng/cột bị cấm) trước khi chạy read-only; sai schema thì trả
-`VALIDATION_FAILED`, không chạm database:
-```
-execute_report(planId: "<planId>", sql: "SELECT ...")
-```
-Tham số khác: `program`, `database` (mặc định lấy từ metadata của plan), `maxRows` (tối đa 10000).
-
-**Bảo mật:** SQL luôn qua lớp validation dựa trên metadata đã chốt ở bước plan — không chạy trực tiếp từ input người dùng.
 
 ### Dashboard HTML Ngoại Tuyến
 
@@ -674,8 +450,8 @@ tường minh. Cần tách vì `MERGE` ghi đè toàn bộ cột: gõ lại `add
 `nhapBoi`/`ngayNhap` luôn là người và lúc ghi **lần đầu**; ai vừa sửa nằm ở cột audit
 `capNhatBoi`/`capNhatLuc`.
 
-Ở bề mặt không có shell (chat/Cowork) thì dùng tool MCP `playbook_add` / `playbook_search` —
-cùng module, cùng luật hợp lệ.
+Kho này chỉ có đường CLI — `playbook_add`/`playbook_search` đã gỡ khỏi bề mặt MCP, nên ở
+chat/Cowork (không có shell) hiện không ghi hay tra được.
 
 Ba điều đáng nhớ về thiết kế của nó:
 
@@ -710,10 +486,6 @@ sửa đặc tả rồi sinh lại, đừng sửa script.
 | Nơi | Mục đích |
 |---|---|
 | **`assets/`** | Tất cả rules, skills, commands, agents. Viết Markdown, auto-emit ra platform |
-| **`plugins/4ai/`** | Bản plugin Claude Code sinh tự động — **không sửa tay**, chạy `sync --target plugin` |
-| **`plugins/4ai-cursor/`** | Bản plugin Cursor sinh tự động — **không sửa tay**, chạy `sync --target plugin-cursor` |
-| `.claude-plugin/marketplace.json` | Catalog marketplace Claude Code để `/plugin marketplace add` |
-| `.cursor-plugin/marketplace.json` | Catalog marketplace Cursor để Import from Repo (Team Marketplace) |
 | `assets/rules/` | Kiểm soát chất lượng (không lộ secret, tên biến, SQL injection, v.v.) |
 | `assets/skills/` | Quy trình chi tiết (customize FBO, audit, PM workflow) |
 | `assets/agents/` | Tác nhân tự động (phân tích tài liệu, code review) |
@@ -777,7 +549,7 @@ chính nó, nên viết một lần là đúng ở mọi nơi:
 
 | Dialect | File chính | Reference |
 |---|---|---|
-| Claude Code / Cursor / plugin / Antigravity | `skills/<id>/SKILL.md` | `skills/<id>/references/<tên>.md` |
+| Claude Code / Cursor / Antigravity | `skills/<id>/SKILL.md` | `skills/<id>/references/<tên>.md` |
 | Copilot | `.github/instructions/<id>.instructions.md` | `.github/instructions/references/<id>/<tên>.md` |
 
 Cursor gọi `references/` đúng cái tên đó và nạp theo yêu cầu, nên layout trùng Claude Code.

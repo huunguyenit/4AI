@@ -144,7 +144,8 @@ if (v != '6' && v != '9') return;
 </field>
 ```
 
-Grid detail: khai `onchange` trực tiếp trên `<field>` (xem [naming.md](naming.md)). Dir master phức tạp: ưu tiên MCP `add_clientscript_to_field`.
+Grid detail: khai `onchange` trực tiếp trên `<field>` (xem [naming.md](naming.md)). Dir master phức
+tạp: khai `<clientScript>` trên `<field>` và để thân hàm trong Include Javascript.
 
 ### JS — handler (chi tiết + tab thuế)
 

@@ -6,7 +6,7 @@ domain: erp
 description: Pattern JS ES5 cho Dir/Grid XML — f.request và g.request, fill hoặc clear lưới, FlowMulti, request trước làm sau qua ResponseComplete, khoá cột theo dòng. Mở khi thêm onChange hay toolbar lưới.
 requires: [4ai-fbo]
 see-also: [erp-js-api-reference, erp-controller-reference]
-version: 1
+version: 2
 ---
 Skill JS FastBusiness (ES5) — các luồng chính:
 
@@ -105,8 +105,9 @@ Chi tiết: [js-grid-row-disabled.md]({REFDIR}/js-grid-row-disabled.md)
 ## Lưu ý
 
 - Điều kiện: bọc `if (điều_kiện) { ... }` — tránh `if (!x) return` khi handler đơn giản ([js-grid-fill.md]({REFDIR}/js-grid-fill.md))
-- clientScript Dir phức tạp: MCP `add_clientscript_to_field`
-- SQL/proc: `fbo_style_sql` / `fbo_get_data_one_voucher`
+- clientScript Dir phức tạp: khai `<clientScript>` trên `<field>`, thân hàm để trong Include
+  Javascript — không có tool sinh hộ. Bề mặt API: skill `erp-js-api-reference`
+- SQL/proc: rule `erp-sql-style` · luồng lấy dữ liệu: skill `erp-voucher-data-lookup`
 
 ## Cập nhật skill
 

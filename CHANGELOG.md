@@ -5,6 +5,299 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Đã thêm — ADR-0002: FBO Designer tách thành repo riêng
+
+`docs/adr/ADR-0002-fbo-designer-repo-split.md`. Extension VS Code kéo thả thiết kế form FBO
+sẽ sống ở repo `Development/FboDesigner`, không nằm trong hub — vì extension bắt buộc có
+dev-dependency, còn hub có hard rule zero npm dependency và tự định nghĩa là compiler chứ
+không phải ứng dụng.
+
+Ràng buộc đặt lên hub: `mcp/fbo/lib/encoding.mjs` về sau sẽ chuyển sang import `fbo-core` của
+repo mới thay vì giữ bản riêng — chiều phụ thuộc một chiều, hub không bao giờ import ngược.
+Cho tới lúc đó, **hai bản encoding song song** là nợ có ý thức, không phải trạng thái đúng.
+
+Hai file `assets/skills/erp/erp-view-design/references/` (`reference-render-pipeline.md`,
+`reference-item-value.md`) từ nay mang thêm vai trò **đặc tả nguồn** cho repo kia: code lệch
+đặc tả thì sửa code.
+
+### Đã thêm — nội hoá bộ rule team FastBusiness
+
+Bộ quy tắc dùng chung của team (CodeGraph/Cypher + SQL format + an toàn AI) được bóc thành
+asset của hub thay vì giữ nguyên văn. Nguyên tắc bóc: **giữ ý định, đổi bề mặt** — không tạo
+asset nào trỏ vào tool hub không có, không tạo asset trùng thứ đã tồn tại.
+
+- **Ba rule mới**, đều `severity: hard`:
+  - `erp-edit-tooling` — sửa file nguồn qua Edit/StrReplace, không ghi đè bằng shell. Hai lý
+    do độc lập: người dùng phải duyệt được diff, và `sed -i`/`Set-Content` phá Windows-1258 +
+    CRLF + BOM của XML nguồn.
+  - `erp-sql-schema-check` — soi bảng nguồn **và** bảng đích bằng `query_sql { object }` trước
+    khi viết `INSERT`/`UPDATE`/`SELECT`. Ca đắt không phải cột không tồn tại (SQL Server báo
+    ngay) mà cột tồn tại nhưng khác nghĩa hoặc khác độ dài.
+  - `erp-js-naming` — biến local JS snake_case khớp tên field. Luật đọc được bằng grep:
+    tên khớp thì một lần `search_content` ra hết; camelCase làm nhánh đó tàng hình.
+- **`erp-sql-style` v4** — bổ sung phần format team có mà hub thiếu: trần ~120 ký tự/dòng,
+  `CASE WHEN` tách nhánh, dynamic SQL format nhiều dòng, tham số proc mỗi cái một dòng, và
+  §11 mới "sửa SQL đã có": reformat KHÔNG đổi alias / thứ tự tham số / kiểu / điều kiện lọc,
+  cộng checklist bốn chỗ phải rà khi thêm một trường (struct `#temp`, mọi `INSERT`, `SELECT`
+  output, search/paging).
+- **`erp-navigation-lookup` v2** — thêm `references/query-intent-map.md`: 14 template Cypher
+  của CodeGraph dịch sang tool call `4ai-fbo`. 13/14 có tương đương; template 10 (aggregate)
+  thì **không**, và file nói thẳng là không thay vì gợi ý ước lượng. Kèm mục "nguyên tắc
+  KHÔNG chuyển được": lệnh cấm `LIKE`/`ILIKE` là chuyện riêng của KùzuDB, SQL Server có
+  `LIKE` và dùng được.
+
+**Xung đột đã chốt.** Tài liệu team viết `DECLARE @ngay_ct smalldatetime`; `erp-sql-style` §1
+bắt tham số/biến proc bằng tiếng Anh (`@Period`, `@DateFrom`). Giữ tiếng Anh — snake_case chỉ
+áp cho JS phía client. Ranh giới ghi tường minh ở cả hai rule để lần sau không phải xử lại.
+
+**Không thêm asset cho ba mục đã có chỗ đứng**: "không deploy proc khi chưa hỏi" nằm ở
+`erp-sql-access` (`allowWrite` phải nêu nguyên văn câu lệnh để duyệt) và checklist cuối
+`erp-sql-style`; format `JOIN`/`IF BEGIN` nằm ở `erp-sql-style` §2.3; catalog tên hàm JS theo
+convention FBO nằm ở `erp-js-implement`.
+
+### Đã gỡ — quét dead code toàn repo
+
+Dựng hai bộ đếm chạy trên mọi `.mjs` thật (`tools/`, `mcp/`, `src/`, `tests/`) thay vì đọc bằng
+mắt: một đếm export **không có người gọi ngoài file khai nó**, một tìm **binding import khai rồi
+không dùng**. Bộ thứ nhất lọc thêm một bước — chỗ nhắc tên nằm trong comment không tính là dùng,
+vì đó chính là kiểu code chết nhìn qua tưởng sống.
+
+Kết quả: 55/262 export không có người gọi ngoài, nhưng **chỉ 5 cái chết thật**; 50 cái còn lại là
+code đang chạy, chỉ thừa từ khoá `export`. Không đụng nhóm 50 đó — đổi chúng là churn, không phải
+dọn rác.
+
+- **Xoá**: `ledgerDataRoot` (alias `@deprecated`, 0 chỗ gọi) ở `tools/lib/assets.mjs`;
+  `DDL_KINDS` ở `tools/lib/ddl.mjs`; `setPath` ở `tools/lib/json.mjs`.
+- **Bốn import thừa**: `mcpPath` (`tools/4ai.mjs`), `fs` (`tools/lib/report.mjs`), `setPath`
+  (`tools/lib/writer.mjs`), `os` (`tests/test-review-report-build.mjs`).
+- **Quét lặp tới điểm dừng.** Gỡ `setPath` khỏi import của `writer.mjs` làm chính `setPath` trong
+  `json.mjs` thành mồ côi — chạy lại bộ đếm mới thấy. Lặp tới khi cả hai bộ đếm trả 0.
+- **Bốn file dữ liệu mồ côi cũng xoá** (quyết định của chủ repo sau khi được nêu ra):
+  `data/fbo-capability.json`, `data/fbo-database.json`, `data/fbo-folders.json`,
+  `data/license.json`. Không dòng code nào nạp bất kỳ file nào trong số đó.
+  `data/` giờ còn đúng thứ có người đọc: `fbo-ddl.json`, `graph-schema.json`,
+  `holidays-vn.json`, `qlda.json`, `qlda.local.json`, `graph/`.
+- **Dọn theo ba chỗ trỏ tới chúng**: `.gitignore` bỏ dòng `data/license.json` (gộp phần
+  còn lại thành một mục `*.pem`); `docs/experience-engine/GRAPH-IN-DATABASE.md` viết lại
+  đoạn "từ vựng đóng" cho khỏi trỏ vào file không còn, kèm ghi chú vì sao chúng biến mất;
+  `tests/test-state-root.mjs` đổi fixture từ `license.json` sang `qlda.local.json` — test
+  đó đo `stateFile()` nói chung, dùng tên file của một hệ thống đã gỡ là gây hiểu nhầm.
+
+### Đã gỡ — giấy phép, và tinh giản bề mặt MCP xuống 14 tool
+
+- **Giấy phép đi hẳn.** Sau khi đường đóng gói plugin bị gỡ (mục ngay dưới), hàng rào này không còn chỗ
+  nào cưỡng chế: `isSourceHub()` trả `true` với mọi bản clone, mà clone là cách duy nhất dùng
+  4AI. Giữ nó chỉ là giữ một cơ chế không bao giờ chạy.
+  Xoá `mcp/fbo/lib/license.mjs`, `tools/lib/license-cli.mjs`, `data/license-public-keys.json`,
+  `tests/test-license.mjs`; gỡ cổng `requireLicense()` ở `mcp/fbo/server.mjs` và hàm
+  `chanGiayPhep()` chặn `graph`/`report`/`serve`/`playbook` trong `tools/4ai.mjs`; gỡ lệnh
+  `4ai license`; `doctor` và `setup` bỏ khối trạng thái giấy phép.
+  *(`data/license.json` trên máy này là file cục bộ đã gitignore — để nguyên, không ai đọc nữa.)*
+- **`stateRoot()` / `FBO_DATA_ROOT` giữ nguyên.** Nó vẫn là chỗ ở của `data/qlda.local.json`
+  và `ledger/`; chỉ có phần prose nhắc "giấy phép" là được viết lại.
+- **MCP: 20 tool → 14.** Bốn tool bị gỡ ngoài hai tool license, chọn theo số lần corpus
+  `assets/` thực sự bảo model gọi chúng:
+  - `plan_report` / `execute_report` — corpus nhắc đúng 3 lần và **cả 3 đều là câu cấm dùng**
+    (`assets/commands/pm/pm-review.md`, `assets/skills/pm/pm-deadline-review.md`). Việc báo cáo
+    tự do đã có `query_sql`; việc báo cáo UR đã có `render_review_report`.
+  - `playbook_add` / `playbook_search` — **0 tham chiếu** trong toàn bộ corpus. CLI
+    `4ai playbook add|edit|search` giữ nguyên, nên kho kinh nghiệm không mất; cái mất là đường
+    ghi/tra từ bề mặt không có shell (chat/Cowork).
+- **Đường báo cáo tự do bị gỡ cả tầng dưới.** Sau khi hai tool MCP đi, cụm module đứng sau
+  chúng không còn ai gọi, nên xoá luôn: `src/workflows/report-workflow.mjs`,
+  `src/database/metadata-resolver.mjs`, `query-plan.mjs`, `query-prompt-builder.mjs`,
+  `query-validator.mjs`, `query-executor.mjs`, và `tests/test-report-pipeline.mjs`.
+  Thư mục `src/workflows/` không còn; `src/database/` chỉ còn `qlda-metadata.mjs` — file
+  này ở lại vì `loadQldaConfig`/`isPmPlaceholder` có hơn 30 chỗ gọi ngoài.
+  Kiểm bằng đồ thị import trước khi xoá: `report-workflow` không còn importer nào, năm
+  module kia chỉ có `report-workflow` gọi — một cụm đóng, không cạnh nào đi ra ngoài.
+- **`qlda-metadata.mjs` cắt hai phần ba.** Bốn export `detectQldaDomain`, `isQldaProgram`,
+  `buildQldaMetadata`, `DOMAIN_THRESHOLD` sinh ra chỉ để phục vụ `metadata-resolver`, nên
+  chết theo nó — cùng bộ helper riêng (`DOMAIN_SIGNALS`, `derivedSignals`,
+  `pickPrimaryTable`, `pushColumns`, `buildBusinessRules`…). Cắt từ mốc
+  `// --- domain detect` tới hết file: **493 → 152 dòng**. Phần sống là đúng hai export
+  `loadQldaConfig` và `isPmPlaceholder` cùng lớp overlay `qlda.local.json` của chúng.
+  Import `stripAccents` rụng theo; header file viết lại cho khớp việc còn làm.
+- **`mcp/servers.json`** bỏ `plan_report` và `license_status` khỏi `autoApprove`, bỏ ghi chú
+  về cổng giấy phép.
+- **Kiểm chứng**: `tools/list` của server trả đúng 14 tool; TOOLS và HANDLERS khớp 1-1, không
+  tool nào thiếu handler và không handler nào thừa; `check` 0 lỗi; `doctor` và `setup` chạy
+  sạch, không còn mục Giấy phép.
+
+### Thêm — rule `erp-sql-script-location`: file .sql ra ngoài thư mục program
+
+Chuẩn bảo mật do chủ dự án chốt: thư mục program là **thư mục web chạy trên internet**, một file
+`.sql` nằm trong đó phát tán toàn bộ cấu trúc bảng và logic proc qua một URL đoán được. Trước đây
+`erp-sql-expert` có nói "không ghi vào thư mục chương trình khách" nhưng chỗ ghi thì để ngỏ —
+*"nơi người điều phối chỉ định"* — nên thực tế agent ghi thẳng vào workspace đang mở, mà workspace
+đang mở **chính là** program.
+
+Rule mới (hard, always) chốt đường dẫn:
+
+    D:\Fast Script\{TenDuAn}\App      -- script chạy trên database nghiệp vụ
+    D:\Fast Script\{TenDuAn}\Sys      -- script chạy trên database hệ thống
+
+`{TenDuAn}` là đoạn **áp chót** của program path, không phải đoạn cuối và không phải tên thư mục
+workspace: `\\172.168.5.14\CustomerPro\FBO\TFR-SP21\SP21\` → `TFR-SP21` là tên dự án, `SP21` là phiên bản.
+Rule nhấn mạnh phải ghi bằng **đường dẫn tuyệt đối** — ghi tương đối là rơi thẳng vào program.
+
+Áp vào 6 asset đang sinh hoặc giao `.sql`: `erp-sql-expert`, `erp-einvoice-customize` (+reference),
+`erp-einvoice-nd70-implement`, `erp-category-create`/`database.md`, `erp-voucher-data-lookup`/`reference-mcp.md`.
+
+### Sửa — `erp-deploy-auditor` (v2): đường dẫn manifest có `\` đầu dòng, script đọc ngoài program
+
+- **Đường dẫn web bắt đầu bằng `\`.** `SP21\App_Data\Controllers\Dir\ARTran.f` là **sai**;
+  `\SP21\App_Data\Controllers\Dir\ARTran.f` là **đúng** — bên PROD dán vào gốc bản triển khai,
+  thiếu `\` thì đường dẫn thành tương đối và giải ra sai chỗ. Gốc là **đoạn cuối** của program path.
+- **Bỏ mô tả gốc đường dẫn cũ.** Doc ghi "tên thư mục cuối của programPath, **thường là `Web`**" —
+  cấu trúc thật là `…\TFR-SP21\SP21\`, đoạn cuối là mã phiên bản chứ không phải `Web`.
+- **Script đọc ở `D:\Fast Script\<TenDuAn>\{App|Sys}`**, không còn đọc `Script\` cạnh program.
+- **Thấy `.sql` dưới program là LỖI.** Quét `Glob **/*.sql`; có kết quả thì mở đầu báo cáo bằng mục
+  `✘ LỖI` **trước cả khối manifest**, không đưa file đó vào manifest và không dùng nó làm nguồn câu
+  lệnh. Agent read-only nên không tự di chuyển, không tự xoá.
+- Ràng buộc đường dẫn: từ "một phép biến đổi" thành **hai** — `.xml`→`.f`, và cắt phần đầu program
+  path còn `\<PhienBan>\…`.
+
+### Sửa — quét tool ma và id chết trên toàn bộ asset ERP
+
+Bắt đầu từ bốn chỗ nợ lại của hai đợt trước, nhưng quét bằng script đối chiếu **mọi** tên kiểu
+`tool_name` trong `assets/**` với 20 tool thật đọc từ `mcp/fbo/lib/tools.mjs` — ra thêm bốn tool ma
+nữa và một reference sai tham số từ đầu tới cuối.
+
+**Tool không tồn tại, đã gỡ khỏi 6 file:**
+
+| Tên ma | Nhắc ở | Đường thật |
+|---|---|---|
+| `generate_sql_for_fields` | `erp-hddv-migrate`, `erp-voucher-data-lookup` | đặc tả `ddl` `kind: "them-cot"` cho `tools/lib/ddl.mjs`, hoặc proc `fsd_addFields` |
+| `search_lmdb_fields` · `generate_field_from_lmdb` | `erp-voucher-data-lookup` | `describe_controller` · `search_content` |
+| `get_field_info` · `add_clientscript_to_field` · `add_function_to_script` | `erp-hddv-migrate`, `erp-js-implement` | khai `<clientScript>` trên `<field>`, thân hàm trong Include Javascript — không có tool sinh hộ |
+| `query_radar` (+ Kuzu/FBOGraph, `build_cmd`, `reference_file`) | `erp-history-search` | `4ai graph build` + skill `pm-graph-maintain` |
+
+`search_qlyc` **giữ nguyên** — nó vốn đã tự khai là thuộc MCP khác chưa được khai trong hub, kèm
+chỉ dẫn phải làm gì khi không có. Đó là ghi chú đúng, không phải lỗi.
+
+**Sai tham số:** `reference-mcp.md` của `erp-voucher-data-lookup` mô tả `query_sql` bằng
+`type=0/1/2` + `query`, và `resolve_entities` bằng `file_path`/`entities`/`list_all`/`force_reload`
+— **không tham số nào trong số đó tồn tại**. Thật là `program` + `object`/`sql`, và
+`program` + `path` + `name` + `includeContent`. Viết lại cả file theo schema thật, thêm bảng các
+tool còn lại hay dùng trong luồng và mục `allowWrite`. `reference-trace-files.md` của
+`erp-history-search` dính cùng lỗi `file_path` + `query_type=1`, sửa luôn.
+
+**Id asset chết** (sót từ đợt chuẩn hoá đặt tên): `fbo_style_sql` → rule `erp-sql-style` (5 chỗ),
+`fbo_get_data_one_voucher` → skill `erp-voucher-data-lookup`.
+
+**`StrReplace`** — không phải tên tool của phương ngữ nào; hub compile ra bốn dialect nên đổi
+thành mô tả trung lập "sửa theo từng khối, không rewrite cả file" (`erp-einvoice-customize`,
+`erp-einvoice-nd70-implement`, `erp-category-create`).
+
+**Một chỗ ngược luật:** `erp-hddv-migrate` bước 9 dặn "bảng partition giữ `$` (`m32$` not `m32`)",
+trong khi `addColumn()` **từ chối** spec có `$` rồi tự sinh vòng lặp `LIKE 'm32$%'` áp ALTER cho mọi
+partition. Sửa lại kèm ghi chú `phanVung: false` cho bảng đơn — thiếu cờ đó thì vòng lặp khớp không
+bảng nào và script chạy êm ru mà chẳng thêm gì.
+
+Version: `erp-einvoice-customize` v2 · `erp-einvoice-nd70-implement` v2 · `erp-hddv-migrate` v2 ·
+`erp-history-search` v2 · `erp-js-implement` v2 · `erp-voucher-data-lookup` v3.
+
+### Sửa — `erp-category-create` (v2): đối chiếu với corpus và với bề mặt MCP thật
+
+Skill dạy validation danh mục bằng template tự soạn, chưa đối chiếu với danh mục đang chạy. Chín
+chỗ sai, trong đó ba chỗ làm hỏng dữ liệu hoặc không chạy được:
+
+- **`Updated` dùng sai giá trị.** Skill bảo `WHERE` theo `$col.OldValue`; thực tế `Updated` chạy
+  **sau** khi dòng đã ghi nên khoá trên đĩa đã là giá trị mới — mọi danh mục thật đều
+  `where {pk} = @{pk}` (`zcdmlhdv.xml`, `Item.xml`, `LotVoucherBalance.xml` khoá 5 cột). Theo skill
+  cũ thì câu update trúng 0 dòng. `OldValue` trong `Updated` chỉ để dọn **bảng liên quan**.
+- **Cấm `LIKE` là cấm ngược.** Idiom chuẩn của mã danh mục là check **lồng nhau** bằng
+  `like rtrim(…) + '%'` hai chiều — mã FBO phân cấp theo tiền tố nên `VT` và `VT01` không được cùng
+  tồn tại. Chính `description` của skill đã ghi "trùng **và lồng**" trong khi thân skill cấm.
+- **`generate_sql_for_fields` không tồn tại.** `4ai-fbo` có 20 tool, không có tool này. Đường tạo
+  bảng đúng là cấp đặc tả `ddl` cho `tools/lib/ddl.mjs`; `query_sql` chặn mọi câu ghi trừ
+  `allowWrite: true`. Skill cũ bảo chạy `CREATE TABLE` qua `query_sql` — mâu thuẫn thẳng với
+  `erp-table-propose` v4 ("không chạy bất kỳ lệnh DDL nào, không tạo sẵn bảng trên DB khách").
+
+Sáu chỗ còn lại:
+
+- **Thiếu hẳn `Deleting`.** 463 file Dir có command này; không có nó là cho phép xoá một mã đang
+  được chứng từ tham chiếu. Thêm pattern D kèm `@$deleteConflict`.
+- **Thiếu luật `zc`.** Bảng danh mục customize bắt buộc tiền tố `zc` — `danhMucTable()` từ chối
+  spec thiếu. View customize là `zv`; sản phẩm chuẩn không có `zv` nào, view join của nó là `v*`.
+- **Thiếu chỗ SQL nằm.** 626/629 file `Dir/*.f` có commands `<Encrypted>` — không đọc, không sửa
+  được. SQL chữ thường chỉ ở bản customize `.xml`. Đây là điều kiện tiên quyết của cả B3.
+- **Structure file không bắt buộc.** 42/599 bảng Dir có; danh mục `zc` đang chạy thật thì không.
+  File rỗng ruột, mang `lastupdate`/`user`, tự khai "do not modify" — dấu hiệu do ứng dụng ghi.
+- **`%s1` mới là dạng chuẩn**, kể cả khi chỉ một placeholder (232 lần, so với 72 lần `%s` trần).
+- **`StrReplace` không phải tên tool nào** — đổi thành mô tả trung lập theo phương ngữ.
+
+Thêm vào reference: gán cột audit bằng `select @datetime0 = …` trong `Inserting` (không phải
+`update`); khối `<script>` với cặp `active$`/`close$` nối từ `Loading`/`Closing`; entity giữa CDATA
+phải `]]>&k;<![CDATA[`; `fsd_StringToTable` trả `_id` + `val`.
+
+Nguồn đối chiếu: corpus `FBISP24` và `mcp/fbo/lib/tools.mjs`, `tools/lib/ddl.mjs`.
+
+Còn nợ: `generate_sql_for_fields` vẫn được nhắc trong `erp-hddv-migrate` và
+`erp-voucher-data-lookup`; `StrReplace` vẫn còn ở `erp-einvoice-customize` và
+`erp-einvoice-nd70-implement`.
+
+### Sửa — `erp-view-design` (v2): bám vào đường render XML → HTML thật
+
+Skill mô tả layout theo XSD và suy luận, chưa đối chiếu với tầng render và với corpus. Bảy chỗ
+sai hoặc thiếu, tất cả đều đổi cách sửa file:
+
+- **`height` không đặt chiều cao vùng main** — main co theo nội dung; `height` áp cho tab không
+  chứa Grid, tab có Grid lấy `field@rows`. Bỏ ghi chú về biến thể typo `heigth`: corpus không có
+  lần nào.
+- **`&TabHeightFomula;` là giá trị `height` phổ biến nhất** (564 view, gần như toàn bộ ở
+  `Filter/`). Đổi chiều cao màn hình lọc = khai đè `LineCounter`/`ExtensionCounter` **trước** dòng
+  nạp `Include/TabHeightFomula.ent`, không gõ px vào `height`.
+- **Độ dài pattern không phải bất biến.** Ngắn hơn số cột thì pad `-` (rất phổ biến), dài hơn thì
+  **bị cắt** — cắt trúng một `1` là mất control không báo. Bất biến thật: số `1` = số token, và
+  mọi `1` phải rơi trong số cột.
+- **`.Footer` không phải vùng footer** — cùng đường render với `.Description` (đọc `<footer>`, rơi
+  về `<header>`); vùng footer do `categoryIndex="-1"` quyết định. `[field].` chấm rỗng đọc thành
+  Input, không phải footer. Thêm ba typo có thật trong corpus: `.Desciption` (95 lần) và họ hàng.
+- **Vùng của một hàng suy từ `categoryIndex` của field**, không từ thứ tự `<item>`; thứ tự tab là
+  thứ tự khai, không sort theo index.
+- **`<item value="0">` trong `<field><items>` là lựa chọn dropdown**, không phải layout — gần một
+  phần tư số thẻ `<item>` trong `Dir/`+`Filter/` thuộc loại này.
+- **Tên trong `[]` so nguyên văn**: `%l` là một phần của tên (`[ten_tk%l]`), và tên có thể chính
+  là entity (`[&k;]`).
+
+Thêm `references/reference-render-pipeline.md`: bảng ánh xạ XML → thẻ HTML, ba hệ quả của
+`table-layout:fixed` (bề rộng bảng = tổng px, không có width cho một ô, nội dung dài bị cắt), và
+mục "cái gì bị bỏ khi render" — hàng toàn field `hidden` không được phát ra, đó là câu trả lời
+cho "khai field rồi mà không thấy đâu".
+
+Nguồn đối chiếu: `DevWorkFlow/docs/04-DESIGNER_PLATFORM.md` và corpus `FBISP24` (646 file `Dir/`,
+2.102 file `Filter/`).
+
+### Đã gỡ — đường đóng gói plugin (Claude Code + Cursor)
+
+- **Lý do.** Kế hoạch phân phối hub này dưới dạng plugin không gom đủ thành phần để chương
+  trình chạy được ở đầu người cài. Giữ một đường đóng gói không dùng tới nghĩa là mỗi lần sửa
+  asset lại phải dựng lại hai gói và commit 374 file output — chi phí thật cho một artifact
+  không ai cài.
+- **Xoá khỏi repo**: `plugins/4ai/`, `plugins/4ai-cursor/`, `.claude-plugin/marketplace.json`,
+  `.cursor-plugin/marketplace.json`, `tools/lib/emit/plugin.mjs`,
+  `tools/lib/emit/cursor-plugin.mjs`.
+- **Compiler còn bốn phương ngữ**, không phải sáu. `TARGETS` trong `schema.mjs` bỏ `plugin` và
+  `cursor-plugin`; `paths.mjs` bỏ hai `case` ở `emitPaths()` và `mcpPath()`; `sync.mjs` bỏ
+  `PACKAGE_TOOLS` — mọi target giờ nhận bản MCP đã giải `{{HUB}}`, không còn nhánh giữ token.
+- **`emit/common.mjs` bỏ phần chép runtime vào gói** — `RUNTIME_DIRS`, `RUNTIME_EXCLUDE`,
+  `runtimeFiles()`, `bareCommand()`, `signRuntime()` và bảng `COMMENT_SYNTAX` chỉ có hai
+  emitter kia gọi. `assets.mjs` bỏ luôn `descriptionRaw`/`bodyRaw`: chúng tồn tại chỉ để gói
+  phân phối không đóng cứng danh tính PM của máy build.
+- **`targets.json`** bỏ hai target `plugin` / `plugin-cursor` (và cặp field `pluginName`,
+  `pluginVersion`); `mcp/servers.json` bỏ hai tool khỏi mảng `targets`.
+- **Giấy phép và `stateRoot()` giữ nguyên.** Chúng là tầng runtime, không phải tầng đóng gói —
+  gỡ chúng là một quyết định khác, chưa lấy. Hệ quả cần biết: `isSourceHub()` luôn đúng khi
+  chạy từ repo, nên hàng rào giấy phép hiện không cưỡng chế ở đâu cả.
+- **Docs theo sau**: `README.md` (mục Cài đặt còn đúng một đường clone + `sync`; xoá mục *Dựng
+  lại plugin*), `BETA.md`, `docs/TARGET-MATRIX.md` (bảng còn bốn cột), `docs/ASSET-FORMAT.md`,
+  `docs/NAMING-MIGRATION.md`.
+- **Kiểm chứng**: `check` 0 lỗi; `sync --dry-run` hai lần liên tiếp cho kết quả giống nhau,
+  0 created / 0 updated trên target `4ai`; `test-setup.mjs` bỏ nhóm assert về `.mcp.json` của
+  gói, còn lại vẫn PASS.
+
 ### Thêm — agent `erp-deploy-auditor`: manifest mang qua PROD
 
 - **Vấn đề.** Cuối một đợt customize, danh sách hiện vật phải copy qua PROD được gom bằng trí
@@ -27,6 +320,40 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 - **`erp-agent-routing` (v2)** thêm một dòng định tuyến. Không có nó thì rule hard đó vẫn nói
   chỉ có sáu cửa, và không ai gọi tới agent mới.
 
+
+### Thêm — skill `erp-retrieve-implement`: nối dây nút Lấy dữ liệu (Retrieve)
+
+- **Vấn đề.** Hub đã có `erp-voucher-data-lookup`, nhưng nó bắt đầu từ *sau* khi màn hình lọc
+  đã mở: ánh xạ cột, `fsdSttRecRef`, proc `BeforeAfterUpdate`. Phần đứng trước — khai
+  `<button command="Retrieve">`, đánh số `commandArgument`, viết `case` trong
+  `on$…$ExecuteCommand`, chọn giữa SingleForm và MultiForm — chưa được viết ở đâu, nên mỗi
+  lần thêm một nguồn lấy số liệu là một lần đọc lại file mẫu từ đầu.
+- **Ranh giới giữa hai skill.** `erp-retrieve-implement` lo **nối dây** (ba tầng: toolbar →
+  script dispatch → Filter → Single/MultiForm); `erp-voucher-data-lookup` lo **số liệu**.
+  Người thêm một `menuItem` vào nút đã có chỉ cần nửa đầu và không bao giờ cần nửa sau — đúng
+  ranh giới tách theo `docs/NAMING.md`.
+- **Bốn file `references/`**: `toolbar-menu.md` (button một nguồn vs `menuItems`, separator ăn
+  một `commandArgument`, hậu tố `$$<px>`), `script-dispatch.md` (bộ ba
+  `load$`/`dispose$`/`ExecuteCommand`, hai guard `View` + `validFields`), `filter-single.md`
+  (`_looking` + `add_loading`, memvar sang Lookup), `filter-multi.md` (mẫu SQL `Inserting`
+  chuẩn với `@vcNumber`/`@vcID`, `OtherCopyField`, `#t` id trong MultiGrid).
+- **Bất biến được nêu thành mục riêng**: điều kiện trong `{Src}Lookup` và trong `{Src}MultiGrid`
+  phải giống nhau. Lệch thì NSD chọn được trong lookup nhưng màn hình sau trả rỗng, và không
+  có thông báo lỗi nào — triệu chứng đắt nhất của luồng này.
+- **Không thêm `kind: agent`.** Retrieve là một quy trình, không phải một vai; `docs/NAMING.md`
+  cấm đặt quy trình thành agent. Thay vào đó `erp-xml-expert` (v2) tách bảng định tuyến thành
+  hai dòng — nối dây và số liệu — trỏ về hai skill.
+- **Neo trên code thật**: `Include\XML\SVDetailRetrieve.txt` và
+  `Include\XML\SeparateInvoice.SVDetailRetrieveToolbar.txt` (cùng một nút ở hai cấu hình), họ
+  file `SVOrder*` / `SVIssue*`, callback `on$&Identity;Filter$Retrieve$QueryComplete` xác minh
+  qua `Include\XML\AutoLotForm.xml`.
+- **Mục *Vùng đối chiếu* chép nguyên ba khai báo XML vào thân skill** — một nguồn, hai nguồn,
+  ba nguồn — thay vì trỏ tới file mẫu. Lý do: `.f` mã hoá không đọc được, và chương trình của
+  khách có thể chưa có bản `.xml` customize nào để mà mở; đọc version cũ thì so được ngay
+  đang ở dạng nào. Đổi lại, B2 chỉ còn bảng luật, không lặp XML.
+- **Đường dẫn dùng `{SysID}`, không phải mã chứng từ.** File controller đặt theo `sysid`
+  (`wcommand`), còn `dmct.ma_ct` là thứ NSD nói — `Grid\SVDetail` là màn hình của `SVTran`,
+  mã ct `HDA`. Skill nêu phân biệt này ở đầu và trỏ `erp-glossary-reference` cho bảng ánh xạ.
 
 ### Đổi — chuẩn hoá đặt tên toàn bộ 67 asset
 

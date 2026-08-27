@@ -4,10 +4,24 @@
 // Không đọc file, không chạm DB, không đoán — chỗ nào thiếu dữ kiện thì hạ độ tin cậy và
 // nói rõ, chứ không bịa ra một cái tên nghe hợp lý.
 //
-// Ba tiêu chí, đúng thứ tự ưu tiên PM đã nêu:
+// Bốn tiêu chí, đúng thứ tự ưu tiên PM đã nêu:
 //   1. Đã từng làm ĐÚNG phân hệ đó trong lịch sử dự án  → ưu tiên cao nhất
 //   2. Đang gánh ít UR sắp tới hạn                          → điểm phạt theo tải
 //   3. UR là báo cáo đầu ra → ai đóng góp nhiều UR đầu vào liên quan
+//   4. Đã làm nhiều UR CÙNG MẢNG NGHIỆP VỤ (chủ đề)         → cộng điểm, KHÔNG nâng bậc
+//
+// Tiêu chí 4 sinh ra vì ba tiêu chí đầu đều đo HIỆN VẬT — "ai đụng màn hình này" — mà câu PM
+// thật sự hỏi nhiều khi là "ai rành mảng này". Xem tools/lib/topics.mjs.
+//
+// MỌI TIÊU CHÍ ĐẾM ĐỀU CHẤM BẰNG NHỊP (UR/năm), KHÔNG BẰNG SỐ ĐẾM THÔ. Số UR nhiều phần lớn vì
+// làm lâu chứ không vì rành: đo trên roster FSD, TRUONGHM có 9.547 UR trong 271 tháng còn HUYNQ
+// 1.786 UR trong 37 tháng — chênh thâm niên bảy lần, nên mọi bảng đếm thô về bản chất là bảng
+// xếp hạng thâm niên. Chia cho số năm có mặt thì thứ hạng đổi hẳn và khớp với người thật sự
+// rành: mảng mẫu in từ TRUONGHM 275 (12,2 UR/năm) sang HUYNQ 176 (57,1 UR/năm).
+//
+// Hiện vật HIẾM không bị phép chia này làm hỏng, dù điểm tuyệt đối tụt: người duy nhất từng đụng
+// `zcrptInventoryFGoods` chỉ được 8 điểm thay vì 33, nhưng vẫn đứng đầu bảng vì BẬC BẰNG CHỨNG
+// xếp trước điểm (xem chỗ sort) — người không có bằng chứng nào vẫn nằm dưới.
 //
 // "Đúng phân hệ" khớp theo menu_id, hoặc bar (tên phân hệ) khi menu_id khác — KHÔNG khớp
 // theo sysid đơn thuần: một controller (sysid) có thể phục vụ nhiều phân hệ hoàn toàn khác
@@ -18,6 +32,7 @@
 
 import { createHash } from 'node:crypto';
 import { canonical } from './json.mjs';
+import { rutChuDe, tenChuDe } from './topics.mjs';
 
 /**
  * Mã 8 hex ổn định của một bộ trọng số — đổi trọng số (`data/qlda.json → review.phanCong`)
@@ -34,6 +49,14 @@ export const TRONG_SO_MAC_DINH = {
   diemHienVat: 100,       // tiêu chí 1 THẬT — kinh nghiệm trên đúng hiện vật (sysid)
   diemMenu: 100,          // tiêu chí 1 dự phòng — khi chưa rút được hiện vật
   diemDauVao: 60,         // tiêu chí 3 — chỉ áp cho báo cáo đầu ra
+  // Tiêu chí 4 — đã làm nhiều UR CÙNG CHỦ ĐỀ (ngân sách, mẫu in, phân quyền…). Thấp hơn hẳn
+  // hiện vật vì nhãn chủ đề rút bằng từ khoá trên văn xuôi, thô hơn `sysid` rút từ từ điển
+  // màn hình. CỐ Ý không nâng bậc bằng chứng: chủ đề rộng (đo trên NBT, `vu-viec-phi` dính 13/24
+  // UR), cho nó nâng bậc thì gần như ai cũng lên bậc 1 và cột độ tin cậy hết phân biệt được.
+  diemChuDe: 50,
+  // Mẫu số của nhịp: thâm niên dưới ngần này năm vẫn tính bằng ngần này, để một người mới vào
+  // vài tháng không ăn nhịp khổng lồ chỉ vì cửa sổ thời gian quá ngắn.
+  sanNamThamNien: 2,
   phatMoiUrToiHan: 15,    // tiêu chí 2 — trừ mỗi UR sắp tới hạn đang gánh
   phatToiDa: 60,          // trần điểm phạt, để tải nặng không xoá sạch lợi thế kinh nghiệm
   baoHoaSoUr: 3,          // SÀN của mẫu số khi chấm kinh nghiệm — xem diemTuongDoi()
@@ -269,6 +292,50 @@ function kinhNghiemTheoHienVat(u, kinhNghiemHienVat = []) {
   return out;
 }
 
+/**
+ * Cộng số UR mỗi người đã làm trên các CHỦ ĐỀ của UR này.
+ *
+ * Nguồn là `nhanSu.kinhNghiemChuDe` — đọc từ `node_Request.chuDe` trong đồ thị, xem
+ * staffing.sqlKinhNghiemChuDe(). Chủ đề của chính UR đang xét rút tại chỗ bằng cùng một hàm
+ * `rutChuDe`, để hai đầu khớp nhau chắc chắn dùng chung một từ điển.
+ *
+ * @returns {Map<string, {soUr: number, chuDe: string[], ma_lt1: string}>}
+ */
+function kinhNghiemTheoChuDe(u, kinhNghiemChuDe = []) {
+  const can = new Set(rutChuDe(u));
+  const out = new Map();
+  if (!can.size) return out;
+
+  for (const row of kinhNghiemChuDe) {
+    const nguoi = chuan(row.ma_lt1);
+    const cd = chuan(row.chuDe);
+    if (!nguoi || !can.has(cd)) continue;
+    const khoa = khoaNguoi(nguoi);
+    const cu = out.get(khoa) ?? { soUr: 0, chuDe: [], ma_lt1: nguoi };
+    cu.soUr += Number(row.so_ur) || 0;
+    if (!cu.chuDe.includes(cd)) cu.chuDe.push(cd);
+    out.set(khoa, cu);
+  }
+  return out;
+}
+
+/**
+ * Số năm có mặt trong dữ liệu yêu cầu, theo người. Khoá lowercase — xem khoaNguoi().
+ *
+ * Thiếu dữ liệu thâm niên của một người thì trả `null` cho người đó, KHÔNG lấy một con số mặc
+ * định: chia cho một mẫu số bịa ra sẽ đẻ ra thứ hạng không ai truy được nguồn.
+ */
+function namTheoNguoi(thamNien = []) {
+  const out = new Map();
+  for (const row of thamNien) {
+    const nguoi = chuan(row.ma_lt1);
+    const thang = Number(row.soThang);
+    if (!nguoi || !Number.isFinite(thang) || thang <= 0) continue;
+    out.set(khoaNguoi(nguoi), { ma_lt1: nguoi, soNam: thang / 12, tongUr: Number(row.tongUr) || 0 });
+  }
+  return out;
+}
+
 /** Tải hiện tại theo người. Khoá lowercase — xem khoaNguoi(). */
 function taiTrongTheoNguoi(taiTrong = []) {
   const out = new Map();
@@ -302,6 +369,45 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   const hienVat = kinhNghiemTheoHienVat(u, nhanSu.kinhNghiemHienVat);
   const tai = taiTrongTheoNguoi(nhanSu.taiTrong);
   const dauVao = laDauRa ? dongGopDauVaoLienQuan(u, nhanSu.dongGopDauVao) : new Map();
+  const chuDe = kinhNghiemTheoChuDe(u, nhanSu.kinhNghiemChuDe);
+  const nam = namTheoNguoi(nhanSu.thamNien);
+
+  /**
+   * Số UR chủ đề → NHỊP (UR mỗi năm). Đây là chỗ sửa cái mà PM chỉ ra: số UR nhiều phần lớn vì
+   * làm lâu, không vì rành. Đo trên roster FSD, thâm niên lệch nhau bảy lần (271 tháng so với
+   * 37 tháng) nên bảng đếm thô về cơ bản là bảng xếp hạng thâm niên.
+   *
+   * CHỈ áp cho chủ đề, KHÔNG áp cho hiện vật/menu — và đây là chỗ dễ làm hỏng nhất nếu áp bừa.
+   * Chủ đề là dòng việc liên tục nên "mỗi năm bao nhiêu" có nghĩa. Hiện vật thì ngược lại: giá
+   * trị của nó nằm ở SỰ HIẾM. Đo thử trên `zcrptInventoryFGoods` — đúng một người từng đụng,
+   * đúng một lần, trong 8 năm có mặt: chia cho thâm niên ra 0,12/năm rồi so với sàn bão hoà thì
+   * điểm sập từ 33 xuống 8, tức là xoá gần hết bằng chứng mạnh nhất đang có. Đếm thô mới đúng ở
+   * đó.
+   *
+   * Không có dữ liệu thâm niên của một người thì trả về chính số đếm — rơi về hành vi cũ cho
+   * riêng người đó, không loại họ khỏi bảng.
+   */
+  const coThamNien = nam.size > 0;
+
+  /**
+   * Thâm niên thay thế cho người KHÔNG có trong bảng thâm niên: TRUNG VỊ của những người có.
+   *
+   * Đây là chỗ dễ sinh lỗi im lặng nhất. Nếu để người thiếu dữ liệu rơi về SỐ ĐẾM THÔ trong khi
+   * cả bảng đang chấm bằng nhịp, họ được so 300 với 40 — thổi phồng gấp bội và luôn đứng đầu.
+   * Trung vị là lựa chọn trung tính: không thưởng, không phạt, và nói được lý do.
+   */
+  const namDaBiet = [...nam.values()].map((v) => v.soNam).sort((a, b) => a - b);
+  const namThayThe = namDaBiet.length ? namDaBiet[Math.floor(namDaBiet.length / 2)] : 0;
+
+  const nhip = (khoa, soUr) => {
+    if (!coThamNien) return soUr; // chưa ai có thâm niên → cả bảng chấm bằng số đếm, vẫn so được
+    const t = nam.get(khoa);
+    return soUr / Math.max(t?.soNam ?? namThayThe, w.sanNamThamNien);
+  };
+  // Sàn bão hoà phải cùng ĐƠN VỊ với thứ đang chấm. Chấm nhịp mà so với `baoHoaSoUr = 3` (đơn
+  // vị UR) thì mọi người đều tụt sát 0. Quy sàn đó về nhịp: "3 UR trong quãng thâm niên tối
+  // thiểu" — cùng một ý nghĩa, khác đơn vị.
+  const san = coThamNien ? w.baoHoaSoUr / w.sanNamThamNien : w.baoHoaSoUr;
 
   // Hiện vật và menu ĐO CÙNG MỘT THỨ ở hai độ chính xác khác nhau, nên chỉ dùng MỘT. Cộng cả
   // hai là đếm hai lần cùng một bằng chứng: người từng sửa `SVTran` trong UR mang menu_id
@@ -337,11 +443,13 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   // bị chấm thấp vì so với một người không còn nhận việc được nữa.
   const trongTap = new Set(tenUngVien.map(khoaNguoi));
   const dinhKinhNghiem = Math.max(0,
-    ...[...kinhNghiem].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
+    ...[...kinhNghiem].filter(([k]) => trongTap.has(k)).map(([k, v]) => nhip(k, v.soUr)));
   const dinhHienVat = Math.max(0,
-    ...[...hienVat].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
+    ...[...hienVat].filter(([k]) => trongTap.has(k)).map(([k, v]) => nhip(k, v.soUr)));
   const dinhDauVao = Math.max(0,
-    ...[...dauVao].filter(([k]) => trongTap.has(k)).map(([, v]) => v.soUr));
+    ...[...dauVao].filter(([k]) => trongTap.has(k)).map(([k, v]) => nhip(k, v.soUr)));
+  const dinhChuDe = Math.max(0,
+    ...[...chuDe].filter(([k]) => trongTap.has(k)).map(([k, v]) => nhip(k, v.soUr)));
 
   const soHienVatCan = (u?.hienVat ?? []).length;
 
@@ -355,22 +463,33 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
   if (!dungHienVat && !nhanSu.lichSuMenu?.length) thieuDuLieu.push('lichSuMenu (tiêu chí 1 dự phòng — kinh nghiệm menu)');
   if (!nhanSu.taiTrong?.length) thieuDuLieu.push('taiTrong (tiêu chí 2 — tải sắp tới hạn)');
   if (laDauRa && !nhanSu.dongGopDauVao?.length) thieuDuLieu.push('dongGopDauVao (tiêu chí 3 — báo cáo đầu ra)');
+  if (rutChuDe(u).length && nhanSu.kinhNghiemChuDe?.length && !nhanSu.thamNien?.length) {
+    thieuDuLieu.push('thamNien (tiêu chí 4 đang xếp theo SỐ UR thô, tức xếp theo thâm niên — '
+      + 'thiếu MIN/MAX(nbphyc.ngay_nhap) nên không quy về nhịp UR/năm được)');
+  }
+  if (rutChuDe(u).length && !nhanSu.kinhNghiemChuDe?.length) {
+    thieuDuLieu.push('kinhNghiemChuDe (tiêu chí 4 — đã làm nhiều UR cùng mảng nghiệp vụ; '
+      + 'kho `node_Request.chuDe` còn rỗng thì chạy `4ai report` và `4ai graph experience` cho nó dày lên)');
+  }
 
   const ungVien = tenUngVien.map((nguoi) => {
     const khoa = khoaNguoi(nguoi);
     const kn = kinhNghiem.get(khoa);
     const hv = hienVat.get(khoa);
     const dv = dauVao.get(khoa);
+    const cd = chuDe.get(khoa);
     const t = tai.get(khoa) ?? { toiHan: 0, dangMo: 0 };
 
     // Đúng MỘT trong hai nhánh được tính — xem chú thích ở `dungHienVat`.
     const diemHienVat = dungHienVat && hv
-      ? diemTuongDoi(hv.soUr, dinhHienVat, w.baoHoaSoUr) * w.diemHienVat : 0;
+      ? diemTuongDoi(nhip(khoa, hv.soUr), dinhHienVat, san) * w.diemHienVat : 0;
     const diemMenu = !dungHienVat && kn
-      ? diemTuongDoi(kn.soUr, dinhKinhNghiem, w.baoHoaSoUr) * w.diemMenu : 0;
-    const diemDauVao = dv ? diemTuongDoi(dv.soUr, dinhDauVao, w.baoHoaSoUr) * w.diemDauVao : 0;
+      ? diemTuongDoi(nhip(khoa, kn.soUr), dinhKinhNghiem, san) * w.diemMenu : 0;
+    const diemDauVao = dv ? diemTuongDoi(nhip(khoa, dv.soUr), dinhDauVao, san) * w.diemDauVao : 0;
+    const nhipCd = cd ? nhip(khoa, cd.soUr) : 0;
+    const diemChuDe = cd ? diemTuongDoi(nhipCd, dinhChuDe, san) * w.diemChuDe : 0;
     const phat = Math.min(t.toiHan * w.phatMoiUrToiHan, w.phatToiDa);
-    const diem = Math.round((diemHienVat + diemMenu + diemDauVao - phat) * 10) / 10;
+    const diem = Math.round((diemHienVat + diemMenu + diemDauVao + diemChuDe - phat) * 10) / 10;
 
     const lyDo = [];
     if (dungHienVat && hv) {
@@ -380,6 +499,13 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
       lyDo.push(`đã làm ${kn.soUr} UR cùng ${kn.theo === 'menu_id' ? 'menu' : 'phân hệ (bar)'}`);
     }
     if (dv) lyDo.push(`đóng góp ${dv.soUr} UR đầu vào liên quan (${dv.nguon.join(', ')})`);
+    if (cd) {
+      const t = nam.get(khoa);
+      const mang = cd.chuDe.map(tenChuDe).join(', ').toLowerCase();
+      lyDo.push(t
+        ? `đã làm ${cd.soUr} UR cùng mảng ${mang} — nhịp ${nhipCd.toFixed(1)} UR/năm trên ${t.soNam.toFixed(1)} năm`
+        : `đã làm ${cd.soUr} UR cùng mảng ${mang} (chưa có thâm niên để quy về nhịp)`);
+    }
     lyDo.push(t.toiHan ? `đang gánh ${t.toiHan} UR sắp tới hạn` : 'không có UR nào sắp tới hạn');
     if (t.dangMo) lyDo.push(`${t.dangMo} UR đang mở`);
 
@@ -403,6 +529,11 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
         diemHienVat: Math.round(diemHienVat * 10) / 10,
         diemMenu: Math.round(diemMenu * 10) / 10,
         diemDauVao: Math.round(diemDauVao * 10) / 10,
+        diemChuDe: Math.round(diemChuDe * 10) / 10,
+        soUrChuDe: cd?.soUr ?? 0,
+        nhipChuDe: Math.round(nhipCd * 10) / 10,
+        soNamLamViec: Math.round((nam.get(khoa)?.soNam ?? 0) * 10) / 10,
+        chuDeDaLam: cd?.chuDe ?? [],
         phatTaiTrong: -phat,
         soUrTrenHienVat: hv?.soUr ?? 0,
         hienVatDaLam: hv ? [...hv.phu] : [],

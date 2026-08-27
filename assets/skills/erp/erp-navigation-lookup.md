@@ -6,13 +6,16 @@ domain: erp
 description: Sổ tay tool call của 4ai-fbo — từ tên nghiệp vụ ra màn hình, họ file cùng mã, nguồn lookup, ai dùng include này, controller nào gọi hàm JS, cột database nào đứng sau.
 requires: [4ai-fbo]
 see-also: [erp-mcp-lookup, erp-controller-reference]
-version: 1
+version: 2
 ---
 
 ## Vì sao
 
 Hầu hết câu hỏi cấu trúc trả lời được bằng một hoặc hai tool call — nếu biết gọi cái nào.
 Kỷ luật chung nằm ở rule `erp-mcp-lookup`; file này là công thức.
+
+Quen tư duy đồ thị (CodeGraph / Cypher) và cần bảng dịch sang tool call ở đây:
+`{REFDIR}/query-intent-map.md`.
 
 ## Công thức
 

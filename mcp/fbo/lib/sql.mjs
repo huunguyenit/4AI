@@ -698,9 +698,32 @@ export function sqlLiteral(s) {
   return String(s).replace(/'/g, "''");
 }
 
+/**
+ * Kích thước mảnh khi cắt `definition` của proc/function/trigger, và số mảnh tối đa.
+ *
+ * Hai lớp hỏng cộng dồn trên cột này, cùng nguyên nhân gốc và cùng cách vá như
+ * `frpost.noi_dung` — xem tools/lib/forum.mjs:
+ *  1. `sys.sql_modules.definition` là nvarchar(MAX) — sqlcmd cắt ÂM THẦM cột kiểu độ dài thay
+ *     đổi ở 256 ký tự (mặc định `-y`, không tắt được vì xung khắc với `-W`). CAST sang
+ *     NVARCHAR(4000) tường minh thoát được luật này vì nó không còn là kiểu MAX.
+ *  2. Thân proc chứa CR/LF — mỗi xuống dòng bị `execSql()` (tách stdout theo `/\r?\n/`) hiểu
+ *     nhầm thành MỘT ROW MỚI, vì hàm đó không phân biệt được "dòng dữ liệu" với "xuống dòng
+ *     nằm trong giá trị". Một proc 12 dòng sẽ trả về 12 "row", mỗi row chỉ một dòng — mất gần
+ *     hết thân hàm mà không có dấu hiệu lỗi nào. Vá bằng cách thay CR/LF/TAB bằng ký tự vùng
+ *     riêng tư Unicode (U+E000..U+E002, không xuất hiện trong mã T-SQL thật) TRƯỚC khi cắt
+ *     mảnh, rồi phục hồi lại ở JS sau khi ghép — objectSql() KHÔNG thay bằng dấu cách như
+ *     forum.mjs vì đó là mã nguồn, mất xuống dòng là mất cấu trúc.
+ */
+export const OBJECT_DEF_CHUNK = 4000;
+export const OBJECT_DEF_MAX_CHUNKS = 32;
+
+/** Ba ký tự vùng riêng tư Unicode đứng thay CR/LF/TAB khi truyền qua sqlcmd — xem hằng số trên. */
+export const OBJECT_DEF_SENTINELS = { cr: '', lf: '', tab: '' };
+
 /** SQL soạn sẵn để soi một object (table / view / proc) — không cần người dùng tự viết. */
 export function objectSql(objectName) {
   const safe = sqlLiteral(objectName);
+  const { cr, lf, tab } = OBJECT_DEF_SENTINELS;
   return `
 IF OBJECT_ID('${safe}') IS NULL
   SELECT 'NOT_FOUND' AS result, '${safe}' AS object_name;
@@ -711,5 +734,19 @@ ELSE IF OBJECTPROPERTY(OBJECT_ID('${safe}'), 'IsTable') = 1
   FROM sys.columns c JOIN sys.types t ON t.user_type_id = c.user_type_id
   WHERE c.object_id = OBJECT_ID('${safe}') ORDER BY c.column_id;
 ELSE
-  SELECT definition FROM sys.sql_modules WHERE object_id = OBJECT_ID('${safe}');`.trim();
+  SELECT
+    manh.i AS manh,
+    bo.len_definition AS len_definition,
+    CAST(SUBSTRING(bo.def_an_toan, (manh.i - 1) * ${OBJECT_DEF_CHUNK} + 1, ${OBJECT_DEF_CHUNK}) AS NVARCHAR(${OBJECT_DEF_CHUNK})) AS definition
+  FROM (
+    SELECT
+      LEN(definition) AS len_definition,
+      REPLACE(REPLACE(REPLACE(definition, CHAR(13), NCHAR(${cr.codePointAt(0)})), CHAR(10), NCHAR(${lf.codePointAt(0)})), CHAR(9), NCHAR(${tab.codePointAt(0)})) AS def_an_toan
+    FROM sys.sql_modules WHERE object_id = OBJECT_ID('${safe}')
+  ) AS bo
+  CROSS JOIN (
+    SELECT TOP (${OBJECT_DEF_MAX_CHUNKS}) ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS i FROM sys.all_objects
+  ) AS manh
+  WHERE (manh.i - 1) * ${OBJECT_DEF_CHUNK} < bo.len_definition
+  ORDER BY manh.i;`.trim();
 }

@@ -2,7 +2,7 @@
 // Emitter không được hardcode tên field; nó đọc từ đây.
 
 export const KINDS = ['doctrine', 'rule', 'skill', 'agent', 'command'];
-export const TARGETS = ['claude', 'cursor', 'vscode', 'antigravity', 'plugin', 'cursor-plugin'];
+export const TARGETS = ['claude', 'cursor', 'vscode', 'antigravity'];
 export const SEVERITIES = ['hard', 'soft'];
 export const MODES = ['agent', 'ask'];
 export const MODELS = ['haiku', 'sonnet', 'opus', 'inherit'];
@@ -81,9 +81,7 @@ export const SECRET_PATTERNS = [
   /\bPwd\s*=/i,
   /\bUser\s+ID\s*=/i,
   /\bUid\s*=\s*\w/i,
-  // Khoá ký giấy phép: private key chỉ được sống ở ~/.4ai/keys/, không bao giờ trong file
-  // được commit. Public key (base64 SPKI trần trong data/license-public-keys.json) không
-  // khớp pattern này — nó công khai theo thiết kế.
+  // Private key không bao giờ được nằm trong file được commit.
   /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
 ];
 

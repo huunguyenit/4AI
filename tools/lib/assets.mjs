@@ -21,16 +21,11 @@ export function ledgerRoot(hub = HUB) {
   const local = readJson(localCfgPath, {});
   if (local.mcpDataRoot) return path.join(local.mcpDataRoot, '4ai', 'ledger');
   // Chạy như plugin: `hub` là gốc GÓI, bị ghi đè mỗi lần update — báo cáo ghi vào đó là mất.
-  // Ledger đi cùng `qlda.local.json` và giấy phép ở `stateRoot()` (thư mục cấp người dùng),
+  // Ledger đi cùng `qlda.local.json` ở `stateRoot()` (thư mục cấp người dùng),
   // KHÔNG phải ${CLAUDE_PLUGIN_DATA}: trong Cowork thư mục đó thuộc về từng phiên, nên báo cáo
   // rà soát của các phiên trước biến mất — mà ledger tồn tại chính để giữ vết qua thời gian.
   if (process.env.FBO_DATA_ROOT) return path.join(stateRoot(hub), 'ledger');
   return path.join(hub, 'ledger');
-}
-
-/** @deprecated dùng ledgerRoot — giữ alias cho chỗ gọi cũ */
-export function ledgerDataRoot(hub = HUB) {
-  return ledgerRoot(hub);
 }
 
 /** Mặc định khi máy chưa có `data/qlda.local.json` — giữ hành vi hiện tại của hub. */
@@ -251,19 +246,11 @@ export function loadAssets({ hub = HUB, domains = null, mcpServerIds = null } = 
 
     // Token {PMName}/{PMDept} thay bằng danh tính PM máy hiện tại — sau validate (giữ
     // nguyên độ dài/định dạng của template được kiểm) chứ không phải trước.
-    // Giữ lại bản RAW (token chưa thay) trên asset — emit/plugin.mjs cần bản này: plugin là
-    // artifact phân phối, đóng cứng danh tính PM của máy build vào đó là sai cho mọi người
-    // cài khác. Ba dialect kia (claude/cursor/vscode/antigravity) chỉ chạy trên máy dev nên
-    // vẫn dùng bản đã thay như cũ.
-    const descriptionRaw = typeof fm.description === 'string' ? fm.description : undefined;
     if (typeof fm.description === 'string') fm.description = applyPmTemplate(fm.description, pm);
-    const bodyRaw = body.replace(/^\n+/, '');
 
     const asset = {
       ...applyDefaults(fm),
-      body: applyPmTemplate(bodyRaw, pm),
-      descriptionRaw,
-      bodyRaw,
+      body: applyPmTemplate(body.replace(/^\n+/, ''), pm),
       file: abs,
       rel: display,
       keyLines,

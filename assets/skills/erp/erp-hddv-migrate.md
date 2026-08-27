@@ -5,8 +5,8 @@ kind: skill
 domain: erp
 description: Migrate ImportXmlInputInvoice (HDDV/II) vào Dir/*Tran.xml — recipe riêng từng Tran, ưu tiên List extender, chỉ dùng InputInvoiceScript* khi dự án không bật List. Mở khi migrate HDDV hoặc II.
 requires: [4ai-fbo]
-see-also: [erp-controller-reference, erp-xml-entity-resolution]
-version: 1
+see-also: [erp-controller-reference, erp-xml-entity-resolution, erp-table-propose]
+version: 2
 ---
 **Phạm vi:** chỉ phần II thuần — **không** tự ý thêm field/view nghiệp vụ nguồn (`ma_tt`, v.v.) trừ khi user yêu cầu.
 
@@ -194,7 +194,10 @@ return
 &FlowMultiScript;    <!-- theo recipe -->
 ```
 
-Handler onChange/onFocus: MCP `get_field_info` → `add_clientscript_to_field` → `add_function_to_script`.
+Handler onChange/onFocus: không có tool nào sinh hộ. Đường thật là
+`describe_controller` (xem field đã có `clientScript` chưa) → thêm `<clientScript>` trên `<field>`
+→ đặt thân hàm trong Include Javascript. Pattern ES5 và bề mặt API: skill `erp-js-implement`,
+`erp-js-api-reference`.
 
 ---
 
@@ -212,7 +215,20 @@ Handler onChange/onFocus: MCP `get_field_info` → `add_clientscript_to_field` �
 
 ## Bước 9 — SQL
 
-Hỏi user trước khi generate. `generate_sql_for_fields` + `file_path`. Bảng partition: giữ `$` (`m32$` not `m32`). Không hardcode tháng.
+Hỏi user trước khi sinh script. **Không tự viết cú pháp DDL** — cấp đặc tả `ddl` cho bộ sinh
+(`tools/lib/ddl.mjs`), xem skill `erp-table-propose`:
+
+    "ddl": { "kind": "them-cot", "family": "m32", "column": "…", "type": "…", "sysid": "…" }
+
+`family` khai **không có `$`** (`m32`, không phải `m32$`) — bộ sinh từ chối spec có `$` rồi tự
+sinh vòng lặp `LIKE 'm32$%'` áp ALTER cho **mọi** partition, idempotent. Đó chính là chỗ viết tay
+hay sót: sửa mỗi `$000000` thì kỳ cũ thiếu cột mà không ai báo.
+
+Bảng **không** phân vùng (danh mục kiểu `dmts`) thì thêm `"phanVung": false` — nếu không, vòng lặp
+`LIKE` khớp không bảng nào và script chạy êm ru mà chẳng thêm gì.
+
+Đường thêm cột đã được duyệt ở tầng SQL là proc `fsd_addFields(@xTable, @xField, @xDataType, @isDebug)`.
+Không hardcode tháng. Giao script cho người có quyền chạy — `query_sql` chặn câu ghi trừ `allowWrite: true`.
 
 ---
 

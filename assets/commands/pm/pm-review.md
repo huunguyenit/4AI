@@ -8,7 +8,7 @@ argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự �
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-graph-maintain, erp-table-propose]
 mode: agent
-version: 11
+version: 12
 ---
 
 ## Việc cần làm
@@ -34,7 +34,7 @@ Sau khi HTML có: **chỉ phân tích UR `trang_thai = DD`** (tài liệu đầu
 Đừng hứa gửi file đó. Cần một file cầm được thì ghi bản phân tích của bạn ra thư mục làm việc
 của phiên — không dựng lại báo cáo từ dữ liệu thô.
 
-Không viết SQL danh sách UR, không ghép payload, không dùng `plan_report`.
+Không viết SQL danh sách UR, không ghép payload.
 **Không bao giờ tự dựng báo cáo từ `get_review_dataset`** — đó là dữ liệu thô: báo cáo tự chế
 bỏ qua validate payload, không nằm trong ledger, và luôn kéo theo việc phân tích cả `XN`/`TH`.
 

@@ -8,7 +8,7 @@
 //   .mcp.json                         ← mcpServers (merge)
 //   .claude/settings.json             ← enabledMcpjsonServers + permissions.allow (merge)
 //
-// User scope (claudeRoot='.', globalPolicy 'on-demand-only'):
+// User scope (claudeRoot='.', target khai scope: 'user'):
 //   skills/ agents/ commands/ như trên, KHÔNG có 4ai-context đầy đủ —
 //   thay bằng một đoạn ngắn trong CLAUDE.md (global) trỏ tới skill.
 //   MCP: không ghi file — in lệnh `claude mcp add` cho người dùng.
@@ -23,6 +23,7 @@ function skillFile(asset) {
   const fm = stringifyFrontmatter({
     name: asset.id,
     description: asset.description,
+    ...(asset['disable-model-invocation'] ? { 'disable-model-invocation': true } : {}),
   });
   const head = asset.severity === 'hard'
     ? `> **Rule cứng (severity: hard)** — vi phạm là sai, không phải lựa chọn.\n\n`

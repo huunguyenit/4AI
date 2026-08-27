@@ -3,12 +3,13 @@ id: erp-category-create
 title: FBO — Create or edit a category screen
 kind: skill
 domain: erp
-description: Tạo hoặc sửa danh mục FBO — cặp Dir (form) + Grid (list), khai khóa chính, validation trùng và lồng bằng fsd_StringToTable với OldValue, tạo bảng và PK. Mở khi user đưa cặp Dir/Grid.
+description: Tạo hoặc sửa danh mục FBO — cặp Dir (form) + Grid (list), tiền tố zc, khóa chính, validation trùng/lồng/xoá trong commands, và đường đề xuất bảng. Mở khi user đưa cặp Dir/Grid.
 requires: [4ai-fbo]
-see-also: [erp-controller-reference, erp-view-design, erp-table-propose]
-version: 1
+see-also: [erp-controller-reference, erp-view-design, erp-table-propose, erp-xml-pairing, erp-sql-reference]
+version: 2
 ---
-Danh mục = **cặp file** `Dir/{controller}.xml` (form) + `Grid/{controller}.xml` (list). Bảng dữ liệu thường trùng tên controller; Grid có thể trỏ **view** (`zv...`) join cột hiển thị.
+Danh mục = **cặp file** `Dir/{controller}` (form) + `Grid/{controller}` (list). Bảng dữ liệu thường
+trùng tên controller; Grid có thể trỏ **view** join sẵn cột hiển thị.
 
 **Nguyên tắc:** chỉ sửa đúng phạm vi user yêu cầu.
 
@@ -26,13 +27,44 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 
 ---
 
+## Hai luật đặt tên, chốt trước khi gõ chữ nào
+
+| Luật | Nội dung |
+|---|---|
+| **Bảng danh mục customize BẮT BUỘC tiền tố `zc`** | `z` đẩy xuống cuối khi sắp xếp, `c` là customize. Bộ sinh DDL **từ chối** spec danh mục thiếu `zc`. |
+| **View customize dùng tiền tố `zv`** | Song song với `zc`. View join của sản phẩm chuẩn là `v*`; `zv*` là của khách. |
+
+Đây là chỗ phân biệt bảng của khách với bảng sản phẩm chuẩn. Đặt sai tên là một lần
+migrate về sau, không phải một lần sửa chữ.
+
+---
+
+## Chỗ SQL nằm — đọc trước khi tưởng mình sửa được
+
+Trong sản phẩm chuẩn, SQL trong `<commands>` **được mã hoá**: 626/629 file `Dir/*.f` chứa
+`<![CDATA[<Encrypted>…</Encrypted>]]>`. Không đọc được, không sửa được, không diff được.
+
+SQL dạng chữ thường chỉ có ở **bản customize `.xml`** đặt cạnh `.f` cùng tên — runtime ưu tiên
+`.xml`. Nên quy trình thật của một danh mục là:
+
+```
+Dir/{ctrl}.f     ← bản chuẩn, commands mã hoá — ĐỌC để biết cấu trúc field/view, KHÔNG sửa
+Dir/{ctrl}.xml   ← bản customize, commands chữ thường — nơi mình viết validation
+```
+
+Kiểm cặp bằng `describe_controller` (`pair.customized`) trước khi bắt đầu — luật đầy đủ ở
+`erp-xml-pairing`. Chưa có `.xml` thì tạo bằng cách **chép nguyên `.f`** rồi thay khối
+`<Encrypted>` bằng SQL chữ thường mình viết; đừng dựng file rỗng chỉ có `<commands>`.
+
+---
+
 ## Workflow
 
 ```
 - [ ] B1. Khảo sát: Dir + Grid + bảng/view (MCP)
 - [ ] B2. XML: code/order + isPrimaryKey ([xml-structure.md]({REFDIR}/xml-structure.md))
-- [ ] B3. Validation Dir commands ([check-trung.md]({REFDIR}/check-trung.md))
-- [ ] B4. Database: bảng + PK + structure ([database.md]({REFDIR}/database.md))
+- [ ] B3. Validation trong commands ([check-trung.md]({REFDIR}/check-trung.md))
+- [ ] B4. Bảng: cấp đặc tả cho bộ sinh, KHÔNG tự chạy DDL ([database.md]({REFDIR}/database.md))
 - [ ] B5. Verify MCP
 ```
 
@@ -40,21 +72,17 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 
 ## B1 — Khảo sát
 
-- Đọc cặp Dir + Grid.
-- MCP `query_sql`: view Grid → biết join; bảng gốc → cột + PK.
+- Đọc cặp Dir + Grid bằng `read_source` (giữ nguyên encoding — `.f`/`.xml` có thể là
+  Windows-1258 + CRLF + BOM, xem `erp-xml-encoding`).
+- `query_sql` với tham số `object` để soi cấu trúc bảng/view — nhanh hơn và không phải tự viết
+  câu tra `sys.columns`:
 
-```sql
-SELECT c.name, t.name AS type, c.max_length,
-       CASE WHEN i.is_primary_key = 1 THEN 1 ELSE 0 END AS is_pk
-FROM sys.columns c
-JOIN sys.types t ON c.user_type_id = t.user_type_id
-LEFT JOIN sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-LEFT JOIN sys.indexes i ON i.object_id = ic.object_id AND i.index_id = ic.index_id AND i.is_primary_key = 1
-WHERE c.object_id = OBJECT_ID('{table}')
-ORDER BY c.column_id
+```
+query_sql(program='{program}', object='{table}')
 ```
 
-View có thể tồn tại khi bảng chưa có → tạo bảng ở B4.
+Cần tự viết thì dùng `sql`, nhưng `object` đã trả cột + kiểu + khóa. View có thể tồn tại khi bảng
+chưa có → xử lý ở B4.
 
 ---
 
@@ -62,8 +90,8 @@ View có thể tồn tại khi bảng chưa có → tạo bảng ở B4.
 
 [xml-structure.md]({REFDIR}/xml-structure.md)
 
-- `code` / `order` = danh sách cột khóa (đơn hoặc kép).
-- Mỗi cột khóa: `isPrimaryKey="true"` (Dir + Grid).
+- `code` / `order` = danh sách cột khóa (đơn hoặc kép), cách nhau dấu phẩy.
+- Mỗi cột khóa: `isPrimaryKey="true"` — khai ở **cả** Dir và Grid.
 - Field Lookup chọn nhiều → lưu CSV → ảnh hưởng pattern validation (B3).
 
 ---
@@ -72,7 +100,8 @@ View có thể tồn tại khi bảng chưa có → tạo bảng ở B4.
 
 [check-trung.md]({REFDIR}/check-trung.md)
 
-Bốn command chuẩn: `Declare` · `Inserting` · `Updating` · `Updated`.
+Năm command của một danh mục: `Declare` · `Inserting` · `Updating` · `Updated` · `Deleting`.
+`Deleting` hay bị bỏ quên — thiếu nó là cho phép xoá một mã đang được chứng từ tham chiếu.
 
 **Chọn pattern** theo nghiệp vụ (không gắn một danh mục cụ thể):
 
@@ -81,36 +110,44 @@ Bốn command chuẩn: `Declare` · `Inserting` · `Updating` · `Updated`.
 | A — Khóa đơn | Một mã duy nhất toàn bảng |
 | B — Khóa kép | Identity dòng = tổ hợp nhiều cột (chuỗi PK chính xác) |
 | C — Giao CSV | Một cột chứa danh sách `A,B,C`; cấm trùng phần tử trong cùng phạm vi |
+| D — Chốt xoá | Mã đã phát sinh ở bảng khác thì chặn xoá |
 
 Quy tắc chung:
-- So sánh bằng `=`, không `LIKE` (trừ nghiệp vụ hierarchy riêng user yêu cầu).
+- **Mã danh mục phân cấp thì check cả trùng lẫn LỒNG NHAU** bằng `like rtrim(…) + '%'` hai chiều
+  — đó là idiom chuẩn của sản phẩm, không phải ngoại lệ. Mã phẳng (không phân cấp) thì `=` là đủ.
 - Sửa: `$col.OldValue` định vị dòng cũ; `@col` là giá trị mới.
-- `Updated`: `WHERE` theo OldValue của **tất cả** cột khóa.
+- **`Updated` dùng giá trị MỚI** (`where {pk} = @{pk}`) — nó chạy sau khi dòng đã ghi, khoá trên
+  đĩa đã là giá trị mới. `OldValue` trong `Updated` chỉ để dọn **bảng liên quan**.
 
 ---
 
-## B4 — Database
+## B4 — Bảng dữ liệu
 
 [database.md]({REFDIR}/database.md)
 
-- PK đơn/kép khớp XML `code`.
-- `generate_sql_for_fields` cho cột thường; PK composite → `CREATE TABLE` / `ALTER TABLE`.
-- File `Structure/App/{table}.xml`.
+**Không tự viết cú pháp DDL và không tự chạy nó trên DB khách.** Cấp đặc tả `ddl`
+(`kind: "danh-muc"`) để bộ sinh viết script — nó lo dấu phẩy, `CONSTRAINT PK_…`, ép tiền tố `zc`
+và tự thêm đủ 5 cột audit. Luật đầy đủ ở `erp-table-propose`.
+
+`query_sql` chặn mọi câu ghi (INSERT/UPDATE/DELETE/DDL/EXEC) trừ khi truyền `allowWrite: true` —
+hàng rào đó có chủ đích, đừng lách. Script giao cho người có quyền chạy duyệt và chạy.
 
 ---
 
 ## B5 — Verify
 
-- Query lại cấu trúc + PK.
+- `query_sql(object='{table}')` — soi lại cột + khóa.
 - `SELECT TOP 1 * FROM {view}` không lỗi.
+- `describe_controller` — cặp `.f`/`.xml` đúng như dự định.
 
 ---
 
 ## Quy tắc sửa file
 
-- `.xml`/`.sql`: **StrReplace** từng khối; không rewrite cả file.
-- Không format on save; không dòng trắng trong CDATA.
-- `fsd_StringToTable`: `rtrim()` hai phía.
+- `.xml` / `.sql`: sửa **theo từng khối**, không rewrite cả file.
+- Giữ nguyên encoding/BOM/CRLF gốc; không format on save; không dòng trắng trong CDATA.
+- Entity giữa CDATA phải đóng/mở lại: `]]>&k;<![CDATA[`.
+- `fsd_StringToTable`: `rtrim()` hai phía khi so sánh.
 
 ---
 
@@ -118,8 +155,8 @@ Quy tắc chung:
 
 | File | Nội dung |
 |------|----------|
-| [xml-structure.md]({REFDIR}/xml-structure.md) | Dir/Grid, khóa, field types |
-| [check-trung.md]({REFDIR}/check-trung.md) | 3 pattern validation + template SQL |
-| [database.md]({REFDIR}/database.md) | Tạo bảng, PK, MCP |
+| [xml-structure.md]({REFDIR}/xml-structure.md) | Dir/Grid, khóa, field types, khối `<script>` |
+| [check-trung.md]({REFDIR}/check-trung.md) | 4 pattern validation + template SQL nguyên văn từ sản phẩm |
+| [database.md]({REFDIR}/database.md) | Đặc tả bảng, cột audit, structure file, verify |
 
 Ràng buộc nút Grid theo danh mục (realtime): skill `erp-js-implement` -> `js-request-deferred.md`.

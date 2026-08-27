@@ -6,14 +6,19 @@ domain: erp
 description: Luồng Lấy dữ liệu từ chứng từ nguồn sang chứng từ đích — Filter, Grid, Form, Lookup, Detail menu, Dir Tran với fsdSttRecRef và BeforeAfterUpdate. Mở khi clone luồng Retrieve hoặc *DMS*.
 requires: [4ai-fbo]
 disable-model-invocation: true
-see-also: [erp-controller-reference, erp-js-implement]
-version: 1
+see-also: [erp-controller-reference, erp-js-implement, erp-retrieve-implement, erp-sql-style, erp-table-propose]
+version: 3
 ---
 Luồng **một chứng từ đích** kế thừa dòng từ **một chứng từ nguồn** qua menu Retrieve (case số trong Detail.xml).
 
+Phần **nối dây** của nút Retrieve — khai `<button>` một nguồn hay `menuItems` nhiều nguồn,
+dispatch theo `commandArgument`, Filter dẫn sang SingleForm hay MultiForm — nằm ở skill
+`erp-retrieve-implement`. File này lo phần **số liệu**: ánh xạ cột, `fsdSttRecRef`, proc.
+
 **Mẫu đã chạy:** PQA ← DMS nhỏ lẻ (`PQADMS*` trên FBISP229), tham chiếu song song `PQBDMS*` (PQB ← DMS).
 
-**Style SQL proc:** gắn skill `fbo_style_sql` khi viết `BeforeAfterUpdate`.
+**Style SQL proc:** rule `erp-sql-style` khi viết `BeforeAfterUpdate`; tra hàm/proc có sẵn ở
+`erp-sql-reference` trước khi viết mới.
 
 ---
 
@@ -37,7 +42,8 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 |---|---|
 | Cột bảng, proc trên DB | `query_sql` (`object` = tên bảng hoặc proc) |
 | Entity XML chứa SQL/JS gì (`BeforeVoucherEdit`, `UpdatefsdSttRecRef`…) | `resolve_entities` |
-| Field XML chuẩn dự án | `search_lmdb_fields` |
+| Field kèm nhãn V/E, lookup, command của một controller | `describe_controller` |
+| Controller nào đụng bảng/hàm này | `search_content` (`in='sql'` / `'js'`) |
 
 **Chỉ hỏi user khi:** MCP lỗi/không có, hoặc quy tắc nghiệp vụ không có trong DB/XML.
 
@@ -45,8 +51,8 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 
 1. `resolve_entities` — file mẫu (`PQBDMS*`, `PQBTran.xml`); bỏ `name` để lấy toàn bộ entity
 2. `resolve_entities` — file đích đang sửa (`PQATran.xml`, `PQADMS*`)
-3. `query_sql` type=0 — `ct**`, `d**$000000`, `fsdSttRecRef`, …
-4. `query_sql` type=1 — proc mẫu `BeforeAfterUpdate$*TranFromDMSTran`
+3. `query_sql` `object=` — `ct**`, `d**$000000`, `fsdSttRecRef`, …
+4. `query_sql` `object=` — proc mẫu `BeforeAfterUpdate$*TranFromDMSTran`
 5. Code — không đoán cột/entity
 
 ---
@@ -54,7 +60,7 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 ## Trước khi code
 
 1. **Tìm mẫu đúng** — MCP `resolve_entities` + đọc file mẫu cùng cặp nguồn→đích (`PQBDMS*`), **không** clone nhầm controller khác.
-2. **MCP `query_sql`** (type=0) — schema bảng chi tiết đích, bảng nguồn, `fsdSttRecRef`, cột `sl_*`. **Không** `fsd_addfields` nếu cột đã có.
+2. **MCP `query_sql`** (`object=`) — schema bảng chi tiết đích, bảng nguồn, `fsdSttRecRef`, cột `sl_*`. **Không** thêm cột nếu `object` đã thấy cột đó.
 3. **MCP `resolve_entities`** trên `*Tran.xml` đích — bảng `ct**`/`ph**`, entity save/update, event gọi proc.
 
 ---
@@ -68,7 +74,7 @@ thì việc chưa xong, kể cả khi code đã chạy). Quy trình đầy đủ
 - [ ] 4. Lookup   — *DMSLookup.xml
 - [ ] 5. Detail   — *Detail.xml (menu Retrieve + Copying)
 - [ ] 6. Tran     — *Tran.xml (fsdSttRecRef + gọi proc)
-- [ ] 7. SQL      — proc BeforeAfterUpdate (+ fsd_addfields nếu thiếu cột)
+- [ ] 7. SQL      — proc BeforeAfterUpdate (+ thêm cột qua đặc tả `ddl` nếu thiếu)
 ```
 
 Deploy: **SQL trước** → XML → test.
@@ -174,7 +180,7 @@ Tên proc / bảng: khớp XML thực tế (`ctbbkt`/`phbbkt` cho PQA).
 
 ## 7. SQL proc `BeforeAfterUpdate`
 
-**Không đổi logic nghiệp vụ** khi user đã chốt — chỉ format theo `fbo_style_sql`.
+**Không đổi logic nghiệp vụ** khi user đã chốt — chỉ format theo rule `erp-sql-style`.
 
 Pattern chuẩn (cập nhật `sl_*` trên `d**$` nguồn):
 
@@ -202,7 +208,7 @@ Mẫu đầy đủ → [reference-example-pqadms.md]({REFDIR}/reference-example-
 
 ```
 ❌  Clone sai controller (Suplier thay DMS)
-❌  fsd_addfields khi MCP đã có cột
+❌  Thêm cột khi query_sql đã thấy cột đó
 ❌  Hỏi user tên bảng/cột/entity khi chưa gọi MCP
 ❌  Đoán nội dung ENTITY — phải resolve_entities
 ❌  Hardcode m**$202601 / d**$202601
@@ -217,4 +223,5 @@ Mẫu đầy đủ → [reference-example-pqadms.md]({REFDIR}/reference-example-
 
 - MCP workflow: [reference-mcp.md]({REFDIR}/reference-mcp.md)
 - Ví dụ file PQA←DMS: [reference-example-pqadms.md]({REFDIR}/reference-example-pqadms.md)
-- Style SQL: skill `fbo_style_sql`
+- Style SQL: rule `erp-sql-style` · danh mục hàm/proc dùng chung: skill `erp-sql-reference`
+- Thêm cột / tạo bảng: skill `erp-table-propose` — cấp đặc tả `ddl`, không tự viết cú pháp

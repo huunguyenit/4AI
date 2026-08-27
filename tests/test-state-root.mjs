@@ -47,20 +47,20 @@ ok('stateRoot nằm ngoài cây phiên', !macDinh.startsWith(tmp), macDinh);
 ok('stateRoot là thư mục cấp người dùng',
   macDinh.startsWith(process.env.APPDATA ?? os.homedir()) && /[\\/]\.?4ai$/.test(macDinh), macDinh);
 
-process.stdout.write('\n=== di chuyển: bản cài cũ không mất giấy phép ===\n');
+process.stdout.write('\n=== di chuyển: bản cài cũ không mất cấu hình ===\n');
 datEnv(cu, moi);
 fs.mkdirSync(path.join(cu, 'data'), { recursive: true });
-fs.writeFileSync(path.join(cu, 'data', 'license.json'), '{"cu":true}');
-const dich = stateFile(ROOT, 'data', 'license.json');
-ok('trả đường dẫn ở state root', dich === path.join(moi, 'data', 'license.json'), dich);
+fs.writeFileSync(path.join(cu, 'data', 'qlda.local.json'), '{"cu":true}');
+const dich = stateFile(ROOT, 'data', 'qlda.local.json');
+ok('trả đường dẫn ở state root', dich === path.join(moi, 'data', 'qlda.local.json'), dich);
 ok('file được copy sang', fs.existsSync(dich));
 ok('nguồn cũ còn nguyên (copy chứ không move — rollback vẫn chạy)',
-  fs.existsSync(path.join(cu, 'data', 'license.json')));
+  fs.existsSync(path.join(cu, 'data', 'qlda.local.json')));
 
 process.stdout.write('\n=== đã có bản mới thì KHÔNG bị bản cũ ghi đè ===\n');
 fs.writeFileSync(dich, '{"moi":true}');
-fs.writeFileSync(path.join(cu, 'data', 'license.json'), '{"cu":"lan hai"}');
-stateFile(ROOT, 'data', 'license.json');
+fs.writeFileSync(path.join(cu, 'data', 'qlda.local.json'), '{"cu":"lan hai"}');
+stateFile(ROOT, 'data', 'qlda.local.json');
 ok('giữ nội dung mới', fs.readFileSync(dich, 'utf8') === '{"moi":true}',
   fs.readFileSync(dich, 'utf8'));
 
@@ -70,9 +70,9 @@ process.stdout.write('\n=== đổi data root giữa chừng: đọc lại nguồ
 const cu2 = path.join(tmp, 'phien-cu-2');
 const moi2 = path.join(tmp, 'nguoi-dung-2');
 fs.mkdirSync(path.join(cu2, 'data'), { recursive: true });
-fs.writeFileSync(path.join(cu2, 'data', 'license.json'), '{"cu2":true}');
+fs.writeFileSync(path.join(cu2, 'data', 'qlda.local.json'), '{"cu2":true}');
 datEnv(cu2, moi2);
-const dich2 = stateFile(ROOT, 'data', 'license.json');
+const dich2 = stateFile(ROOT, 'data', 'qlda.local.json');
 ok('gốc mới được di chuyển độc lập', fs.existsSync(dich2)
   && fs.readFileSync(dich2, 'utf8') === '{"cu2":true}');
 

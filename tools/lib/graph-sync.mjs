@@ -16,9 +16,44 @@
 // chạm đĩa — caller quyết định đẩy hay không.
 
 import { toExperienceFacts } from './experience-extract.mjs';
+import { rutChuDe } from './topics.mjs';
 
 const chuan = (v) => String(v ?? '').trim();
 const ngay = (v) => chuan(v).slice(0, 10) || undefined;
+
+/** Danh sách → chuỗi phân tách bằng dấu phẩy, bỏ trùng, sắp xếp. Rỗng → undefined (cột NULL). */
+const gopDanhSach = (arr) => {
+  const v = [...new Set((arr ?? []).map(chuan).filter(Boolean))].sort();
+  return v.length ? v.join(',') : undefined;
+};
+
+/**
+ * Phần thân của node `Request` — dùng chung cho CẢ HAI đường ghi (rà soát DD/XN/TH và kinh
+ * nghiệm HT/DT/OK/UP).
+ *
+ * Phải dùng chung một hàm: hai đường ghi vào CÙNG một bảng `node_Request`, nên nếu một bên
+ * điền meta còn bên kia không thì cùng một câu tra ra kết quả khác nhau tuỳ UR đó đã xong hay
+ * chưa — và cái lệch đó im lặng. Trước đây hai chỗ này là hai object literal chép tay, đã lệch
+ * sẵn: đường kinh nghiệm không ghi `tg_dk_th`.
+ *
+ * `ur_ma_lt1` (tên cột của dataset rà soát) và `ma_lt1` (tên trong nguồn kinh nghiệm) là cùng
+ * một thứ, nhận cả hai.
+ */
+function metaRequest(u) {
+  return {
+    fcode1: chuan(u.fcode1) || undefined,
+    noi_dung: chuan(u.noi_dung) || undefined,
+    ma_lt1: chuan(u.ur_ma_lt1 ?? u.ma_lt1) || undefined,
+    menu_id: chuan(u.menu_id) || undefined,
+    sysid: chuan(u.sysid) || undefined,
+    hienVat: gopDanhSach(u.hienVat),
+    maDaumuc: gopDanhSach((u.maDaumuc ?? (u.daumuc ?? []).map((d) => d?.ma_daumuc))),
+    chuDe: gopDanhSach(rutChuDe({
+      noi_dung: u.noi_dung,
+      maDaumuc: u.maDaumuc ?? (u.daumuc ?? []).map((d) => d?.ma_daumuc),
+    })),
+  };
+}
 
 /** Trạng thái coi là đã làm xong — chỉ những UR này mới sinh kinh nghiệm. Xem graph-schema. */
 export const TRANG_THAI_DA_XONG = ['HT', 'DT', 'OK', 'UP'];
@@ -98,13 +133,7 @@ export function datasetToGraph(dataset = {}, opts = {}) {
     if (!stt) continue;
     if (!maDa) { boQua.push(`UR ${stt} không có ma_da — bỏ qua, không đoán dự án`); continue; }
 
-    them('Request', {
-      stt_rec: stt,
-      fcode1: chuan(u.fcode1) || undefined,
-      noi_dung: chuan(u.noi_dung) || undefined,
-      tg_dk_th: u.tg_dk_th,
-      ma_lt1: chuan(u.ur_ma_lt1) || undefined,
-    }, maDa);
+    them('Request', { ...metaRequest(u), stt_rec: stt, tg_dk_th: u.tg_dk_th }, maDa);
 
     edges.push({ _: 'edge', type: 'BELONGS_TO', from: `Request:${stt}`, to: `Project:${maDa}`, nguon: 'qlda' });
 
@@ -148,12 +177,12 @@ export function doThiKinhNghiem(yeuCau = [], tuDien = new Map(), args = {}) {
   for (const u of urDaXong(yeuCau)) {
     const stt = chuan(u.stt_rec);
     if (!canRequest.has(stt)) continue;
+    // Meta tra cứu dựng bằng ĐÚNG hàm của đường rà soát — xem metaRequest(). Đây mới là nhánh
+    // quan trọng: node Request của UR ĐÃ XONG chính là kho kinh nghiệm của phòng, và không có
+    // meta thì kho đó chỉ tra ngược được bằng `stt_rec`.
     nodes.push({
       _: 'node', kind: 'Request', scope: maDa, capNhatBoi: boi,
-      stt_rec: stt,
-      fcode1: chuan(u.fcode1) || undefined,
-      noi_dung: chuan(u.noi_dung) || undefined,
-      ma_lt1: chuan(u.ur_ma_lt1 ?? u.ma_lt1) || undefined,
+      ...metaRequest(u), stt_rec: stt,
     });
   }
   nodes.push(...factNodes);

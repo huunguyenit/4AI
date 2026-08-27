@@ -12,13 +12,13 @@
 // Thiết kế: bảng màu semantic (đỏ/vàng/xanh) từ ui-ux-pro-max, font hệ thống (không @import
 // Google Fonts — trang phải mở được offline).
 
-import fs from 'node:fs';
 import path from 'node:path';
 import { loadHolidays, classifyDeadline, isWorkingDay } from './workdays.mjs';
 import { renderDdl } from './ddl.mjs';
 import { promptKyThuat } from './prompt.mjs';
 import { HUB, readJson } from './assets.mjs';
 import { goiYPhanCong, laChuaPhanCong, TRONG_SO_MAC_DINH } from './assignee.mjs';
+import { rutChuDe, tenChuDe } from './topics.mjs';
 import { loadTemplate, renderTemplate } from './template.mjs';
 
 /** Tải cấu hình từ qlda.local.json; fallback về defaults nếu file không tồn tại. */
@@ -50,7 +50,11 @@ function loadTrongSoPhanCong(hub = HUB) {
  */
 function sqlCuaUr(u) {
   if (u.ddl) {
-    try { return { sql: renderDdl(u.ddl), err: null }; }
+    // `ddl` nhận CẢ mảng lẫn object đơn. Mảng là dạng do `ddl-suggest.mjs` sinh — một UR xin ba
+    // trường thì ra ba câu ALTER, gộp lại thành một khối cho lập trình viên chạy một lượt.
+    // Object đơn là dạng payload viết tay đời trước, vẫn phải chạy.
+    const specs = Array.isArray(u.ddl) ? u.ddl : [u.ddl];
+    try { return { sql: specs.map((sp) => renderDdl(sp)).join('\n'), err: null }; }
     catch (e) { return { sql: null, err: e.message }; }
   }
   return { sql: u.ghiChuDdl ?? null, err: null };
@@ -826,6 +830,12 @@ function ghiChuPmDuAn(payload) {
   return '';
 }
 
+/** Nhãn chủ đề của UR, hiện cạnh menu/controller để PM thấy hệ thống đọc UR này là mảng gì. */
+function chuDeCuaUr(ur) {
+  const cd = rutChuDe(ur);
+  return cd.length ? ` · mảng ${cd.map((c) => `<span class="pill">${esc(tenChuDe(c))}</span>`).join(' ')}` : '';
+}
+
 /** Mục gợi ý người tiếp nhận cho UR ở DD chưa phân công thật sự. */
 function phanCongBlock(canGiao, payload, trongSo, pm) {
   if (!canGiao.length) return { dem: 0, html: '<p class="empty">Mọi yêu cầu ở DD đều đã phân lập trình thực hiện.</p>' };
@@ -851,8 +861,41 @@ ${urTable(canGiao, [colStt, colNoiDung, colGiaiDoan, colHan, colMaLt1])}`,
   const hongNguon = nhanSu.thieuDuLieu?.length
     ? `<p class="banner">Nguồn nhân sự thiếu: ${nhanSu.thieuDuLieu.map(esc).join(' · ')}</p>` : '';
 
+  /**
+   * Người được hướng dẫn playbook chỉ ĐÍCH DANH cho UR này.
+   *
+   * `nguonLt` là mã lập trình viên mà cách làm đó đến từ họ — một câu khẳng định của NGƯỜI, và
+   * nó nói được thứ mà không phép đếm nào nói được. Đo trên dữ liệu thật: người rành mẫu in
+   * đứng thứ năm trong bảng đếm đầu mục `02`, người rành ngân sách đứng thứ ba trong bảng đếm
+   * UR ngân sách. Đếm UR đo khối lượng, không đo năng lực.
+   *
+   * CỐ Ý KHÔNG cộng vào điểm. Điểm là thang đo bằng chứng đếm được; nhét một khẳng định tay vào
+   * đó là trộn hai loại bằng chứng rồi mất dấu cái nào là cái nào. Hiện riêng ra, để PM đọc và
+   * tự quyết — đúng như mọi thứ khác trong mục này đều là ĐỀ XUẤT.
+   */
+  const theoUrHuongDan = new Map();
+  for (const cap of payload?.huongDan ?? []) {
+    const stt = String(cap?.ur?.stt_rec ?? '').trim();
+    if (!stt) continue;
+    for (const g of cap.huongDan ?? []) {
+      const lt = String(g?.nguonLt ?? '').trim();
+      if (!lt) continue;
+      if (!theoUrHuongDan.has(stt)) theoUrHuongDan.set(stt, new Map());
+      const cua = theoUrHuongDan.get(stt);
+      if (!cua.has(lt)) cua.set(lt, []);
+      cua.get(lt).push(String(g.tieuDe ?? '').trim());
+    }
+  }
+
   const ketQua = goiYPhanCong(canGiao, nhanSu, trongSo, pm);
   const html = ghiChuPm + hongNguon + ketQua.map(({ ur, goiY }) => {
+    const chiDichDanh = theoUrHuongDan.get(String(ur.stt_rec).trim());
+    const nguoiTay = chiDichDanh?.size
+      ? `<p class="banner">Kinh nghiệm ghi tay chỉ đích danh: ${[...chiDichDanh].map(([lt, tds]) =>
+        `<strong class="mono">${esc(lt)}</strong> <span class="muted">(${tds.map(esc).join('; ')})</span>`).join(' · ')}. `
+        + 'Đây là khẳng định của người, KHÔNG cộng vào điểm bên dưới — bảng điểm chỉ đếm được khối lượng, '
+        + 'không đo được tay nghề.</p>'
+      : '';
     const thieu = goiY.thieuDuLieu.length
       ? `<p class="banner">Thiếu dữ kiện: ${goiY.thieuDuLieu.map(esc).join(' · ')}. Xếp hạng bên dưới yếu đi tương ứng.</p>` : '';
 
@@ -891,7 +934,8 @@ ${goiY.ungVien.map((c, i) => {
 
     return `<article class="phan-cong">
 <h3>${esc(ur.fcode1 || String(ur.stt_rec).trim())} — ${escLink(ur.noi_dung ?? '')}</h3>
-<p class="lead">Menu <code>${esc(ur.menu_id || '—')}</code>${ur.sysid ? ` · controller <code>${esc(ur.sysid)}</code>` : ''}${ur._phase ? ` · hạn ${fmtDate(ur._phase.ngay_ht)}` : ''}</p>
+<p class="lead">Menu <code>${esc(ur.menu_id || '—')}</code>${ur.sysid ? ` · controller <code>${esc(ur.sysid)}</code>` : ''}${chuDeCuaUr(ur)}${ur._phase ? ` · hạn ${fmtDate(ur._phase.ngay_ht)}` : ''}</p>
+${nguoiTay}
 ${dauRa}
 ${thieu}
 ${bang}
@@ -992,7 +1036,10 @@ export function renderReport(payload, h) {
   const deXuatKl = urs.filter((u) => u.deXuat?.trang_thai === 'KL');
   const deXuatTa = urs.filter((u) => u.deXuat?.trang_thai === 'TA');
   const thieuTaiLieu = urs.filter((u) => u.canCuTep && !u.canCuTep.coTep);
-  const coDdl = urs.filter((u) => u.ddl || u.ghiChuDdl);
+  // Mọi UR ĐỤNG LƯỢC ĐỒ đều vào mục này, kể cả khi chưa sinh nổi script (`loaiThayDoiLuocDo` có
+  // mà `ddl` rỗng — vd xin thêm danh mục mới, phải chốt bảng chuẩn để sao chép trước). Đó là luật
+  // "bắt buộc luôn có gợi ý": im lặng ở đây nghĩa là lập trình viên tự nghĩ tên cột và kiểu.
+  const coDdl = urs.filter((u) => u.ddl || u.ghiChuDdl || u.loaiThayDoiLuocDo);
   const lichChuaChot = phases.some((p) => p.lichChuaChot);
 
   const canhBaoLich = lichChuaChot
@@ -1064,11 +1111,18 @@ ${urTable(urChuaChot, [colStt, colNoiDung, colGiaiDoan, colTrangThai, colHan])}`
 
   const ddlBlock = coDdl.length ? coDdl.map((u) => {
     const { sql, err } = sqlCuaUr(u);
+    // Chỗ chưa chốt hiện NGAY TRÊN script, không nấp dưới: script có `<HO_BANG>` mà không ai nói
+    // là chưa chốt thì rất dễ bị copy chạy thẳng.
+    const chuaChot = u.ddlChuaChot?.length
+      ? `<p class="banner">Còn phải chốt trước khi chạy: ${u.ddlChuaChot.map(esc).join(' · ')}.</p>` : '';
     const than = err
       ? `<p class="banner">Không sinh được SQL: ${esc(err)}</p>`
-      : `<div class="sql"><div class="sql-chip"><span>SQL${u.ddl ? ' — sinh tự động' : ''} · chờ PM xác nhận</span><button class="sql-copy">Copy</button></div><pre>${highlightSql(sql)}</pre></div>`;
+      : sql
+        ? `<div class="sql"><div class="sql-chip"><span>SQL${u.ddl ? ' — sinh tự động từ nội dung UR' : ''} · chờ PM xác nhận</span><button class="sql-copy">Copy</button></div><pre>${highlightSql(sql)}</pre></div>`
+        : '';
     return `<article class="ddl">
 <h3>${esc(u.fcode1 || String(u.stt_rec).trim())} — ${escLink(u.noi_dung ?? '')}</h3>
+${chuaChot}
 ${than}
 </article>`;
   }).join('\n') : '<p class="empty">Không có yêu cầu nào nhắc tạo bảng hay thêm cột.</p>';
@@ -1164,7 +1218,11 @@ ${chartTlks(urs)}`),
     coLuong.length ? section('luong-du-lieu', 'Luồng dữ liệu — tính năng dùng màn hình có sẵn',
       'Những yêu cầu này KHÔNG tạo bảng mới: chứng từ đích đã tồn tại trên FBO. Cái cần chốt là nguồn lấy ở đâu và ghi vào chứng từ nào.',
       luongBlock, coLuong.length) : '',
-    section('ddl', 'Gợi ý tạo bảng / thêm cột', 'Script SQL đầy đủ cho lập trình viên — không tự chạy từ báo cáo này.',
+    section('ddl', 'Gợi ý tạo bảng / thêm cột',
+      'Script SQL đầy đủ cho lập trình viên — không tự chạy từ báo cáo này. Họ bảng đọc từ thuộc tính '
+      + '`table` của controller, kiểu cột đếm trên CHÍNH database của khách (cột cùng tên đang chạy '
+      + 'với kiểu gì thì lấy kiểu đó) — không có con số nào do hub quy định. Chỗ chưa chốt được đánh '
+      + 'dấu bằng `<...>` và liệt kê ngay trên script.',
       ddlBlock, coDdl.length),
   ].filter(Boolean).join('\n\n');
 
