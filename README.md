@@ -346,9 +346,9 @@ Thêm `--project <MA_DA>` để chỉ dựng một dự án (bỏ trang tổng q
 từ bốn câu SQL cố định — không cần và không nhận payload viết tay.
 
 **Cách dùng — không có shell** (chat/Cowork): gọi tool MCP `render_review_report()` (thêm
-`project` nếu chỉ cần một dự án). Cùng code dựng, cùng output, và trả luôn `ddUR[]` — danh sách
-UR trạng thái `DD` kèm nội dung — để phân tích ngay. UR `XN`/`TH` cố ý chỉ trả số đếm và hạn gần
-nhất: chúng đã qua cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại.
+`project` nếu chỉ cần một dự án). Cùng code dựng, cùng output, và trả luôn `ycUR[]` — danh sách
+UR trạng thái `YC` kèm nội dung — để phân tích ngay. UR `DD`/`XN`/`TH` cố ý chỉ trả số đếm và hạn
+gần nhất: chúng đã qua cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại.
 
 Kết quả (cả hai đường): `<ledgerRoot>/review/<yyyyMMdd>/<ma_da>/review.html` + `review.payload.json`
 cạnh nó, và `_tong/tong.html` khi rà soát nhiều dự án. Mở bằng `node tools/4ai.mjs serve /review`
@@ -390,7 +390,7 @@ promptCuaUr(urRecord) → prompt hoàn chỉnh cho agent tự viết DDL/SQL
 
 ## 🕸️ Kho kinh nghiệm & đồ thị
 
-`4ai report` tự gợi ý người tiếp nhận cho UR ở DD, dựa trên kinh nghiệm THẬT chứ không phải
+`4ai report` tự gợi ý người tiếp nhận cho UR ở YC, dựa trên kinh nghiệm THẬT chứ không phải
 đoán qua tên menu — `nbphyc.menu_id` đo được là không đáng tin (1/25 giá trị trên một dự án
 thật sự tồn tại trong cây menu của chính chương trình đó). Thay vào đó hệ thống rút HIỆN VẬT
 (chứng từ/báo cáo/controller cụ thể) từ nội dung UR, đối chiếu với `wcommand` của từng khách:

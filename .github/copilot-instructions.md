@@ -503,7 +503,7 @@ corpus để sẵn bản đồ file.
 
 ## Route UR questions to pm-analyst
 
-<!-- assets/rules/pm/pm-ur-routing.md v2 -->
+<!-- assets/rules/pm/pm-ur-routing.md v3 -->
 ## Vì sao
 
 `pm-analyst` biết sẵn cấu trúc `nbphyc`, giới hạn kiểu từng cột, cách lấy tài liệu từ
@@ -531,13 +531,13 @@ corpus để sẵn bản đồ file.
 
 ## Ví dụ
 
-"Review yêu cầu trạng thái DD" khi đang đứng ở
+"Review yêu cầu trạng thái YC" khi đang đứng ở
 `\\10.0.0.1\CustomerPro\FBI\<MA_DA>\FBISP2422`:
 
 1. Khớp workspace → `<MA_DA>`, FBI, FBISP2422.
-2. `DD` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
-   **"Đã duyệt"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
-3. Giao `pm-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='DD'`.
+2. `YC` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
+   **"Yêu cầu"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
+3. Giao `pm-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='YC'`.
 
 ## Bẫy
 
@@ -550,6 +550,6 @@ corpus để sẵn bản đồ file.
   là gọi `render_review_report` rồi tự làm Bước 2 của `pm-deadline-review`. Cách SAI — và là
   cách model hay trượt vào — là gọi `get_review_dataset` rồi tự dựng một bản báo cáo riêng:
   bản đó không qua validate payload, không nằm trong ledger, và kéo theo việc phân tích cả
-  `XN`/`TH` vốn đã qua cổng PM. Thiếu công cụ thì **nói là thiếu**, không lấp bằng đồ tự chế.
-- Mã trạng thái là `char(2)` — `'DD'` so sánh được nhưng cột khoá khác (`ma_da`,
+  `DD`/`XN`/`TH` vốn đã qua cổng PM. Thiếu công cụ thì **nói là thiếu**, không lấp bằng đồ tự chế.
+- Mã trạng thái là `char(2)` — `'YC'` so sánh được nhưng cột khoá khác (`ma_da`,
   `stt_rec`, `syskey`) là `char` dài cố định, thiếu `RTRIM` là ra rỗng.

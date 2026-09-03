@@ -8,7 +8,7 @@
 // Bề mặt nào không có shell (chat, Cowork) thì đường CLI không tồn tại, và trước khi có
 // file này thì đường duy nhất còn sống là `get_review_dataset` — dataset THÔ. Model gặp
 // dataset thô mà không có đường dựng báo cáo sẽ tự ghép HTML lấy, tức là bỏ qua toàn bộ
-// validate payload, bỏ qua ledger, và phân tích cả UR XN/TH mà doctrine cấm phân tích.
+// validate payload, bỏ qua ledger, và phân tích cả UR DD/XN/TH mà doctrine cấm phân tích.
 // Cách chặn không phải viết thêm lời dặn — là làm cho đường đúng chạy được ở mọi bề mặt.
 //
 // Ranh giới: file này KHÔNG import writer. Nó trả mô tả file; caller ghi.
@@ -23,7 +23,7 @@ import { snapshotGoiY, toGraphNodes, docLog, doiChieu, tongHop } from './recomme
 import { docPlaybook, ghepVaoUr } from './playbook.mjs';
 
 /** Trạng thái PM chỉ theo dõi hạn, không phân tích — xem `pm-deadline-review`. */
-const CHI_THEO_DOI = ['XN', 'TH'];
+const CHI_THEO_DOI = ['DD', 'XN', 'TH'];
 
 /**
  * Đối chiếu gợi ý cũ với thực tế, rồi snapshot gợi ý lần này.
@@ -111,7 +111,7 @@ function huongDanChoDataset(dataset, deps = {}) {
 export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
   const dataset = fetchReviewDataset(hub, args, deps);
   if (!dataset.yeuCau.length) {
-    throw new Error('không có UR nào trong phạm vi (DD/XN/TH) — không dựng báo cáo.');
+    throw new Error('không có UR nào trong phạm vi (YC/DD/XN/TH) — không dựng báo cáo.');
   }
 
   const pm = dataset.filters.pmName || dataset.filters.pmDept || '';
@@ -194,9 +194,9 @@ export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
 /**
  * Dataset → phần AI được phép phân tích.
  *
- * Cổng PM chỉ mở ở `DD`. `XN`/`TH` có mặt trên HTML để theo dõi hạn, nên ở đây chúng chỉ
+ * Cổng PM chỉ mở ở `YC`. `DD`/`XN`/`TH` có mặt trên HTML để theo dõi hạn, nên ở đây chúng chỉ
  * còn ĐẾM và hạn gần nhất — không có `noi_dung`, không có đầu mục. Đây là chỗ doctrine
- * "chỉ phân tích DD" thôi làm lời dặn và thành hình dạng dữ liệu: cái không trả về thì
+ * "chỉ phân tích YC" thôi làm lời dặn và thành hình dạng dữ liệu: cái không trả về thì
  * không phân tích nhầm được.
  *
  * @param {object} dataset  kết quả fetchReviewDataset
@@ -204,7 +204,7 @@ export function buildReviewReportFiles(hub = HUB, args = {}, deps = {}) {
  */
 export function ddChoPhanTich(dataset) {
   const yeuCau = dataset.yeuCau ?? [];
-  const dd = yeuCau.filter((u) => trimmed(u.trang_thai) === 'DD');
+  const dd = yeuCau.filter((u) => trimmed(u.trang_thai) === 'YC');
 
   const theoTrangThai = {};
   for (const u of yeuCau) {
@@ -231,7 +231,7 @@ export function ddChoPhanTich(dataset) {
       ma_da: d.ma_da,
       ten_ngan: d.ten_ngan,
       soUR: d.urs.length,
-      soDD: d.urs.filter((u) => trimmed(u.trang_thai) === 'DD').length,
+      soYC: d.urs.filter((u) => trimmed(u.trang_thai) === 'YC').length,
       soTheoDoi: theoDoi.length,
       hanTheoDoiSomNhat: hanSomNhat(theoDoi),
     };
@@ -244,14 +244,14 @@ export function ddChoPhanTich(dataset) {
       theoTrangThai,
     },
     duAn,
-    ddUR: dd,
+    ycUR: dd,
     nhanSu: dataset.nhanSu,
     ghiChu:
-      `Chỉ ${dd.length} UR trạng thái DD được trả nguyên nội dung — đó là phạm vi PM được phân `
-      + 'tích (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL). '
+      `Chỉ ${dd.length} UR trạng thái YC được trả nguyên nội dung — đó là phạm vi PM được phân `
+      + 'tích (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất DD/TA/KL). '
       + `UR ${CHI_THEO_DOI.join('/')} CỐ Ý chỉ còn số đếm và hạn gần nhất: chúng đã qua cổng PM, `
       + 'có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại. Đừng gọi '
       + '`get_review_dataset` để lấy lại nội dung của chúng. '
-      + 'UR DD có `forum[]` thì nội dung yêu cầu THẬT nằm trong topic đó, không phải trong `noi_dung`.',
+      + 'UR YC có `forum[]` thì nội dung yêu cầu THẬT nằm trong topic đó, không phải trong `noi_dung`.',
   };
 }

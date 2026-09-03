@@ -503,7 +503,7 @@ corpus để sẵn bản đồ file.
 
 ## Route UR questions to pm-analyst
 
-<!-- assets/rules/pm/pm-ur-routing.md v2 -->
+<!-- assets/rules/pm/pm-ur-routing.md v3 -->
 ## Vì sao
 
 `pm-analyst` biết sẵn cấu trúc `nbphyc`, giới hạn kiểu từng cột, cách lấy tài liệu từ
@@ -531,13 +531,13 @@ corpus để sẵn bản đồ file.
 
 ## Ví dụ
 
-"Review yêu cầu trạng thái DD" khi đang đứng ở
+"Review yêu cầu trạng thái YC" khi đang đứng ở
 `\\10.0.0.1\CustomerPro\FBI\<MA_DA>\FBISP2422`:
 
 1. Khớp workspace → `<MA_DA>`, FBI, FBISP2422.
-2. `DD` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
-   **"Đã duyệt"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
-3. Giao `pm-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='DD'`.
+2. `YC` là mã trong `nbdmttyc` (cột `nbphyc.trang_thai` chỉ `char(2)`), nghĩa là
+   **"Yêu cầu"** — tra danh mục để lấy tên, không đoán nghĩa từ chữ viết tắt.
+3. Giao `pm-analyst` với: `ma_da=<MA_DA>`, lọc `trang_thai='YC'`.
 
 ## Bẫy
 
@@ -550,8 +550,8 @@ corpus để sẵn bản đồ file.
   là gọi `render_review_report` rồi tự làm Bước 2 của `pm-deadline-review`. Cách SAI — và là
   cách model hay trượt vào — là gọi `get_review_dataset` rồi tự dựng một bản báo cáo riêng:
   bản đó không qua validate payload, không nằm trong ledger, và kéo theo việc phân tích cả
-  `XN`/`TH` vốn đã qua cổng PM. Thiếu công cụ thì **nói là thiếu**, không lấp bằng đồ tự chế.
-- Mã trạng thái là `char(2)` — `'DD'` so sánh được nhưng cột khoá khác (`ma_da`,
+  `DD`/`XN`/`TH` vốn đã qua cổng PM. Thiếu công cụ thì **nói là thiếu**, không lấp bằng đồ tự chế.
+- Mã trạng thái là `char(2)` — `'YC'` so sánh được nhưng cột khoá khác (`ma_da`,
   `stt_rec`, `syskey`) là `char` dài cố định, thiếu `RTRIM` là ra rỗng.
 
 
@@ -566,7 +566,7 @@ corpus để sẵn bản đồ file.
 | `erp-reviewer` | Sub-agent read-only soi một diff XML theo bộ rule FBO, phân loại phát hiện thành Blocker / Nên sửa / Góp ý — không tự sửa gì. |
 | `erp-sql-expert` | Chuyên trách tầng backend FBO — proc, function, bảng, sổ, tùy chọn nghiệp vụ. Tra kho tri thức SQL theo đúng thứ tự rồi mới viết. Giao file .sql cho người duyệt, không bao giờ tự chạy lệnh ghi. |
 | `erp-xml-expert` | Chuyên trách tầng frontend FBO — controller XML, layout form, lưới, JavaScript. Thiết kế cách làm dựa trên kho tri thức, không tự sửa file; việc thi hành giao erp-builder. |
-| `pm-analyst` | Sub-agent read-only cho yêu cầu/UR — lối A mặc định UR trạng thái DD (tài liệu, ảnh hưởng, phân việc); lối B bóc tài liệu thành UR draft. Không sửa file. |
+| `pm-analyst` | Sub-agent read-only cho yêu cầu/UR — lối A mặc định UR trạng thái YC (tài liệu, ảnh hưởng, phân việc); lối B bóc tài liệu thành UR draft. Không sửa file. |
 | `pm-architect` | Sub-agent biến yêu cầu mơ hồ thành kế hoạch có phạm vi — xác định khách/program/SP, liệt kê controller liên quan, soạn sẵn ledger entry. Chỉ lập kế hoạch, không sửa file. |
 | `pm-auditor` | Sub-agent read-only kiểm trước bàn giao — mọi ledger entry có changelog chưa, biên bản handover đủ mục chưa, có secret lọt vào ghi chú không. Báo lỗ hổng, không tự vá. |
 | `4ai-agent-create` | Tạo sub-agent mới trong hub 4AI — bắt buộc khai tools tối thiểu và format báo cáo, từ chối cấp quyền ghi cho agent read-only. |
@@ -579,7 +579,7 @@ corpus để sẵn bản đồ file.
 | `erp-screen-find` | Điều tra một màn hình FBO — dispatch erp-explorer, trả về bản đồ file, field, quan hệ và trạng thái customize. |
 | `erp-sql-query` | Tra cứu SQL đằng sau màn hình FBO qua query_sql — cấu trúc bảng, định nghĩa proc, dữ liệu mẫu có TOP. |
 | `pm-adr-create` | Ghi lại một quyết định thành ADR theo template chuẩn — hỏi đủ Bối cảnh/Quyết định/Hệ quả rồi tạo file trong ledger/adr/. |
-| `pm-review` | Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái DD. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ. |
+| `pm-review` | Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái YC. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ. |
 | `pm-status` | Tóm tắt ledger — việc gì đang ở trạng thái nào, theo khách; nêu entry ứ đọng và entry Xong còn thiếu changelog. |
 | `erp-edit-tooling` | Sửa file nguồn FBO BẮT BUỘC qua Edit/StrReplace để người dùng duyệt được từng thay đổi — không ghi đè bằng shell, không sinh lại cả file; sửa không nổi thì báo, không im lặng bỏ qua. |
 | `erp-js-naming` | Biến local, tham số và biến tạm trong JS controller BẮT BUỘC snake_case khớp tên field XML/SQL — cấm camelCase; ngoại lệ là tên hàm theo convention FBO và property của API có sẵn. |
@@ -614,7 +614,7 @@ corpus để sẵn bản đồ file.
 | `erp-view-design` | Layout form FBO trong Dir/Filter — item value (cột px + pattern 1/0/- + token [field]), view@anchor/@split/@height, category. Mở khi sửa views, merge cột, hoặc hỏi vì sao form hiện như vậy. |
 | `erp-voucher-data-lookup` | Luồng Lấy dữ liệu từ chứng từ nguồn sang chứng từ đích — Filter, Grid, Form, Lookup, Detail menu, Dir Tran với fsdSttRecRef và BeforeAfterUpdate. Mở khi clone luồng Retrieve hoặc *DMS*. |
 | `pm-adr-author` | Khi nào một quyết định đáng viết ADR và template — theo convention ADR của DevWorkFlow để hai project đọc giống nhau. |
-| `pm-deadline-review` | Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái DD — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL. Bỏ trống = TOÀN BỘ dự án. |
+| `pm-deadline-review` | Sinh báo cáo hạn bằng `4ai report` rồi chỉ phân tích UR trạng thái YC — tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất DD/TA/KL. Bỏ trống = TOÀN BỘ dự án. |
 | `pm-graph-maintain` | Đọc và bảo trì đồ thị năng lực FBO và mạng rà soát Request (Phase/Status/Evidence/PMReview/Plan) — file JSONL là nguồn thật, SQL Server graph là chỉ mục, dựng bằng 4ai graph build. |
 | `pm-handover-author` | Checklist release/bàn giao cho khách — cái gì đã đổi, controller nào, đường rollback, khách phải verify gì, hỗ trợ cần biết gì. |
 | `pm-ledger-maintain` | Format entry trong `<mcpDataRoot>/4ai/ledger/tasks.md` và vòng đời Mới → Đang làm → Chờ xác nhận → Xong — cách mở, cập nhật, đóng entry và chuyển sang CHANGELOG. |

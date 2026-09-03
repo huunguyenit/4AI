@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test-assignee.mjs — Test gợi ý người tiếp nhận UR ở DD chưa có ma_lt1.
+// test-assignee.mjs — Test gợi ý người tiếp nhận UR ở YC chưa có ma_lt1.
 
 import { goiYNguoiTiepNhan, goiYPhanCong, nhanDienBaoCaoDauRa, laChuaPhanCong, policyVersion, TRONG_SO_MAC_DINH } from '../tools/lib/assignee.mjs';
 import { validatePayload, renderReport, buildPortfolioArtifact } from '../tools/lib/report.mjs';
@@ -174,14 +174,14 @@ ok('Nêu rõ thiếu dữ kiện gì', g6.thieuDuLieu.length >= 2, g6.thieuDuLie
 
 process.stdout.write('\n=== 6. LỌC ĐÚNG UR CẦN GỢI Ý ===\n');
 const urs = [
-  { stt_rec: '1', trang_thai: 'DD', ma_lt1: '', menu_id: 'M01', noi_dung: 'a' },
-  { stt_rec: '2', trang_thai: 'DD', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'b' },
+  { stt_rec: '1', trang_thai: 'YC', ma_lt1: '', menu_id: 'M01', noi_dung: 'a' },
+  { stt_rec: '2', trang_thai: 'YC', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'b' },
   { stt_rec: '3', trang_thai: 'XN', ma_lt1: '', menu_id: 'M01', noi_dung: 'c' },
   { stt_rec: '4', trang_thai: 'TH', ma_lt1: '', menu_id: 'M01', noi_dung: 'd' },
-  { stt_rec: '5', trang_thai: 'DD', ma_lt1: '   ', menu_id: 'M01', noi_dung: 'e' },
+  { stt_rec: '5', trang_thai: 'YC', ma_lt1: '   ', menu_id: 'M01', noi_dung: 'e' },
 ];
 const loc = goiYPhanCong(urs, NHAN_SU);
-ok('Chỉ lấy DD chưa giao (kể cả ma_lt1 toàn khoảng trắng)', loc.length === 2,
+ok('Chỉ lấy YC chưa giao (kể cả ma_lt1 toàn khoảng trắng)', loc.length === 2,
   loc.map(x => x.ur.stt_rec).join(','));
 ok('Bỏ qua UR đã có người', !loc.some(x => x.ur.stt_rec === '2'));
 ok('Bỏ qua XN/TH', !loc.some(x => ['3', '4'].includes(x.ur.stt_rec)));
@@ -201,15 +201,15 @@ ok('Không biết mã PM -> chỉ ô trống mới là chưa phân',
   laChuaPhanCong('DATNH', '') === false && laChuaPhanCong('', '') === true);
 
 const ursPm = [
-  { stt_rec: 'P1', trang_thai: 'DD', ma_lt1: 'PM01', menu_id: 'M01', noi_dung: 'BA để mặc định' },
-  { stt_rec: 'P2', trang_thai: 'DD', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'đã phân thật' },
+  { stt_rec: 'P1', trang_thai: 'YC', ma_lt1: 'PM01', menu_id: 'M01', noi_dung: 'BA để mặc định' },
+  { stt_rec: 'P2', trang_thai: 'YC', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'đã phân thật' },
   { stt_rec: 'P3', trang_thai: 'TH', ma_lt1: 'PM01', menu_id: 'M01', noi_dung: 'PM tự làm, đang chạy' },
 ];
 const locPm = goiYPhanCong(ursPm, NHAN_SU, {}, 'PM01');
-ok('UR ở DD mang mã PM -> VÀO danh sách cần gợi ý',
+ok('UR ở YC mang mã PM -> VÀO danh sách cần gợi ý',
   locPm.some(x => x.ur.stt_rec === 'P1'), locPm.map(x => x.ur.stt_rec).join(','));
 ok('UR đã phân người khác -> không vào', !locPm.some(x => x.ur.stt_rec === 'P2'));
-ok('UR ngoài DD (PM tự làm, đang TH) -> không vào', !locPm.some(x => x.ur.stt_rec === 'P3'));
+ok('UR ngoài YC (PM tự làm, đang TH) -> không vào', !locPm.some(x => x.ur.stt_rec === 'P3'));
 
 // PM vẫn là ứng viên hợp lệ — PM cũng trực tiếp lập trình.
 const nhanSuCoPm = {
@@ -250,7 +250,7 @@ ok('Không truyền pmCode -> không tự thêm ai (tương thích ngược)',
 
 // goiYPhanCong (đường đi thật từ report.mjs) phải tự thread pmCode xuống goiYNguoiTiepNhan.
 const locRosterThieuPm = goiYPhanCong(
-  [{ stt_rec: 'R1', trang_thai: 'DD', ma_lt1: '', menu_id: 'M01', noi_dung: 'x' }],
+  [{ stt_rec: 'R1', trang_thai: 'YC', ma_lt1: '', menu_id: 'M01', noi_dung: 'x' }],
   nhanSuRosterThieuPm, {}, 'PM01');
 ok('goiYPhanCong tự truyền pmCode xuống -> PM có mặt trong gợi ý',
   locRosterThieuPm[0]?.goiY.ungVien.some(c => c.ma_lt1 === 'PM01'));
@@ -262,9 +262,9 @@ const payload = {
   giaiDoan: [{ giai_doan_da: 'GD1', ngay_ht: '2026-08-14', xac_nhan_da_hen_yn: true }],
   yeuCau: [
     { stt_rec: 'R1', fcode1: 'UR-01', noi_dung: 'Sửa màn hình nhập liệu', giai_doan_da: 'GD1',
-      trang_thai: 'DD', tlks_yn: true, trang_tlks: 'TLKS tr.5', menu_id: 'M01', ma_lt1: '' },
+      trang_thai: 'YC', tlks_yn: true, trang_tlks: 'TLKS tr.5', menu_id: 'M01', ma_lt1: '' },
     { stt_rec: 'R2', fcode1: 'UR-02', noi_dung: 'Thêm báo cáo tổng hợp xuất nhập tồn',
-      giai_doan_da: 'GD1', trang_thai: 'DD', tlks_yn: true, trang_tlks: 'TLKS tr.9',
+      giai_doan_da: 'GD1', trang_thai: 'YC', tlks_yn: true, trang_tlks: 'TLKS tr.9',
       menu_id: 'M01', ma_lt1: '', luongDuLieu: { nguon: ['dmvt'], dich: { manHinh: 'Report' } } },
     { stt_rec: 'R3', fcode1: 'UR-03', noi_dung: 'Việc đã giao', giai_doan_da: 'GD1',
       trang_thai: 'TH', tlks_yn: true, trang_tlks: 'TLKS tr.2', menu_id: 'M09', ma_lt1: 'NV03' },
@@ -278,9 +278,9 @@ ok('Payload có nhanSu hợp lệ -> không lỗi', errs.length === 0, errs.join
 const html = renderReport(payload, loadHolidays());
 ok('Có cột "LT thực hiện"', html.includes('LT thực hiện'));
 ok('UR đã giao hiện tên người', html.includes('NV03'));
-ok('UR DD chưa giao hiện "chưa giao"', html.includes('chưa giao'));
+ok('UR YC chưa giao hiện "chưa giao"', html.includes('chưa giao'));
 ok('Có mục gợi ý phân công', html.includes('Gợi ý người tiếp nhận'));
-ok('Thẻ tóm tắt nêu số DD chưa giao', html.includes('2 chưa giao LT'));
+ok('Thẻ tóm tắt nêu số YC chưa giao', html.includes('2 chưa giao LT'));
 ok('Bảng ứng viên có cột độ tin cậy', html.includes('Độ tin cậy'));
 ok('Nêu rõ đây là đề xuất chờ PM', html.includes('PM chốt rồi mới giao'));
 
@@ -301,14 +301,14 @@ const payloadPm = {
   yeuCau: [
     // BA lên UR để mặc định ma_lt1 = PM -> phải bị coi là chưa phân.
     { stt_rec: 'R1', fcode1: 'UR-01', noi_dung: 'Sửa màn hình nhập liệu', giai_doan_da: 'GD1',
-      trang_thai: 'DD', tlks_yn: true, trang_tlks: 'TLKS tr.5', menu_id: 'M01', ma_lt1: 'PM01' },
+      trang_thai: 'YC', tlks_yn: true, trang_tlks: 'TLKS tr.5', menu_id: 'M01', ma_lt1: 'PM01' },
     // PM tự làm thật, đã sang TH -> vẫn là tên hợp lệ, không gắn cảnh báo.
     { stt_rec: 'R3', fcode1: 'UR-03', noi_dung: 'PM tự làm', giai_doan_da: 'GD1',
       trang_thai: 'TH', tlks_yn: true, trang_tlks: 'TLKS tr.2', menu_id: 'M09', ma_lt1: 'PM01' },
   ],
 };
 const htmlPm = renderReport(payloadPm, loadHolidays());
-ok('UR-01 (DD + mã PM) được đếm là chưa giao', htmlPm.includes('1 chưa giao LT'));
+ok('UR-01 (YC + mã PM) được đếm là chưa giao', htmlPm.includes('1 chưa giao LT'));
 ok('Cột LT thực hiện nói rõ "mặc định — chưa phân"',
   htmlPm.includes('PM01 (mặc định — chưa phân)'));
 ok('Giải thích vì sao UR mang tên PM vẫn nằm ở mục chưa phân',
@@ -346,7 +346,7 @@ const dungPortfolio = (duAn) => {
 const portfolio = dungPortfolio([payload]);
 
 ok('Portfolio có cột "LT thực hiện"', portfolio.includes('LT thực hiện'));
-ok('Portfolio nêu số DD chưa giao', portfolio.includes('chưa giao LT'));
+ok('Portfolio nêu số YC chưa giao', portfolio.includes('chưa giao LT'));
 ok('Portfolio có mục "Chưa giao lập trình"', portfolio.includes('Chưa giao lập trình'));
 ok('Portfolio có cột gợi ý tiếp nhận', portfolio.includes('Gợi ý tiếp nhận'));
 // NV02: 6 UR trên M01 (100) trừ 4 UR tới hạn (−60) = 40, thắng NV04 (33.3).

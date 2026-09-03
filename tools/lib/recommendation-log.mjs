@@ -5,7 +5,7 @@
 // báo cáo, rồi lần chạy sau ĐỌC LẠI `nbphyc.ma_lt1` (vốn đã có trong dataset) để biết PM đã
 // giao cho ai. Kết quả tự suy ra, không ai phải gõ thêm gì.
 //
-//   chạy hôm nay   → UR ở DD chưa giao, gợi ý NV01 → ghi snapshot
+//   chạy hôm nay   → UR ở YC chưa giao, gợi ý NV01 → ghi snapshot
 //   PM giao trên web QLDA cho PM01            → 4AI không biết, không cần biết
 //   chạy hôm sau   → dataset cho thấy ma_lt1 = PM01 → đối chiếu → override
 //
@@ -59,7 +59,7 @@ export function docLog(deps, maDas = []) {
 /**
  * Snapshot gợi ý của MỘT lần chạy báo cáo.
  *
- * Chỉ ghi UR thật sự có gợi ý (DD, chưa phân công) — UR không qua bước gợi ý thì không có gì
+ * Chỉ ghi UR thật sự có gợi ý (YC, chưa phân công) — UR không qua bước gợi ý thì không có gì
  * để đối chiếu sau này. `daGoiY` giữ nguyên thứ hạng lúc đó: trọng số có thể đổi về sau, và
  * khi đó chấm lại sẽ ra số khác, không còn là cái PM đã nhìn thấy.
  *
@@ -128,7 +128,7 @@ export function toGraphNodes(banGhi = [], opts = {}) {
  * Đối chiếu gợi ý cũ với trạng thái HIỆN TẠI của UR trong dataset.
  *
  * Ba kết cục, và cái thứ ba là lý do hàm này tồn tại:
- *   `chua-giao`  — UR vẫn ở DD chưa phân công: PM chưa quyết, chưa kết luận được gì.
+ *   `chua-giao`  — UR vẫn ở YC chưa phân công: PM chưa quyết, chưa kết luận được gì.
  *   `trung`      — PM giao đúng người đứng đầu gợi ý.
  *   `khac`       — PM giao người khác. KHÔNG suy ra vì sao: lý do nằm trong đầu PM, không
  *                  nằm trong `nbphyc`. Ghi nhận sự việc, để trống động cơ.

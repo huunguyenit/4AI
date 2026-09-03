@@ -221,7 +221,7 @@ export function phoPhong(roster = []) {
  *
  * PM không phải một chức vụ trong `userinfo2` — mọi PM ở đây đều mang `ma_chv='NV'`. Dấu
  * hiệu duy nhất là ĐỨNG TÊN LẬP TRÌNH QUẢN LÝ: mã của họ nằm ở `nbdmda.ma_lt1/ma_lt2/ma_lt3`
- * của một dự án còn UR trong phạm vi rà soát (DD/XN/TH). PM cũng là nhân viên và vẫn trực
+ * của một dự án còn UR trong phạm vi rà soát (YC/DD/XN/TH). PM cũng là nhân viên và vẫn trực
  * tiếp lập trình, nên việc này KHÔNG loại họ khỏi danh sách ứng viên — chỉ để nói rõ vai.
  *
  * @param {Array} roster - đã normalize
@@ -308,14 +308,14 @@ export function buildTaiTrong(yeuCau = [], h, ngayChay) {
 }
 
 /**
- * Menu nào đang cần gợi ý người nhận — chỉ UR ở DD. Không lọc theo "đã phân hay chưa" ở đây:
+ * Menu nào đang cần gợi ý người nhận — chỉ UR ở YC. Không lọc theo "đã phân hay chưa" ở đây:
  * việc đó cần biết PM của từng dự án, mà tập menu rộng hơn một chút thì chỉ tốn vài dòng SQL,
  * còn thiếu menu thì mất hẳn tiêu chí 1 của một UR.
  */
 export function menuCanGoiY(yeuCau = []) {
   const out = new Set();
   for (const u of yeuCau) {
-    if (chuan(u.trang_thai) !== 'DD') continue;
+    if (chuan(u.trang_thai) !== 'YC') continue;
     const menu = chuan(u.menu_id);
     if (menu) out.add(menu);
   }
@@ -423,7 +423,7 @@ export function buildNhanSu(hub, args = {}, deps = {}) {
   // `wcommand` của từng chương trình — không lấy được ở đây vì file này chỉ biết QLDA).
   let kinhNghiemHienVat = [];
   const sysidCan = [...new Set(
-    yeuCau.filter((u) => chuan(u.trang_thai) === 'DD').flatMap((u) => u.hienVat ?? []).map(chuan).filter(Boolean),
+    yeuCau.filter((u) => chuan(u.trang_thai) === 'YC').flatMap((u) => u.hienVat ?? []).map(chuan).filter(Boolean),
   )].sort();
   if (sysidCan.length && roster.length) {
     try {
@@ -449,7 +449,7 @@ export function buildNhanSu(hub, args = {}, deps = {}) {
   // bịa: chưa đủ dữ liệu để nói ai rành mảng nào thì im lặng hơn là đoán.
   let kinhNghiemChuDe = [];
   const chuDeCan = [...new Set(
-    yeuCau.filter((u) => chuan(u.trang_thai) === 'DD').flatMap((u) => rutChuDe(u)),
+    yeuCau.filter((u) => chuan(u.trang_thai) === 'YC').flatMap((u) => rutChuDe(u)),
   )].sort();
   if (chuDeCan.length && roster.length) {
     try {

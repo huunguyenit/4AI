@@ -303,14 +303,14 @@ export const TOOLS = [
   {
     name: 'get_review_dataset',
     description:
-      'Dataset rà soát UR từ bốn câu SQL cố định (nbphyc, nbctdaumuc, nbcnhanhtda, nbdmda) — không nhận SQL từ caller. Trả projects[] (dự án có UR) và yeuCau[] (mỗi UR kèm daumuc[] + hạn hiệu lực MAX ngay_ht theo giai_doan_da). Lọc project / pmName / pmDept / statusUR, AND; bỏ trống cả ba thì lấy pm.maNv từ qlda.local.json. CLI `4ai report` (không payload) gọi cùng function rồi đổ HTML — đừng ghép payload tay. AI chỉ phân tích UR trang_thai=DD.',
+      'Dataset rà soát UR từ bốn câu SQL cố định (nbphyc, nbctdaumuc, nbcnhanhtda, nbdmda) — không nhận SQL từ caller. Trả projects[] (dự án có UR) và yeuCau[] (mỗi UR kèm daumuc[] + hạn hiệu lực MAX ngay_ht theo giai_doan_da). Lọc project / pmName / pmDept / statusUR, AND; bỏ trống cả ba thì lấy pm.maNv từ qlda.local.json. CLI `4ai report` (không payload) gọi cùng function rồi đổ HTML — đừng ghép payload tay. AI chỉ phân tích UR trang_thai=YC.',
     inputSchema: {
       type: 'object',
       properties: {
         project: { type: 'string', description: 'Mã dự án nbdmda.ma_da — có thì chỉ lấy đúng dự án này' },
         pmName: { type: 'string', description: 'Lọc dự án theo nbdmda.ma_lt1/ma_lt2/ma_lt3. Bỏ trống (và không truyền project) thì lấy pm.maNv từ qlda.local.json' },
         pmDept: { type: 'string', description: 'Lọc yêu cầu theo nbphyc.bp_lt (bộ phận lập trình)' },
-        statusUR: { type: 'array', items: { type: 'string' }, description: "Lọc nbphyc.trang_thai. Bỏ trống mặc định ['DD','XN','TH'] (phạm vi PM review)" },
+        statusUR: { type: 'array', items: { type: 'string' }, description: "Lọc nbphyc.trang_thai. Bỏ trống mặc định ['YC','DD','XN','TH'] (phạm vi PM review)" },
         maxRows: { type: 'integer', default: 5000, maximum: 10000, description: 'Giới hạn dòng THÔ (trước khi gộp đầu mục) — UR có nhiều đầu mục tính nhiều dòng' },
       },
       additionalProperties: false,
@@ -324,10 +324,10 @@ export const TOOLS = [
       + 'không có shell (chat/Cowork) lẫn nơi có shell. '
       + 'KHÔNG BAO GIỜ tự ghép báo cáo từ `get_review_dataset` — dataset là dữ liệu THÔ, không qua validate '
       + 'payload, không để lại vết trong ledger; báo cáo tự chế là báo cáo không kiểm chứng được. '
-      + 'Trả về: file đã ghi, tổng quan theo dự án, `ddUR[]` (UR trạng thái DD — NGUYÊN nội dung, đây là phạm vi '
-      + 'cổng PM) và `nhanSu` để đề xuất phân việc. UR XN/TH CỐ Ý chỉ có số đếm và hạn gần nhất: chúng đã qua '
+      + 'Trả về: file đã ghi, tổng quan theo dự án, `ycUR[]` (UR trạng thái YC — NGUYÊN nội dung, đây là phạm vi '
+      + 'cổng PM) và `nhanSu` để đề xuất phân việc. UR DD/XN/TH CỐ Ý chỉ có số đếm và hạn gần nhất: chúng đã qua '
       + 'cổng PM, có mặt trên HTML để theo dõi hạn chứ không phải để phân tích lại. '
-      + 'Chỉ ĐỀ XUẤT đổi trạng thái (XN/TA/KL) — không bao giờ tự UPDATE nbphyc. '
+      + 'Chỉ ĐỀ XUẤT đổi trạng thái (DD/TA/KL) — không bao giờ tự UPDATE nbphyc. '
       + 'GỌI THẲNG, KHÔNG THAM SỐ trước: phạm vi mặc định là PM đã cấu hình trên máy này. '
       + 'Báo "CHƯA GÁN PM" thì chữa bằng `set_pm_identity`, đừng hỏi người dùng họ tên hay '
       + 'đi tra danh sách nhân viên bằng SQL.',
@@ -999,7 +999,7 @@ export const HANDLERS = {
       xem: `Trang chính: ${trangChinh}. Có shell thì mở bằng \`4ai serve /review\` (hoặc `
         + '`/review/<MA_DA>`). KHÔNG có shell (chat/Cowork): ledger nằm ngoài thư mục người dùng '
         + 'mở được, nên đừng hứa "mở file HTML ra xem" và đừng thử Read nó — phân tích thẳng từ '
-        + '`ddUR` ở đây. Người dùng muốn một file cầm được thì ghi bản tóm tắt của bạn ra thư mục '
+        + '`ycUR` ở đây. Người dùng muốn một file cầm được thì ghi bản tóm tắt của bạn ra thư mục '
         + 'làm việc của phiên, đừng dựng lại báo cáo từ dữ liệu thô.',
     };
   },

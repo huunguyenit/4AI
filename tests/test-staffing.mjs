@@ -96,7 +96,7 @@ const yeuCau = [
   { stt_rec: 'A2', trang_thai: 'TH', ur_ma_lt1: 'NV01', ngay_ht: '2026-08-10', menu_id: '07.00.00' },
   { stt_rec: 'A3', trang_thai: 'TH', ur_ma_lt1: 'NV01', ngay_ht: '2026-12-31', menu_id: '07.00.00' },
   { stt_rec: 'A4', trang_thai: 'XN', ur_ma_lt1: 'NV08', ngay_ht: '2026-12-31', menu_id: '07.00.00' },
-  { stt_rec: 'A5', trang_thai: 'DD', ur_ma_lt1: '', ngay_ht: '2026-08-20', menu_id: '07.00.00' },
+  { stt_rec: 'A5', trang_thai: 'YC', ur_ma_lt1: '', ngay_ht: '2026-08-20', menu_id: '07.00.00' },
 ];
 const tai = buildTaiTrong(yeuCau, H, NGAY);
 const taiHuy = tai.find((t) => t.ma_lt1 === 'NV01');
@@ -105,7 +105,7 @@ ok('Đếm đủ UR đang mở', taiHuy.so_ur_dang_mo === 3);
 ok('Hạn còn xa không tính là tới hạn',
   tai.find((t) => t.ma_lt1 === 'NV08').so_ur_toi_han === 0);
 ok('UR chưa giao không đẻ ra dòng tải trống', !tai.some((t) => !t.ma_lt1));
-ok('menuCanGoiY chỉ lấy menu của UR ở DD', menuCanGoiY(yeuCau).join() === '07.00.00');
+ok('menuCanGoiY chỉ lấy menu của UR ở YC', menuCanGoiY(yeuCau).join() === '07.00.00');
 
 process.stdout.write('\n=== buildNhanSu (runSql tiêm giả) ===\n');
 const goiSql = [];
@@ -174,7 +174,7 @@ ok('Đếm theo UR duy nhất, không đếm trùng khi một UR sinh nhiều d�
 ok('KHÔNG lọc theo dự án — kinh nghiệm SVTran ở dự án khác vẫn dùng được',
   !/ma_da/.test(sqlKinhNghiemHienVat(['SVTran'], ['NV01'])));
 
-// UR ở DD đã mang sẵn `hienVat` -> buildNhanSu phải đi hỏi đồ thị.
+// UR ở YC đã mang sẵn `hienVat` -> buildNhanSu phải đi hỏi đồ thị.
 const yeuCauCoHienVat = yeuCau.map((u) =>
   u.stt_rec === 'A5' ? { ...u, hienVat: ['SVTran', 'ARTran'] } : u);
 let sqlGraphDaGoi = null;

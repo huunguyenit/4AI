@@ -4,11 +4,15 @@
 // `get_review_dataset` cùng gọi function này. Mức cảnh báo hạn của từng UR do report.mjs tính.
 //
 // Khối nhân sự (roster phòng · lịch sử menu · tải hiện tại) do `staffing.mjs` dựng và đi kèm
-// dataset. Không có nó thì mục "Chưa giao lập trình (DD)" chỉ liệt kê được UR chứ không gợi
+// dataset. Không có nó thì mục "Chưa giao lập trình (YC)" chỉ liệt kê được UR chứ không gợi
 // ý nổi ai nhận — xem buildNhanSu().
 //
-// Nội dung forum của UR ở DD do `forum.mjs` phân giải: nhiều UR chỉ ghi "update theo link
+// Nội dung forum của UR ở YC do `forum.mjs` phân giải: nhiều UR chỉ ghi "update theo link
 // forum: <url>", yêu cầu thật nằm ở topic chứ không nằm trong UR — xem fetchForum().
+//
+// Cổng PM (phân tích tài liệu/ảnh hưởng/phân việc) nằm ở `YC` — không còn ở `DD`. `DD` giờ là
+// mốc PM đã báo thời gian thực hiện và tick xác nhận theo giai đoạn (chotDaHen); `XN`/`TH` vẫn
+// chỉ để theo dõi hạn như cũ. Xem data/qlda.json → review.congPm.
 
 import { runSql, sqlLiteral } from '../../mcp/fbo/lib/sql.mjs';
 import { loadQldaConfig, isPmPlaceholder } from '../../src/database/qlda-metadata.mjs';
@@ -22,7 +26,7 @@ import { readSource } from '../../mcp/fbo/lib/encoding.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const STATUS_MAC_DINH = ['DD', 'XN', 'TH'];
+export const STATUS_MAC_DINH = ['YC', 'DD', 'XN', 'TH'];
 
 export function trimmed(v) {
   return String(v ?? '').trim();
@@ -54,7 +58,7 @@ function qldaConnection(hub) {
 }
 
 /** Trạng thái mà UR mang tên PM được coi là "việc PM đang tự làm" — xem buildReviewWhere(). */
-export const STATUS_PM_TU_LAM = ['XN', 'TH'];
+export const STATUS_PM_TU_LAM = ['DD', 'XN', 'TH'];
 
 /**
  * Chốt filter AND. Bỏ trống cả project/pmName/pmDept → lấy pm.maNv từ qlda.local.json.
@@ -100,19 +104,19 @@ export function resolveReviewFilters(hub, args = {}) {
  * Hai LÝ DO một UR lọt vào phạm vi, OR với nhau:
  *   1. Phạm vi quản lý — dự án PM đứng tên LTQL (`pmName`) và/hoặc bộ phận lập trình
  *      (`pmDept`). Đây là phần cũ, giữ nguyên quan hệ AND giữa hai filter đó.
- *   2. VIỆC PM TỰ LÀM — `nbphyc.ma_lt1` = PM, chỉ ở trạng thái XN/TH.
+ *   2. VIỆC PM TỰ LÀM — `nbphyc.ma_lt1` = PM, chỉ ở trạng thái DD/XN/TH.
  *
  * Vì sao cần lý do 2: PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình. Lọc theo
  * LTQL dự án chỉ trả về việc PM QUẢN LÝ, không trả về việc PM ĐANG LÀM trên dự án người khác
  * quản lý — đo trên dữ liệu thật (PM01, DD/XN/TH): 10 UR mang tên PM thì 6 nằm ở dự án
  * do người khác đứng LTQL, tức lọt 6/10 nếu chỉ có lý do 1.
  *
- * Vì sao CHỈ XN/TH: DD là cổng PM — UR ở DD mang tên PM chỉ là giá trị mặc định màn hình BA
- * để lại, chưa phải việc đã nhận (xem laChuaPhanCong() ở assignee.mjs); kéo chúng vào đây sẽ
- * bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.
+ * Vì sao CHỈ DD/XN/TH: YC là cổng PM — UR ở YC mang tên PM chỉ là giá trị mặc định màn hình
+ * BA để lại, chưa phải việc đã nhận (xem laChuaPhanCong() ở assignee.mjs); kéo chúng vào đây
+ * sẽ bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.
  *
  * `project` và `statusList` vẫn AND ở ngoài: chúng là phép THU HẸP tường minh, lý do 2 không
- * được phép phá. Lọc `statusUR=['DD']` mà vẫn lòi ra XN/TH thì filter mất nghĩa.
+ * được phép phá. Lọc `statusUR=['YC']` mà vẫn lòi ra DD/XN/TH thì filter mất nghĩa.
  */
 export function buildReviewWhere({ project, pmName, pmDept, pmSelf, statusList }) {
   const phamVi = [];
@@ -408,7 +412,7 @@ export function mergeReviewRows({ yeuCauRows = [], daumucRows = [], hanRows = []
  * `deps.runSql` để test không chạm DB.
  */
 /**
- * Gắn `hienVat` (danh sách sysid) cho UR ở DD, rút từ nội dung bằng từ điển màn hình.
+ * Gắn `hienVat` (danh sách sysid) cho UR ở YC, rút từ nội dung bằng từ điển màn hình.
  *
  * Từ điển là `wcommand` của CHÍNH chương trình khách — mỗi khách một cây menu, dùng từ điển
  * của khách khác sẽ phân giải ra `sysid` không tồn tại bên này. Nên phải hỏi từng program một.
@@ -443,7 +447,7 @@ function ganHienVat(hub, merged, deps = {}) {
       const tuDien = buildTuDien(res.rows ?? []);
       if (!tuDien.size) continue;
       merged.tuDienTheoDuAn.set(maDa, tuDien);
-      // Gắn `hienVat` cho MỌI UR, không riêng DD: UR ở DD cần nó để chấm điểm ứng viên, còn
+      // Gắn `hienVat` cho MỌI UR, không riêng YC: UR ở YC cần nó để chấm điểm ứng viên, còn
       // UR đã xong cần nó để rút kinh nghiệm. Cùng một phép rút, chạy một lần.
       for (const u of urs) {
         const { hienVat } = rutHienVat(u, tuDien);
@@ -491,7 +495,7 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
     dinhKemRows,
   });
 
-  // Rút hiện vật cho UR ở DD TRƯỚC khi dựng nhân sự: `buildNhanSu` hỏi đồ thị "ai đã làm các
+  // Rút hiện vật cho UR ở YC TRƯỚC khi dựng nhân sự: `buildNhanSu` hỏi đồ thị "ai đã làm các
   // hiện vật này", nên phải biết hiện vật trước. Không có bước này thì `u.hienVat` luôn rỗng
   // và mọi UR rơi về thang menu_id — thang mà đo trên dữ liệu thật chỉ phân giải được 1/25.
   ganHienVat(hub, merged, deps);
@@ -509,7 +513,7 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
     ngayChay: args.ngayChay || todayIso(),
   }, deps);
 
-  // UR ở DD chỉ ghi "update theo link forum: <url>" thì nội dung yêu cầu nằm ở topic, không
+  // UR ở YC chỉ ghi "update theo link forum: <url>" thì nội dung yêu cầu nằm ở topic, không
   // nằm trong UR — mở sẵn ra đây để cả PM lẫn agent phân tích được mà không phải rời báo cáo.
   const forum = fetchForum(hub, { yeuCau: merged.yeuCau, maxTopic: args.maxTopicForum }, deps);
   for (const u of merged.yeuCau) {
@@ -543,10 +547,10 @@ export function fetchReviewDataset(hub, args = {}, deps = {}) {
       + 'noi_dung mất dấu tiếng Việt do codepage sqlcmd — đối chiếu `noi_dung_len`. '
       + '`nhanSu.roster` là người CÒN làm và CÒN ở bộ phận đó (userinfo2.status=1, ma_bo_phan=dept); '
       + 'LTQL của dự án mà không có trong roster nghĩa là đã off hoặc chuyển phòng, khi đó PM là cấp PP. '
-      + '`yeuCau[].forum[]` (chỉ UR ở DD có link forum.fast.com.vn) là nội dung topic lấy từ bản sao '
+      + '`yeuCau[].forum[]` (chỉ UR ở YC có link forum.fast.com.vn) là nội dung topic lấy từ bản sao '
       + '`frpost` — với những UR chỉ ghi "update theo link forum" thì ĐÂY mới là yêu cầu thật, PHẢI đọc '
       + 'nó rồi mới phân tích, đừng kết luận chỉ từ noi_dung của UR. '
-      + 'AI chỉ phân tích UR trang_thai=DD; XN/TH chỉ hiện trên báo cáo để theo dõi hạn.',
+      + 'AI chỉ phân tích UR trang_thai=YC; DD/XN/TH chỉ hiện trên báo cáo để theo dõi hạn.',
   };
 }
 
@@ -648,7 +652,7 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
       ...(u.ddl?.length ? { ddl: u.ddl } : {}),
       ...(u.ddlChuaChot?.length ? { ddlChuaChot: u.ddlChuaChot } : {}),
       ...(u.loaiThayDoiLuocDo ? { loaiThayDoiLuocDo: u.loaiThayDoiLuocDo } : {}),
-      // Nội dung topic forum (chỉ UR ở DD có link) — với UR chỉ ghi "update theo link forum"
+      // Nội dung topic forum (chỉ UR ở YC có link) — với UR chỉ ghi "update theo link forum"
       // thì đây mới là yêu cầu thật. Xem forum.mjs.
       ...(u.forum?.length ? { forum: u.forum } : {}),
     });
@@ -673,7 +677,7 @@ export function datasetToPayloads(dataset, { ngay_chay, pm } = {}) {
 }
 
 /**
- * Gắn `ddl` (đặc tả script) cho UR ở DD có đụng tới lược đồ.
+ * Gắn `ddl` (đặc tả script) cho UR ở YC có đụng tới lược đồ.
  *
  * Ba dữ kiện phải tra, cả ba đều từ CHÍNH chương trình của khách — không cái nào suy từ hằng số
  * trong hub:
@@ -691,10 +695,10 @@ function ganDdl(hub, merged, deps = {}) {
   const sqlFn = deps.runSql ?? runSql;
   const theoDuAn = new Map();
   for (const u of merged.yeuCau) {
-    // DD **và** XN. Khác các phép rút khác vốn chỉ phục vụ cổng duyệt của PM: XN nghĩa là "đã xác
-    // nhận chuyển lập trình" — đúng lúc lập trình viên cần script nhất, mà lọc mỗi DD thì họ không
-    // bao giờ nhìn thấy nó. TH trở đi thì việc đã đang chạy, script tới lúc đó là muộn.
-    if (!['DD', 'XN'].includes(trimmed(u.trang_thai))) continue;
+    // YC, DD **và** XN. Cổng duyệt của PM (nơi script được sinh lần đầu) nằm ở YC; giữ lại DD
+    // và XN để lập trình viên vẫn thấy script khi việc đã được xác nhận chuyển — lọc mỗi YC thì
+    // họ không bao giờ nhìn thấy nó. TH trở đi thì việc đã đang chạy, script tới lúc đó là muộn.
+    if (!['YC', 'DD', 'XN'].includes(trimmed(u.trang_thai))) continue;
     if (!loaiThayDoiLuocDo(u)) continue;
     const maDa = trimmed(u.ma_da);
     if (!maDa) continue;

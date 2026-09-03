@@ -1,4 +1,4 @@
-// assignee.mjs — gợi ý người tiếp nhận cho UR ở trạng thái DD chưa có ma_lt1.
+// assignee.mjs — gợi ý người tiếp nhận cho UR ở trạng thái YC chưa có ma_lt1.
 //
 // Thuần hàm: vào là dữ kiện đã lấy sẵn qua SQL, ra là danh sách ứng viên có điểm và LÝ DO.
 // Không đọc file, không chạm DB, không đoán — chỗ nào thiếu dữ kiện thì hạ độ tin cậy và
@@ -583,7 +583,7 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
 }
 
 /**
- * Lọc ra UR cần gợi ý (DD và chưa phân công thật sự) rồi chấm điểm từng cái.
+ * Lọc ra UR cần gợi ý (YC và chưa phân công thật sự) rồi chấm điểm từng cái.
  * @param {Array} urs
  * @param {Object} nhanSu
  * @param {Object} [trongSo]
@@ -592,6 +592,6 @@ export function goiYNguoiTiepNhan(u, nhanSu = {}, trongSo = {}, pmCode = '') {
  */
 export function goiYPhanCong(urs = [], nhanSu = {}, trongSo = {}, pmCode = '') {
   return urs
-    .filter((u) => chuan(u.trang_thai) === 'DD' && laChuaPhanCong(u.ma_lt1, pmCode))
+    .filter((u) => chuan(u.trang_thai) === 'YC' && laChuaPhanCong(u.ma_lt1, pmCode))
     .map((u) => ({ ur: u, goiY: goiYNguoiTiepNhan(u, nhanSu, trongSo, pmCode) }));
 }

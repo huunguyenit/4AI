@@ -1,8 +1,8 @@
 // experience-build.mjs — nạp kinh nghiệm từ UR đã xong vào đồ thị.
 //
-// Tách khỏi đường báo cáo vì PHẠM VI DỮ LIỆU khác hẳn: báo cáo rà soát chỉ lấy UR ở DD/XN/TH
-// (phạm vi cổng PM), còn kinh nghiệm chỉ tính từ UR đã xong HT/DT/OK/UP. Hai tập không giao
-// nhau, nên không có cách nào ghép chung một lần đọc.
+// Tách khỏi đường báo cáo vì PHẠM VI DỮ LIỆU khác hẳn: báo cáo rà soát chỉ lấy UR ở YC/DD/XN/TH
+// (phạm vi cổng PM + theo dõi hạn), còn kinh nghiệm chỉ tính từ UR đã xong HT/DT/OK/UP. Hai tập
+// không giao nhau, nên không có cách nào ghép chung một lần đọc.
 //
 // Cũng khác về NHỊP: báo cáo chạy mỗi sáng; kho kinh nghiệm là lịch sử tích luỹ, chạy lại khi
 // cần (sau một đợt UP, hoặc khi thêm dự án mới). Ép nó vào báo cáo là bắt PM trả giá quét lại

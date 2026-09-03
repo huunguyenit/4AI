@@ -417,7 +417,7 @@ export function gopEntry(cu = {}, moi = {}) {
  *
  * BẢN ĐẦU BỎ QUA `chinh-ur`, VÀ ĐÓ LÀ LỖI. Lý do khi đó: "PM đang nhìn UR ấy rồi, nhắc lại
  * kinh nghiệm của chính nó là nhiễu" — giả định ngầm là hướng dẫn luôn được ghi SAU khi làm
- * xong, nên hiện lại chỉ là tiếng vọng. Sai: UR ở DD thì việc CHƯA làm, và cách làm ghi cho nó
+ * xong, nên hiện lại chỉ là tiếng vọng. Sai: UR ở YC thì việc CHƯA làm, và cách làm ghi cho nó
  * chính là chỉ dẫn cho người sắp bắt tay vào. Đúng chỗ cần hiện nhất thì lại là chỗ duy nhất
  * bị giấu. Đo được ngay ở ca thật: HOATP UR10 (fcode1 `10`, trạng thái DD) có hướng dẫn ghi
  * đích danh mà tab "Gợi ý kỹ thuật" trống trơn.

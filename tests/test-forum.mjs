@@ -35,15 +35,15 @@ ok('Link không có ?t= thì bỏ qua, không đoán',
   trichLinkForum('https://forum.fast.com.vn/index.php').length === 0);
 ok('Text rỗng / null không nổ', trichLinkForum(null).length === 0 && trichLinkForum('').length === 0);
 
-process.stdout.write('\n=== chỉ UR ở DD mới tra forum ===\n');
+process.stdout.write('\n=== chỉ UR ở YC mới tra forum ===\n');
 const urs = [
-  { stt_rec: 'A', trang_thai: 'DD', noi_dung: 'update theo https://forum.fast.com.vn/showthread.php?t=100' },
+  { stt_rec: 'A', trang_thai: 'YC', noi_dung: 'update theo https://forum.fast.com.vn/showthread.php?t=100' },
   { stt_rec: 'B', trang_thai: 'XN', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=200' },
   { stt_rec: 'C', trang_thai: 'TH', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=300' },
-  { stt_rec: 'D', trang_thai: 'DD', noi_dung: 'không có link' },
+  { stt_rec: 'D', trang_thai: 'YC', noi_dung: 'không có link' },
 ];
 const can = urCanTraForum(urs);
-ok('Chỉ lấy UR ở DD có link', can.length === 1 && can[0].stt_rec === 'A', JSON.stringify(can.map((x) => x.stt_rec)));
+ok('Chỉ lấy UR ở YC có link', can.length === 1 && can[0].stt_rec === 'A', JSON.stringify(can.map((x) => x.stt_rec)));
 ok('XN/TH không tra (việc đã giao, kéo forum vào chỉ làm nặng báo cáo)',
   !can.some((x) => ['B', 'C'].includes(x.stt_rec)));
 
@@ -70,7 +70,7 @@ const rowsGia = [
   { topic_id: 9, thu_tu: 2, post_id: 92, nguoi_viet: 'luanvt', ngay_viet: '2026-08-12', len_noi_dung: 5, manh: 1, noi_dung: 'ngắn' + 'x' },
 ];
 const rGhep = fetchForum(undefined,
-  { yeuCau: [{ stt_rec: 'A', trang_thai: 'DD', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
+  { yeuCau: [{ stt_rec: 'A', trang_thai: 'YC', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
   { runSql: () => ({ rows: rowsGia }) });
 const bai = rGhep.theoUr.A?.[0]?.baiViet ?? [];
 ok('Hai bài, sắp theo thu_tu', bai.length === 2 && bai[0].thu_tu === 1 && bai[1].thu_tu === 2);
@@ -83,23 +83,23 @@ ok('Ghép đủ thì không báo thiếu', rGhep.thieuDuLieu.length === 0, rGhep
 
 // Lưới an toàn: sqlcmd cắt lặng lẽ nên phải ĐO lại, không tin câu SQL trông đúng là đủ.
 const rHut = fetchForum(undefined,
-  { yeuCau: [{ stt_rec: 'A', trang_thai: 'DD', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
+  { yeuCau: [{ stt_rec: 'A', trang_thai: 'YC', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
   { runSql: () => ({ rows: [{ topic_id: 9, thu_tu: 1, len_noi_dung: 9000, manh: 1, noi_dung: 'ngắn hơn nhiều' }] }) });
 ok('Nhận về ngắn hơn LEN thật -> BÁO RA, không im lặng',
   rHut.thieuDuLieu.some((m) => m.includes('ngắn hơn độ dài thật')), rHut.thieuDuLieu.join(' | '));
 
 const rLoi = fetchForum(undefined,
-  { yeuCau: [{ stt_rec: 'A', trang_thai: 'DD', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
+  { yeuCau: [{ stt_rec: 'A', trang_thai: 'YC', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=9' }] },
   { runSql: () => { throw new Error('sqlcmd không chạy'); } });
 ok('Lỗi SQL -> ghi lý do, không đánh sập báo cáo',
   rLoi.thieuDuLieu.some((m) => m.includes('frpost')) && Object.keys(rLoi.theoUr).length === 0);
 
-const rTrong = fetchForum(undefined, { yeuCau: [{ stt_rec: 'A', trang_thai: 'DD', noi_dung: 'không link' }] },
+const rTrong = fetchForum(undefined, { yeuCau: [{ stt_rec: 'A', trang_thai: 'YC', noi_dung: 'không link' }] },
   { runSql: () => { throw new Error('không được gọi'); } });
 ok('Không UR nào có link -> KHÔNG chạm DB', rTrong.soTopic === 0 && rTrong.thieuDuLieu.length === 0);
 
 const rThieuTopic = fetchForum(undefined,
-  { yeuCau: [{ stt_rec: 'A', trang_thai: 'DD', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=999' }] },
+  { yeuCau: [{ stt_rec: 'A', trang_thai: 'YC', noi_dung: 'https://forum.fast.com.vn/showthread.php?t=999' }] },
   { runSql: () => ({ rows: [] }) });
 ok('Topic không có trong bản sao frpost -> nói ra, không lặng lẽ bỏ',
   rThieuTopic.thieuDuLieu.some((m) => m.includes('999')), rThieuTopic.thieuDuLieu.join(' | '));
@@ -124,7 +124,7 @@ const payload = {
   giaiDoan: [{ giai_doan_da: 'GD1', ngay_ht: '2026-08-20', xac_nhan_da_hen_yn: true }],
   yeuCau: [
     {
-      stt_rec: 'R1', fcode1: '59', giai_doan_da: 'GD1', trang_thai: 'DD', tlks_yn: true,
+      stt_rec: 'R1', fcode1: '59', giai_doan_da: 'GD1', trang_thai: 'YC', tlks_yn: true,
       trang_tlks: 'tr.1', menu_id: 'M01', ma_lt1: '',
       noi_dung: 'Update TT80 theo link: https://forum.fast.com.vn/showthread.php?t=28934',
       forum: [{
@@ -149,7 +149,7 @@ ok('Ghi tên người viết + ngày', html.includes('khoand') && html.includes(
 const { forum: _bo, ...khongForum } = payload.yeuCau[0];
 const htmlTrong = renderReport({ ...payload, yeuCau: [khongForum, payload.yeuCau[1]] }, loadHolidays());
 ok('Không UR nào có forum -> nói rõ, không bỏ trống mục',
-  htmlTrong.includes('Không có yêu cầu nào ở DD kèm link'));
+  htmlTrong.includes('Không có yêu cầu nào ở YC kèm link'));
 
 process.stdout.write(`\n=== TEST KẾT THÚC: ${failures ? `${failures} thất bại` : 'TẤT CẢ PASS (0 thất bại)'} ===\n`);
 process.exit(failures ? 1 : 0);

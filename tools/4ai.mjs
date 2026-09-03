@@ -286,7 +286,7 @@ function cmdTargets(opts) {
 /**
  * `graph experience` — quét UR ĐÃ XONG, rút kinh nghiệm ở mức hiện vật, đẩy vào đồ thị.
  *
- * Không gộp vào `report` được: báo cáo chỉ đọc UR ở DD/XN/TH còn kinh nghiệm lấy từ
+ * Không gộp vào `report` được: báo cáo chỉ đọc UR ở YC/DD/XN/TH còn kinh nghiệm lấy từ
  * HT/DT/OK/UP — hai tập rời nhau. Xem experience-build.mjs.
  */
 async function cmdGraphExperience(opts) {

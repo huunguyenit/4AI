@@ -149,8 +149,9 @@ export function datasetToGraph(dataset = {}, opts = {}) {
     }
   }
 
-  // ExperienceFact CỐ TÌNH không dựng ở đây. Dataset rà soát chỉ lấy UR ở DD/XN/TH (phạm vi
-  // cổng PM), còn kinh nghiệm chỉ tính từ UR đã xong HT/DT/OK/UP — hai tập KHÔNG giao nhau.
+  // ExperienceFact CỐ TÌNH không dựng ở đây. Dataset rà soát chỉ lấy UR ở YC/DD/XN/TH (phạm vi
+  // cổng PM + theo dõi hạn), còn kinh nghiệm chỉ tính từ UR đã xong HT/DT/OK/UP — hai tập KHÔNG
+  // giao nhau.
   // Nối vào đây thì mã trông như đang chạy nhưng vĩnh viễn cho ra rỗng. Việc đó nằm ở
   // `4ai graph experience`, có phạm vi dữ liệu riêng.
 
@@ -160,7 +161,7 @@ export function datasetToGraph(dataset = {}, opts = {}) {
 /**
  * UR đã xong → node Request + ExperienceFact + cạnh, cho `4ai graph experience`.
  *
- * Có dựng cả node Request vì đồ thị chỉ chứa UR ở DD/XN/TH (do đường báo cáo nộp); UR đã xong
+ * Có dựng cả node Request vì đồ thị chỉ chứa UR ở YC/DD/XN/TH (do đường báo cáo nộp); UR đã xong
  * chưa từng có mặt, mà cạnh PRODUCED_EXPERIENCE thì phải có đầu Request để bám vào.
  *
  * @param {Array} yeuCau - UR của MỘT dự án, mọi trạng thái (hàm tự lọc)

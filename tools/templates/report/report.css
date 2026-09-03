@@ -12,6 +12,7 @@
   --warn-bg: #FFFBEB;
   --ok: #047857;
   --ok-bg: #ECFDF5;
+  --yc: #64748B;
   --dd: #1D4ED8;
   --xn: #7C3AED;
   --th: #0F766E;
@@ -39,6 +40,7 @@
     --warn-bg: rgba(251, 191, 36, .12);
     --ok: #34D399;
     --ok-bg: rgba(52, 211, 153, .12);
+    --yc: #94A3B8;
     --dd: #60A5FA;
     --xn: #C4B5FD;
     --th: #5EEAD4;
@@ -228,6 +230,10 @@ tbody tr:hover {
   padding: 1px 7px;
   border-radius: 4px;
   color: #fff
+}
+
+.tt-yc {
+  background: var(--yc)
 }
 
 .tt-dd {
@@ -539,6 +545,10 @@ pre {
   fill: var(--mut)
 }
 
+.chart .seg.tt-yc {
+  fill: var(--yc)
+}
+
 .chart .seg.tt-dd {
   fill: var(--dd)
 }
@@ -570,6 +580,10 @@ pre {
   height: 10px;
   border-radius: 2px;
   margin: 0 4px 0 12px
+}
+
+.key.tt-yc {
+  background: var(--yc)
 }
 
 .key.tt-dd {
@@ -841,7 +855,7 @@ body.dash {
 }
 
 /* --calm chứ không --mut: nhãn và dòng phụ giờ mang phần định lượng ("≤ 3 ngày LV",
-   "UR ở DD") nên phải đọc được, mà --mut trên nền --bad-bg chỉ đạt 4.35:1 — dưới ngưỡng AA. */
+   "UR ở YC") nên phải đọc được, mà --mut trên nền --bad-bg chỉ đạt 4.35:1 — dưới ngưỡng AA. */
 .kpi span {
   display: block;
   font-size: 12px;

@@ -10,8 +10,8 @@
 // theo từ khoá; ở đây đã có sẵn topic_id lấy từ chính link nên tra thẳng `frpost` là đường
 // ngắn và chắc chắn hơn (khớp đúng topic, không phụ thuộc thuật toán xếp hạng từ khoá).
 //
-// CHỈ ÁP CHO UR Ở TRẠNG THÁI DD. Đó là cổng PM — chỗ duy nhất báo cáo cần đủ dữ kiện để phân
-// tích. UR đã sang XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng
+// CHỈ ÁP CHO UR Ở TRẠNG THÁI YC. Đó là cổng PM — chỗ duy nhất báo cáo cần đủ dữ kiện để phân
+// tích. UR đã sang DD/XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng
 // báo cáo mà không đổi quyết định nào.
 
 import { runSql } from '../../mcp/fbo/lib/sql.mjs';
@@ -100,11 +100,11 @@ WHERE p.topic_id IN (${ids.join(', ')})
 ORDER BY p.topic_id, p.thu_tu, manh.i`.trim();
 }
 
-/** UR nào cần mở link forum — chỉ DD, và chỉ khi nội dung thật sự có link. */
+/** UR nào cần mở link forum — chỉ YC, và chỉ khi nội dung thật sự có link. */
 export function urCanTraForum(yeuCau = []) {
   const out = [];
   for (const u of yeuCau) {
-    if (chuan(u.trang_thai) !== 'DD') continue;
+    if (chuan(u.trang_thai) !== 'YC') continue;
     const links = trichLinkForum(u.noi_dung);
     if (links.length) out.push({ stt_rec: chuan(u.stt_rec), links });
   }
@@ -122,7 +122,7 @@ function qldaConnection(hub) {
 }
 
 /**
- * Nạp nội dung forum cho các UR ở DD có link.
+ * Nạp nội dung forum cho các UR ở YC có link.
  *
  * Trả về map `stt_rec` → mảng topic, mỗi topic kèm `baiViet[]` ĐẦY ĐỦ (không cắt): payload là
  * thứ agent đọc để phân tích, cắt ở đây là cắt mất chính cái cần phân tích. Việc trình bày gọn

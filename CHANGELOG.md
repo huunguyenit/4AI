@@ -5,6 +5,23 @@ beta nội bộ, chưa theo semver nghiêm ngặt vì dự án chưa có `packag
 
 ## [Chưa phát hành]
 
+### Đổi — cổng phân tích PM chuyển từ `DD` sang `YC`
+
+Quy định mới: AI chỉ phân tích UR ở trạng thái `YC` (tài liệu đầu vào, ảnh hưởng, phân việc,
+đề xuất `DD`/`TA`/`KL`). Sau khi PM báo thời gian thực hiện và tick xác nhận theo giai đoạn
+(`chotDaHen`), UR chuyển `DD` — giờ chỉ còn là mốc đã cam kết hạn, không phân tích lại. `XN`/`TH`
+không đổi vai trò (chỉ theo dõi hạn). Luồng chuẩn: `YC → DD → XN → TH → HT`.
+
+Đổi cả code lẫn tài liệu: `STATUS_MAC_DINH`/`STATUS_PM_TU_LAM`/`CHI_THEO_DOI` và mọi điểm gọi
+`laChuaPhanCong`/`goiYPhanCong`/`menuCanGoiY`/`urCanTraForum` trong `tools/lib/*.mjs`; trường
+MCP `ddUR[]` đổi tên thành `ycUR[]` (`render_review_report`, `get_review_dataset`); ba asset
+`pm-deadline-review`, `pm-analyst`, `pm-ur-routing`; `data/qlda.json` mục `review.*`.
+
+Bổ sung: `pm-analyst` giờ bắt buộc UR loại "tạo mới/sửa báo cáo" (đầu mục `09` hoặc nội dung
+nhắc báo cáo/thống kê/bảng kê) phải mô tả đủ **đầu vào** (điều kiện lọc — ngày, kỳ, mã khách,
+tài khoản… và nguồn lấy theo sổ cái/sổ kho/sổ thanh toán) và **đầu ra** (danh sách cột hiển
+thị); thiếu bên nào thì ghi "Cần làm rõ" và cảnh báo PM, không tự suy diễn.
+
 ### Đã thêm — ADR-0002: FBO Designer tách thành repo riêng
 
 `docs/adr/ADR-0002-fbo-designer-repo-split.md`. Extension VS Code kéo thả thiết kế form FBO

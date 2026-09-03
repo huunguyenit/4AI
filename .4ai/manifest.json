@@ -44,9 +44,9 @@
     },
     {
       "path": ".agents/agents/pm-analyst.md",
-      "sha256": "6a3f428890762e55cda054624476540d016dae98369a0b6234a0c87af220d251",
+      "sha256": "d02cf2b4c0e9fcc90a3b392bdc595b65eacb7dad6f8cb8fe3c259761f14166f4",
       "sourceId": "pm-analyst",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".agents/agents/pm-architect.md",
@@ -182,9 +182,9 @@
     },
     {
       "path": ".agents/rules/pm-ur-routing.md",
-      "sha256": "c31dd2a5666b69ed9490804aeed94bf7b0189dcddc5af0dd4112575b95017490",
+      "sha256": "533d80f500e189ec88811c2305dc4a3d6854fdaf6b52aa38f68df5c613726c86",
       "sourceId": "pm-ur-routing",
-      "sourceVersion": 2
+      "sourceVersion": 3
     },
     {
       "path": ".agents/skills/erp-category-create/SKILL.md",
@@ -692,9 +692,9 @@
     },
     {
       "path": ".agents/skills/pm-deadline-review/SKILL.md",
-      "sha256": "5e4a3b5126d903db74cf46a5d67b4e3a3d9a5ab752ae7f0c9876383c38fe4394",
+      "sha256": "97545f5c539f088b0ffb3b6252188fab58627748f889ebc0ca0405315824c18e",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 13
+      "sourceVersion": 14
     },
     {
       "path": ".agents/skills/pm-graph-maintain/SKILL.md",
@@ -752,9 +752,9 @@
     },
     {
       "path": ".agents/workflows/pm-review.md",
-      "sha256": "ff8865ba85dd2b9fa1a6eb9d552ad5ca7dbbfae278292b838395a6cd82dd482f",
+      "sha256": "83fb27eece6572e074cc22e6a512d80204f0f90690c807d9869e1ec589ea9b70",
       "sourceId": "pm-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".agents/workflows/pm-status.md",
@@ -764,7 +764,7 @@
     },
     {
       "path": ".claude/4ai-context.md",
-      "sha256": "e4f6651d8ba955b464f9c959942342deb73fe7d14e508733047790c8f958e84f"
+      "sha256": "8366b5ab63e16744f2b6a97cfed7b64e6d883302f62560b22a0de7978d80fd3e"
     },
     {
       "path": ".claude/agents/erp-builder.md",
@@ -810,9 +810,9 @@
     },
     {
       "path": ".claude/agents/pm-analyst.md",
-      "sha256": "5f1ea977e6dc9cf09d9025e1f10bb774743f47d67c54525c678ef7bd8e7db486",
+      "sha256": "8e4dca37db7f6d4dd0a1cb456821886b943e8070d7512ec4de4a78748d821c9b",
       "sourceId": "pm-analyst",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".claude/agents/pm-architect.md",
@@ -888,9 +888,9 @@
     },
     {
       "path": ".claude/commands/pm-review.md",
-      "sha256": "9d44546a64e7a3b558ec4f49ccfbb22b9829a1af5ed8b19abac451ff4502171f",
+      "sha256": "ce672f52a9f282ae7ae5963f724f4cd74480456ba9818497caeb064752e207f3",
       "sourceId": "pm-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".claude/commands/pm-status.md",
@@ -1458,9 +1458,9 @@
     },
     {
       "path": ".claude/skills/pm-deadline-review/SKILL.md",
-      "sha256": "5e4a3b5126d903db74cf46a5d67b4e3a3d9a5ab752ae7f0c9876383c38fe4394",
+      "sha256": "97545f5c539f088b0ffb3b6252188fab58627748f889ebc0ca0405315824c18e",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 13
+      "sourceVersion": 14
     },
     {
       "path": ".claude/skills/pm-graph-maintain/SKILL.md",
@@ -1530,9 +1530,9 @@
     },
     {
       "path": ".cursor/agents/pm-analyst.md",
-      "sha256": "a159752763d00272e345aeb41f71e665afee6ca1da7f9c60e972c7bc8503e1ab",
+      "sha256": "b4801238d16eea905f6d0ea211d10df97891af9fcd7bc5bcb74dd22d36442b83",
       "sourceId": "pm-analyst",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".cursor/agents/pm-architect.md",
@@ -1608,9 +1608,9 @@
     },
     {
       "path": ".cursor/commands/pm-review.md",
-      "sha256": "f1b9c95320d37c6af8fa704a329f783844157e2a826c203da1b4afaa60570dde",
+      "sha256": "cd301220c689683a452d05f20c40e3237f2465f560ec1c787e72b683f6e3e8b7",
       "sourceId": "pm-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".cursor/commands/pm-status.md",
@@ -1740,9 +1740,9 @@
     },
     {
       "path": ".cursor/rules/pm-ur-routing.mdc",
-      "sha256": "ef51314fcebea00a3edc427698ef370a59a654b86148f9e15405cef54bf8fed2",
+      "sha256": "01acc12ef6a1ac582c7065f98c1553158a39cbe05ee7a8b7eaa50feba82dafa0",
       "sourceId": "pm-ur-routing",
-      "sourceVersion": 2
+      "sourceVersion": 3
     },
     {
       "path": ".cursor/skills/4ai-asset-author/SKILL.md",
@@ -2256,9 +2256,9 @@
     },
     {
       "path": ".cursor/skills/pm-deadline-review/SKILL.md",
-      "sha256": "b2b492e135c29c95d4f2bfa95f6975afac6dfc1ac24201497d80813768c62a7d",
+      "sha256": "f0dff8d96b58cb2ffb70093eb73ab2671fd7726d974a04486fa078e882fcae90",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 13
+      "sourceVersion": 14
     },
     {
       "path": ".cursor/skills/pm-graph-maintain/SKILL.md",
@@ -2328,9 +2328,9 @@
     },
     {
       "path": ".github/chatmodes/pm-analyst.chatmode.md",
-      "sha256": "eaae2c98bac1a75d3a37b618ba1bde97efe2974ca701d4423ede15f5712cc138",
+      "sha256": "b752bbb74edd2692c80871a86faa9be834fe50030c0112bec9831cf3fb553431",
       "sourceId": "pm-analyst",
-      "sourceVersion": 4
+      "sourceVersion": 5
     },
     {
       "path": ".github/chatmodes/pm-architect.chatmode.md",
@@ -2346,7 +2346,7 @@
     },
     {
       "path": ".github/copilot-instructions.md",
-      "sha256": "e49caef00130a2489b56e929cf2bfcf1290fe5020f6df7fff1152e2fef62e41b"
+      "sha256": "c9c2e55fa569cb598bbaa7e6c9c35568452304b030e8e47417aee796ef2797e2"
     },
     {
       "path": ".github/instructions/erp-category-create.instructions.md",
@@ -2542,9 +2542,9 @@
     },
     {
       "path": ".github/instructions/pm-deadline-review.instructions.md",
-      "sha256": "76e49d2c0855efa918e64586b4828c342087ad1ce107a71642d2b87edb4ba1d4",
+      "sha256": "b27b08567bedf28538c887b921a35cae8113dc91af58864073a975bf7159f5dc",
       "sourceId": "pm-deadline-review",
-      "sourceVersion": 13
+      "sourceVersion": 14
     },
     {
       "path": ".github/instructions/pm-graph-maintain.instructions.md",
@@ -2962,9 +2962,9 @@
     },
     {
       "path": ".github/prompts/pm-review.prompt.md",
-      "sha256": "f78ca7fbef04bf5b795432c2925cf2d09bf440a324385875deb55c81fe375661",
+      "sha256": "e35e37bdbc8e65ff761d257b4d4bfd44d72fb63223c01e8849ead9a1441339c6",
       "sourceId": "pm-review",
-      "sourceVersion": 12
+      "sourceVersion": 13
     },
     {
       "path": ".github/prompts/pm-status.prompt.md",
@@ -3018,6 +3018,6 @@
     }
   ],
   "schemaVersion": 1,
-  "syncedAt": "2026-08-25T07:55:46.366Z",
+  "syncedAt": "2026-09-03T03:08:10.483Z",
   "target": "4ai"
 }

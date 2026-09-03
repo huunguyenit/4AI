@@ -433,15 +433,15 @@
         "note": "Một dự án có thể có nhiều bộ phận tham gia — KHÔNG lọc theo bộ phận, chỉ lọc theo LTQL."
       },
       "vieCPmTuLam": {
-        "rule": "Kéo thêm mọi UR có nbphyc.ma_lt1 = {PMName} và trang_thai thuộc XN/TH, kể cả khi dự án đó do người khác đứng LTQL.",
+        "rule": "Kéo thêm mọi UR có nbphyc.ma_lt1 = {PMName} và trang_thai thuộc DD/XN/TH, kể cả khi dự án đó do người khác đứng LTQL.",
         "viSao": "PM cũng là nhân viên của phòng và vẫn trực tiếp lập trình — PM cần thấy công việc của chính mình. Lọc theo LTQL dự án chỉ ra việc PM QUẢN LÝ, không ra việc PM ĐANG LÀM. Đo trên dữ liệu thật (PM01, DD/XN/TH): 10 UR mang tên PM thì 6 nằm ở dự án người khác quản lý — lọt 6/10 nếu thiếu lý do này.",
-        "chiXnTh": "CỐ Ý bỏ DD. DD là cổng PM: ma_lt1 = mã PM ở trạng thái đó chỉ là giá trị mặc định màn hình BA để lại, chưa phải việc đã nhận (xem review.phanCong.chuaPhanCong). Kéo cả DD vào sẽ bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.",
+        "chiDdXnTh": "CỐ Ý bỏ YC. YC là cổng PM: ma_lt1 = mã PM ở trạng thái đó chỉ là giá trị mặc định màn hình BA để lại, chưa phải việc đã nhận (xem review.phanCong.chuaPhanCong). Kéo cả YC vào sẽ bơm nhầm UR chưa giao của cả công ty vào báo cáo của PM.",
         "chiMoRong": "Nhánh này chỉ MỞ RỘNG một phạm vi đã có, không bao giờ đứng một mình. Chỉ truyền `--project` (không pmName/pmDept) thì phạm vi vốn đã là toàn bộ UR của dự án — thêm nhánh vào lúc đó biến OR thành phép thu hẹp.",
-        "khongPhaThuHep": "`project` và `statusUR` vẫn AND ở ngoài — chúng là phép thu hẹp tường minh, nhánh này không được phép phá. Lọc statusUR=['DD'] mà vẫn lòi ra XN/TH thì filter mất nghĩa."
+        "khongPhaThuHep": "`project` và `statusUR` vẫn AND ở ngoài — chúng là phép thu hẹp tường minh, nhánh này không được phép phá. Lọc statusUR=['YC'] mà vẫn lòi ra DD/XN/TH thì filter mất nghĩa."
       },
       "yeuCau": {
-        "trangThai": ["DD", "XN", "TH"],
-        "rule": "Chỉ rà soát UR ở ba trạng thái này. TA/YC chưa vào luồng; HT trở đi đã ngoài vai PM; CH/KL/KD là nhánh dừng."
+        "trangThai": ["YC", "DD", "XN", "TH"],
+        "rule": "Chỉ rà soát UR ở bốn trạng thái này. TA chưa vào luồng chính thức (giữ chỗ khi chưa chốt được hạn); HT trở đi đã ngoài vai PM; CH/KL/KD là nhánh dừng."
       }
     },
 
@@ -456,7 +456,7 @@
         "leadWorkingDays": 3,
         "lichNghi": "data/holidays-vn.json",
         "rule": "Cảnh báo khi số ngày làm việc còn lại tới hạn <= 3. Ngày làm việc loại T7/CN và mọi ngày trong holidays-vn.json.",
-        "quaHan": "Hạn đã qua mà UR vẫn ở DD/XN/TH thì báo mức QUÁ HẠN, tách riêng khỏi mức SẮP TỚI."
+        "quaHan": "Hạn đã qua mà UR vẫn ở YC/DD/XN/TH thì báo mức QUÁ HẠN, tách riêng khỏi mức SẮP TỚI."
       }
     },
 
@@ -467,20 +467,21 @@
     },
 
     "congPm": {
-      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái DD — đây là phần AI phân tích (tài liệu đầu vào, ảnh hưởng, phân việc). UR ở XN/TH chỉ theo dõi hạn trên báo cáo do code sinh, không kiểm lại TLKS.",
-      "tai": "DD",
+      "note": "Cổng kiểm của PM nằm ĐÚNG ở trạng thái YC — đây là phần AI phân tích (tài liệu đầu vào, ảnh hưởng, phân việc). UR ở DD/XN/TH chỉ theo dõi hạn trên báo cáo do code sinh, không kiểm lại TLKS. DD giờ là mốc PM đã báo thời gian thực hiện và tick xác nhận theo giai đoạn (chotDaHen) — không còn là cổng phân tích.",
+      "tai": "YC",
       "quyetDinh": [
-        { "sang": "XN", "khi": "Chấp nhận — yêu cầu nằm trong phạm vi và đã chốt được hạn hoàn thành." },
+        { "sang": "DD", "khi": "Chấp nhận — yêu cầu nằm trong phạm vi và đã chốt được hạn hoàn thành (tick xác nhận theo giai đoạn — chotDaHen)." },
         { "sang": "TA", "khi": "Chưa chốt được hạn hoàn thành (giai đoạn chưa tick chốt đã hẹn)." },
         { "sang": "KL", "khi": "Vượt khả năng xử lý của FBO — phải dẫn được node Capability verdict='khong' làm căn cứ." }
       ],
-      "luongChuan": "DD → XN → TH → HT",
+      "luongChuan": "YC → DD → XN → TH → HT",
+      "chuyenDdSangXn": "DD → XN là bước PM tự làm sau khi đã báo thời gian thực hiện — không còn nằm trong quyết định AI đề xuất ở cổng YC.",
       "thiHanh": "AI chỉ ĐỀ XUẤT và soạn sẵn câu lệnh. Mọi thay đổi trạng thái chỉ chạy sau khi PM xác nhận."
     },
 
     "linkForum": {
       "note": "Rất nhiều UR chỉ ghi 'update theo link forum: <url>' — nội dung yêu cầu THẬT nằm ở topic trên forum.fast.com.vn chứ không nằm trong UR. Đọc mỗi noi_dung của UR thì không đủ để phân tích phạm vi hay giờ công.",
-      "apDung": "CHỈ UR ở trang_thai = DD. Đó là cổng PM — chỗ duy nhất cần đủ dữ kiện để quyết định. UR đã sang XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng báo cáo.",
+      "apDung": "CHỈ UR ở trang_thai = YC. Đó là cổng PM — chỗ duy nhất cần đủ dữ kiện để quyết định. UR đã sang DD/XN/TH thì việc đã giao, kéo thêm vài nghìn ký tự forum vào chỉ làm nặng báo cáo.",
       "nguon": {
         "bang": "frpost",
         "database": "app (`databases.qlda.databaseName`) — bản sao diễn đàn: 76.151 bài / 17.533 topic, url_goc giữ link gốc",
@@ -499,7 +500,7 @@
     },
 
     "kiemTlks": {
-      "note": "Áp dụng cho UR ở trạng thái DD.",
+      "note": "Áp dụng cho UR ở trạng thái YC.",
       "rule": "tlks_yn chỉ được tick khi trang_tlks ghi rõ số trang / mục lục. Nhưng tick không đủ tin: có UR tick tlks_yn mà nội dung ghi không trùng tài liệu. LUÔN đọc nội dung tài liệu rồi mới kết luận.",
       "ngoaiTlks": {
         "rule": "UR không nằm trong TLKS thì phải có căn cứ khác đính kèm ở cấp dự án: biên bản nghiệm thu, phụ lục, hoặc email xác nhận có đúng nội dung đó.",
@@ -510,8 +511,8 @@
     },
 
     "phanCong": {
-      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở DD chưa phân lập trình (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
-      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = DD — UR đã sang XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình. Dự án có nhiều LTQL thì payload.pm là danh sách, so khớp từng mã một.",
+      "note": "Trọng số chấm điểm gợi ý người tiếp nhận UR ở YC chưa phân lập trình (tools/lib/assignee.mjs). Ba tiêu chí theo đúng thứ tự ưu tiên PM đặt: kinh nghiệm menu > tải sắp tới hạn > đóng góp UR đầu vào (chỉ áp cho báo cáo đầu ra). Đây là ĐỀ XUẤT xếp hạng, PM chốt rồi mới giao — không có đường tự UPDATE nbphyc.",
+      "chuaPhanCong": "'Chưa phân' gồm CẢ ma_lt1 = mã PM, không chỉ ô trống: màn hình BA lên yêu cầu để sẵn ma_lt1 = PM (người duyệt đầu tiên), PM mới phân việc thật sự sau đó. Chỉ áp cho trang_thai = YC — UR đã sang DD/XN/TH mang mã PM là PM tự làm thật. PM VẪN nằm trong danh sách ứng viên vì PM cũng trực tiếp lập trình. Dự án có nhiều LTQL thì payload.pm là danh sách, so khớp từng mã một.",
       "diemMenu": 100,
       "diemDauVao": 60,
       "phatMoiUrToiHan": 15,
@@ -539,7 +540,7 @@
         "NV": "Nhân viên."
       },
       "pmLaAi": {
-        "rule": "PM không phải một chức vụ trong userinfo2 — mọi PM đều mang ma_chv='NV'. Dấu hiệu duy nhất là ĐỨNG TÊN lập trình quản lý: mã nằm ở nbdmda.ma_lt1/ma_lt2/ma_lt3 của dự án còn UR ở DD/XN/TH.",
+        "rule": "PM không phải một chức vụ trong userinfo2 — mọi PM đều mang ma_chv='NV'. Dấu hiệu duy nhất là ĐỨNG TÊN lập trình quản lý: mã nằm ở nbdmda.ma_lt1/ma_lt2/ma_lt3 của dự án còn UR ở YC/DD/XN/TH.",
         "viDu": "NV01 và PM01 là PM vì mã của họ nằm trong ma_lt1/2/3 của dự án đang có UR — không phải vì chức vụ HR.",
         "hệQua": "PM cũng là nhân viên và vẫn trực tiếp lập trình, nên vai PM KHÔNG loại họ khỏi danh sách ứng viên."
       },
@@ -550,7 +551,7 @@
       },
       "lichSuMenu": {
         "bang": "nbphyc",
-        "loc": "menu_id IN (menu của UR đang ở DD) AND ma_lt1 IN (roster)",
+        "loc": "menu_id IN (menu của UR đang ở YC) AND ma_lt1 IN (roster)",
         "rule": "KHÔNG lọc trang_thai (UR đã UP mới là bằng chứng kinh nghiệm mạnh nhất) và KHÔNG lọc bp_lt (kinh nghiệm theo người, không theo mã phòng ghi trên UR). Hai giới hạn trên là để câu trả lời còn nghĩa: toàn bộ cặp (người × menu) của FSD là hơn 33.000 dòng."
       },
       "taiTrong": {
@@ -559,7 +560,7 @@
       },
       "dongGopDauVao": {
         "bang": "nbctdaumuc JOIN nbphyc",
-        "loc": "ma_daumuc IN (mã đầu vào — xem enums.dauMucLoai) AND menu_id IN (menu của UR đang ở DD) AND ma_lt IN (roster)",
+        "loc": "ma_daumuc IN (mã đầu vào — xem enums.dauMucLoai) AND menu_id IN (menu của UR đang ở YC) AND ma_lt IN (roster)",
         "rule": "`ma_lt` lấy trên ĐẦU MỤC, không phải ma_lt1 của cả UR — một UR có thể có nhiều đầu mục do nhiều người khác nhau làm, gán theo UR sẽ nhầm công cho người đứng tên UR dù họ không làm đúng phần đầu vào đó. `nguon` trả về là menu_id, khớp bằng khopPhanHe() giống tiêu chí 1.",
         "implementedAt": "tools/lib/staffing.mjs → sqlDongGopDauVao()"
       }
@@ -593,13 +594,13 @@
       "outputNote": "Gom theo NGÀY trước, trong ngày mới chia dự án. Payload đặt cạnh HTML (review.payload.json / tong.payload.json) do chính lệnh report ghi. Đường dẫn do tools/lib/report.mjs quyết định (duongDanTong, duongDanDuAn), đừng tự ghép chuỗi.",
       "format": "HTML tự chứa, xem lại được offline.",
       "phanBaoCao": [
-        "Quá hạn — UR ở DD/XN/TH mà hạn giai đoạn đã qua (code).",
+        "Quá hạn — UR ở YC/DD/XN/TH mà hạn giai đoạn đã qua (code).",
         "Sắp tới hạn — còn <= 3 ngày làm việc (code).",
         "Giai đoạn chưa tick chốt đã hẹn (code).",
-        "Danh sách UR DD chờ cổng PM — AI phân tích sau (tài liệu, ảnh hưởng, phân việc).",
+        "Danh sách UR YC chờ cổng PM — AI phân tích sau (tài liệu, ảnh hưởng, phân việc).",
         "Biểu đồ: tiến độ theo giai đoạn, phân bố UR trong/ngoài TLKS, đường deadline (code)."
       ],
-      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác. Phân tích DD sống ở chat, không nhét deXuat vào lần sinh đầu."
+      "sauKhiSinh": "Báo tóm tắt trong chat kèm đường dẫn file. Không tự gửi cho ai khác. Phân tích YC sống ở chat, không nhét deXuat vào lần sinh đầu."
     }
   },
 

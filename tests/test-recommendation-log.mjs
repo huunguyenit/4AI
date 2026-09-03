@@ -26,14 +26,14 @@ const NHAN_SU = {
 
 process.stdout.write('=== 1. SNAPSHOT GỢI Ý ===\n');
 const urs = [
-  { stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'DD', ma_lt1: '', menu_id: 'M01', noi_dung: 'a' },
-  { stt_rec: 'R2', ma_da: 'DEMO1', trang_thai: 'DD', ma_lt1: '', menu_id: 'M01', noi_dung: 'b' },
+  { stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'YC', ma_lt1: '', menu_id: 'M01', noi_dung: 'a' },
+  { stt_rec: 'R2', ma_da: 'DEMO1', trang_thai: 'YC', ma_lt1: '', menu_id: 'M01', noi_dung: 'b' },
   { stt_rec: 'R3', ma_da: 'DEMO1', trang_thai: 'TH', ma_lt1: 'NV02', menu_id: 'M01', noi_dung: 'c' },
 ];
 const goiYs = goiYPhanCong(urs, NHAN_SU);
 const snap = snapshotGoiY(goiYs, { ngayChay: '2026-08-13' });
 
-ok('Chỉ snapshot UR có gợi ý (DD chưa giao), bỏ UR đã chạy', snap.length === 2,
+ok('Chỉ snapshot UR có gợi ý (YC chưa giao), bỏ UR đã chạy', snap.length === 2,
   snap.map((s) => s.stt_rec).join(','));
 ok('Giữ thứ hạng lúc gợi ý, không phải chấm lại sau', snap[0].daGoiY[0].ma_lt1 === 'NV02',
   JSON.stringify(snap[0].daGoiY.map((c) => c.ma_lt1)));
@@ -96,15 +96,15 @@ ok('PM giao người khác -> khac, ghi rõ ai',
 ok('KHÔNG bịa lý do PM đổi ý — không có field nào chứa suy diễn',
   !('overrideReason' in dc[0]) && !('lyDo' in dc[0]), Object.keys(dc[0]).join(','));
 
-// UR vẫn ở DD chưa giao: PM chưa quyết, chưa kết luận gì được.
+// UR vẫn ở YC chưa giao: PM chưa quyết, chưa kết luận gì được.
 const dcChuaQuyet = doiChieu(logDaDoc,
-  [{ stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'DD', ur_ma_lt1: '', menu_id: 'M01' }], pmTheoDuAn);
-ok('UR còn ở DD chưa giao -> chua-giao, không tính là trượt',
+  [{ stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'YC', ur_ma_lt1: '', menu_id: 'M01' }], pmTheoDuAn);
+ok('UR còn ở YC chưa giao -> chua-giao, không tính là trượt',
   dcChuaQuyet[0].ketCuc === 'chua-giao' && dcChuaQuyet[0].thucTe === '');
 
 // ma_lt1 = mã PM là mặc định BA để lại, KHÔNG phải đã giao — cùng định nghĩa với báo cáo.
 const dcMacDinhBa = doiChieu(logDaDoc,
-  [{ stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'DD', ur_ma_lt1: 'PM01', menu_id: 'M01' }],
+  [{ stt_rec: 'R1', ma_da: 'DEMO1', trang_thai: 'YC', ur_ma_lt1: 'PM01', menu_id: 'M01' }],
   pmTheoDuAn);
 ok('ma_lt1 = mã PM -> vẫn là chưa giao, không tính nhầm thành override',
   dcMacDinhBa[0].ketCuc === 'chua-giao', JSON.stringify(dcMacDinhBa[0]));

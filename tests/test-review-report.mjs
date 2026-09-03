@@ -55,8 +55,8 @@ ok('DR03 (chưa chốt + còn 1 UR TH) xuất hiện trong mục', mucChuaChot.i
 ok('DR01 (chưa chốt nhưng KHÔNG còn UR nào) KHÔNG xuất hiện trong mục', !mucChuaChot.includes('>DR01<'));
 ok('DV01 (đã tick chốt, dù còn UR DD) KHÔNG xuất hiện trong mục phase-table',
   !/<td>DV01<\/td>/.test(mucChuaChot));
-ok('Có cột "YC tồn đọng" trong bảng', mucChuaChot.includes('YC tồn đọng'));
-ok('Đếm đúng 1 YC tồn đọng cho DR03',
+ok('Có cột "UR tồn đọng" trong bảng', mucChuaChot.includes('UR tồn đọng'));
+ok('Đếm đúng 1 UR tồn đọng cho DR03',
   /<td>DR03<\/td>[\s\S]*?<td class="mono">1<\/td>/.test(mucChuaChot));
 
 process.stdout.write('\n=== Thẻ tóm tắt đếm đúng (chỉ 1, không phải 2) ===\n');

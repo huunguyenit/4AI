@@ -43,8 +43,8 @@ const wMacDinh = buildReviewWhere(
   { project: '', pmName: 'PM01', pmDept: '', pmSelf: 'PM01', statusList: STATUS_MAC_DINH });
 ok('Mặc định: OR thêm nhánh việc PM tự làm',
   wMacDinh.includes("RTRIM(yc.ma_lt1) = 'PM01'") && wMacDinh.includes(' OR '), wMacDinh);
-ok('Nhánh PM tự làm CHỈ lấy XN/TH, không lấy DD (DD là cổng PM, mặc định BA để lại)',
-  /RTRIM\(yc\.ma_lt1\) = 'PM01' AND RTRIM\(yc\.trang_thai\) IN \('XN', 'TH'\)/.test(wMacDinh), wMacDinh);
+ok('Nhánh PM tự làm CHỈ lấy DD/XN/TH, không lấy YC (YC là cổng PM, mặc định BA để lại)',
+  /RTRIM\(yc\.ma_lt1\) = 'PM01' AND RTRIM\(yc\.trang_thai\) IN \('DD', 'XN', 'TH'\)/.test(wMacDinh), wMacDinh);
 
 const wDept = buildReviewWhere(
   { project: '', pmName: '', pmDept: 'FSD', pmSelf: 'PM01', statusList: STATUS_MAC_DINH });
@@ -65,7 +65,7 @@ ok('statusUR=[DD] vẫn chốt DD ở ngoài, XN/TH không lọt ra',
 
 ok('Không cấu hình PM -> WHERE y như cũ, không thêm nhánh nào',
   buildReviewWhere({ project: '', pmName: '', pmDept: 'FSD', pmSelf: '', statusList: STATUS_MAC_DINH })
-  === "RTRIM(yc.bp_lt) = 'FSD' AND RTRIM(yc.trang_thai) IN ('DD', 'XN', 'TH')");
+  === "RTRIM(yc.bp_lt) = 'FSD' AND RTRIM(yc.trang_thai) IN ('YC', 'DD', 'XN', 'TH')");
 
 process.stdout.write('\n=== mergeReviewRows ===\n');
 const merged = mergeReviewRows({

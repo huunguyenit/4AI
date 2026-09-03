@@ -140,7 +140,7 @@ export function doiChieuCanCu(u, kho = {}) {
 /**
  * Đề xuất TA khi ba vế cùng đúng — luật do PM đặt, chép nguyên ở đây để đọc code là thấy luật:
  *
- *   1. UR còn ở `DD` (chưa qua cổng duyệt của PM),
+ *   1. UR còn ở `YC` (chưa qua cổng duyệt của PM),
  *   2. căn cứ khai trên `trang_tlks` KHÔNG có tệp nào chứng minh ở `nbdmda` lẫn `nbphyc`,
  *   3. giai đoạn của UR chưa tick `xac_nhan_da_hen_yn`.
  *
@@ -151,7 +151,7 @@ export function doiChieuCanCu(u, kho = {}) {
  * @returns {{trang_thai: 'TA', lyDo: string}|null}
  */
 export function deXuatTuCanCu(u, canCuTep, chotDaHen) {
-  if (chuan(u?.trang_thai) !== 'DD') return null;
+  if (chuan(u?.trang_thai) !== 'YC') return null;
   if (!canCuTep || canCuTep.coTep) return null;
   if (chotDaHen) return null;
 

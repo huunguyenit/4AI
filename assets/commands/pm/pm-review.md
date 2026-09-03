@@ -3,12 +3,12 @@ id: pm-review
 title: /pm-review
 kind: command
 domain: pm
-description: Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái DD. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ.
+description: Sinh báo cáo hạn UR bằng `4ai report` rồi phân tích các UR trạng thái YC. Có mã dự án → 1 dự án. Bỏ trống → TOÀN BỘ.
 argument-hint: "[mã dự án — bỏ trống để rà soát TOÀN BỘ dự án đang quản lý]"
 requires: [4ai-fbo]
 see-also: [pm-deadline-review, pm-graph-maintain, erp-table-propose]
 mode: agent
-version: 12
+version: 13
 ---
 
 ## Việc cần làm
@@ -21,14 +21,14 @@ từ `pm.maNv` trong `data/qlda.local.json`), không chỉ dự án nói tới g
 **Chọn đường TRƯỚC KHI làm gì khác — bề mặt này có chạy được `node` không?**
 
 **KHÔNG có shell** (chat, Cowork) → gọi thẳng tool `render_review_report` (`project` bỏ trống =
-toàn bộ). Nó dựng đúng bộ file đó bằng chính code của `4ai report` và trả về `ddUR[]` để phân
+toàn bộ). Nó dựng đúng bộ file đó bằng chính code của `4ai report` và trả về `ycUR[]` để phân
 tích ngay tại chỗ. Bề mặt này không chạy được `4ai report`, nên bỏ Bước 1 của
-[pm-deadline-review] và làm thẳng Bước 2 trên `ddUR[]` vừa nhận.
+[pm-deadline-review] và làm thẳng Bước 2 trên `ycUR[]` vừa nhận.
 
 **CÓ shell** → làm theo [pm-deadline-review]: có mã dự án thì `node tools/4ai.mjs report --project
 $ARGUMENTS` rồi `serve /review/<MA_DA>`; bỏ trống thì `node tools/4ai.mjs report` rồi `serve /review`.
 
-Sau khi HTML có: **chỉ phân tích UR `trang_thai = DD`** (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất XN/TA/KL). `XN`/`TH` chỉ xem hạn trên báo cáo.
+Sau khi HTML có: **chỉ phân tích UR `trang_thai = YC`** (tài liệu đầu vào, ảnh hưởng, phân việc, đề xuất DD/TA/KL). `DD`/`XN`/`TH` chỉ xem hạn trên báo cáo.
 
 Ở bề mặt không có shell, **file HTML trong ledger PM không mở được** (nằm ngoài thư mục phiên).
 Đừng hứa gửi file đó. Cần một file cầm được thì ghi bản phân tích của bạn ra thư mục làm việc
@@ -36,7 +36,7 @@ của phiên — không dựng lại báo cáo từ dữ liệu thô.
 
 Không viết SQL danh sách UR, không ghép payload.
 **Không bao giờ tự dựng báo cáo từ `get_review_dataset`** — đó là dữ liệu thô: báo cáo tự chế
-bỏ qua validate payload, không nằm trong ledger, và luôn kéo theo việc phân tích cả `XN`/`TH`.
+bỏ qua validate payload, không nằm trong ledger, và luôn kéo theo việc phân tích cả `DD`/`XN`/`TH`.
 
 **Báo "CHƯA GÁN PM"** → máy/cài đặt này chưa có danh tính PM. Gọi `set_pm_identity({ maNv, boPhanLt })`
 rồi chạy lại. `maNv` là **mã** nhân viên (chuỗi in hoa không dấu, dùng trong `nbdmda.ma_lt1`), không

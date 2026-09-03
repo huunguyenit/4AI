@@ -2,8 +2,8 @@
 // test-review-report-build.mjs — tools/lib/review-report.mjs: dataset → mô tả file + phần
 // AI được phép phân tích. KHÔNG chạm DB (runSql tiêm giả), KHÔNG chạm đĩa.
 //
-// Điều thật sự được canh ở đây: `ddChoPhanTich` KHÔNG trả nội dung UR XN/TH. Đó là chỗ
-// doctrine "chỉ phân tích DD" thôi làm lời dặn và thành hình dạng dữ liệu — lời dặn thì
+// Điều thật sự được canh ở đây: `ddChoPhanTich` KHÔNG trả nội dung UR DD/XN/TH. Đó là chỗ
+// doctrine "chỉ phân tích YC" thôi làm lời dặn và thành hình dạng dữ liệu — lời dặn thì
 // model bỏ qua được, dữ liệu vắng mặt thì không.
 
 import fs from 'node:fs';
@@ -20,10 +20,10 @@ function ok(label, cond, detail) {
 
 const YEUCAU_ROWS = [
   { ma_da: 'AAA', stt_rec: 'UR001', fcode1: 'A-01', noi_dung: 'Them truong so booking',
-    noi_dung_len: 24, giai_doan_da: 'GD1', trang_thai: 'DD', menu_id: '09.30.03',
+    noi_dung_len: 24, giai_doan_da: 'GD1', trang_thai: 'YC', menu_id: '09.30.03',
     tlks_yn: 1, ur_ma_lt1: '', tg_dk_th: 8 },
   { ma_da: 'AAA', stt_rec: 'UR002', fcode1: 'A-02', noi_dung: 'Bao cao doanh thu',
-    noi_dung_len: 18, giai_doan_da: 'GD1', trang_thai: 'DD', menu_id: '06.10.01',
+    noi_dung_len: 18, giai_doan_da: 'GD1', trang_thai: 'YC', menu_id: '06.10.01',
     tlks_yn: 0, ur_ma_lt1: '', tg_dk_th: 16 },
   { ma_da: 'AAA', stt_rec: 'UR003', fcode1: 'A-03', noi_dung: 'BI MAT KHONG DUOC LO RA',
     noi_dung_len: 22, giai_doan_da: 'GD1', trang_thai: 'XN', menu_id: '07.10.08',
@@ -85,35 +85,37 @@ ok('Chỉ định project thì bỏ trang tổng quan',
   !chiMotDuAn.files.some((f) => f.relPath.includes('_tong')),
   chiMotDuAn.files.map((f) => f.relPath).join(' '));
 
-process.stdout.write('\n=== ddChoPhanTich: chỉ DD mới có nội dung ===\n');
+process.stdout.write('\n=== ddChoPhanTich: chỉ YC mới có nội dung ===\n');
 const view = ddChoPhanTich(built.dataset);
-const ddIds = view.ddUR.map((u) => u.stt_rec).sort();
+const ycIds = view.ycUR.map((u) => u.stt_rec).sort();
 
-ok('Trả đúng 3 UR ở DD', ddIds.join(',') === 'UR001,UR002,UR005', ddIds.join(','));
-ok('Không UR nào ngoài DD lọt vào ddUR',
-  view.ddUR.every((u) => String(u.trang_thai).trim() === 'DD'));
-ok('UR DD giữ nguyên nội dung để phân tích',
-  view.ddUR.find((u) => u.stt_rec === 'UR001')?.noi_dung === 'Them truong so booking');
-ok('UR DD giữ đầu mục',
-  view.ddUR.find((u) => u.stt_rec === 'UR001')?.daumuc?.length === 1);
+ok('Trả đúng 2 UR ở YC', ycIds.join(',') === 'UR001,UR002', ycIds.join(','));
+ok('Không UR nào ngoài YC lọt vào ycUR',
+  view.ycUR.every((u) => String(u.trang_thai).trim() === 'YC'));
+ok('UR YC giữ nguyên nội dung để phân tích',
+  view.ycUR.find((u) => u.stt_rec === 'UR001')?.noi_dung === 'Them truong so booking');
+ok('UR YC giữ đầu mục',
+  view.ycUR.find((u) => u.stt_rec === 'UR001')?.daumuc?.length === 1);
 
-// Đây là bài kiểm tra chính: nội dung XN/TH phải KHÔNG có mặt ở bất cứ đâu trong kết quả.
+// Đây là bài kiểm tra chính: nội dung DD/XN/TH phải KHÔNG có mặt ở bất cứ đâu trong kết quả —
+// kể cả UR005 vốn ở DD (trước đây DD là cổng PM, được trả nguyên nội dung; giờ không còn nữa).
 const json = JSON.stringify(view);
 ok('Nội dung UR XN không lọt ra', !json.includes('BI MAT KHONG DUOC LO RA'));
 ok('Nội dung UR TH không lọt ra', !json.includes('CUNG KHONG DUOC LO RA'));
-ok('XN/TH vẫn còn số đếm để theo dõi hạn',
-  view.tongQuan.theoTrangThai.XN === 1 && view.tongQuan.theoTrangThai.TH === 1
-  && view.tongQuan.soUR === 5, JSON.stringify(view.tongQuan));
+ok('Nội dung UR DD (UR005) không lọt ra', !json.includes('Sua ty gia hai quan'));
+ok('DD/XN/TH vẫn còn số đếm để theo dõi hạn',
+  view.tongQuan.theoTrangThai.DD === 1 && view.tongQuan.theoTrangThai.XN === 1
+  && view.tongQuan.theoTrangThai.TH === 1 && view.tongQuan.soUR === 5, JSON.stringify(view.tongQuan));
 
 const aaa = view.duAn.find((d) => d.ma_da === 'AAA');
 const bbb = view.duAn.find((d) => d.ma_da === 'BBB');
-ok('Tổng quan theo dự án đếm đúng DD và số theo dõi',
-  aaa.soDD === 2 && aaa.soTheoDoi === 1 && bbb.soDD === 1 && bbb.soTheoDoi === 1,
+ok('Tổng quan theo dự án đếm đúng YC và số theo dõi',
+  aaa.soYC === 2 && aaa.soTheoDoi === 1 && bbb.soYC === 0 && bbb.soTheoDoi === 2,
   JSON.stringify(view.duAn));
 ok('Hạn gần nhất của nhóm theo dõi vẫn trả về',
   aaa.hanTheoDoiSomNhat === '2026-08-14' && bbb.hanTheoDoiSomNhat === '2026-10-20',
   JSON.stringify([aaa.hanTheoDoiSomNhat, bbb.hanTheoDoiSomNhat]));
-ok('Có ghi chú giải thích vì sao XN/TH bị cắt', /XN\/TH/.test(view.ghiChu));
+ok('Có ghi chú giải thích vì sao DD/XN/TH bị cắt', /DD\/XN\/TH/.test(view.ghiChu));
 
 process.stdout.write('\n=== ranh giới kiến trúc ===\n');
 const src = fs.readFileSync(path.join(ROOT, 'tools', 'lib', 'review-report.mjs'), 'utf8');
@@ -150,7 +152,7 @@ const chayReport = (yeuCauRows, ngay) => buildReviewReportFiles(ROOT, { ngayChay
   runGraphSql: () => ({ rows: khoDoThi }),
 });
 
-// Lần 1: UR001 ở DD chưa giao — sinh gợi ý, nộp vào đồ thị.
+// Lần 1: UR001 ở YC chưa giao — sinh gợi ý, nộp vào đồ thị.
 const lan1 = chayReport(YEUCAU_ROWS, '2026-08-13');
 const logNodes = lan1.doThi.nodes.filter((n) => n.kind === 'RecommendationLog');
 ok('Lần chạy đầu sinh node RecommendationLog trong đồ thị, KHÔNG sinh file',
