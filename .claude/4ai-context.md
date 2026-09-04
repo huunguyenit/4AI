@@ -595,6 +595,7 @@ corpus để sẵn bản đồ file.
 | `erp-customization-execute` | Quy trình customize một màn hình FBO từ đầu tới cuối — xác định program, xác nhận controller, kiểm tra cặp .f/.xml, phân giải entity, sửa tối thiểu, verify, ghi ledger. |
 | `erp-einvoice-customize` | Customize HĐĐT đầu ra — form EIFields, Grid dòng hàng, dmhddtbs (struct_*/detail_*), FastBusiness$EInvoice$Customize, Proxy Structure. Chỉ sửa XML và SQL. Mở khi UR về EInvoice, HD1/HDA. |
 | `erp-einvoice-nd70-implement` | NĐ70 phần chiết khấu kỳ trên HĐĐT — so_bk, ngay_bk, tính chất dòng 3, VoucherType 9, Proxy ListNumber/ListDate. Patch thẳng Dir/{Tran} + dmhddtbs + Customize. Không dùng cho phần CCCD. |
+| `erp-einvoice-package-migrate` | Nâng cấp gói HDDT/EInvoice runtime FBO — so sánh với program phiên bản mới hơn rồi sao chép dll, ashx/asmx/aspx, command/wcommand, js/css. Mở khi UR Update gói HDDT, nâng cấp version HDDT. |
 | `erp-glossary-reference` | Từ điển thuật ngữ Fast ERP — 122 mã chứng từ kèm tên Việt/Anh, controller và bảng lưu trữ; quy tắc đặt tên bảng/cột/sysid; viết tắt nghiệp vụ. Mở khi gặp mã, viết tắt hoặc tên bảng không hiểu. |
 | `erp-hddv-migrate` | Migrate ImportXmlInputInvoice (HDDV/II) vào Dir/*Tran.xml — recipe riêng từng Tran, ưu tiên List extender, chỉ dùng InputInvoiceScript* khi dự án không bật List. Mở khi migrate HDDV hoặc II. |
 | `erp-history-search` | Tra UR/ticket đã làm trước khi clone hay thiết kế — ưu tiên ma_da kèm fcode1 khi biết dự án và số yêu cầu, lật hết trang trước khi đổi diễn đạt, tối đa 3 query mỗi lượt, tóm tắt có dẫn chứng. |
