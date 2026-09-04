@@ -7,7 +7,7 @@ description: Nâng cấp gói HDDT/EInvoice runtime FBO — so sánh với progr
 requires: [4ai-fbo]
 see-also: [erp-einvoice-customize, erp-history-search, pm-ledger-maintain, pm-handover-author]
 disable-model-invocation: true
-version: 4
+version: 5
 ---
 Skill cho UR **nâng cấp gói HDDT** trên chương trình đã chạy lâu / customize nhiều:
 đối chiếu nguồn phiên bản mới hơn → lập bảng diff → sao chép có kiểm soát.
@@ -56,7 +56,9 @@ Quy tắc diff/copy: [reference-diff-copy.md]({REFDIR}/reference-diff-copy.md)
 - [ ] 8. Controller cần sửa: lấy .xml gốc SourceCollection theo version ĐÍCH rồi mới merge
 - [ ] 9. Sao chép theo lô đã duyệt (backup path đích trước khi ghi đè) + INSERT dòng wcommand
 - [ ] 10. resolve_entities trên TỪNG file đã chép → chép nốt Include còn thiếu, lặp tới khi đóng
-- [ ] 11. Verify tồn tại + size/date; ghi ledger + checklist bàn giao (PH thử, menu HDDT)
+- [ ] 11. Quét backend hai phía: bảng *hddt*, proc/function *EInvoice*, callee, options *hddt*
+- [ ] 12. Controller lòi ra từ proc rs_* và từ options → quay lại bước 8 lấy .xml gốc cho chúng
+- [ ] 13. Verify tồn tại + size/date; ghi ledger + checklist bàn giao (PH thử, menu HDDT)
 ```
 
 ### Chọn nguồn tham chiếu (ưu tiên)
@@ -90,10 +92,12 @@ Quy tắc diff/copy: [reference-diff-copy.md]({REFDIR}/reference-diff-copy.md)
 4. **DLL**: nhiều program không có `bin\*EInvoice*` trong tree — nếu UR yêu cầu dll mà không thấy trong program, hỏi path gói / thư mục deploy, không bịa.
 5. **Controller phải sửa thì bắt đầu từ `.xml` gốc SourceCollection theo version của program ĐÍCH**, rồi mới merge nội dung. Không sửa `.f`, không dựng `.xml` từ `.f` — `.f` của khách bị mã hóa. Dự án tham khảo chưa có `.xml` cũng lấy gốc từ SourceCollection theo version của chính nó. **Không tìm thấy `.xml` ở version nào trong share thì mang thẳng file `.f`** từ program nguồn sang, giữ nguyên đuôi `.f`.
 6. **Chép file controller chưa phải là xong**: DOCTYPE của nó trỏ sang `..\Include\…` mà dự án cũ thường chưa có. Chạy `resolve_entities` trên từng file đã chép, mang qua mọi entity có `systemPath` mà `exists: false`, rồi **lặp lại** vì `.ent` tự khai SYSTEM tiếp. Entity `systemPath: null` là khai inline — bỏ qua, không phải file thiếu.
-7. **`EIReleasedInvoice*` không thuộc gói** — đó là Hóa đơn bán ra, cần UR riêng. Đừng nhầm với `EIReleaseType` (kiểu phát hành, thuộc gói).
-8. **Menu `wcommand` là một phần của gói**: dòng 11.12.20–11.12.64 còn thiếu phải INSERT (trừ ba dòng `EIRelease…`), trình câu lệnh cho user duyệt. Ngoài phạm vi đó, **không** deploy SQL / `dmhddtbs` trong skill này — chuyển `erp-einvoice-customize`.
-9. **Không** sửa file bằng PowerShell `Set-Content` cho XML/JS cần accept trong IDE — file binary/runtime copy thì dùng lệnh copy sau khi đã duyệt.
-10. Ghi ledger theo `pm-ledger-maintain`; bàn giao theo `pm-handover-author` (verify: mở menu HDDT, phát hành thử nếu môi trường cho phép).
+7. **Diện gói còn nằm dưới database**: bảng `*hddt*`, proc/function `*EInvoice*`, thứ proc gọi trong thân, và `options` `*hddt*`. Bỏ bảng phân mảnh theo kỳ ra khỏi diff. Danh sách thiếu ở đây lòi ra **thêm** file `Dir`/`Grid` phải chép — proc `rs_<Stem>` ứng với controller `<Stem>`.
+8. **Hai nhóm luôn phải mở, dù tên không có hddt**: `Dir\Config\Config.xml`, `Grid\Config\Config.xml`, `Filter\Config\Config.xml` (config cấp thư mục, sinh dynamic event cho mọi controller trong đó) và `Dir\Customer` + `Grid\Customer` (trường email / MST phục vụ phát hành). Hai chỗ này gần như luôn đã customize ở đích → merge tay, không overwrite.
+9. **`EIReleasedInvoice*` không thuộc gói** — đó là Hóa đơn bán ra, cần UR riêng. Đừng nhầm với `EIReleaseType` (kiểu phát hành, thuộc gói).
+10. **Menu `wcommand` là một phần của gói**: dòng 11.12.20–11.12.64 còn thiếu phải INSERT (trừ ba dòng `EIRelease…`), trình câu lệnh cho user duyệt. Ngoài phạm vi đó, **không** deploy SQL / `dmhddtbs` trong skill này — chuyển `erp-einvoice-customize`.
+11. **Không** sửa file bằng PowerShell `Set-Content` cho XML/JS cần accept trong IDE — file binary/runtime copy thì dùng lệnh copy sau khi đã duyệt.
+12. Ghi ledger theo `pm-ledger-maintain`; bàn giao theo `pm-handover-author` (verify: mở menu HDDT, phát hành thử nếu môi trường cho phép).
 
 ---
 
@@ -109,6 +113,9 @@ Quy tắc diff/copy: [reference-diff-copy.md]({REFDIR}/reference-diff-copy.md)
 - [ ] Controller đã sửa đều bắt đầu từ `.xml` gốc SourceCollection
 - [ ] `resolve_entities` sạch trên mọi file đã chép — không còn Include nào `exists: false`
 - [ ] Dòng `wcommand` còn thiếu đã INSERT; menu HDDT mở ra thấy đủ chức năng
+- [ ] Đã quét backend: bảng / proc / function / options; callee của proc cũng đã mang qua
+- [ ] Controller lòi ra từ proc `rs_*` và từ options đã nằm trong lô chép
+- [ ] `Dir\Config`, `Grid\Config`, `Filter\Config` và `Dir\Customer` đã xử lý, không bị overwrite
 - [ ] Verify tồn tại; ledger + mục khách cần thử
 
 ---
