@@ -113,6 +113,8 @@ kèm INSERT các dòng còn thiếu. Xem `reference-diff-copy.md`.
 
 - `App_Data/Controllers/Dir|Grid|Filter/*.xml` đã customize  
 - `Include/**` đã vá theo khách (trừ khi diff chứng minh file đích = stock cũ và nguồn = stock mới cùng chức năng)  
+  — nhưng file `Include/**` **thiếu hẳn** ở đích thì ngược lại: phải chép, và tìm chúng bằng
+  `resolve_entities` chứ không bằng pattern tên. Xem `reference-diff-copy.md`  
 - `License.lic`, `Entity.lic`, connection / proxy URL  
 - Toàn bộ `bin/` không liên quan EInvoice  
 

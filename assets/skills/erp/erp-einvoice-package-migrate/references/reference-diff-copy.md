@@ -19,6 +19,56 @@ Lý do là kỹ thuật, không phải quy trình: `.f` trong program khách b�
 ENTITY dạng `<Encrypted>…</Encrypted>`; bản `FBOR2SP24.2.2\…\Grid\EIReleasedInvoice.xml`
 (50.139 B) là plaintext đọc được. Merge từ `.f` về mặt vật lý không làm được.
 
+### Entity include — chép file controller chưa phải là xong
+
+Case thật gặp khi chạy: đã gen đủ `Dir` / `Grid` / `Filter`, mở lên vẫn hỏng, vì trong DOCTYPE
+của chúng có entity trỏ sang `..\Include\…` mà **dự án cũ chưa có file đó**. Include không
+suy được từ tên controller — phải hỏi chính file.
+
+Sau khi chép file controller vào program đích, với **từng file vừa chép**:
+
+```
+index_program    { program: "<program đích>" }          # một lần cho mỗi program
+resolve_entities { program: "<program đích>", path: "Grid\\RITran.xml" }
+```
+
+Đọc kết quả theo đúng hai cột này:
+
+| `systemPath` | `exists` | Nghĩa |
+|---|---|---|
+| có | `true` | include đã có ở đích — **không đè**, xem `sharedByControllers` trước khi nghĩ tới sửa |
+| có | `false` | **thiếu thật** — mang file include từ nguồn sang, giữ nguyên đường dẫn tương đối |
+| `null` | `false` | entity khai **inline** ngay trong DOCTYPE, không phải file. Bỏ qua |
+
+Bẫy nằm ở dòng cuối: một controller bình thường có cả chục entity `exists: false` mà
+`systemPath: null` — `Controller`, `CreateTicket`, `QueryID`, `FastBusiness.Encryption.Begin`…
+Đuổi theo chúng là đuổi theo file không tồn tại. **Chỉ `systemPath` khác `null` mới tính.**
+
+**Phải lặp cho tới khi đóng.** File `.ent` tự khai SYSTEM tiếp: `Unit.ent` có 48 dòng,
+`Filter.ent` 2 dòng, `ResetCustInfo.ent` 1 dòng. Chép xong một `.ent` thì quét chính nó rồi
+chép tiếp lớp sau, tới khi không còn `exists: false` nào có `systemPath`.
+
+Số thật của một lần chạy: 6 file controller (`Dir\RITran`, `Grid\RITran`,
+`Grid\rptEInvoiceUnPost`, `Grid\rptEInvoiceStatusCheckPacket`,
+`Dir\BusinessUnitUsingCircular`, `Grid\rptEIInvoiceCancelReport`) tham chiếu **55**
+include cấp 1, trong đó **3** thiếu ở program đích — và đệ quy một lớp nữa thành **4**:
+
+```
+Include\CheckTaxCode.ent
+Include\Command\EIEditCheckTableRITran.txt
+Include\ResetCustInfo.ent
+Include\ResetCustInfo.txt      ← chỉ lộ ra sau khi quét ResetCustInfo.ent
+```
+
+Hai lưu ý khi chạy tool:
+
+- `resolve_entities` trên file `.f` **mã hóa** trả `count: 0`. Đó không phải "không phụ thuộc"
+  — chạy trên bản `.xml` gốc SourceCollection hoặc trên file đã chép vào đích.
+- Include **thiếu hẳn** ở đích thì chép thẳng: không có customize nào để mất. Include **đã có**
+  ở đích thì thuộc DO_NOT_TOUCH — nó có thể đã vá theo khách, và `sharedByControllers` cho
+  biết đè lên sẽ kéo theo bao nhiêu controller khác.
+
+---
 ### Tên thư mục version — chốt với user, không suy từ chuỗi
 
 `ma_pbsp` và tên thư mục share **không cùng cách viết**:
@@ -124,6 +174,7 @@ Copy-Item $from $to -Force
 - [ ] Không đụng file DO_NOT_TOUCH  
 - [ ] MERGE_REVIEW: hoặc đã chép theo duyệt, hoặc ghi “giữ đích” + lý do vào ledger  
 - [ ] Mọi controller đã sửa đều bắt đầu từ `.xml` gốc SourceCollection, không phải từ `.f`  
+- [ ] `resolve_entities` trên từng file đã chép: không còn entity nào `systemPath` khác `null` mà `exists: false`  
 - [ ] Dòng `wcommand` còn thiếu đã INSERT (trừ `EIRelease…`); mở menu HDDT thấy đủ chức năng  
 - [ ] Ghi chú IIS / recycle app pool nếu đụng dll/ashx (nhắc user — agent không tự recycle production)
 
