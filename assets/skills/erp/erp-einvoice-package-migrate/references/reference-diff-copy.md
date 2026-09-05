@@ -60,10 +60,21 @@ Include\ResetCustInfo.ent
 Include\ResetCustInfo.txt      ← chỉ lộ ra sau khi quét ResetCustInfo.ent
 ```
 
-Hai lưu ý khi chạy tool:
+Ví dụ chạy thật trên một cặp `Filter\EITranPacket.f` + `Grid\EITranPacket.f` vừa chép sang:
+tool báo **5** include thiếu (`Recovery.ent`, `EIOptions.ent`, `DetailTax.ent`, `Discount.ent`,
+`EINotice.ent`) — runtime lúc đó mới chỉ kêu đúng cái đầu tiên. Đệ quy từ 5 file đó ra **23**
+file phải mang qua, phần lớn là `Include\XML\*.txt` do chính các `.ent` kéo theo.
 
-- `resolve_entities` trên file `.f` **mã hóa** trả `count: 0`. Đó không phải "không phụ thuộc"
-  — chạy trên bản `.xml` gốc SourceCollection hoặc trên file đã chép vào đích.
+Ba lưu ý khi chạy tool:
+
+- **Index là ảnh chụp, không phải đĩa.** Chép file mới vào program rồi mới quét thì phải
+  `index_program` **lại**, nếu không tool đọc trạng thái cũ. Đây là nguyên nhân phổ biến nhất
+  của "tool báo không có entity mà runtime vẫn kêu thiếu file".
+- `resolve_entities` trả `count: 0` trên một `.f` **không** có nghĩa file đó không phụ thuộc gì.
+  Phần mã hóa trong `.f` chỉ là thân `clientScript` / `command` (`<Encrypted>…</Encrypted>`);
+  DOCTYPE và khai báo entity **luôn plaintext ở cả `.f` lẫn `.xml`** — entity luôn đứng trong
+  `]]>&Entity;<![CDATA[`, không bao giờ bị mã hóa. Gặp `count: 0` thì index chưa quét `.f`:
+  chạy lại `index_program`, và nếu vẫn 0 thì báo — đó là lỗi tool, không phải đặc tính file.
 - Include **thiếu hẳn** ở đích thì chép thẳng: không có customize nào để mất. Include **đã có**
   ở đích thì thuộc DO_NOT_TOUCH — nó có thể đã vá theo khách, và `sharedByControllers` cho
   biết đè lên sẽ kéo theo bao nhiêu controller khác.
@@ -275,11 +286,11 @@ Mỗi option thiếu là một nhánh code chưa có ai đọc. Tìm ai đọc n
 search_content { program: "<program nguồn>", query: "m_hddt_valid_mode", in: "sql" }
 ```
 
-**Cảnh báo:** trên program mà controller chuẩn là `.f` **mã hóa**, `search_content in=sql`
-chỉ thấy file plaintext (`.xml` customize, `Include\XML\*`) nên trả `count: 0` cả với
-option chắc chắn đang dùng. Lúc đó grep thẳng cây `.xml` gốc trong SourceCollection theo
-version — `m_hddt_valid_mode` tìm kiểu này ra `Grid\SVDetail.xml` và
-`Grid\SVComboDetailGrid.xml`, hai controller không hề có chữ "hddt" trong tên.
+**Kết quả rỗng không phải bằng chứng.** `search_content` đọc từ index; index cũ hoặc chưa quét
+hết thì option đang dùng vẫn trả `count: 0`. Chạy lại `index_program` trước khi tin. Đường dự
+phòng luôn đúng là grep thẳng cây `.xml` gốc trong SourceCollection theo version —
+`m_hddt_valid_mode` tìm kiểu này ra `Grid\SVDetail.xml` và `Grid\SVComboDetailGrid.xml`,
+hai controller không hề có chữ "hddt" trong tên.
 
 Option thiếu thì INSERT vào `options` cùng lô với `wcommand` (mục 6), giá trị lấy theo nguồn
 trừ khi khách chốt khác — trình câu lệnh cho user duyệt.

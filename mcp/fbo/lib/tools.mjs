@@ -539,9 +539,9 @@ export const HANDLERS = {
                   stem, ext
          LIMIT ?`).all(...params, limit + 1);
 
-      // Gom theo MÃ controller, không theo file. Lý do: bản .f mã hoá không bóc được
-      // title/field nên không bao giờ tự khớp từ khoá nghiệp vụ — nhưng nó thường CHÍNH LÀ
-      // màn hình người dùng đang hỏi. Khớp ở Report\CPTran.xml phải kéo Dir\CPTran.f theo.
+      // Gom theo MÃ controller, không theo file: một màn hình là họ file cùng mã trải trên
+      // Dir/Grid/Filter/Report. Khớp ở Report\CPTran.xml phải kéo Dir\CPTran.f theo, vì cái
+      // người dùng hỏi là màn hình, không phải một file.
       const seen = new Set();
       const groups = [];
       for (const r of rows) {
@@ -570,7 +570,7 @@ export const HANDLERS = {
         count: groups.length,
         truncated: rows.length > limit,
         results: groups,
-        note: 'Kết quả gom theo mã controller. `matchedIn` là file thật sự khớp từ khoá; `entry` là màn hình nhập chính. File .f mã hoá không bóc được nội dung nên không tự khớp — nó xuất hiện qua họ file cùng mã.',
+        note: 'Kết quả gom theo mã controller. `matchedIn` là file thật sự khớp từ khoá; `entry` là màn hình nhập chính. File cùng mã ở thư mục khác đi kèm trong `files`.',
         hint: groups.length === 0
           ? 'Không có kết quả. Thử từ khoá ngắn hơn, tên field (dien_giai, ten_vt), hoặc mã controller trực tiếp. Kết quả rỗng KHÔNG có nghĩa màn hình không tồn tại.'
           : undefined,

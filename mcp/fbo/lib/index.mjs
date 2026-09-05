@@ -18,7 +18,10 @@ export const CONTROLLER_FOLDERS = [
   'EInvoice', 'BankHub', 'Dashboard', 'Allocation', 'Chat', 'Media', 'Config',
 ];
 const SCAN_EXT = new Set(['.xml', '.f', '.txt', '.ent']);
-const PARSE_EXT = new Set(['.xml', '.ent']);
+// '.f' nằm đây vì phần MÃ HOÁ trong .f chỉ là thân clientScript/command (<Encrypted>…);
+// DOCTYPE, entity, field, title luôn plaintext ở cả .f lẫn .xml. Bỏ .f ra khỏi đây là
+// resolve_entities trả count 0 cho mọi màn hình chưa customize — sai, không phải 'không có entity'.
+const PARSE_EXT = new Set(['.xml', '.ent', '.f']);
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
