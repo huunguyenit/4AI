@@ -17,7 +17,11 @@ export const CONTROLLER_FOLDERS = [
   'Query', 'View', 'Post', 'Flow', 'List', 'Structure', 'Options', 'Notify',
   'EInvoice', 'BankHub', 'Dashboard', 'Allocation', 'Chat', 'Media', 'Config',
 ];
-const SCAN_EXT = new Set(['.xml', '.f', '.txt', '.ent']);
+// Index MỌI file dưới Controllers, không lọc theo đuôi. Include chứa cả file không có đuôi
+// quy ước — Extender.PQTran, VoucherGoodsType.RITran, HandleVoucherNumber.002,
+// Clipboard.RIDetail — và resolve_entities kết luận `exists` bằng cách tra INDEX. Lọc đuôi ở
+// đây là mọi file như vậy biến mất khỏi index và bị báo THIẾU dù đang nằm trên đĩa.
+// Việc lọc thuộc về PARSE_EXT: index tất cả để biết cái gì tồn tại, chỉ bóc nội dung cái nào bóc được.
 // '.f' nằm đây vì phần MÃ HOÁ trong .f chỉ là thân clientScript/command (<Encrypted>…);
 // DOCTYPE, entity, field, title luôn plaintext ở cả .f lẫn .xml. Bỏ .f ra khỏi đây là
 // resolve_entities trả count 0 cho mọi màn hình chưa customize — sai, không phải 'không có entity'.
@@ -166,7 +170,6 @@ function walk(root, folder, out) {
         continue;
       }
       const ext = path.extname(e.name).toLowerCase();
-      if (!SCAN_EXT.has(ext)) continue;
       out.push({
         folder,
         subdir: sub || null,
