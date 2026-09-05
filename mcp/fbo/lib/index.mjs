@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS file (
   title_vi TEXT, title_en TEXT,
   field_count INTEGER, js_chars INTEGER, sql_chars INTEGER,
   has_pair_xml INTEGER, has_pair_f INTEGER,
-  fields_json TEXT, entities_json TEXT, commands_json TEXT,
+  fields_json TEXT, entities_json TEXT, commands_json TEXT, entity_refs_json TEXT,
   js_text TEXT, sql_text TEXT,
   search_blob TEXT
 );
@@ -155,6 +155,10 @@ export function openIndex(hub, programPath, { create = false } = {}) {
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA journal_mode = WAL;');
   db.exec(SCHEMA);
+  // CREATE TABLE IF NOT EXISTS không thêm cột vào DB đã có. Index cũ thiếu cột thì vá tại chỗ;
+  // giá trị null cho tới lần build lại, và resolve_entities coi null là "chưa biết", không phải "rỗng".
+  const cols = db.prepare('PRAGMA table_info(file)').all().map((c) => c.name);
+  if (!cols.includes('entity_refs_json')) db.exec('ALTER TABLE file ADD COLUMN entity_refs_json TEXT');
   return db;
 }
 
@@ -203,8 +207,8 @@ export function buildIndex(hub, programPath, { log } = {}) {
     (rel_path, folder, subdir, stem, ext, bytes, mtime, encoding, bom, newline,
      root_tag, controller_type, table_name, title_vi, title_en,
      field_count, js_chars, sql_chars, has_pair_xml, has_pair_f,
-     fields_json, entities_json, commands_json, js_text, sql_text, search_blob)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+     fields_json, entities_json, commands_json, entity_refs_json, js_text, sql_text, search_blob)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
   const insEnt = db.prepare(
     'INSERT INTO entity_ref (file_id, name, system_path, resolved, is_parameter, used) VALUES (?,?,?,?,?,?)');
 
@@ -248,6 +252,7 @@ export function buildIndex(hub, programPath, { log } = {}) {
       scan ? JSON.stringify(scan.fields) : null,
       scan ? JSON.stringify(scan.entities) : null,
       scan ? JSON.stringify(scan.commands) : null,
+      scan ? JSON.stringify([...new Set(scan.entityRefs)].sort()) : null,
       scan?.jsText ?? null, scan?.sqlText ?? null,
       searchBlob);
 

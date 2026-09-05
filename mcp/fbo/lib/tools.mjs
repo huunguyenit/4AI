@@ -728,13 +728,45 @@ export const HANDLERS = {
         return item;
       });
 
-      return {
+      // Entity DÙNG trong thân mà không ai khai. Khai báo có thể nằm trong chính file, hoặc
+      // trong bất kỳ .ent nào nó include (đệ quy) — nên phải gom tên đã khai của cả cụm rồi
+      // mới trừ. Đây là cách duy nhất bắt được lỗi "file include CÓ ở đích nhưng là bản CŨ,
+      // thiếu entity mà controller mới cần": exists vẫn true, chỉ chỗ này mới lộ ra.
+      const declared = new Set();
+      const visited = new Set();
+      const collect = (fileId) => {
+        if (visited.has(fileId)) return;
+        visited.add(fileId);
+        for (const e of db.prepare('SELECT name, resolved FROM entity_ref WHERE file_id = ?').all(fileId)) {
+          declared.add(e.name);
+          if (!e.resolved) continue;
+          const child = fileRow(db, e.resolved);
+          if (child) collect(child.id);
+        }
+      };
+      collect(row.id);
+      let undeclared = null;
+      const refsRaw = db.prepare('SELECT entity_refs_json FROM file WHERE id = ?').get(row.id)?.entity_refs_json;
+      if (refsRaw) {
+        undeclared = JSON.parse(refsRaw).filter((n) => !declared.has(n));
+      }
+
+      const out = {
         program: programPath,
         path: row.rel_path,
         count: result.length,
         entities: result,
         hint: 'sharedByControllers > 1 nghĩa là file include đó dùng chung — sửa nó ảnh hưởng tất cả controller đang liệt kê ở used_by.',
       };
+      if (undeclared === null) {
+        out.undeclaredNote = 'Index dựng trước khi có cột entity_refs_json — chạy lại index_program để kiểm tra entity dùng-mà-chưa-khai.';
+      } else if (undeclared.length > 0) {
+        out.undeclared = undeclared;
+        out.undeclaredNote = 'Entity DÙNG trong thân nhưng không file nào trong cụm include khai. ' +
+          'Runtime sẽ báo "Reference to undeclared entity". Nguyên nhân hay gặp nhất KHÔNG phải thiếu file: ' +
+          'file include có ở đích nhưng là BẢN CŨ, thiếu entity mà controller mới cần. So số entity hai bên trước khi kết luận.';
+      }
+      return out;
     } finally { db.close(); }
   },
 
