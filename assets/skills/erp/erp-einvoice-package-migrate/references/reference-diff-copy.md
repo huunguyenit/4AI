@@ -44,9 +44,13 @@ Bẫy nằm ở dòng cuối: một controller bình thường có cả chục e
 `systemPath: null` — `Controller`, `CreateTicket`, `QueryID`, `FastBusiness.Encryption.Begin`…
 Đuổi theo chúng là đuổi theo file không tồn tại. **Chỉ `systemPath` khác `null` mới tính.**
 
-**Phải lặp cho tới khi đóng.** File `.ent` tự khai SYSTEM tiếp: `Unit.ent` có 48 dòng,
-`Filter.ent` 2 dòng, `ResetCustInfo.ent` 1 dòng. Chép xong một `.ent` thì quét chính nó rồi
-chép tiếp lớp sau, tới khi không còn `exists: false` nào có `systemPath`.
+**Phải lặp cho tới khi đóng, và đi qua CẢ file đã có ở đích.** File `.ent` tự khai SYSTEM tiếp:
+`Unit.ent` có 48 dòng, `Filter.ent` 2 dòng, `ResetCustInfo.ent` 1 dòng. Quét mọi `.ent` gặp
+trên đường — **kể cả cái `exists: true`** — chứ không chỉ cái vừa chép: một `.ent` có sẵn ở đích
+vẫn có thể trỏ tới file mà đích chưa có. Đúng cái bẫy này làm hỏng một lần chạy thật:
+`EIUpdateHash.ent` báo `exists: true` nên không ai mở nó ra, trong khi nó kéo
+`Include\EICheckHashAction.txt` mà đích không có — runtime báo thiếu file sau khi đã tưởng
+là chép xong.
 
 Số thật của một lần chạy: 6 file controller (`Dir\RITran`, `Grid\RITran`,
 `Grid\rptEInvoiceUnPost`, `Grid\rptEInvoiceStatusCheckPacket`,
@@ -78,6 +82,24 @@ Ba lưu ý khi chạy tool:
 - Include **thiếu hẳn** ở đích thì chép thẳng: không có customize nào để mất. Include **đã có**
   ở đích thì thuộc DO_NOT_TOUCH — nó có thể đã vá theo khách, và `sharedByControllers` cho
   biết đè lên sẽ kéo theo bao nhiêu controller khác.
+
+---
+### Closure phình ra hàng trăm file = dấu hiệu vượt bản, dừng lại
+
+Đóng gói đệ quy vài chục file là bình thường. Lên tới **hàng trăm** thì không phải "gói HDDT to"
+— đó là một **subsystem của SP mới** bị kéo vào program SP cũ, và nó sẽ không dừng.
+
+Đo thật trên một cặp program cách nhau cả dòng SP: closure từ 29 controller HDDT ra **281** file
+thiếu, trong đó hơn 200 là họ `Tiny.External.*` — kéo vào bởi `Grid\Config\Config.xml` và
+`Filter\Config\Config.xml` lấy từ bản SP mới, cộng thêm
+`Filter\rptServiceInvoiceList.f`. `Tiny.External` là tính năng program đích chưa từng có.
+
+Gặp tình huống này thì **không chép tiếp**. Ba đường ra, theo thứ tự:
+
+1. Lấy lại file gây ra cascade từ SourceCollection **theo version ĐÍCH** thay vì từ program nguồn
+   — đây chính là mục 0, và bỏ qua nó là lý do cascade xuất hiện.
+2. Không có bản theo version đích thì bỏ chức năng đó ra khỏi lô, ghi vào ledger là hoãn.
+3. Khách thật sự cần thì đó là UR **nâng SP**, không phải UR update gói — báo lại, đừng tự gánh.
 
 ---
 ### Tên thư mục version — chốt với user, không suy từ chuỗi

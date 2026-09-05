@@ -218,7 +218,7 @@ export function buildIndex(hub, programPath, { log } = {}) {
     if (PARSE_EXT.has(f.ext) && st.size < 8 * 1024 * 1024) {
       try {
         src = readSource(f.abs);
-        scan = scanController(src.text, f.folder);
+        scan = scanController(src.text, [f.folder, f.subdir].filter(Boolean).join('\\'));
         parsed++;
       } catch (e) {
         failed++;

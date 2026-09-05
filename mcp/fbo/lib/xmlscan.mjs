@@ -31,7 +31,10 @@ function attrs(s) {
 /** Chuẩn hoá đường dẫn SYSTEM của entity ("..\Include\XML\A.xml") về rel-path kiểu 'Include\XML\A.xml'. */
 export function normalizeSystemPath(systemPath, fromFolder) {
   const parts = systemPath.replace(/\//g, '\\').split('\\').filter((p) => p !== '' && p !== '.');
-  const stack = fromFolder ? [fromFolder] : [];
+  // fromFolder là THƯ MỤC CHỨA FILE, kể cả thư mục con (Include\XML\Config\Fields), và phải
+  // tách ra từng segment: mỗi '..' chỉ được lùi MỘT cấp. Giữ nguyên cả chuỗi thì một '..'
+  // xoá sạch base, và file nằm sâu sẽ phân giải ra đường dẫn không tồn tại.
+  const stack = fromFolder ? fromFolder.replace(/\//g, '\\').split('\\').filter(Boolean) : [];
   for (const p of parts) {
     if (p === '..') stack.pop();
     else stack.push(p);
@@ -41,7 +44,7 @@ export function normalizeSystemPath(systemPath, fromFolder) {
 
 /**
  * @param {string} text  nội dung đã decode
- * @param {string} folder  thư mục chứa file ('Dir', 'Grid'…) để phân giải '..'
+ * @param {string} folder  thư mục chứa file, kèm thư mục con ('Dir', 'Include\\XML'…) để phân giải '..'
  */
 export function scanController(text, folder) {
   const result = {
@@ -62,13 +65,16 @@ export function scanController(text, folder) {
     sqlText: '',
   };
 
-  // --- DOCTYPE: entity khai báo ---
+  // --- entity khai báo ---
+  // Controller có DOCTYPE bọc; file .ent trong Include\ thì KHÔNG — nó là fragment, khai
+  // <!ENTITY …> thẳng ở cấp cao nhất. Không có nhánh fallback này thì mọi .ent trả về 0
+  // entity, và vòng lặp "chép .ent rồi quét tiếp lớp sau" đứt im lặng ngay bước đầu.
   const doctype = RE_DOCTYPE.exec(text);
-  if (doctype) {
-    const block = doctype[1];
+  const declBlock = doctype ? doctype[1] : text;
+  {
     RE_ENTITY_SYSTEM.lastIndex = 0;
     let m;
-    while ((m = RE_ENTITY_SYSTEM.exec(block)) !== null) {
+    while ((m = RE_ENTITY_SYSTEM.exec(declBlock)) !== null) {
       result.entities.push({
         name: m[2],
         parameter: !!m[1],
@@ -79,7 +85,7 @@ export function scanController(text, folder) {
     // Entity literal (giá trị nội tuyến, không phải include).
     const systemNames = new Set(result.entities.map((e) => e.name));
     RE_ENTITY_LITERAL.lastIndex = 0;
-    while ((m = RE_ENTITY_LITERAL.exec(block)) !== null) {
+    while ((m = RE_ENTITY_LITERAL.exec(declBlock)) !== null) {
       if (systemNames.has(m[1])) continue;
       result.entities.push({ name: m[1], parameter: false, literal: m[3], resolved: null });
     }
